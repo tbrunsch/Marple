@@ -167,25 +167,25 @@ public class SwingObjectInspector extends ObjectInspector
             return;
         }
 
-        Point point = mouseEvent.getPoint();
         Component component = mouseEvent.getComponent();
+        Point point = mouseEvent.getPoint();
+        onInspectionEvent(component, point);
+    }
 
+    private void onInspectionEvent(Component component, Point point) {
         // The component is not always the leaf in the component tree.
         // Use findComponentAt recursively to find the leaf component
         // at the specified location.
-        Point lastPoint = null;
-        Component lastComponent = null;
-        while (component instanceof Container && component != lastComponent) {
-            lastPoint = point;
-            lastComponent = component;
+        if (component instanceof Container) {
+            Point coordinatesInComponent = new Point(point);
             if (component.getParent() != null) {
-                point.translate(-component.getX(), -component.getY());
+                // Coordinates are given w.r.t. component's parent. Translate it to coordinates w.r.t. component.
+                coordinatesInComponent.translate(-component.getX(), -component.getY());
             }
-            component = ((Container) component).findComponentAt(point);
-            if (component == null) {
-                point = lastPoint;
-                component = lastComponent;
-                break;
+            Component nestedComponent = ((Container) component).findComponentAt(coordinatesInComponent);
+            if (nestedComponent != null && nestedComponent != component) {
+                onInspectionEvent(nestedComponent, coordinatesInComponent);
+                return;
             }
         }
         inspectComponent(component, toMouseLocation(point));
