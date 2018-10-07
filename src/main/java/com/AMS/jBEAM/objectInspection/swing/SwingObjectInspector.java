@@ -11,6 +11,7 @@ import com.AMS.jBEAM.objectInspection.swing.gui.SwingSubComponentHierarchyStrate
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
@@ -19,7 +20,9 @@ import java.util.function.Function;
 
 public class SwingObjectInspector extends ObjectInspector
 {
-    private static SwingObjectInspector INSPECTOR   = null;
+    private static final SwingKeyboardShortCut  DEBUG_SHORT_CUT = new SwingKeyboardShortCut(KeyEvent.VK_I, KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
+
+    private static SwingObjectInspector         INSPECTOR       = null;
 
     public synchronized static void load() {
         if (INSPECTOR == null) {
@@ -44,13 +47,7 @@ public class SwingObjectInspector extends ObjectInspector
      */
     SwingObjectInspector() {
         registerInspector(this);
-        registerMouseListener();
-    }
-
-    private void registerMouseListener() {
-        Toolkit tk = Toolkit.getDefaultToolkit();
-        long eventMask = AWTEvent.MOUSE_EVENT_MASK;
-        tk.addAWTEventListener(this::eventDispatched, eventMask);
+        SwingEventHandler.register(this, DEBUG_SHORT_CUT);
     }
 
     /*
@@ -157,22 +154,7 @@ public class SwingObjectInspector extends ObjectInspector
     /*
      * Event Handling
      */
-    private void eventDispatched(AWTEvent e) {
-        if (!(e instanceof MouseEvent)) {
-            return;
-        }
-        MouseEvent mouseEvent = (MouseEvent) e;
-
-        if (!isInspectionEvent(mouseEvent)) {
-            return;
-        }
-
-        Component component = mouseEvent.getComponent();
-        Point point = mouseEvent.getPoint();
-        onInspectionEvent(component, point);
-    }
-
-    private void onInspectionEvent(Component component, Point point) {
+    void onInspectionEvent(Component component, Point point) {
         // The component is not always the leaf in the component tree.
         // Use findComponentAt recursively to find the leaf component
         // at the specified location.
@@ -189,12 +171,6 @@ public class SwingObjectInspector extends ObjectInspector
             }
         }
         inspectComponent(component, toMouseLocation(point));
-    }
-
-    private static boolean isInspectionEvent(MouseEvent mouseEvent) {
-        return mouseEvent.getID() == MouseEvent.MOUSE_CLICKED               // clicked
-                && mouseEvent.getButton() == MouseEvent.BUTTON1             // left mouse button
-                && (mouseEvent.getModifiers() & InputEvent.CTRL_MASK) != 0; // Ctrl pressed
     }
 
     private void onInspectionFrameClosed() {
