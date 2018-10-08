@@ -3,10 +3,7 @@ package com.AMS.jBEAM.objectInspection.swing;
 import com.AMS.jBEAM.objectInspection.ObjectInspector;
 import com.AMS.jBEAM.objectInspection.InspectionUtils;
 import com.AMS.jBEAM.objectInspection.MouseLocation;
-import com.AMS.jBEAM.objectInspection.swing.gui.SwingComponentInspectionPanel;
-import com.AMS.jBEAM.objectInspection.swing.gui.SwingInspectionFrame;
-import com.AMS.jBEAM.objectInspection.swing.gui.SwingInspectionStrategies;
-import com.AMS.jBEAM.objectInspection.swing.gui.SwingSubComponentHierarchyStrategies;
+import com.AMS.jBEAM.objectInspection.swing.gui.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,7 +34,7 @@ public class SwingObjectInspector extends ObjectInspector
         return INSPECTOR;
     }
 
-    private final Map<Class<?>, Function<Object, JComponent>>               inspectionStrategyByClass               = new HashMap<>();
+    private final Map<Class<?>, Function<Object, SwingInspectionViewData>>  inspectionStrategyByClass               = new HashMap<>();
     private final Map<Class<?>, BiFunction<Object, Point, List<Object>>>    subComponentHierarchyStrategyByClass    = new HashMap<>();
 
     private SwingInspectionFrame                                            swingInspectionFrame                    = null;
@@ -53,12 +50,12 @@ public class SwingObjectInspector extends ObjectInspector
     /*
      * Specify how to present data of instances of type T in a JComponent
      */
-    public synchronized <T> void addInspectionStrategyFor(Class<T> clazz, Function<T, JComponent> strategy) {
+    public synchronized <T> void addInspectionStrategyFor(Class<T> clazz, Function<T, SwingInspectionViewData> strategy) {
         if (inspectionStrategyByClass.containsKey(clazz)) {
             // Warning: Already registered strategy for that class
             return;
         }
-        Function<Object, JComponent> wrappedStrategy = object -> strategy.apply(clazz.cast(object));
+        Function<Object, SwingInspectionViewData> wrappedStrategy = object -> strategy.apply(clazz.cast(object));
         inspectionStrategyByClass.put(clazz, wrappedStrategy);
     }
 
@@ -106,10 +103,10 @@ public class SwingObjectInspector extends ObjectInspector
 
     @Override
     protected void inspectAs(Object object, Class<?> clazz) {
-        Function<Object, JComponent> strategy = inspectionStrategyByClass.get(clazz);
+        Function<Object, SwingInspectionViewData> strategy = inspectionStrategyByClass.get(clazz);
         if (strategy != null) {
-            JComponent component = strategy.apply(object);
-            swingInspectionFrame.addComponent(component);
+            SwingInspectionViewData inspectionViewData = strategy.apply(object);
+            swingInspectionFrame.addComponent(inspectionViewData.getTitle(), inspectionViewData.getComponent());
         }
     }
 
@@ -125,7 +122,7 @@ public class SwingObjectInspector extends ObjectInspector
         Point point = toPoint(mouseLocation);
         List<Object> subComponentHierarchy = getSubComponentHierarchy(component, point);
         JComponent panel = new SwingComponentInspectionPanel(component, subComponentHierarchy);
-        swingInspectionFrame.addComponent(panel);
+        swingInspectionFrame.addComponent("Component Hierarchy", panel);
     }
 
     private List<Object> getSubComponentHierarchy(Component component, Point point) {

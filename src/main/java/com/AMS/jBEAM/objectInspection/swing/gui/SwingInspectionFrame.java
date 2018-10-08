@@ -12,10 +12,10 @@ public class SwingInspectionFrame extends JFrame
 {
     private static final Dimension INITIAL_SIZE = new Dimension(400, 300);
 
-    private final JButton   prevButton  = new JButton("<");
-    private final JButton   nextButton  = new JButton(">");
+    private final JButton       prevButton  = new JButton("<");
+    private final JButton       nextButton  = new JButton(">");
 
-    private final JPanel    contentPanel    = new JPanel();
+    private final JTabbedPane   tabbedPane  = new JTabbedPane();
 
     private final Runnable  onClosed;
 
@@ -30,7 +30,7 @@ public class SwingInspectionFrame extends JFrame
         JPanel mainPanel = new JPanel(new GridBagLayout());
         int xPos = 0;
         mainPanel.add(prevButton, new GridBagConstraints(xPos++, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-        mainPanel.add(new JScrollPane(contentPanel), new GridBagConstraints(xPos++, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+        mainPanel.add(new JScrollPane(tabbedPane), new GridBagConstraints(xPos++, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
         mainPanel.add(nextButton, new GridBagConstraints(xPos++, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 
         getContentPane().add(mainPanel);
@@ -48,13 +48,12 @@ public class SwingInspectionFrame extends JFrame
         });
     }
 
-    public void addComponent(JComponent component) {
-        int y = contentPanel.getComponentCount();
-        contentPanel.add(component, new GridBagConstraints(0, y, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+    public void addComponent(String title, JComponent component) {
+        tabbedPane.add(component, title);
     }
 
     public void removeAllComponents() {
-        contentPanel.removeAll();
+        tabbedPane.removeAll();
         updateNavigationButtons();
     }
 

@@ -12,17 +12,19 @@ import java.util.stream.Collectors;
 
 public class SwingComponentInspectionPanel extends JPanel
 {
+    private final JScrollPane   scrollPane;
+    private final JTree         tree;
+
     public SwingComponentInspectionPanel(Component component, List<Object> subComponentHierarchy) {
         super(new GridBagLayout());
-        setBorder(BorderFactory.createTitledBorder("Component Hierarchy"));
 
         List<InspectionLink> componentInspectionHierarchy = createComponentInspectionHierarchy(component, subComponentHierarchy);
-        JTree tree = SwingInspectionUtils.createInspectionLinkTree(componentInspectionHierarchy);
+        tree = SwingInspectionUtils.createInspectionLinkTree(componentInspectionHierarchy);
         for (int i = 0; i < tree.getRowCount(); i++) {
             tree.expandRow(i);
         }
 
-        JScrollPane scrollPane  = new JScrollPane(tree);
+        scrollPane  = new JScrollPane(tree);
         add(scrollPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
     }
 
