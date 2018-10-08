@@ -1,6 +1,7 @@
 package com.AMS.jBEAM.objectInspection;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
@@ -66,7 +67,14 @@ public class InspectionUtils
     public static List<Field> getFields(Class<?> clazz) {
         List<Field> fields = new ArrayList<>();
         for (Class<?> curClazz = clazz; curClazz != null; curClazz = curClazz.getSuperclass()) {
-            fields.addAll(Arrays.asList(curClazz.getDeclaredFields()));
+            Field[] declaredFields = curClazz.getDeclaredFields();
+            for (Field field : declaredFields) {
+                int modifiers = field.getModifiers();
+                // We are currently not interested in static fields
+                if ((modifiers & Modifier.STATIC) == 0) {
+                    fields.add(field);
+                }
+            }
         }
         return fields;
     }
