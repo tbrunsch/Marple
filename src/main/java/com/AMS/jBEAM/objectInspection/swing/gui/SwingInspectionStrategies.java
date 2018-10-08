@@ -1,8 +1,10 @@
 package com.AMS.jBEAM.objectInspection.swing.gui;
 
+import com.AMS.jBEAM.objectInspection.swing.SwingObjectInspector;
+
 public class SwingInspectionStrategies
 {
     public static void register() {
-        // TODO
+        SwingObjectInspector.getInspector().addInspectionStrategyFor(Object.class, object -> new SwingInspectionViewData("Fields", new SwingObjectInspectionPanel(object)));
     }
 }
