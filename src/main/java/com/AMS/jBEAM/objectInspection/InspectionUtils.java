@@ -44,25 +44,31 @@ public class InspectionUtils
     public static <T> Map<T, List<Field>> findFieldValues(Object instance, Set<T> fieldValues) {
         Map<T, List<Field>> fieldsByValue = new HashMap<>();
         if (instance != null) {
-            for (Class<?> clazz = instance.getClass(); clazz != null; clazz = clazz.getSuperclass()) {
-                Field[] fields = clazz.getDeclaredFields();
-                for (Field field : fields) {
-                    try {
-                        field.setAccessible(true);
-                        Object fieldValue = field.get(instance);
-                        if (fieldValues.contains(fieldValue)) {
-                            if (!fieldsByValue.containsKey(fieldValue)) {
-                                fieldsByValue.put((T) fieldValue, new ArrayList<>());
-                            }
-                            fieldsByValue.get(fieldValue).add(field);
+            List<Field> fields = getFields(instance.getClass());
+            for (Field field : fields) {
+                try {
+                    field.setAccessible(true);
+                    Object fieldValue = field.get(instance);
+                    if (fieldValues.contains(fieldValue)) {
+                        if (!fieldsByValue.containsKey(fieldValue)) {
+                            fieldsByValue.put((T) fieldValue, new ArrayList<>());
                         }
-                    } catch (IllegalAccessException e) {
-                        /* do nothing */
+                        fieldsByValue.get(fieldValue).add(field);
                     }
+                } catch (IllegalAccessException e) {
+                    /* do nothing */
                 }
             }
         }
         return fieldsByValue;
+    }
+
+    public static List<Field> getFields(Class<?> clazz) {
+        List<Field> fields = new ArrayList<>();
+        for (Class<?> curClazz = clazz; curClazz != null; curClazz = curClazz.getSuperclass()) {
+            fields.addAll(Arrays.asList(curClazz.getDeclaredFields()));
+        }
+        return fields;
     }
 
     public static String formatField(Field field) {
