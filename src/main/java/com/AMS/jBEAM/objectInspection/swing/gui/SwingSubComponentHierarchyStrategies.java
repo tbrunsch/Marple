@@ -12,7 +12,7 @@ public class SwingSubComponentHierarchyStrategies
 {
     public static void register() {
         SwingObjectInspector inspector = SwingObjectInspector.getInspector();
-        inspector.addSubcomponenHierarchyStrategyFor(JTree.class, SwingSubComponentHierarchyStrategies::getJTreeSubComponentHierarchy);
+        inspector.addSubcomponentHierarchyStrategyFor(JTree.class, SwingSubComponentHierarchyStrategies::getJTreeSubComponentHierarchy);
         // TODO: Add more
     }
 

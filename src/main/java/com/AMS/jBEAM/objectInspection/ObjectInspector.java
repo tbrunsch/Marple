@@ -1,8 +1,12 @@
 package com.AMS.jBEAM.objectInspection;
 
+import com.AMS.jBEAM.objectInspection.swing.gui.SwingComponentInspectionPanel;
+
+import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.function.BiFunction;
 
 /**
  * Base class for all inspection frameworks
@@ -15,6 +19,8 @@ public abstract class ObjectInspector
         INSPECTOR = inspector;
     }
 
+    private final Map<Class<?>, BiFunction<Object, MouseLocation, List<Object>>>    subComponentHierarchyStrategyByClass    = new HashMap<>();
+
     public synchronized static ObjectInspector getInspector() {
         if (INSPECTOR == null) {
             throw new IllegalStateException("No object inspector has been loaded");
@@ -24,9 +30,9 @@ public abstract class ObjectInspector
 
     public abstract void                    runLater(Runnable runnable);
     protected abstract Collection<Class<?>> getRegisteredClasses();
-    protected abstract void                 beginInspection(Object object);
+    protected abstract void                 beginInspection();
     protected abstract void                 endInspection();
-    protected abstract void                 inspect(Object component, MouseLocation mouseLocation);
+    protected abstract void                 inspect(Object component, List<Object> subComponentHierarchy, MouseLocation mouseLocation);
     protected abstract void                 inspectAs(Object object, Class<?> clazz);
 
     protected synchronized void registerInspector(ObjectInspector inspector) {
@@ -35,6 +41,14 @@ public abstract class ObjectInspector
         } else if (inspector != INSPECTOR) {
             throw new IllegalStateException("There is already an object inspector loaded");
         }
+    }
+
+    protected synchronized void addSubcomponentHierarchyStrategy(Class<?> clazz, BiFunction<Object, MouseLocation, List<Object>> strategy) {
+        if (subComponentHierarchyStrategyByClass.containsKey(clazz)) {
+            // Warning: Already registered strategy for that component
+            return;
+        }
+        subComponentHierarchyStrategyByClass.put(clazz, strategy);
     }
 
     /*
@@ -89,19 +103,40 @@ public abstract class ObjectInspector
 
     private synchronized void inspect(Object object, Optional<MouseLocation> mouseLocation) {
         runLater(() -> {
-            beginInspection(object);
+            beginInspection();
 
+            final Object objectToInspect;
             if (mouseLocation.isPresent()) {
-                inspect(object, mouseLocation.get());
+                MouseLocation location = mouseLocation.get();
+                List<Object> subComponentHierarchy = getSubComponentHierarchy(object, location);
+                inspect(object, subComponentHierarchy, location);
+                objectToInspect = subComponentHierarchy.isEmpty() ? object : subComponentHierarchy.get(subComponentHierarchy.size()-1);
+            } else {
+                objectToInspect = object;
             }
 
             Set<Class<?>> registeredClasses = new HashSet<>(getRegisteredClasses());
-            InspectionUtils.getImplementedClasses(object, true).stream()
+            InspectionUtils.getImplementedClasses(objectToInspect, true).stream()
                     .filter(registeredClasses::contains)
-                    .forEach(clazz -> inspectAs(object, clazz));
+                    .forEach(clazz -> inspectAs(objectToInspect, clazz));
 
             endInspection();
         });
+    }
+
+    private List<Object> getSubComponentHierarchy(Object component, MouseLocation mouseLocation) {
+        Iterable<Class<?>> implementedClasses = InspectionUtils.getImplementedClasses(component, false);
+        for (Class<?> clazz : implementedClasses) {
+            BiFunction<Object, MouseLocation, List<Object>> strategy = subComponentHierarchyStrategyByClass.get(clazz);
+            if (strategy == null) {
+                continue;
+            }
+            List<Object> subComponentHierarchy = strategy.apply(component, mouseLocation);
+            if (!subComponentHierarchy.isEmpty()) {
+                return subComponentHierarchy;
+            }
+        }
+        return Collections.emptyList();
     }
 
     private static class InspectionData
