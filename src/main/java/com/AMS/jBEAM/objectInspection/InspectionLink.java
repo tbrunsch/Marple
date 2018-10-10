@@ -15,7 +15,9 @@ public class InspectionLink
     }
 
     public void execute() {
-        ObjectInspector.getInspector().inspectObject(objectToInspect);
+        ObjectInspector inspector = ObjectInspector.getInspector();
+        InspectionStrategyIF objectInspectionStrategy = inspector.createObjectInspectionStrategy(objectToInspect);
+        inspector.inspect(objectInspectionStrategy);
     }
 
     @Override

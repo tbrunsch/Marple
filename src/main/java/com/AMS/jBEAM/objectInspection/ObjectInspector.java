@@ -1,9 +1,5 @@
 package com.AMS.jBEAM.objectInspection;
 
-import com.AMS.jBEAM.objectInspection.swing.gui.SwingComponentInspectionPanel;
-
-import javax.swing.*;
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -30,10 +26,18 @@ public abstract class ObjectInspector
 
     public abstract void                    runLater(Runnable runnable);
     protected abstract Collection<Class<?>> getRegisteredClasses();
-    protected abstract void                 beginInspection();
+    protected abstract void                 beginInspection(Object object);
     protected abstract void                 endInspection();
-    protected abstract void                 inspect(Object component, List<Object> subComponentHierarchy, MouseLocation mouseLocation);
-    protected abstract void                 inspectAs(Object object, Class<?> clazz);
+    protected abstract void                 inspectComponent(Object component, List<Object> subComponentHierarchy);
+    protected abstract void                 inspectObjectAs(Object object, Class<?> clazz);
+
+    // Should only be called by InspectionStrategyIFs
+    void inspectObject(Object object) {
+        Set<Class<?>> registeredClasses = new HashSet<>(getRegisteredClasses());
+        InspectionUtils.getImplementedClasses(object, true).stream()
+                .filter(registeredClasses::contains)
+                .forEach(clazz -> inspectObjectAs(object, clazz));
+    }
 
     protected synchronized void registerInspector(ObjectInspector inspector) {
         if (INSPECTOR == null) {
@@ -54,74 +58,52 @@ public abstract class ObjectInspector
     /*
      * Inspection History
      */
-    private final List<InspectionData>  inspectionHistory       = new ArrayList<>();
-    private int                         inspectionHistoryIndex  = -1;
+    private final List<InspectionStrategyIF>    inspectionStrategyHistory       = new ArrayList<>();
+    private int                                 inspectionStrategyHistoryIndex  = -1;
 
     public final boolean canInspectPrevious() {
-        return inspectionHistoryIndex - 1 >= 0;
+        return inspectionStrategyHistoryIndex - 1 >= 0;
     }
 
     public final boolean canInspectNext() {
-        return inspectionHistoryIndex + 1 < inspectionHistory.size();
+        return inspectionStrategyHistoryIndex + 1 < inspectionStrategyHistory.size();
     }
 
     public final void inspectPrevious() {
         if (canInspectPrevious()) {
-            InspectionData inspectionData = inspectionHistory.get(--inspectionHistoryIndex);
-            inspect(inspectionData.getObject(), inspectionData.getMouseLocation());
+            InspectionStrategyIF inspectionStrategy = inspectionStrategyHistory.get(--inspectionStrategyHistoryIndex);
+            inspectionStrategy.inspect();
         }
     }
 
     public final void inspectNext() {
         if (canInspectNext()) {
-            InspectionData inspectionData = inspectionHistory.get(++inspectionHistoryIndex);
-            inspect(inspectionData.getObject(), inspectionData.getMouseLocation());
+            InspectionStrategyIF inspectionStrategy = inspectionStrategyHistory.get(++inspectionStrategyHistoryIndex);
+            inspectionStrategy.inspect();
         }
     }
 
-    public final void inspectObject(Object object) {
-        inspect(new InspectionData(object, Optional.empty()));
+    public final void clearInspectionHistory() {
+        inspectionStrategyHistory.clear();
+        inspectionStrategyHistoryIndex = -1;
     }
 
-    public final void inspectComponent(Object component, MouseLocation mouseLocation) {
-        inspect(new InspectionData(component, Optional.of(mouseLocation)));
-    }
-
-    final protected void clearInspectionHistory() {
-        inspectionHistory.clear();
-        inspectionHistoryIndex = -1;
-    }
-
-    final void inspect(InspectionData inspectionData) {
+    protected final void inspect(InspectionStrategyIF inspectionStrategy) {
         if (canInspectNext()) {
-            inspectionHistory.subList(inspectionHistoryIndex + 1, inspectionHistory.size()).clear();
+            inspectionStrategyHistory.subList(inspectionStrategyHistoryIndex + 1, inspectionStrategyHistory.size()).clear();
         }
-        inspectionHistory.add(inspectionData);
-        inspectionHistoryIndex++;
-        inspect(inspectionData.getObject(), inspectionData.getMouseLocation());
+        inspectionStrategyHistory.add(inspectionStrategy);
+        inspectionStrategyHistoryIndex++;
+        inspectionStrategy.inspect();
     }
 
-    private synchronized void inspect(Object object, Optional<MouseLocation> mouseLocation) {
-        runLater(() -> {
-            beginInspection();
+    protected InspectionStrategyIF createComponentInspectionStrategy(Object component, MouseLocation mouseLocation) {
+        List<Object> subComponentHierarchy = getSubComponentHierarchy(component, mouseLocation);
+        return new ComponentInspectionStrategy(component, subComponentHierarchy);
+    }
 
-            final Object objectToInspect;
-            if (mouseLocation.isPresent()) {
-                MouseLocation location = mouseLocation.get();
-                List<Object> subComponentHierarchy = getSubComponentHierarchy(object, location);
-                inspect(object, subComponentHierarchy, location);
-                objectToInspect = subComponentHierarchy.isEmpty() ? object : subComponentHierarchy.get(subComponentHierarchy.size()-1);
-            } else {
-                objectToInspect = object;
-            }
-
-            Set<Class<?>> registeredClasses = new HashSet<>(getRegisteredClasses());
-            InspectionUtils.getImplementedClasses(objectToInspect, true).stream()
-                    .filter(registeredClasses::contains)
-                    .forEach(clazz -> inspectAs(objectToInspect, clazz));
-
-            endInspection();
-        });
+    protected InspectionStrategyIF createObjectInspectionStrategy(Object object) {
+        return new ObjectInspectionStrategy(object);
     }
 
     private List<Object> getSubComponentHierarchy(Object component, MouseLocation mouseLocation) {
@@ -137,24 +119,5 @@ public abstract class ObjectInspector
             }
         }
         return Collections.emptyList();
-    }
-
-    private static class InspectionData
-    {
-        private final Object                    object;
-        private final Optional<MouseLocation>   mouseLocation;   // only relevant for GUI components
-
-        InspectionData(Object object, Optional<MouseLocation> mouseLocation) {
-            this.object = object;
-            this.mouseLocation = mouseLocation;
-        }
-
-        Object getObject() {
-            return object;
-        }
-
-        Optional<MouseLocation> getMouseLocation() {
-            return mouseLocation;
-        }
     }
 }

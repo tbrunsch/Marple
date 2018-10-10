@@ -1,15 +1,17 @@
 package com.AMS.jBEAM.objectInspection.swing;
 
-import com.AMS.jBEAM.objectInspection.ObjectInspector;
-import com.AMS.jBEAM.objectInspection.InspectionUtils;
+import com.AMS.jBEAM.objectInspection.InspectionStrategyIF;
 import com.AMS.jBEAM.objectInspection.MouseLocation;
+import com.AMS.jBEAM.objectInspection.ObjectInspector;
 import com.AMS.jBEAM.objectInspection.swing.gui.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -80,10 +82,11 @@ public class SwingObjectInspector extends ObjectInspector
     }
 
     @Override
-    protected void beginInspection() {
+    protected void beginInspection(Object object) {
         if (swingInspectionFrame == null) {
             swingInspectionFrame = new SwingInspectionFrame(this::onInspectionFrameClosed);
         }
+        swingInspectionFrame.setObjectToInspect(object);
         swingInspectionFrame.removeAllComponents();
     }
 
@@ -95,19 +98,7 @@ public class SwingObjectInspector extends ObjectInspector
     }
 
     @Override
-    protected void inspectAs(Object object, Class<?> clazz) {
-        Function<Object, SwingInspectionViewData> strategy = inspectionStrategyByClass.get(clazz);
-        if (strategy != null) {
-            SwingInspectionViewData inspectionViewData = strategy.apply(object);
-            swingInspectionFrame.addComponent(inspectionViewData.getTitle(), inspectionViewData.getComponent());
-        }
-    }
-
-    /*
-     * Component Inspection
-     */
-    @Override
-    protected void inspect(Object componentAsObject, List<Object> subComponentHierarchy, MouseLocation mouseLocation) {
+    protected void inspectComponent(Object componentAsObject, List<Object> subComponentHierarchy) {
         if (!(componentAsObject instanceof Component)) {
             return;
         }
@@ -116,12 +107,13 @@ public class SwingObjectInspector extends ObjectInspector
         swingInspectionFrame.addComponent("Component Hierarchy", panel);
     }
 
-    private static MouseLocation toMouseLocation(Point p) {
-        return new MouseLocation(p.x, p.y);
-    }
-
-    private static Point toPoint(MouseLocation mouseLocation) {
-        return new Point(mouseLocation.getX(), mouseLocation.getY());
+    @Override
+    protected void inspectObjectAs(Object object, Class<?> clazz) {
+        Function<Object, SwingInspectionViewData> strategy = inspectionStrategyByClass.get(clazz);
+        if (strategy != null) {
+            SwingInspectionViewData inspectionViewData = strategy.apply(object);
+            swingInspectionFrame.addComponent(inspectionViewData.getTitle(), inspectionViewData.getComponent());
+        }
     }
 
     /*
@@ -143,11 +135,21 @@ public class SwingObjectInspector extends ObjectInspector
                 return;
             }
         }
-        inspectComponent(component, toMouseLocation(point));
+        MouseLocation mouseLocation = toMouseLocation(point);
+        InspectionStrategyIF componentInspectionStrategy = createComponentInspectionStrategy(component, mouseLocation);
+        inspect(componentInspectionStrategy);
     }
 
     private void onInspectionFrameClosed() {
         swingInspectionFrame = null;
         clearInspectionHistory();
+    }
+
+    private static MouseLocation toMouseLocation(Point p) {
+        return new MouseLocation(p.x, p.y);
+    }
+
+    private static Point toPoint(MouseLocation mouseLocation) {
+        return new Point(mouseLocation.getX(), mouseLocation.getY());
     }
 }
