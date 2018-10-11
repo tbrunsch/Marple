@@ -7,7 +7,7 @@ import com.AMS.jBEAM.objectInspection.swing.gui.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;

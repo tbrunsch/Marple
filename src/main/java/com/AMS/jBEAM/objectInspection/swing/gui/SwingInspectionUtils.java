@@ -44,7 +44,7 @@ class SwingInspectionUtils
                 Object userObject = ((DefaultMutableTreeNode) node).getUserObject();
                 if (userObject instanceof InspectionLink) {
                     InspectionLink link = (InspectionLink) userObject;
-                    link.execute();
+                    link.run();
                 }
             }
         });

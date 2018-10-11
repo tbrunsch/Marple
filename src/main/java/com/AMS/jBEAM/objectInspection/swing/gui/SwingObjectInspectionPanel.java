@@ -2,12 +2,11 @@ package com.AMS.jBEAM.objectInspection.swing.gui;
 
 import com.AMS.jBEAM.objectInspection.InspectionLink;
 import com.AMS.jBEAM.objectInspection.InspectionUtils;
-import com.AMS.jBEAM.objectInspection.swing.gui.fieldTable.SwingFieldTableColumnDescription;
-import com.AMS.jBEAM.objectInspection.swing.gui.fieldTable.SwingFieldTableColumnDescriptionIF;
-import com.AMS.jBEAM.objectInspection.swing.gui.fieldTable.SwingFieldTableModel;
+import com.AMS.jBEAM.objectInspection.swing.gui.table.*;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -15,6 +14,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.awt.GridBagConstraints.*;
 
 class SwingObjectInspectionPanel extends JPanel
 {
@@ -26,36 +27,40 @@ class SwingObjectInspectionPanel extends JPanel
         MODIFIER_TO_ACCESS_MODIFIER.put(Modifier.PRIVATE,         AccessModifier.PRIVATE);
     }
 
-    private final JScrollPane   scrollPane;
-    private final JTable        table;
+    private final ListBasedTable<Field> table;
 
     public SwingObjectInspectionPanel(final Object object) {
         super(new GridBagLayout());
 
         List<Field> fields = InspectionUtils.getFields(object.getClass());
         fields.forEach(field -> field.setAccessible(true));
-        List<SwingFieldTableColumnDescriptionIF> columnDescriptions = createColumnDescriptionsFor(object);
-        SwingFieldTableModel fieldTableModel = new SwingFieldTableModel(fields, columnDescriptions);
-        table = new JTable(fieldTableModel);
-        table.setAutoCreateRowSorter(true);
-        table.setDefaultRenderer(AccessModifier.class, new AccessModifierRenderer());
-        scrollPane = new JScrollPane(table);
 
-        add(scrollPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+        List<ColumnDescriptionIF<Field>> columnDescriptions = createColumnDescriptionsFor(object);
+
+        table = new ListBasedTable<>(fields, columnDescriptions);
+        table.getInternalTable().setDefaultRenderer(AccessModifier.class, new AccessModifierRenderer());
+
+        add(table, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
     }
 
-    private static List<SwingFieldTableColumnDescriptionIF> createColumnDescriptionsFor(final Object object) {
+    private static List<ColumnDescriptionIF<Field>> createColumnDescriptionsFor(final Object object) {
         return Arrays.asList(
-            new SwingFieldTableColumnDescription("Name", String.class, Field::getName),
-            new SwingFieldTableColumnDescription("Value", InspectionLink.class, field -> getInspectionLink(getFieldValue(field, object))),
-            new SwingFieldTableColumnDescription("Type", Class.class, field -> field.getType().getSimpleName()),
-            new SwingFieldTableColumnDescription("Class", String.class, field -> field.getDeclaringClass().getSimpleName()),
-            new SwingFieldTableColumnDescription("Modifier", AccessModifier.class, field -> getAccessModifier(field))
+            new ColumnDescription<>("Name",     String.class,           Field::getName,                                             new TableValueFilter_Wildcard()),
+            new ColumnDescription<>("Value",    Object.class,           field -> getInspectionLink(field, object),                  new TableValueFilter_Wildcard()),
+            new ColumnDescription<>("Type",     Class.class,            field -> field.getType().getSimpleName(),                   new TableValueFilter_Wildcard()),
+            new ColumnDescription<>("Class",    String.class,           field -> field.getDeclaringClass().getSimpleName(),         new TableValueFilter_Selection()),
+            new ColumnDescription<>("Modifier", AccessModifier.class,   field -> getAccessModifier(field),                          new TableValueFilter_Selection())
         );
     }
 
-    private static InspectionLink getInspectionLink(Object object) {
-        return object == null ? null : new InspectionLink(object, object.toString());
+    private static Object getInspectionLink(Field field, Object object) {
+        Object fieldValue = getFieldValue(field, object);
+        if (fieldValue == null) {
+            return null;
+        }
+        return field.getType().isPrimitive()
+                ? fieldValue.toString()
+                : new InspectionLink(fieldValue, fieldValue.toString());
     }
 
     private static Object getFieldValue(Field field, Object object) {
