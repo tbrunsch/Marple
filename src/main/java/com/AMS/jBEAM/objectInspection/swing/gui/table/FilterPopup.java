@@ -14,7 +14,7 @@ class FilterPopup extends JDialog
         JComponent editor = valueFilter.getEditor();
         getContentPane().add(editor);
 
-        setMinimumSize(new Dimension(300, 20));
+        setMinimumSize(new Dimension(200, 20));
 
         KeyStroke escape = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
         getRootPane().registerKeyboardAction(e -> dispose(), escape, JComponent.WHEN_IN_FOCUSED_WINDOW);

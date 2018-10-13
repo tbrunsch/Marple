@@ -38,7 +38,9 @@ public class TableValueFilter_Selection extends AbstractTableValueFilter
         }
         Dimension maxDimension = new Dimension(maxWidth, maxHeight);
 
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        JPanel filterPanel = new JPanel();
+        filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
+        filterPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         for (JCheckBox checkBox : checkBoxes) {
             checkBox.setPreferredSize(maxDimension);
             filterPanel.add(checkBox);
