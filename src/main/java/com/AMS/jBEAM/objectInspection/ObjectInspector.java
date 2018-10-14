@@ -58,52 +58,60 @@ public abstract class ObjectInspector
     /*
      * Inspection History
      */
-    private final List<InspectionStrategyIF>    inspectionStrategyHistory       = new ArrayList<>();
-    private int                                 inspectionStrategyHistoryIndex  = -1;
+    private final List<InspectionLinkIF>    inspectionLinkHistory = new ArrayList<>();
+    private int                             inspectionLinkHistoryIndex = -1;
 
     public final boolean canInspectPrevious() {
-        return inspectionStrategyHistoryIndex - 1 >= 0;
+        return inspectionLinkHistoryIndex - 1 >= 0;
     }
 
     public final boolean canInspectNext() {
-        return inspectionStrategyHistoryIndex + 1 < inspectionStrategyHistory.size();
+        return inspectionLinkHistoryIndex + 1 < inspectionLinkHistory.size();
     }
 
     public final void inspectPrevious() {
         if (canInspectPrevious()) {
-            InspectionStrategyIF inspectionStrategy = inspectionStrategyHistory.get(--inspectionStrategyHistoryIndex);
-            inspectionStrategy.inspect();
+            InspectionLinkIF inspectionLink = inspectionLinkHistory.get(--inspectionLinkHistoryIndex);
+            inspectionLink.inspect(this);
         }
     }
 
     public final void inspectNext() {
         if (canInspectNext()) {
-            InspectionStrategyIF inspectionStrategy = inspectionStrategyHistory.get(++inspectionStrategyHistoryIndex);
-            inspectionStrategy.inspect();
+            InspectionLinkIF inspectionLink = inspectionLinkHistory.get(++inspectionLinkHistoryIndex);
+            inspectionLink.inspect(this);
         }
     }
 
     public final void clearInspectionHistory() {
-        inspectionStrategyHistory.clear();
-        inspectionStrategyHistoryIndex = -1;
+        inspectionLinkHistory.clear();
+        inspectionLinkHistoryIndex = -1;
     }
 
-    protected final void inspect(InspectionStrategyIF inspectionStrategy) {
+    protected final void inspect(InspectionLinkIF inspectionLink) {
         if (canInspectNext()) {
-            inspectionStrategyHistory.subList(inspectionStrategyHistoryIndex + 1, inspectionStrategyHistory.size()).clear();
+            inspectionLinkHistory.subList(inspectionLinkHistoryIndex + 1, inspectionLinkHistory.size()).clear();
         }
-        inspectionStrategyHistory.add(inspectionStrategy);
-        inspectionStrategyHistoryIndex++;
-        inspectionStrategy.inspect();
+        inspectionLinkHistory.add(inspectionLink);
+        inspectionLinkHistoryIndex++;
+        inspectionLink.inspect(this);
     }
 
-    protected InspectionStrategyIF createComponentInspectionStrategy(Object component, MouseLocation mouseLocation) {
+    public InspectionLinkIF createComponentInspectionStrategy(Object component, MouseLocation mouseLocation) {
         List<Object> subComponentHierarchy = getSubComponentHierarchy(component, mouseLocation);
-        return new ComponentInspectionStrategy(component, subComponentHierarchy);
+        return createComponentInspectionStrategy(component, subComponentHierarchy);
     }
 
-    protected InspectionStrategyIF createObjectInspectionStrategy(Object object) {
-        return new ObjectInspectionStrategy(object);
+    public InspectionLinkIF createComponentInspectionStrategy(Object component, List<Object> subComponentHierarchy) {
+        return new ComponentInspectionLink(component, subComponentHierarchy);
+    }
+
+    public InspectionLinkIF createObjectInspectionLink(Object object) {
+        return new ObjectInspectionLink(object);
+    }
+
+    public InspectionLinkIF createObjectInspectionLink(Object object, String linkText) {
+        return new ObjectInspectionLink(object, linkText);
     }
 
     private List<Object> getSubComponentHierarchy(Object component, MouseLocation mouseLocation) {

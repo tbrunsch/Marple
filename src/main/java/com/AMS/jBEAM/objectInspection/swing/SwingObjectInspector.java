@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.objectInspection.swing;
 
-import com.AMS.jBEAM.objectInspection.InspectionStrategyIF;
+import com.AMS.jBEAM.objectInspection.InspectionLinkIF;
 import com.AMS.jBEAM.objectInspection.MouseLocation;
 import com.AMS.jBEAM.objectInspection.ObjectInspector;
 import com.AMS.jBEAM.objectInspection.swing.gui.*;
@@ -136,7 +136,7 @@ public class SwingObjectInspector extends ObjectInspector
             }
         }
         MouseLocation mouseLocation = toMouseLocation(point);
-        InspectionStrategyIF componentInspectionStrategy = createComponentInspectionStrategy(component, mouseLocation);
+        InspectionLinkIF componentInspectionStrategy = createComponentInspectionStrategy(component, mouseLocation);
         inspect(componentInspectionStrategy);
     }
 

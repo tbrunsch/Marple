@@ -1,10 +1,15 @@
 package com.AMS.jBEAM.objectInspection;
 
-class ObjectInspectionStrategy extends AbstractInspectionStrategy
+class ObjectInspectionLink extends AbstractInspectionLink
 {
     private final Object object;
 
-    ObjectInspectionStrategy(Object object) {
+    ObjectInspectionLink(Object object) {
+        this(object, object.toString());
+    }
+
+    ObjectInspectionLink(Object object, String linkText) {
+        super(linkText);
         this.object = object;
     }
 
@@ -14,7 +19,7 @@ class ObjectInspectionStrategy extends AbstractInspectionStrategy
     }
 
     @Override
-    void inspect(ObjectInspector inspector) {
+    void doInspect(ObjectInspector inspector) {
         Object objectToInspect = getObjectToInspect();
         inspector.beginInspection(objectToInspect);
         inspector.inspectObject(objectToInspect);

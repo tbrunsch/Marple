@@ -1,12 +1,12 @@
 package com.AMS.jBEAM.objectInspection.swing.gui;
 
-import com.AMS.jBEAM.objectInspection.InspectionLink;
+import com.AMS.jBEAM.objectInspection.InspectionLinkIF;
 import com.AMS.jBEAM.objectInspection.InspectionUtils;
+import com.AMS.jBEAM.objectInspection.swing.SwingObjectInspector;
 import com.AMS.jBEAM.objectInspection.swing.gui.table.*;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -14,8 +14,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static java.awt.GridBagConstraints.*;
 
 class SwingObjectInspectionPanel extends JPanel
 {
@@ -60,7 +58,7 @@ class SwingObjectInspectionPanel extends JPanel
         }
         return field.getType().isPrimitive()
                 ? fieldValue.toString()
-                : new InspectionLink(fieldValue, fieldValue.toString());
+                : SwingObjectInspector.getInspector().createObjectInspectionLink(fieldValue);
     }
 
     private static Object getFieldValue(Field field, Object object) {

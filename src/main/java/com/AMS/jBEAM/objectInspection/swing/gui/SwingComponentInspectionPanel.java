@@ -1,7 +1,8 @@
 package com.AMS.jBEAM.objectInspection.swing.gui;
 
-import com.AMS.jBEAM.objectInspection.InspectionLink;
+import com.AMS.jBEAM.objectInspection.InspectionLinkIF;
 import com.AMS.jBEAM.objectInspection.InspectionUtils;
+import com.AMS.jBEAM.objectInspection.swing.SwingObjectInspector;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +19,7 @@ public class SwingComponentInspectionPanel extends JPanel
     public SwingComponentInspectionPanel(Component component, List<Object> subComponentHierarchy) {
         super(new GridBagLayout());
 
-        List<InspectionLink> componentInspectionHierarchy = createComponentInspectionHierarchy(component, subComponentHierarchy);
+        List<InspectionLinkIF> componentInspectionHierarchy = createComponentInspectionHierarchy(component, subComponentHierarchy);
         tree = SwingInspectionUtils.createInspectionLinkTree(componentInspectionHierarchy);
         for (int i = 0; i < tree.getRowCount(); i++) {
             tree.expandRow(i);
@@ -28,7 +29,7 @@ public class SwingComponentInspectionPanel extends JPanel
         add(scrollPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
     }
 
-    private static List<InspectionLink> createComponentInspectionHierarchy(Component component, List<Object> subComponentHierarchy) {
+    private static List<InspectionLinkIF> createComponentInspectionHierarchy(Component component, List<Object> subComponentHierarchy) {
         List<Object> componentHierarchy = new ArrayList<>();
         for (Component curComponent = component; curComponent != null; curComponent = curComponent.getParent()) {
             componentHierarchy.add(0, curComponent);
@@ -37,7 +38,7 @@ public class SwingComponentInspectionPanel extends JPanel
         return createInspectionLinkHierarchy(componentHierarchy);
     }
 
-    private static List<InspectionLink> createInspectionLinkHierarchy(List<Object> hierarchy) {
+    private static List<InspectionLinkIF> createInspectionLinkHierarchy(List<Object> hierarchy) {
         Map<Object, List<Field>> fieldsByObject = new HashMap<>();
         // Traverse hierarchy from child to parent because usually children are members of parents and not vice versa
         for (int i = hierarchy.size() - 1; i >= 0; i--) {
@@ -57,7 +58,7 @@ public class SwingComponentInspectionPanel extends JPanel
         }
     }
 
-    private static InspectionLink createInspectionLink(Object object, List<Field> fields) {
+    private static InspectionLinkIF createInspectionLink(Object object, List<Field> fields) {
         String linkText = object.getClass().getSimpleName();
         if (!fields.isEmpty()) {
             String fieldText = fields.stream()
@@ -65,6 +66,6 @@ public class SwingComponentInspectionPanel extends JPanel
                     .collect(Collectors.joining(", "));
             linkText += " (" + fieldText + ")";
         }
-        return new InspectionLink(object, linkText);
+        return SwingObjectInspector.getInspector().createObjectInspectionLink(object, linkText);
     }
 }
