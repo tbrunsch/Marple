@@ -16,10 +16,10 @@ public class SwingComponentInspectionPanel extends JPanel
     private final JScrollPane   scrollPane;
     private final JTree         tree;
 
-    public SwingComponentInspectionPanel(Component component, List<Object> subComponentHierarchy) {
+    public SwingComponentInspectionPanel(List<Object> componentHierarchy) {
         super(new GridBagLayout());
 
-        List<InspectionLinkIF> componentInspectionHierarchy = createComponentInspectionHierarchy(component, subComponentHierarchy);
+        List<InspectionLinkIF> componentInspectionHierarchy = createInspectionLinkHierarchy(componentHierarchy);
         tree = SwingInspectionUtils.createInspectionLinkTree(componentInspectionHierarchy);
         for (int i = 0; i < tree.getRowCount(); i++) {
             tree.expandRow(i);
@@ -29,26 +29,23 @@ public class SwingComponentInspectionPanel extends JPanel
         add(scrollPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
     }
 
-    private static List<InspectionLinkIF> createComponentInspectionHierarchy(Component component, List<Object> subComponentHierarchy) {
-        List<Object> componentHierarchy = new ArrayList<>();
-        for (Component curComponent = component; curComponent != null; curComponent = curComponent.getParent()) {
-            componentHierarchy.add(0, curComponent);
-        }
-        componentHierarchy.addAll(subComponentHierarchy);
-        return createInspectionLinkHierarchy(componentHierarchy);
-    }
-
-    private static List<InspectionLinkIF> createInspectionLinkHierarchy(List<Object> hierarchy) {
+    private static List<InspectionLinkIF> createInspectionLinkHierarchy(List<Object> componentHierarchy) {
         Map<Object, List<Field>> fieldsByObject = new HashMap<>();
         // Traverse hierarchy from child to parent because usually children are members of parents and not vice versa
-        for (int i = hierarchy.size() - 1; i >= 0; i--) {
-            Object object = hierarchy.get(i);
+        for (int i = componentHierarchy.size() - 1; i >= 0; i--) {
+            Object object = componentHierarchy.get(i);
             fieldsByObject.put(object, new ArrayList<>());
             addAll(fieldsByObject, InspectionUtils.findFieldValues(object, fieldsByObject.keySet()));
         }
-        return hierarchy.stream()
-                .map(object -> createInspectionLink(object, fieldsByObject.get(object)))
-                .collect(Collectors.toList());
+
+        List<InspectionLinkIF> inspectionLinkHierarchy = new ArrayList<>(componentHierarchy.size());
+        for (int i = 0; i < componentHierarchy.size(); i++) {
+            Object component = componentHierarchy.get(i);
+            List<Field> fields = fieldsByObject.get(component);
+            InspectionLinkIF inspectionLink = createComponentInspectionLink(component, componentHierarchy.subList(0, i+1), fields);
+            inspectionLinkHierarchy.add(inspectionLink);
+        }
+        return inspectionLinkHierarchy;
     }
 
     private static <S, T> void addAll(Map<S, List<T>> aggregated, Map<S, List<T>> toAdd) {
@@ -58,14 +55,14 @@ public class SwingComponentInspectionPanel extends JPanel
         }
     }
 
-    private static InspectionLinkIF createInspectionLink(Object object, List<Field> fields) {
-        String linkText = object.getClass().getSimpleName();
+    private static InspectionLinkIF createComponentInspectionLink(Object component, List<Object> componentHierarchy, List<Field> fields) {
+        String linkText = component.getClass().getSimpleName();
         if (!fields.isEmpty()) {
             String fieldText = fields.stream()
                     .map(InspectionUtils::formatField)
                     .collect(Collectors.joining(", "));
             linkText += " (" + fieldText + ")";
         }
-        return SwingObjectInspector.getInspector().createObjectInspectionLink(object, linkText);
+        return SwingObjectInspector.getInspector().createComponentInspectionLink(componentHierarchy, linkText);
     }
 }

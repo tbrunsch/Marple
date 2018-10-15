@@ -15,8 +15,6 @@ public abstract class ObjectInspector
         INSPECTOR = inspector;
     }
 
-    private final Map<Class<?>, BiFunction<Object, MouseLocation, List<Object>>>    subComponentHierarchyStrategyByClass    = new HashMap<>();
-
     public synchronized static ObjectInspector getInspector() {
         if (INSPECTOR == null) {
             throw new IllegalStateException("No object inspector has been loaded");
@@ -28,7 +26,7 @@ public abstract class ObjectInspector
     protected abstract Collection<Class<?>> getRegisteredClasses();
     protected abstract void                 beginInspection(Object object);
     protected abstract void                 endInspection();
-    protected abstract void                 inspectComponent(Object component, List<Object> subComponentHierarchy);
+    protected abstract void                 inspectComponent(List<Object> componentHierarchy);
     protected abstract void                 inspectObjectAs(Object object, Class<?> clazz);
 
     // Should only be called by InspectionStrategyIFs
@@ -45,14 +43,6 @@ public abstract class ObjectInspector
         } else if (inspector != INSPECTOR) {
             throw new IllegalStateException("There is already an object inspector loaded");
         }
-    }
-
-    protected synchronized void addSubcomponentHierarchyStrategy(Class<?> clazz, BiFunction<Object, MouseLocation, List<Object>> strategy) {
-        if (subComponentHierarchyStrategyByClass.containsKey(clazz)) {
-            // Warning: Already registered strategy for that component
-            return;
-        }
-        subComponentHierarchyStrategyByClass.put(clazz, strategy);
     }
 
     /*
@@ -97,35 +87,15 @@ public abstract class ObjectInspector
         inspectionLink.inspect(this);
     }
 
-    public InspectionLinkIF createComponentInspectionStrategy(Object component, MouseLocation mouseLocation) {
-        List<Object> subComponentHierarchy = getSubComponentHierarchy(component, mouseLocation);
-        return createComponentInspectionStrategy(component, subComponentHierarchy);
+    public InspectionLinkIF createComponentInspectionLink(List<Object> componentHierarchy) {
+        return new ComponentInspectionLink(componentHierarchy);
     }
 
-    public InspectionLinkIF createComponentInspectionStrategy(Object component, List<Object> subComponentHierarchy) {
-        return new ComponentInspectionLink(component, subComponentHierarchy);
+    public InspectionLinkIF createComponentInspectionLink(List<Object> componentHierarchy, String linkText) {
+        return new ComponentInspectionLink(componentHierarchy, linkText);
     }
 
     public InspectionLinkIF createObjectInspectionLink(Object object) {
         return new ObjectInspectionLink(object);
-    }
-
-    public InspectionLinkIF createObjectInspectionLink(Object object, String linkText) {
-        return new ObjectInspectionLink(object, linkText);
-    }
-
-    private List<Object> getSubComponentHierarchy(Object component, MouseLocation mouseLocation) {
-        Iterable<Class<?>> implementedClasses = InspectionUtils.getImplementedClasses(component, false);
-        for (Class<?> clazz : implementedClasses) {
-            BiFunction<Object, MouseLocation, List<Object>> strategy = subComponentHierarchyStrategyByClass.get(clazz);
-            if (strategy == null) {
-                continue;
-            }
-            List<Object> subComponentHierarchy = strategy.apply(component, mouseLocation);
-            if (!subComponentHierarchy.isEmpty()) {
-                return subComponentHierarchy;
-            }
-        }
-        return Collections.emptyList();
     }
 }

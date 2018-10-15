@@ -10,9 +10,21 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-class SwingInspectionUtils
+public class SwingInspectionUtils
 {
+    public static List<Object> getComponentHierarchy(Component component) {
+        List<Object> componentHierarchy = new ArrayList<>();
+        for (Component curComponent = component; curComponent != null; curComponent = curComponent.getParent()) {
+            componentHierarchy.add(0, curComponent);
+        }
+        return componentHierarchy;
+    }
+
+
     static JTree createInspectionLinkTree(Iterable<InspectionLinkIF> linearLinkHierarchy) {
         MutableTreeNode root = null;
         MutableTreeNode parent = null;

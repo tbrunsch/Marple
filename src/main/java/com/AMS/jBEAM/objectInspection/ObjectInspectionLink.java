@@ -5,11 +5,7 @@ class ObjectInspectionLink extends AbstractInspectionLink
     private final Object object;
 
     ObjectInspectionLink(Object object) {
-        this(object, object.toString());
-    }
-
-    ObjectInspectionLink(Object object, String linkText) {
-        super(linkText);
+        super(object.toString());
         this.object = object;
     }
 

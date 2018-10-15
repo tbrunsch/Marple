@@ -1,6 +1,7 @@
 package com.AMS.jBEAM.objectInspection.swing;
 
 import com.AMS.jBEAM.objectInspection.InspectionLinkIF;
+import com.AMS.jBEAM.objectInspection.InspectionUtils;
 import com.AMS.jBEAM.objectInspection.MouseLocation;
 import com.AMS.jBEAM.objectInspection.ObjectInspector;
 import com.AMS.jBEAM.objectInspection.swing.gui.*;
@@ -8,10 +9,8 @@ import com.AMS.jBEAM.objectInspection.swing.gui.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -34,9 +33,10 @@ public class SwingObjectInspector extends ObjectInspector
         return INSPECTOR;
     }
 
-    private final Map<Class<?>, Function<Object, SwingInspectionViewData>>  inspectionStrategyByClass               = new HashMap<>();
+    private final Map<Class<?>, Function<Object, SwingInspectionViewData>>          inspectionStrategyByClass               = new HashMap<>();
+    private final Map<Class<?>, BiFunction<Component, MouseLocation, List<Object>>> subComponentHierarchyStrategyByClass    = new HashMap<>();
 
-    private SwingInspectionFrame                                            swingInspectionFrame                    = null;
+    private SwingInspectionFrame                                                    swingInspectionFrame                    = null;
 
     /*
      * Setup Code
@@ -64,8 +64,31 @@ public class SwingObjectInspector extends ObjectInspector
      * via JComponents.
      */
     public <T extends Component> void addSubcomponentHierarchyStrategyFor(Class<T> clazz, BiFunction<T, Point, List<Object>> strategy) {
-        BiFunction<Object, MouseLocation, List<Object>> wrappedStrategy = (object, mouseLocation) -> strategy.apply(clazz.cast(object), toPoint(mouseLocation));
+        BiFunction<Component, MouseLocation, List<Object>> wrappedStrategy = (object, mouseLocation) -> strategy.apply(clazz.cast(object), toPoint(mouseLocation));
         addSubcomponentHierarchyStrategy(clazz, wrappedStrategy);
+    }
+
+    private synchronized void addSubcomponentHierarchyStrategy(Class<? extends Component> clazz, BiFunction<Component, MouseLocation, List<Object>> strategy) {
+        if (subComponentHierarchyStrategyByClass.containsKey(clazz)) {
+            // Warning: Already registered strategy for that component
+            return;
+        }
+        subComponentHierarchyStrategyByClass.put(clazz, strategy);
+    }
+
+    private List<Object> getSubComponentHierarchy(Component component, MouseLocation mouseLocation) {
+        Iterable<Class<?>> implementedClasses = InspectionUtils.getImplementedClasses(component, false);
+        for (Class<?> clazz : implementedClasses) {
+            BiFunction<Component, MouseLocation, List<Object>> strategy = subComponentHierarchyStrategyByClass.get(clazz);
+            if (strategy == null) {
+                continue;
+            }
+            List<Object> subComponentHierarchy = strategy.apply(component, mouseLocation);
+            if (!subComponentHierarchy.isEmpty()) {
+                return subComponentHierarchy;
+            }
+        }
+        return Collections.emptyList();
     }
 
     /*
@@ -98,12 +121,8 @@ public class SwingObjectInspector extends ObjectInspector
     }
 
     @Override
-    protected void inspectComponent(Object componentAsObject, List<Object> subComponentHierarchy) {
-        if (!(componentAsObject instanceof Component)) {
-            return;
-        }
-        Component component = (Component) componentAsObject;
-        JComponent panel = new SwingComponentInspectionPanel(component, subComponentHierarchy);
+    protected void inspectComponent(List<Object> componentHierarchy) {
+        JComponent panel = new SwingComponentInspectionPanel(componentHierarchy);
         swingInspectionFrame.addComponent("Component Hierarchy", panel);
     }
 
@@ -136,8 +155,10 @@ public class SwingObjectInspector extends ObjectInspector
             }
         }
         MouseLocation mouseLocation = toMouseLocation(point);
-        InspectionLinkIF componentInspectionStrategy = createComponentInspectionStrategy(component, mouseLocation);
-        inspect(componentInspectionStrategy);
+        List<Object> componentHierarchy = SwingInspectionUtils.getComponentHierarchy(component);
+        componentHierarchy.addAll(getSubComponentHierarchy(component, mouseLocation));
+        InspectionLinkIF componentInspectionLink = createComponentInspectionLink(componentHierarchy);
+        componentInspectionLink.run();
     }
 
     private void onInspectionFrameClosed() {
