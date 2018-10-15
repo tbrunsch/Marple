@@ -109,7 +109,7 @@ public class SwingObjectInspector extends ObjectInspector
         if (swingInspectionFrame == null) {
             swingInspectionFrame = new SwingInspectionFrame(this::onInspectionFrameClosed);
         }
-        swingInspectionFrame.setObjectToInspect(object);
+        swingInspectionFrame.beginInspection(object);
         swingInspectionFrame.removeAllComponents();
     }
 
@@ -117,7 +117,7 @@ public class SwingObjectInspector extends ObjectInspector
     protected void endInspection() {
         swingInspectionFrame.revalidate();
         swingInspectionFrame.repaint();
-        swingInspectionFrame.setVisible(true);
+        swingInspectionFrame.endInspection();
     }
 
     @Override

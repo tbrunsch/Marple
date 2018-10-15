@@ -24,7 +24,10 @@ public class SwingInspectionFrame extends JFrame
 
     private final JTabbedPane   tabbedPane          = new JTabbedPane();
 
-    private final Runnable  onClosed;
+    private final Runnable      onClosed;
+
+    private boolean             initializing;
+    private String              lastSelectedTabTitle;
 
     public SwingInspectionFrame(Runnable onClosed) {
         this.onClosed = onClosed;
@@ -49,10 +52,11 @@ public class SwingInspectionFrame extends JFrame
         objectOverviewPanel.add(toStringLabel,  new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
         objectOverviewPanel.add(classInfoLabel, new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 
+        setSize(INITIAL_SIZE);
+
         prevButton.addActionListener(e -> onPrevButtonClicked());
         nextButton.addActionListener(e -> onNextButtonClicked());
-
-        setSize(INITIAL_SIZE);
+        tabbedPane.addChangeListener(e -> onTabChanged());
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -62,7 +66,8 @@ public class SwingInspectionFrame extends JFrame
         });
     }
 
-    public void setObjectToInspect(Object object) {
+    public void beginInspection(Object object) {
+        initializing = true;
         toStringLabel.setText('"' + object.toString() + '"');
         classInfoLabel.setText(object.getClass().toString());
     }
@@ -74,6 +79,17 @@ public class SwingInspectionFrame extends JFrame
     public void removeAllComponents() {
         tabbedPane.removeAll();
         updateNavigationButtons();
+    }
+
+    public void endInspection() {
+        if (lastSelectedTabTitle != null) {
+            int indexOfLastSelectedTab = tabbedPane.indexOfTab(lastSelectedTabTitle);
+            if (indexOfLastSelectedTab >= 0) {
+                tabbedPane.setSelectedIndex(indexOfLastSelectedTab);
+            }
+        }
+        setVisible(true);
+        initializing = false;
     }
 
     private void updateNavigationButtons() {
@@ -95,5 +111,15 @@ public class SwingInspectionFrame extends JFrame
     private void onNextButtonClicked() {
         ObjectInspector.getInspector().inspectNext();
         updateNavigationButtons();
+    }
+
+    private void onTabChanged() {
+        if (initializing) {
+            return;
+        }
+        int selectedIndex = tabbedPane.getSelectedIndex();
+        if (selectedIndex >= 0) {
+            lastSelectedTabTitle = tabbedPane.getTitleAt(selectedIndex);
+        }
     }
 }
