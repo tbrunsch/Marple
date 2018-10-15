@@ -33,7 +33,7 @@ public class SwingObjectInspector extends ObjectInspector
         return INSPECTOR;
     }
 
-    private final Map<Class<?>, Function<Object, SwingInspectionViewData>>          inspectionStrategyByClass               = new HashMap<>();
+    private final Map<Class<?>, List<Function<Object, SwingInspectionViewData>>>    inspectionStrategiesByClass               = new HashMap<>();
     private final Map<Class<?>, BiFunction<Component, MouseLocation, List<Object>>> subComponentHierarchyStrategyByClass    = new HashMap<>();
 
     private SwingInspectionFrame                                                    swingInspectionFrame                    = null;
@@ -41,7 +41,7 @@ public class SwingObjectInspector extends ObjectInspector
     /*
      * Setup Code
      */
-    SwingObjectInspector() {
+    private SwingObjectInspector() {
         registerInspector(this);
         SwingEventHandler.register(this, DEBUG_SHORT_CUT);
     }
@@ -50,12 +50,12 @@ public class SwingObjectInspector extends ObjectInspector
      * Specify how to present data of instances of type T in a JComponent
      */
     public synchronized <T> void addInspectionStrategyFor(Class<T> clazz, Function<T, SwingInspectionViewData> strategy) {
-        if (inspectionStrategyByClass.containsKey(clazz)) {
-            // Warning: Already registered strategy for that class
-            return;
+        if (!inspectionStrategiesByClass.containsKey(clazz)) {
+            inspectionStrategiesByClass.put(clazz, new ArrayList<>());
         }
+        List<Function<Object, SwingInspectionViewData>> strategies = inspectionStrategiesByClass.get(clazz);
         Function<Object, SwingInspectionViewData> wrappedStrategy = object -> strategy.apply(clazz.cast(object));
-        inspectionStrategyByClass.put(clazz, wrappedStrategy);
+        strategies.add(wrappedStrategy);
     }
 
     /*
@@ -101,7 +101,7 @@ public class SwingObjectInspector extends ObjectInspector
 
     @Override
     protected Collection<Class<?>> getRegisteredClasses() {
-        return inspectionStrategyByClass.keySet();
+        return inspectionStrategiesByClass.keySet();
     }
 
     @Override
@@ -128,8 +128,11 @@ public class SwingObjectInspector extends ObjectInspector
 
     @Override
     protected void inspectObjectAs(Object object, Class<?> clazz) {
-        Function<Object, SwingInspectionViewData> strategy = inspectionStrategyByClass.get(clazz);
-        if (strategy != null) {
+        List<Function<Object, SwingInspectionViewData>> strategies = inspectionStrategiesByClass.get(clazz);
+        if (strategies == null) {
+            return;
+        }
+        for (Function<Object, SwingInspectionViewData> strategy : strategies) {
             SwingInspectionViewData inspectionViewData = strategy.apply(object);
             swingInspectionFrame.addComponent(inspectionViewData.getTitle(), inspectionViewData.getComponent());
         }

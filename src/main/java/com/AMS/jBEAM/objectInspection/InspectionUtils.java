@@ -1,8 +1,12 @@
 package com.AMS.jBEAM.objectInspection;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.text.MessageFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for framework independent object inspection
@@ -77,6 +81,17 @@ public class InspectionUtils
             }
         }
         return fields;
+    }
+
+    public static List<Method> getMethods(Class<?> clazz) {
+        List<Method> methods = new ArrayList<>();
+        for (Class<?> curClazz = clazz; curClazz != null; curClazz = curClazz.getSuperclass()) {
+            Method[] declaredMethods = curClazz.getDeclaredMethods();
+            for (Method method : declaredMethods) {
+                methods.add(method);
+            }
+        }
+        return methods;
     }
 
     public static String formatField(Field field) {
