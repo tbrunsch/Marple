@@ -108,18 +108,19 @@ class SwingObjectInspectionPanel extends JPanel
         private static final Map<AccessModifier, Color> MODIFIER_COLORS = new HashMap<>();
 
         static {
-            MODIFIER_COLORS.put(AccessModifier.PUBLIC,          Color.GREEN.darker());
-            MODIFIER_COLORS.put(AccessModifier.PROTECTED,       Color.BLUE.darker());
-            MODIFIER_COLORS.put(AccessModifier.PACKAGE_PRIVATE, Color.MAGENTA.darker());
-            MODIFIER_COLORS.put(AccessModifier.PRIVATE,         Color.RED.darker());
+            MODIFIER_COLORS.put(AccessModifier.PUBLIC,          Color.GREEN);
+            MODIFIER_COLORS.put(AccessModifier.PROTECTED,       Color.YELLOW);
+            MODIFIER_COLORS.put(AccessModifier.PACKAGE_PRIVATE, Color.ORANGE);
+            MODIFIER_COLORS.put(AccessModifier.PRIVATE,         Color.RED);
         }
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             setText(value.toString());
             Color color = MODIFIER_COLORS.get(value);
-            setForeground(color == null ? Color.BLACK : color);
             setFont(getFont().deriveFont(0));
+            setBackground(color == null ? Color.BLACK : color);
+            setOpaque(true);
             return this;
         }
     }
