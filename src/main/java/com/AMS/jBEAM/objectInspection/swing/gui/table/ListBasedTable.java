@@ -75,7 +75,10 @@ public class ListBasedTable<T> extends JPanel
                 position.translate(tableShift.x, tableShift.y);
                 filterPopup.setLocation(position);
                 filterPopup.pack();
-                filterPopup.setVisible(true);
+                SwingUtilities.invokeLater(() -> {
+                    filterPopup.setVisible(true);
+                    filterPopup.toFront();
+                });
             }
         });
     }
