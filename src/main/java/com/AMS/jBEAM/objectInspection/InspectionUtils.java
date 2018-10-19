@@ -73,11 +73,7 @@ public class InspectionUtils
         for (Class<?> curClazz = clazz; curClazz != null; curClazz = curClazz.getSuperclass()) {
             Field[] declaredFields = curClazz.getDeclaredFields();
             for (Field field : declaredFields) {
-                int modifiers = field.getModifiers();
-                // We are currently not interested in static fields
-                if ((modifiers & Modifier.STATIC) == 0) {
-                    fields.add(field);
-                }
+                fields.add(field);
             }
         }
         return fields;
