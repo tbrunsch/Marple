@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 class JavaTokenStream implements Cloneable
 {
+    // TODO: Support white spaces
     private static final Pattern    IDENTIFIER_PATTERN  = Pattern.compile("^([A-Za-z][_A-Za-z0-9]*).*");
 
     private final String    javaExpression;
@@ -27,9 +28,7 @@ class JavaTokenStream implements Cloneable
     }
 
     JavaToken readIdentifier() throws JavaTokenParseException {
-        if (!hasMore()) {
-            throw new JavaTokenParseException("End of Java expression reached", position);
-        }
+        checkHasMore();
         Matcher matcher = IDENTIFIER_PATTERN.matcher(javaExpression.substring(position));
         if (!matcher.matches()) {
             throw new JavaTokenParseException("No identifier found", position);
@@ -37,6 +36,21 @@ class JavaTokenStream implements Cloneable
         String identifier = matcher.group(1);
         boolean containsCarret = moveToNextPosition(position + identifier.length());
         return new JavaToken(identifier, containsCarret);
+    }
+
+    JavaToken readDot() throws JavaTokenParseException {
+        checkHasMore();
+        if (javaExpression.charAt(position) == '.') {
+            boolean containsCarret = moveToNextPosition(position + 1);
+            return new JavaToken(".", containsCarret);
+        }
+        throw new JavaTokenParseException("Dot not found", position);
+    }
+
+    private void checkHasMore() throws JavaTokenParseException {
+        if (!hasMore()) {
+            throw new JavaTokenParseException("End of Java expression reached", position);
+        }
     }
 
     /**
