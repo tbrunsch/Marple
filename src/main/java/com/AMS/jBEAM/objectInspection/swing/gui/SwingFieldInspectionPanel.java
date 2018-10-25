@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.objectInspection.swing.gui;
 
-import com.AMS.jBEAM.objectInspection.InspectionUtils;
+import com.AMS.jBEAM.javaParser.ReflectionUtils;
 import com.AMS.jBEAM.objectInspection.common.AccessModifier;
 import com.AMS.jBEAM.objectInspection.swing.SwingObjectInspector;
 import com.AMS.jBEAM.objectInspection.swing.gui.table.*;
@@ -18,7 +18,7 @@ class SwingFieldInspectionPanel extends JPanel
     public SwingFieldInspectionPanel(final Object object) {
         super(new GridBagLayout());
 
-        List<Field> fields = InspectionUtils.getFields(object.getClass());
+        List<Field> fields = ReflectionUtils.getFields(object.getClass());
         fields.forEach(field -> field.setAccessible(true));
 
         List<ColumnDescriptionIF<Field>> columnDescriptions = createColumnDescriptionsFor(object);

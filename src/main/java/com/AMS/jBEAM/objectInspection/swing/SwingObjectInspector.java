@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.objectInspection.swing;
 
 import com.AMS.jBEAM.objectInspection.InspectionLinkIF;
-import com.AMS.jBEAM.objectInspection.InspectionUtils;
+import com.AMS.jBEAM.javaParser.ReflectionUtils;
 import com.AMS.jBEAM.objectInspection.MouseLocation;
 import com.AMS.jBEAM.objectInspection.ObjectInspector;
 import com.AMS.jBEAM.objectInspection.swing.gui.*;
@@ -77,7 +77,7 @@ public class SwingObjectInspector extends ObjectInspector
     }
 
     private List<Object> getSubComponentHierarchy(Component component, MouseLocation mouseLocation) {
-        Iterable<Class<?>> implementedClasses = InspectionUtils.getImplementedClasses(component, false);
+        Iterable<Class<?>> implementedClasses = ReflectionUtils.getImplementedClasses(component, false);
         for (Class<?> clazz : implementedClasses) {
             BiFunction<Component, MouseLocation, List<Object>> strategy = subComponentHierarchyStrategyByClass.get(clazz);
             if (strategy == null) {

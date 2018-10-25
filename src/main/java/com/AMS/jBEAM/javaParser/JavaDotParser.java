@@ -3,10 +3,15 @@ package com.AMS.jBEAM.javaParser;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.function.ToIntFunction;
 
+/**
+ * Parses a sub expression starting with a dot, assuming the context
+ * <ul>
+ *     <li>{@code <object>.<field or method> or</li>
+ *     <li>{@code <class>.<static field or method></li>
+ * </ul>
+ */
 class JavaDotParser extends AbstractJavaEntityParser
 {
     private final boolean staticOnly;
@@ -17,26 +22,43 @@ class JavaDotParser extends AbstractJavaEntityParser
     }
 
     @Override
-    List<CompletionSuggestionIF> doParse(JavaTokenStream tokenStream, Class<?> currentContextClass) {
-        try {
-            JavaToken dotToken = tokenStream.readDot();
-            if (dotToken.isContainsCarret()) {
-                List<CompletionSuggestionIF> suggestions = new ArrayList<>();
-                List<Field> fields = parserSettings.getInspectionDataProvider().getFields(currentContextClass, staticOnly);
-                ToIntFunction<Field> fieldRatingFunc = field -> MatchValuer.rateStringMatch(field.getName(), "");
-                suggestions.addAll(JavaParser.createSuggestions(fields, fieldRatingFunc, Field::getName));
-                List<Method> methods = parserSettings.getInspectionDataProvider().getMethods(currentContextClass, staticOnly);
-                ToIntFunction<Method> methodRatingFunc = method -> MatchValuer.rateStringMatch(method.getName(), "");
-                suggestions.addAll(JavaParser.createSuggestions(methods, methodRatingFunc, Method::getName));
-                return suggestions;
-            }
-            return JavaParser.parse(tokenStream, currentContextClass,
-                parserSettings.getFieldParser(staticOnly)//,
-                // TODO: Add more parsers
-                //parserSettings.getMethodParser(staticOnly)
-            );
-        } catch (JavaTokenStream.JavaTokenParseException e) {
-            return Collections.emptyList();
+    ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass) {
+        int position = tokenStream.getPosition();
+        JavaToken characterToken = tokenStream.readCharacter();
+        if (!characterToken.getValue().equals(".")) {
+            return new ParseError(position, "Expected dot '.'");
         }
+
+        if (characterToken.isContainsCaret()) {
+            int insertionBegin = tokenStream.getPosition();
+            int insertionEnd;
+            try {
+                tokenStream.readIdentifier();
+                insertionEnd = tokenStream.getPosition();
+            } catch (JavaTokenStream.JavaTokenParseException e) {
+                insertionEnd = insertionBegin;
+            }
+
+            List<CompletionSuggestion> suggestions = new ArrayList<>();
+
+            List<Field> fields = parserSettings.getInspectionDataProvider().getFields(currentContextClass, staticOnly);
+            suggestions.addAll(CompletionUtils.createSuggestions(fields,
+                                                                    CompletionUtils.fieldTextInsertionInfoFunction(insertionBegin, insertionEnd),
+                                                                    CompletionUtils.FIELD_DISPLAY_FUNC,
+                                                                    CompletionUtils.rateFieldByNameFunc("")));
+
+            List<Method> methods = parserSettings.getInspectionDataProvider().getMethods(currentContextClass, staticOnly);
+            suggestions.addAll(CompletionUtils.createSuggestions(methods,
+                                                                    CompletionUtils.methodTextInsertionInfoFunction(insertionBegin, insertionEnd),
+                                                                    CompletionUtils.METHOD_DISPLAY_FUNC,
+                                                                    CompletionUtils.rateMethodByNameFunc("")));
+            return new CompletionSuggestions(suggestions);
+        }
+
+        return JavaParser.parse(tokenStream, currentContextClass,
+            parserSettings.getFieldParser(staticOnly)//,
+            // TODO: Add method parser
+            //parserSettings.getMethodParser(staticOnly)
+        );
     }
 }

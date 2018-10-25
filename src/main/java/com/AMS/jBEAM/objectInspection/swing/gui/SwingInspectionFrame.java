@@ -1,10 +1,8 @@
 package com.AMS.jBEAM.objectInspection.swing.gui;
 
-import com.AMS.jBEAM.objectInspection.InspectionUtils;
 import com.AMS.jBEAM.objectInspection.ObjectInspector;
 
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;

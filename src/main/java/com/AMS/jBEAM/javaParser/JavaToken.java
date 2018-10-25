@@ -2,19 +2,19 @@ package com.AMS.jBEAM.javaParser;
 
 class JavaToken
 {
-    private final String    token;
-    private final boolean   containsCarret;
+    private final String    value;
+    private final boolean   containsCaret;
 
-    JavaToken(String token, boolean containsCarret) {
-        this.token = token;
-        this.containsCarret = containsCarret;
+    JavaToken(String value, boolean containsCaret) {
+        this.value = value;
+        this.containsCaret = containsCaret;
     }
 
-    public String getToken() {
-        return token;
+    String getValue() {
+        return value;
     }
 
-    public boolean isContainsCarret() {
-        return containsCarret;
+    boolean isContainsCaret() {
+        return containsCaret;
     }
 }

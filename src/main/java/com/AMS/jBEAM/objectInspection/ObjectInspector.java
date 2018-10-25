@@ -1,8 +1,9 @@
 package com.AMS.jBEAM.objectInspection;
 
+import com.AMS.jBEAM.javaParser.ReflectionUtils;
+
 import java.util.*;
 import java.util.List;
-import java.util.function.BiFunction;
 
 /**
  * Base class for all inspection frameworks
@@ -32,7 +33,7 @@ public abstract class ObjectInspector
     // Should only be called by InspectionStrategyIFs
     void inspectObject(Object object) {
         Set<Class<?>> registeredClasses = new HashSet<>(getRegisteredClasses());
-        InspectionUtils.getImplementedClasses(object, true).stream()
+        ReflectionUtils.getImplementedClasses(object, true).stream()
                 .filter(registeredClasses::contains)
                 .forEach(clazz -> inspectObjectAs(object, clazz));
     }

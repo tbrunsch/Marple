@@ -1,11 +1,18 @@
 package com.AMS.jBEAM.javaParser;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.ToIntFunction;
 
+/**
+ * Parses a sub expression starting with a field {@code <field>}, assuming the context
+ * <ul>
+ *     <li>{@code <context instance>.<field>},</li>
+ *     <li>{@code <context class>.<field>}, or</li>
+ *     <li>{@code <field>} (like {@code <context instance>.<field>} for {@code <context instance> = this})</li>
+ * </ul>
+ */
 class JavaFieldParser extends AbstractJavaEntityParser
 {
     private final boolean staticOnly;
@@ -16,31 +23,37 @@ class JavaFieldParser extends AbstractJavaEntityParser
     }
 
     @Override
-    List<CompletionSuggestionIF> doParse(JavaTokenStream tokenStream, Class<?> currentContextClass) {
+    ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass) {
+        int startPosition = tokenStream.getPosition();
+        JavaToken fieldNameToken = null;
         try {
-            List<Field> fields = parserSettings.getInspectionDataProvider().getFields(currentContextClass, staticOnly);
-            JavaToken fieldNameToken = tokenStream.readIdentifier();
-            String fieldName = fieldNameToken.getToken();
-            if (fieldNameToken.isContainsCarret()) {
-                ToIntFunction<Field> fieldRatingFunc = field -> MatchValuer.rateStringMatch(field.getName(), fieldName);
-                return JavaParser.createSuggestions(fields, fieldRatingFunc, Field::getName);
-            }
-            // expecting exact match
-            Optional<Field> firstFieldMatch = fields.stream().filter(field -> field.getName().equals(fieldName)).findFirst();
-            if (!firstFieldMatch.isPresent()) {
-                return Collections.emptyList();
-            }
-            Field matchingField = firstFieldMatch.get();
-            Class<?> matchingFieldClass = matchingField.getType();
-            return JavaParser.parse(tokenStream, matchingFieldClass,
-                parserSettings.getDotParser(staticOnly) //,
-                // TODO: Add more parsers
-                //parserSettings.getArrayAccessParser(),    // []
-                //parserSettings.getComparisonParser(),     // ==, !=, <, >, <=, >=
-                //parserSettings.getAssignmentParser()
-            );
+            fieldNameToken = tokenStream.readIdentifier();
         } catch (JavaTokenStream.JavaTokenParseException e) {
-            return Collections.emptyList();
+            return new ParseError(startPosition, "Expected an identifier");
         }
+        String fieldName = fieldNameToken.getValue();
+        int endPosition = tokenStream.getPosition();
+
+        List<Field> fields = parserSettings.getInspectionDataProvider().getFields(currentContextClass, staticOnly);
+
+        // check for code completion
+        if (fieldNameToken.isContainsCaret()) {
+            List<CompletionSuggestion> suggestions = CompletionUtils.createSuggestions(fields,
+                    CompletionUtils.fieldTextInsertionInfoFunction(startPosition, endPosition),
+                    CompletionUtils.FIELD_DISPLAY_FUNC,
+                    CompletionUtils.rateFieldByNameFunc(fieldName));
+            return new CompletionSuggestions(suggestions);
+        }
+
+        // no code completion requested => field name must exist
+        Optional<Field> firstFieldMatch = fields.stream().filter(field -> field.getName().equals(fieldName)).findFirst();
+        if (!firstFieldMatch.isPresent()) {
+            return new ParseError(startPosition, "Unknown field '" + fieldName + "'");
+        }
+
+        Field matchingField = firstFieldMatch.get();
+        Class<?> matchingFieldClass = matchingField.getType();
+
+        return parserSettings.getObjectTailParser().parse(tokenStream, matchingFieldClass);
     }
 }

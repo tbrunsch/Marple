@@ -38,7 +38,12 @@ public class JavaCompletionTest
         JavaParser parser = new JavaParser();
         String javaExpression = "member.";
         List<String> expectedCompletions = Arrays.asList("xy", "xy_z", "ab", "AB", "ABC", "xyzw", "member");
-        List<String> suggestions = extractSuggestions(parser.suggestCodeCompletion(javaExpression, javaExpression.length(), testInstance));
+        List<String> suggestions = null;
+        try {
+            suggestions = extractSuggestions(parser.suggestCodeCompletion(javaExpression, javaExpression.length(), testInstance));
+        } catch (JavaParseException e) {
+            assertTrue("Exception during code completion: " + e.getMessage(), false);
+        }
         for (String expectedCompletion : expectedCompletions) {
             assertTrue("Expected completion '" + expectedCompletion + "'", suggestions.contains(expectedCompletion));
         }
@@ -62,8 +67,10 @@ public class JavaCompletionTest
             .performTests();
     }
 
-    private static List<String> extractSuggestions(List<CompletionSuggestionIF> completions) {
-        return completions.stream().map(CompletionSuggestionIF::getSuggestion).collect(Collectors.toList());
+    private static List<String> extractSuggestions(List<CompletionSuggestion> completions) {
+        return completions.stream()
+            .map(completion -> completion.getInsertionInfo().getTextToInsert())
+            .collect(Collectors.toList());
     }
 
     private static class TestBuilder
@@ -81,8 +88,13 @@ public class JavaCompletionTest
             for (Map.Entry<String, List<String>> expectedResult : expectedResults.entrySet()) {
                 String javaExpression = expectedResult.getKey();
                 List<String> expectedSuggestions = expectedResult.getValue();
-                int carret = javaExpression.length();
-                List<String> suggestions = extractSuggestions(parser.suggestCodeCompletion(javaExpression, carret, testInstance));
+                int caret = javaExpression.length();
+                List<String> suggestions = null;
+                try {
+                    suggestions = extractSuggestions(parser.suggestCodeCompletion(javaExpression, caret, testInstance));
+                } catch (JavaParseException e) {
+                    assertTrue("Exception during code completion: " + e.getMessage(), false);
+                }
                 assertTrue(MessageFormat.format("Expression: {0}, expected completions: {1}, actual completions: {2}",
                         javaExpression,
                         expectedSuggestions,

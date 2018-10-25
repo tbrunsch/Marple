@@ -1,21 +1,25 @@
 package com.AMS.jBEAM.javaParser;
 
-class CompletionSuggestion implements CompletionSuggestionIF
+class CompletionSuggestion
 {
-    private final String    suggestion;
-    private final int       rating;
+    private final TextInsertionInfo insertionInfo;
+    private final String            displayText;
+    private final int               rating;
 
-    CompletionSuggestion(String suggestion, int rating) {
-        this.suggestion = suggestion;
+    CompletionSuggestion(TextInsertionInfo insertionInfo, String displayText, int rating) {
+        this.insertionInfo = insertionInfo;
+        this.displayText = displayText;
         this.rating = rating;
     }
 
-    @Override
-    public String getSuggestion() {
-        return suggestion;
+    public TextInsertionInfo getInsertionInfo() {
+        return insertionInfo;
     }
 
-    @Override
+    public String getDisplayText() {
+        return displayText;
+    }
+
     public int getRating() {
         return rating;
     }

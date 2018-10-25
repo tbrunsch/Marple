@@ -9,17 +9,17 @@ class JavaTokenStream implements Cloneable
     private static final Pattern    IDENTIFIER_PATTERN  = Pattern.compile("^([A-Za-z][_A-Za-z0-9]*).*");
 
     private final String    javaExpression;
-    private final int       carret;
+    private final int       caret;
 
     private int             position;
 
-    JavaTokenStream(String javaExpression, int carret) {
-        this(javaExpression, carret, 0);
+    JavaTokenStream(String javaExpression, int caret) {
+        this(javaExpression, caret, 0);
     }
 
-    private JavaTokenStream(String javaExpression, int carret, int position) {
+    private JavaTokenStream(String javaExpression, int caret, int position) {
         this.javaExpression = javaExpression;
-        this.carret = carret;
+        this.caret = caret;
         this.position = position;
     }
 
@@ -27,57 +27,55 @@ class JavaTokenStream implements Cloneable
         return position < javaExpression.length();
     }
 
+    int getPosition() {
+        return position;
+    }
+
     JavaToken readIdentifier() throws JavaTokenParseException {
-        checkHasMore();
         Matcher matcher = IDENTIFIER_PATTERN.matcher(javaExpression.substring(position));
         if (!matcher.matches()) {
-            throw new JavaTokenParseException("No identifier found", position);
+            throw new JavaTokenParseException("No identifier found");
         }
         String identifier = matcher.group(1);
-        boolean containsCarret = moveToNextPosition(position + identifier.length());
-        return new JavaToken(identifier, containsCarret);
+        // TODO: Only correct if no white spaces
+        int length = identifier.length();
+        boolean containsCaret = moveForward(length);
+        return new JavaToken(identifier, containsCaret);
     }
 
-    JavaToken readDot() throws JavaTokenParseException {
-        checkHasMore();
-        if (javaExpression.charAt(position) == '.') {
-            boolean containsCarret = moveToNextPosition(position + 1);
-            return new JavaToken(".", containsCarret);
-        }
-        throw new JavaTokenParseException("Dot not found", position);
+    char peekCharacter() {
+        return javaExpression.charAt(position);
     }
 
-    private void checkHasMore() throws JavaTokenParseException {
-        if (!hasMore()) {
-            throw new JavaTokenParseException("End of Java expression reached", position);
-        }
+    JavaToken readCharacter() {
+        char c = peekCharacter();
+        boolean containsCaret = moveForward(1);
+        return new JavaToken(String.valueOf(c), containsCaret);
     }
 
     /**
-     * Returns true whether the position strived the carret when moving from position to nextPosition
+     * Returns true whether the position strived the caret when moving from position to nextPosition
      */
-    private boolean moveToNextPosition(int nextPosition) {
-        boolean containsCarret = position < carret && carret <= nextPosition;
-        position = nextPosition;
-        return containsCarret;
+    private boolean moveForward(int numCharacters) {
+        int newPosition = position + numCharacters;
+        boolean containsCaret = position < caret && caret <= newPosition;
+        moveTo(newPosition);
+        return containsCaret;
+    }
+
+    void moveTo(int newPosition) {
+        position = newPosition;
     }
 
     @Override
     public JavaTokenStream clone() {
-        return new JavaTokenStream(javaExpression, carret, position);
+        return new JavaTokenStream(javaExpression, caret, position);
     }
 
     static class JavaTokenParseException extends Exception
     {
-        private final int       position;
-
-        JavaTokenParseException(String message, int position) {
+        JavaTokenParseException(String message) {
             super(message);
-            this.position = position;
-        }
-
-        int getPosition() {
-            return position;
         }
     }
 }

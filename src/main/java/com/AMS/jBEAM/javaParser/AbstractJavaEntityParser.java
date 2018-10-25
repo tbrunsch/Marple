@@ -1,8 +1,5 @@
 package com.AMS.jBEAM.javaParser;
 
-import java.util.ArrayList;
-import java.util.List;
-
 abstract class AbstractJavaEntityParser
 {
     protected final JavaParserSettings  parserSettings;
@@ -13,10 +10,9 @@ abstract class AbstractJavaEntityParser
         this.thisContextClass = thisContextClass;
     }
 
-    abstract List<CompletionSuggestionIF> doParse(JavaTokenStream tokenStream, Class<?> currentContextClass);
+    abstract ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass);
 
-    List<CompletionSuggestionIF> parse(final JavaTokenStream tokenStream, final Class<?> currentContextClass) {
+    ParseResultIF parse(final JavaTokenStream tokenStream, final Class<?> currentContextClass) {
         return doParse(tokenStream.clone(), currentContextClass);
     }
-
 }

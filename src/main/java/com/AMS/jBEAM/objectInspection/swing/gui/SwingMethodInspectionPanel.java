@@ -1,21 +1,17 @@
 package com.AMS.jBEAM.objectInspection.swing.gui;
 
 import com.AMS.jBEAM.objectInspection.InspectionLinkIF;
-import com.AMS.jBEAM.objectInspection.InspectionUtils;
+import com.AMS.jBEAM.javaParser.ReflectionUtils;
 import com.AMS.jBEAM.objectInspection.ObjectInspector;
 import com.AMS.jBEAM.objectInspection.common.AccessModifier;
 import com.AMS.jBEAM.objectInspection.swing.gui.table.*;
 
 import javax.swing.*;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 class SwingMethodInspectionPanel extends JPanel
@@ -25,7 +21,7 @@ class SwingMethodInspectionPanel extends JPanel
     public SwingMethodInspectionPanel(final Object object) {
         super(new GridBagLayout());
 
-        List<Method> methods = InspectionUtils.getMethods(object.getClass());
+        List<Method> methods = ReflectionUtils.getMethods(object.getClass());
         List<ColumnDescriptionIF<Method>> columnDescriptions = createColumnDescriptionsFor(object);
 
         table = new ListBasedTable<>(methods, columnDescriptions);

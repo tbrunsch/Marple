@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.objectInspection.swing.gui;
 
 import com.AMS.jBEAM.objectInspection.InspectionLinkIF;
-import com.AMS.jBEAM.objectInspection.InspectionUtils;
+import com.AMS.jBEAM.javaParser.ReflectionUtils;
 import com.AMS.jBEAM.objectInspection.swing.SwingObjectInspector;
 
 import javax.swing.*;
@@ -35,7 +35,7 @@ public class SwingComponentInspectionPanel extends JPanel
         for (int i = componentHierarchy.size() - 1; i >= 0; i--) {
             Object object = componentHierarchy.get(i);
             fieldsByObject.put(object, new ArrayList<>());
-            addAll(fieldsByObject, InspectionUtils.findFieldValues(object, fieldsByObject.keySet()));
+            addAll(fieldsByObject, ReflectionUtils.findFieldValues(object, fieldsByObject.keySet()));
         }
 
         List<InspectionLinkIF> inspectionLinkHierarchy = new ArrayList<>(componentHierarchy.size());
@@ -59,7 +59,7 @@ public class SwingComponentInspectionPanel extends JPanel
         String linkText = component.getClass().getSimpleName();
         if (!fields.isEmpty()) {
             String fieldText = fields.stream()
-                    .map(InspectionUtils::formatField)
+                    .map(field -> field.getDeclaringClass().getSimpleName() + "." + field.getName())
                     .collect(Collectors.joining(", "));
             linkText += " (" + fieldText + ")";
         }

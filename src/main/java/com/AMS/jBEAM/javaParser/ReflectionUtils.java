@@ -1,4 +1,4 @@
-package com.AMS.jBEAM.objectInspection;
+package com.AMS.jBEAM.javaParser;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -8,13 +8,10 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Utility class for framework independent object inspection
- */
-public class InspectionUtils
+public class ReflectionUtils
 {
     /*
-     * For Implementing Inspection Strategies
+     * Classes
      */
     public static Collection<Class<?>> getImplementedClasses(Object object, boolean includeInterfaces) {
         if (object == null) {
@@ -40,6 +37,10 @@ public class InspectionUtils
         }
         return implementedClasses;
     }
+
+    /*
+     * Fields
+     */
 
     /**
      * Scans the class hierarchy of instance's class to find all fields
@@ -79,6 +80,9 @@ public class InspectionUtils
         return fields;
     }
 
+    /*
+     * Methods
+     */
     public static List<Method> getMethods(Class<?> clazz) {
         List<Method> methods = new ArrayList<>();
         for (Class<?> curClazz = clazz; curClazz != null; curClazz = curClazz.getSuperclass()) {
@@ -88,12 +92,5 @@ public class InspectionUtils
             }
         }
         return methods;
-    }
-
-    public static String formatField(Field field) {
-        Class<?> declaringClass = field.getDeclaringClass();
-        String declaringClassName = declaringClass.getSimpleName();
-        String fieldName = field.getName();
-        return declaringClassName + "." + fieldName;
     }
 }
