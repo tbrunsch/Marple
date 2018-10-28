@@ -10,9 +10,9 @@ abstract class AbstractJavaEntityParser
         this.thisContextClass = thisContextClass;
     }
 
-    abstract ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass);
+    abstract ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass, Class<?> expectedResultClass);
 
-    ParseResultIF parse(final JavaTokenStream tokenStream, final Class<?> currentContextClass) {
-        return doParse(tokenStream.clone(), currentContextClass);
+    ParseResultIF parse(final JavaTokenStream tokenStream, final Class<?> currentContextClass, final Class<?> expectedResultClass) {
+        return doParse(tokenStream.clone(), currentContextClass, expectedResultClass);
     }
 }

@@ -9,46 +9,94 @@ import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
-class CompletionUtils
+class ParseUtils
 {
     /*
      * String Comparison
      */
-    private static final int FULL_MATCH                         = 0;
-    private static final int FULL_MATCH_IGNORE_CASE             = 1;
-    private static final int PREFIX_MATCH                       = 2;
-    private static final int PREFIX_MATCH_IGNORE_CASE           = 3;
-    private static final int INVERSE_PREFIX_MATCH               = 4;
-    private static final int INVERSE_PREFIX_MATCH_IGNORE_CASE   = 5;
-    private static final int MIN_VALUE_OTHER                    = 6;
+    private static final int STRING_MATCH_FULL 							= 0;
+    private static final int STRING_MATCH_FULL_IGNORE_CASE 				= 1;
+    private static final int STRING_MATCH_PREFIX                        = 2;
+    private static final int STRING_MATCH_PREFIX_IGNORE_CASE            = 3;
+    private static final int STRING_MATCH_INVERSE_PREFIX                = 4;
+    private static final int STRING_MATCH_INVERSE_PREFIX_IGNORE_CASE    = 5;
+    private static final int STRING_MATCH_MIN_VALUE_OTHER               = 6;
 
     private static int rateStringMatch(String actual, String expected) {
         if (actual.equals(expected)) {
-            return FULL_MATCH;
+            return STRING_MATCH_FULL;
         } else {
             String actualLowerCase = actual.toLowerCase();
             String expectedLowerCase = expected.toLowerCase();
             if (actualLowerCase.equals(expectedLowerCase)) {
-                return FULL_MATCH_IGNORE_CASE;
+                return STRING_MATCH_FULL_IGNORE_CASE;
             } else if (actual.startsWith(expected)) {
-                return PREFIX_MATCH;
+                return STRING_MATCH_PREFIX;
             } else if (actualLowerCase.startsWith(expectedLowerCase)) {
-                return PREFIX_MATCH_IGNORE_CASE;
+                return STRING_MATCH_PREFIX_IGNORE_CASE;
             } else if (expected.startsWith(actual)) {
-                return INVERSE_PREFIX_MATCH;
+                return STRING_MATCH_INVERSE_PREFIX;
             } else if (expectedLowerCase.startsWith(actualLowerCase)) {
-                return INVERSE_PREFIX_MATCH_IGNORE_CASE;
+                return STRING_MATCH_INVERSE_PREFIX_IGNORE_CASE;
             } else {
                 // TODO: Differentiate between Strings
-                return MIN_VALUE_OTHER;
+                return STRING_MATCH_MIN_VALUE_OTHER;
             }
         }
+    }
+
+    private static final int CLASS_MATCH_FULL					= 0;
+    private static final int CLASS_MATCH_PRIMITIVE_BOXED		= 1;
+    private static final int CLASS_MATCH_INHERITANCE			= 2;
+    private static final int CLASS_MATCH_BOXED_AND_INHERITANCE  = 3;
+    private static final int CLASS_MATCH_PRIMITIVE_CONVERSION	= 4;
+    private static final int CLASS_MATCH_NONE                   = 5;
+
+    private static int rateClassMatch(Class<?> actual, Class<?> expected) {
+    	if (expected == null) {
+    		// No expectations
+			return CLASS_MATCH_FULL;
+		}
+
+        if (actual == expected) {
+            return CLASS_MATCH_FULL;
+        }
+        if (actual.isPrimitive()) {
+            Class<?> boxedClass = ReflectionUtils.getBoxedClass(actual);
+            if (boxedClass == expected) {
+                // e.g. actual == int.class, expected = Integer.class
+                return CLASS_MATCH_PRIMITIVE_BOXED;
+            }
+            if (expected.isAssignableFrom(boxedClass)) {
+                // e.g. actual == int.class, expected == Number.class
+                return CLASS_MATCH_BOXED_AND_INHERITANCE;
+            }
+        } else {
+            Class<?> primitiveClass = ReflectionUtils.getPrimitiveClass(actual);
+            if (primitiveClass == expected) {
+                // e.g. actual == Integer.class, expected == int.class
+                return CLASS_MATCH_PRIMITIVE_BOXED;
+            }
+            if (expected.isAssignableFrom(actual)) {
+                // e.g. actual == Integer.class, expected == Number.class
+                return CLASS_MATCH_INHERITANCE;
+            }
+        }
+        if (ReflectionUtils.isPrimitiveConvertibleTo(actual, expected)) {
+            // e.g. actual == int.class or Integer.class, expected == double.class or Double.class
+            return CLASS_MATCH_PRIMITIVE_CONVERSION;
+        }
+        return CLASS_MATCH_NONE;
+    }
+
+    public static boolean isConvertibleTo(Class<?> source, Class<?> target) {
+        return rateClassMatch(source, target) != CLASS_MATCH_NONE;
     }
 
     /*
      * Fields
      */
-    static final Function<Field, String>    FIELD_DISPLAY_FUNC          = CompletionUtils::getFieldDisplayText;
+    static final Function<Field, String>    FIELD_DISPLAY_FUNC          = ParseUtils::getFieldDisplayText;
 
     static ToIntFunction<Field> rateFieldByNameFunc(final String expectedFieldName) {
         return field -> rateFieldByName(field, expectedFieldName);
@@ -63,11 +111,11 @@ class CompletionUtils
     }
 
     private static int rateFieldByClass(Field field, Class<?> expectedClass) {
-        return expectedClass.isAssignableFrom(field.getType()) ? 0 : 1;
+        return rateClassMatch(field.getType(), expectedClass);
     }
 
     static ToIntFunction<Field> rateFieldByNameAndClassFunc(final String fieldName, final Class<?> expectedClass) {
-        return field -> 2*rateFieldByName(field, fieldName) + rateFieldByClass(field, expectedClass);
+        return field -> (CLASS_MATCH_NONE +1)*rateFieldByName(field, fieldName) + rateFieldByClass(field, expectedClass);
     }
 
     static Function<Field, TextInsertionInfo> fieldTextInsertionInfoFunction(final int insertionBegin, final int insertionEnd) {
@@ -83,7 +131,7 @@ class CompletionUtils
     /*
      * Methods
      */
-    static final Function<Method, String>   METHOD_DISPLAY_FUNC = CompletionUtils::getMethodDisplayText;
+    static final Function<Method, String>   METHOD_DISPLAY_FUNC = ParseUtils::getMethodDisplayText;
 
     static ToIntFunction<Method> rateMethodByNameFunc(final String expectedMethodName) {
         return method -> rateMethodByName(method, expectedMethodName);
@@ -98,11 +146,11 @@ class CompletionUtils
     }
 
     private static int rateMethodByClass(Method method, Class<?> expectedClass) {
-        return expectedClass.isAssignableFrom(method.getReturnType()) ? 0 : 1;
+        return rateClassMatch(method.getReturnType(), expectedClass);
     }
 
-    static ToIntFunction<Method> rateMethodyNameAndClassFunc(final String methodName, final Class<?> expectedClass) {
-        return method -> 2*rateMethodByName(method, methodName) + rateMethodByClass(method, expectedClass);
+    static ToIntFunction<Method> rateMethodByNameAndClassFunc(final String methodName, final Class<?> expectedClass) {
+        return method -> (CLASS_MATCH_NONE +1)*rateMethodByName(method, methodName) + rateMethodByClass(method, expectedClass);
     }
 
     static Function<Method, TextInsertionInfo> methodTextInsertionInfoFunction(final int insertionBegin, final int insertionEnd) {

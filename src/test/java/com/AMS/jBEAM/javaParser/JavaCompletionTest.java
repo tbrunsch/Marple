@@ -67,6 +67,15 @@ public class JavaCompletionTest
             .performTests();
     }
 
+    @Test
+    public void testFieldArray() {
+        new TestBuilder()
+            .addTest("array[", "xy_z", "hashCode()", "xyzw")
+            .addTest("array[xy", "xy", "xy_z", "xyzw")
+            .addTest("array[xyz", "xyzw", "xy", "xy_z")
+            .performTests();
+    }
+
     private static List<String> extractSuggestions(List<CompletionSuggestion> completions) {
         return completions.stream()
             .map(completion -> completion.getInsertionInfo().getTextToInsert())
@@ -109,11 +118,12 @@ public class JavaCompletionTest
 
     private static abstract class AbstractClassUnderTest
     {
-        private final static int    xy      = 12;
-        private final static String xy_z    = "xyz";
-        private final double        ab      = 2.4;
-        private float               AB      = -7.8f;
-        private final long          ABC     = 27;
+        private final static int            xy_z    = 12;
+        private final static String         xy      = "xyz";
+        private final double                ab      = 2.4;
+        private float                       AB      = -7.8f;
+        private final long                  ABC     = 27;
+        private ConcreteClassUnderTest[]    array   = new ConcreteClassUnderTest[3];
     }
 
     private static class ConcreteClassUnderTest extends AbstractClassUnderTest

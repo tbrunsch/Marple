@@ -22,7 +22,7 @@ class JavaDotParser extends AbstractJavaEntityParser
     }
 
     @Override
-    ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass) {
+    ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass, Class<?> expectedResultClass) {
         int position = tokenStream.getPosition();
         JavaToken characterToken = tokenStream.readCharacter();
         if (!characterToken.getValue().equals(".")) {
@@ -42,20 +42,20 @@ class JavaDotParser extends AbstractJavaEntityParser
             List<CompletionSuggestion> suggestions = new ArrayList<>();
 
             List<Field> fields = parserSettings.getInspectionDataProvider().getFields(currentContextClass, staticOnly);
-            suggestions.addAll(CompletionUtils.createSuggestions(fields,
-                                                                    CompletionUtils.fieldTextInsertionInfoFunction(insertionBegin, insertionEnd),
-                                                                    CompletionUtils.FIELD_DISPLAY_FUNC,
-                                                                    CompletionUtils.rateFieldByNameFunc("")));
+            suggestions.addAll(ParseUtils.createSuggestions(fields,
+                                                                    ParseUtils.fieldTextInsertionInfoFunction(insertionBegin, insertionEnd),
+                                                                    ParseUtils.FIELD_DISPLAY_FUNC,
+                                                                    ParseUtils.rateFieldByNameAndClassFunc("", expectedResultClass)));
 
             List<Method> methods = parserSettings.getInspectionDataProvider().getMethods(currentContextClass, staticOnly);
-            suggestions.addAll(CompletionUtils.createSuggestions(methods,
-                                                                    CompletionUtils.methodTextInsertionInfoFunction(insertionBegin, insertionEnd),
-                                                                    CompletionUtils.METHOD_DISPLAY_FUNC,
-                                                                    CompletionUtils.rateMethodByNameFunc("")));
+            suggestions.addAll(ParseUtils.createSuggestions(methods,
+                                                                    ParseUtils.methodTextInsertionInfoFunction(insertionBegin, insertionEnd),
+                                                                    ParseUtils.METHOD_DISPLAY_FUNC,
+                                                                    ParseUtils.rateMethodByNameAndClassFunc("", expectedResultClass)));
             return new CompletionSuggestions(suggestions);
         }
 
-        return JavaParser.parse(tokenStream, currentContextClass,
+        return JavaParser.parse(tokenStream, currentContextClass, expectedResultClass,
             parserSettings.getFieldParser(staticOnly)//,
             // TODO: Add method parser
             //parserSettings.getMethodParser(staticOnly)

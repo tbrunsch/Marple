@@ -17,7 +17,9 @@ class JavaArrayAccessParser extends AbstractJavaEntityParser
     }
 
     @Override
-    ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass) {
+    ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass, Class<?> expectedResultClass) {
+    	assert expectedResultClass == int.class : "Array index must be an int or convertible to int";
+
         int position = tokenStream.getPosition();
         JavaToken characterToken = tokenStream.readCharacter();
         if (!characterToken.getValue().equals("[")) {
@@ -29,21 +31,21 @@ class JavaArrayAccessParser extends AbstractJavaEntityParser
             List<CompletionSuggestion> suggestions = new ArrayList<>();
 
             List<Field> fields = parserSettings.getInspectionDataProvider().getFields(thisContextClass, false);
-            suggestions.addAll(CompletionUtils.createSuggestions(fields,
-                                                                    CompletionUtils.fieldTextInsertionInfoFunction(tokenStream.getPosition(), tokenStream.getPosition()),
-                                                                    CompletionUtils.FIELD_DISPLAY_FUNC,
-                                                                    CompletionUtils.rateFieldByClassFunc(Integer.class)));
+            suggestions.addAll(ParseUtils.createSuggestions(fields,
+                                                                    ParseUtils.fieldTextInsertionInfoFunction(tokenStream.getPosition(), tokenStream.getPosition()),
+                                                                    ParseUtils.FIELD_DISPLAY_FUNC,
+                                                                    ParseUtils.rateFieldByClassFunc(expectedResultClass)));
 
             List<Method> methods = parserSettings.getInspectionDataProvider().getMethods(thisContextClass, false);
-            suggestions.addAll(CompletionUtils.createSuggestions(methods,
-                                                                    CompletionUtils.methodTextInsertionInfoFunction(tokenStream.getPosition(), tokenStream.getPosition()),
-                                                                    CompletionUtils.METHOD_DISPLAY_FUNC,
-                                                                    CompletionUtils.rateMethodByClassFunc(Integer.class)));
+            suggestions.addAll(ParseUtils.createSuggestions(methods,
+                                                                    ParseUtils.methodTextInsertionInfoFunction(tokenStream.getPosition(), tokenStream.getPosition()),
+                                                                    ParseUtils.METHOD_DISPLAY_FUNC,
+                                                                    ParseUtils.rateMethodByClassFunc(expectedResultClass)));
 
             return new CompletionSuggestions(suggestions);
         }
 
-        ParseResultIF arrayIndexParseResult = parserSettings.getExpressionParser().parse(tokenStream, currentContextClass);
+        ParseResultIF arrayIndexParseResult = parserSettings.getExpressionParser().parse(tokenStream, currentContextClass, expectedResultClass);
         switch (arrayIndexParseResult.getResultType()) {
             case COMPLETION_SUGGESTIONS:
                 // code completion inside "[]" => propagate completion suggestions
@@ -54,10 +56,11 @@ class JavaArrayAccessParser extends AbstractJavaEntityParser
             case PARSE_RESULT: {
                 ParseResult parseResult = ((ParseResult) arrayIndexParseResult);
                 int parsedToPosition = parseResult.getParsedToPosition();
+
                 tokenStream.moveTo(parsedToPosition);
                 characterToken = tokenStream.readCharacter();
                 if (!characterToken.getValue().equals("]")) {
-                    return new ParseError(parsedToPosition, "Expected closing bracket ']'");
+                    return new ParseError(tokenStream.getPosition(), "Expected closing bracket ']'");
                 }
 
                 if (characterToken.isContainsCaret()) {
@@ -65,6 +68,7 @@ class JavaArrayAccessParser extends AbstractJavaEntityParser
                     return new CompletionSuggestions(Collections.emptyList());
                 }
 
+                // delegate parse result with corrected position (includes ']')
                 return new ParseResult(tokenStream.getPosition(), parseResult.getObjectInfo());
             }
             default:

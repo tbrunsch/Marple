@@ -3,7 +3,6 @@ package com.AMS.jBEAM.javaParser;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.ToIntFunction;
 
 /**
  * Parses a sub expression starting with a field {@code <field>}, assuming the context
@@ -23,7 +22,7 @@ class JavaFieldParser extends AbstractJavaEntityParser
     }
 
     @Override
-    ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass) {
+    ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass, Class<?> expectedResultClass) {
         int startPosition = tokenStream.getPosition();
         JavaToken fieldNameToken = null;
         try {
@@ -38,10 +37,10 @@ class JavaFieldParser extends AbstractJavaEntityParser
 
         // check for code completion
         if (fieldNameToken.isContainsCaret()) {
-            List<CompletionSuggestion> suggestions = CompletionUtils.createSuggestions(fields,
-                    CompletionUtils.fieldTextInsertionInfoFunction(startPosition, endPosition),
-                    CompletionUtils.FIELD_DISPLAY_FUNC,
-                    CompletionUtils.rateFieldByNameFunc(fieldName));
+            List<CompletionSuggestion> suggestions = ParseUtils.createSuggestions(fields,
+                    ParseUtils.fieldTextInsertionInfoFunction(startPosition, endPosition),
+                    ParseUtils.FIELD_DISPLAY_FUNC,
+                    ParseUtils.rateFieldByNameAndClassFunc(fieldName, expectedResultClass));
             return new CompletionSuggestions(suggestions);
         }
 
@@ -54,6 +53,6 @@ class JavaFieldParser extends AbstractJavaEntityParser
         Field matchingField = firstFieldMatch.get();
         Class<?> matchingFieldClass = matchingField.getType();
 
-        return parserSettings.getObjectTailParser().parse(tokenStream, matchingFieldClass);
+        return parserSettings.getObjectTailParser().parse(tokenStream, matchingFieldClass, expectedResultClass);
     }
 }

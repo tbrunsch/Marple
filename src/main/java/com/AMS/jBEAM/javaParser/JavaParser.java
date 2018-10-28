@@ -1,7 +1,5 @@
 package com.AMS.jBEAM.javaParser;
 
-import sun.plugin.dom.exception.InvalidStateException;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,10 +13,10 @@ public class JavaParser
         Class<?> thisContextClass = thisContext.getClass();
         JavaParserSettings parserSettings  = new JavaParserSettings(thisContextClass);
         JavaTokenStream tokenStream = new JavaTokenStream(javaExpression, caret);
-        ParseResultIF parseResult = parserSettings.getExpressionParser().parse(tokenStream, thisContextClass);
+        ParseResultIF parseResult = parserSettings.getExpressionParser().parse(tokenStream, thisContextClass, null);
         switch (parseResult.getResultType()) {
             case PARSE_RESULT:
-                throw new InvalidStateException("Internal error: No completions available");
+                throw new IllegalStateException("Internal error: No completions available");
             case PARSE_ERROR:
                 throw new JavaParseException((ParseError) parseResult);
             case COMPLETION_SUGGESTIONS: {
@@ -32,9 +30,9 @@ public class JavaParser
         }
     }
 
-    static ParseResultIF parse(JavaTokenStream tokenStream, Class<?> currentContextClass, AbstractJavaEntityParser... parsers) {
+    static ParseResultIF parse(final JavaTokenStream tokenStream, final Class<?> currentContextClass, final Class<?> expectedResultClass, AbstractJavaEntityParser... parsers) {
         List<ParseResultIF> parseResults = Arrays.stream(parsers)
-                .map(parser -> parser.parse(tokenStream, currentContextClass))
+                .map(parser -> parser.parse(tokenStream, currentContextClass, expectedResultClass))
                 .collect(Collectors.toList());
         return mergeParseResults(parseResults);
     }

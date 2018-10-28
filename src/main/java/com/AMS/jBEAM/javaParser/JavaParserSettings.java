@@ -18,7 +18,7 @@ class JavaParserSettings
         staticFieldParser = new JavaFieldParser(this, thisContextClass, true);
         dotParser = new JavaDotParser(this, thisContextClass, false);
         staticDotParser = new JavaDotParser(this, thisContextClass, true);
-        arrayAccessParser = new JavaDotParser(this, thisContextClass, true);
+        arrayAccessParser = new JavaArrayAccessParser(this, thisContextClass);
         objectTailParser = new JavaObjectTailParser(this, thisContextClass);
     }
 

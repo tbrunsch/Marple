@@ -14,18 +14,18 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
     }
 
     @Override
-    ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass) {
+    ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass, Class<?> expectedResultClass) {
         if (tokenStream.hasMore()) {
             char nextChar = tokenStream.peekCharacter();
             if (nextChar == '.') {
-                return parserSettings.getDotParser(false).parse(tokenStream, currentContextClass);
+                return parserSettings.getDotParser(false).parse(tokenStream, currentContextClass, expectedResultClass);
             } else if (nextChar == '[') {
                 Class<?> elementClass = currentContextClass.getComponentType();
                 if (elementClass == null) {
                     // no array type
                     return new ParseError(tokenStream.getPosition(), "Cannot apply [] to non-array types");
                 }
-                ParseResultIF arrayIndexParseResult = parserSettings.getArrayAccessParser().parse(tokenStream, thisContextClass);
+                ParseResultIF arrayIndexParseResult = parserSettings.getArrayAccessParser().parse(tokenStream, thisContextClass, int.class);
                 switch (arrayIndexParseResult.getResultType()) {
                     case COMPLETION_SUGGESTIONS:
                         // code completion inside "[]" => propagate completion suggestions
@@ -34,10 +34,9 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
                         // always propagate errors
                         return arrayIndexParseResult;
                     case PARSE_RESULT: {
-                        // TODO: Test on integer assignability
                         int parsedToPosition = ((ParseResult) arrayIndexParseResult).getParsedToPosition();
                         tokenStream.moveTo(parsedToPosition);
-                        return parserSettings.getObjectTailParser().parse(tokenStream, elementClass);
+                        return parserSettings.getObjectTailParser().parse(tokenStream, elementClass, expectedResultClass);
                     }
                     default:
                         throw new IllegalStateException("Unsupported parse result type: " + arrayIndexParseResult.getResultType());
@@ -45,7 +44,12 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
             }
         }
         // finished parsing
-        // TODO: Determine real object when doing real parsing
+
+		if (expectedResultClass != null && !ParseUtils.isConvertibleTo(currentContextClass, expectedResultClass)) {
+			return new ParseError(tokenStream.getPosition(), "The class '" + currentContextClass.getSimpleName() + "' cannot be casted to the expected class '" + expectedResultClass.getSimpleName() + "");
+		}
+
+		// TODO: Determine real object when doing real parsing
         return new ParseResult(tokenStream.getPosition(), new ObjectInfo(null, currentContextClass));
     }
 }
