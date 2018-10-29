@@ -15,8 +15,14 @@ public class JavaParser
         JavaTokenStream tokenStream = new JavaTokenStream(javaExpression, caret);
         ParseResultIF parseResult = parserSettings.getExpressionParser().parse(tokenStream, thisContextClass, null);
         switch (parseResult.getResultType()) {
-            case PARSE_RESULT:
-                throw new IllegalStateException("Internal error: No completions available");
+            case PARSE_RESULT: {
+				ParseResult result = (ParseResult) parseResult;
+				if (result.getParsedToPosition() != javaExpression.length()) {
+					throw new JavaParseException(new ParseError(result.getParsedToPosition(), "Unexpected character"));
+				} else {
+					throw new IllegalStateException("Internal error: No completions available");
+				}
+			}
             case PARSE_ERROR:
                 throw new JavaParseException((ParseError) parseResult);
             case COMPLETION_SUGGESTIONS: {

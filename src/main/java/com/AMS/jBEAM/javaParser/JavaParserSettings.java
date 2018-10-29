@@ -19,7 +19,7 @@ class JavaParserSettings
         dotParser = new JavaDotParser(this, thisContextClass, false);
         staticDotParser = new JavaDotParser(this, thisContextClass, true);
         arrayAccessParser = new JavaArrayAccessParser(this, thisContextClass);
-        objectTailParser = new JavaObjectTailParser(this, thisContextClass);
+        objectTailParser = new JavaExpressionTailParser(this, thisContextClass);
     }
 
     JavaInspectionDataProvider getInspectionDataProvider() {

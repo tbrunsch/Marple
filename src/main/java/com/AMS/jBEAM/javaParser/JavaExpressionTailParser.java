@@ -7,9 +7,9 @@ package com.AMS.jBEAM.javaParser;
  *     <li>{@code <object>[]</li>
  * </ul>
  */
-class JavaObjectTailParser extends AbstractJavaEntityParser
+class JavaExpressionTailParser extends AbstractJavaEntityParser
 {
-    JavaObjectTailParser(JavaParserSettings parserSettings, Class<?> thisContextClass) {
+    JavaExpressionTailParser(JavaParserSettings parserSettings, Class<?> thisContextClass) {
         super(parserSettings, thisContextClass);
     }
 
