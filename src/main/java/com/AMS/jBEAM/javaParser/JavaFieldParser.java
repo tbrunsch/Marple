@@ -24,7 +24,7 @@ class JavaFieldParser extends AbstractJavaEntityParser
     @Override
     ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass, Class<?> expectedResultClass) {
         int startPosition = tokenStream.getPosition();
-        JavaToken fieldNameToken = null;
+        JavaToken fieldNameToken;
         try {
             fieldNameToken = tokenStream.readIdentifier();
         } catch (JavaTokenStream.JavaTokenParseException e) {
@@ -37,10 +37,12 @@ class JavaFieldParser extends AbstractJavaEntityParser
 
         // check for code completion
         if (fieldNameToken.isContainsCaret()) {
-            List<CompletionSuggestion> suggestions = ParseUtils.createSuggestions(fields,
-                    ParseUtils.fieldTextInsertionInfoFunction(startPosition, endPosition),
-                    ParseUtils.FIELD_DISPLAY_FUNC,
-                    ParseUtils.rateFieldByNameAndClassFunc(fieldName, expectedResultClass));
+            List<CompletionSuggestion> suggestions = ParseUtils.createSuggestions(
+				fields,
+				ParseUtils.fieldTextInsertionInfoFunction(startPosition, endPosition),
+				ParseUtils.FIELD_DISPLAY_FUNC,
+				ParseUtils.rateFieldByNameAndClassFunc(fieldName, expectedResultClass)
+			);
             return new CompletionSuggestions(suggestions);
         }
 

@@ -31,7 +31,7 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
                     // no array type
                     return new ParseError(tokenStream.getPosition(), "Cannot apply [] to non-array types");
                 }
-                ParseResultIF arrayIndexParseResult = parseArrayIndex(tokenStream, thisContextClass);
+                ParseResultIF arrayIndexParseResult = parseArrayIndex(tokenStream);
                 switch (arrayIndexParseResult.getResultType()) {
                     case COMPLETION_SUGGESTIONS:
                         // code completion inside "[]" => propagate completion suggestions
@@ -40,7 +40,8 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
                         // always propagate errors
                         return arrayIndexParseResult;
                     case PARSE_RESULT: {
-                        int parsedToPosition = ((ParseResult) arrayIndexParseResult).getParsedToPosition();
+						ParseResult parseResult = (ParseResult) arrayIndexParseResult;
+						int parsedToPosition = parseResult.getParsedToPosition();
                         tokenStream.moveTo(parsedToPosition);
                         return parserSettings.getObjectTailParser().parse(tokenStream, elementClass, expectedResultClass);
                     }
@@ -60,6 +61,7 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 
     private ParseResultIF parseDot(JavaTokenStream tokenStream, Class<?> currentContextClass, Class<?> expectedResultClass) {
 		JavaToken characterToken = tokenStream.readCharacter();
+		assert characterToken.getValue().equals(".");
 		if (characterToken.isContainsCaret()) {
 			int insertionBegin = tokenStream.getPosition();
 			int insertionEnd;
@@ -69,61 +71,26 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 			} catch (JavaTokenStream.JavaTokenParseException e) {
 				insertionEnd = insertionBegin;
 			}
-
-			List<CompletionSuggestion> suggestions = new ArrayList<>();
-
-			List<Field> fields = parserSettings.getInspectionDataProvider().getFields(currentContextClass, false);
-			suggestions.addAll(ParseUtils.createSuggestions(
-				fields,
-				ParseUtils.fieldTextInsertionInfoFunction(insertionBegin, insertionEnd),
-				ParseUtils.FIELD_DISPLAY_FUNC,
-				ParseUtils.rateFieldByNameAndClassFunc("", expectedResultClass))
-			);
-
-			List<Method> methods = parserSettings.getInspectionDataProvider().getMethods(currentContextClass, false);
-			suggestions.addAll(ParseUtils.createSuggestions(
-				methods,
-				ParseUtils.methodTextInsertionInfoFunction(insertionBegin, insertionEnd),
-				ParseUtils.METHOD_DISPLAY_FUNC,
-				ParseUtils.rateMethodByNameAndClassFunc("", expectedResultClass))
-			);
-			return new CompletionSuggestions(suggestions);
+			return suggestFieldsAndMethods(currentContextClass, expectedResultClass, insertionBegin, insertionEnd);
 		}
 
 		return JavaParser.parse(tokenStream, currentContextClass, expectedResultClass,
-				parserSettings.getFieldParser(false)//,
-				// TODO: Add method parser
-				//parserSettings.getMethodParser(staticOnly)
+				parserSettings.getFieldParser(false),
+				parserSettings.getMethodParser(false)
 		);
 	}
 
-	private ParseResultIF parseArrayIndex(JavaTokenStream tokenStream, Class<?> currentContextClass) {
+	private ParseResultIF parseArrayIndex(JavaTokenStream tokenStream) {
 		Class<?> expectedResultClass = int.class;
 		JavaToken characterToken = tokenStream.readCharacter();
+		assert characterToken.getValue().equals("[");
 		if (characterToken.isContainsCaret()) {
-			// Suggest all fields and methods of this' class, preferring integers (for index)
-			List<CompletionSuggestion> suggestions = new ArrayList<>();
-
-			List<Field> fields = parserSettings.getInspectionDataProvider().getFields(thisContextClass, false);
-			suggestions.addAll(ParseUtils.createSuggestions(
-				fields,
-				ParseUtils.fieldTextInsertionInfoFunction(tokenStream.getPosition(), tokenStream.getPosition()),
-				ParseUtils.FIELD_DISPLAY_FUNC,
-				ParseUtils.rateFieldByClassFunc(expectedResultClass))
-			);
-
-			List<Method> methods = parserSettings.getInspectionDataProvider().getMethods(thisContextClass, false);
-			suggestions.addAll(ParseUtils.createSuggestions(
-				methods,
-				ParseUtils.methodTextInsertionInfoFunction(tokenStream.getPosition(), tokenStream.getPosition()),
-				ParseUtils.METHOD_DISPLAY_FUNC,
-				ParseUtils.rateMethodByClassFunc(expectedResultClass))
-			);
-
-			return new CompletionSuggestions(suggestions);
+			int insertionBegin, insertionEnd;
+			insertionBegin = insertionEnd = tokenStream.getPosition();
+			return suggestFieldsAndMethods(thisContextClass, expectedResultClass, insertionBegin, insertionEnd);
 		}
 
-		ParseResultIF arrayIndexParseResult = parserSettings.getExpressionParser().parse(tokenStream, currentContextClass, expectedResultClass);
+		ParseResultIF arrayIndexParseResult = parserSettings.getExpressionParser().parse(tokenStream, thisContextClass, expectedResultClass);
 		switch (arrayIndexParseResult.getResultType()) {
 			case COMPLETION_SUGGESTIONS:
 				// code completion inside "[]" => propagate completion suggestions
@@ -136,9 +103,8 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 				int parsedToPosition = parseResult.getParsedToPosition();
 
 				tokenStream.moveTo(parsedToPosition);
-				characterToken = tokenStream.readCharacter();
-				if (!characterToken.getValue().equals("]")) {
-					return new ParseError(tokenStream.getPosition(), "Expected closing bracket ']'");
+				if (!tokenStream.hasMore() || !(characterToken = tokenStream.readCharacter()).getValue().equals("]")) {
+					return new ParseError(parsedToPosition, "Expected closing bracket ']'");
 				}
 
 				if (characterToken.isContainsCaret()) {

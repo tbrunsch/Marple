@@ -43,7 +43,7 @@ public class JavaParser
         return mergeParseResults(parseResults);
     }
 
-    private static ParseResultIF mergeParseResults(List<ParseResultIF> parseResults) {
+    static ParseResultIF mergeParseResults(List<ParseResultIF> parseResults) {
         if (parseResults.isEmpty()) {
             throw new IllegalArgumentException("Cannot merge 0 parse results");
         }

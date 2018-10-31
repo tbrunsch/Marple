@@ -1,13 +1,15 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.google.common.base.Joiner;
 import org.junit.Test;
 
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class JavaCompletionTest
@@ -87,14 +89,15 @@ public class JavaCompletionTest
 			private TestClass[]	member	= null;
 		}
 
+		final String hashCode = "hashCode()";
 		TestClass testInstance = new TestClass();
 		new TestBuilder(testInstance)
-			.addTest("member[", "xyz", "hashCode()", "xyzw", "xy", "member")
-			.addTest("member[x", "xyz", "xyzw", "xy", "member")
-			.addTest("member[xy", "xy", "xyz", "xyzw", "member")
-			.addTest("member[xyz", "xyz", "xyzw", "xy", "member")
-			.addTest("member[xyzw", "xyzw", "xyz", "xy", "member")
-			.addTest("member[m", "member", "xyz", "xyzw", "xy")
+			.addTest("member[", "xyz", hashCode, "xyzw", "xy", "member")
+			.addTest("member[x", "xyz", "xyzw", "xy", hashCode, "member")
+			.addTest("member[xy", "xy", "xyz", "xyzw", hashCode, "member")
+			.addTest("member[xyz", "xyz", "xyzw", "xy", hashCode, "member")
+			.addTest("member[xyzw", "xyzw", "xyz", "xy", hashCode, "member")
+			.addTest("member[m", "member", "xyz", hashCode, "xyzw", "xy")
 			.addTest("member[xyz].", "xy", "xyz", "xyzw", "member")
 			.addTest("member[xyzw].x", "xy", "xyz", "xyzw", "member")
 			.performTests();
@@ -109,7 +112,58 @@ public class JavaCompletionTest
 			.performTests();
     }
 
-    private static List<String> extractSuggestions(List<CompletionSuggestion> completions) {
+	@Test
+	public void testMethod() {
+    	/*
+    	 * Convention for this test: Methods whose names consist of n characters have n arguments.
+    	 *
+    	 * This allows for auto-generating the insertion text of a method:
+    	 *
+    	 * "x" -> "x()", "xy" -> "xy(, )", "xyz" -> "xyz(, , )" etc.
+    	 *
+    	 * Exception: Method "other" whose sole purpose is not to appear among the first suggestions,
+    	 *            which makes this test stronger.
+    	 */
+		Function<String, String> methodFormatter = s -> s + "(" + Joiner.on(", ").join(IntStream.range(0, s.length()).mapToObj(i -> "").collect(Collectors.toList())) + ")";
+		Function<String[], String[]> methodsFormatter = methods -> Arrays.stream(methods).map(methodFormatter::apply).toArray(size -> new String[size]);
+
+		abstract class BasicTestClass
+		{
+			private int 	xy(char c, float f)						{ return 13; }
+			private char 	XYZ(float f, int i, double d)			{ return 'W'; }
+			private float	X(int i)								{ return 1.0f; }
+
+			private short	other()									{ return 0; }
+		}
+
+		class TestClass extends BasicTestClass
+		{
+			private String 	XY(long l, double d)					{ return "27"; }
+			private long	xy_z(double d, short s, int i, byte b)	{ return 13; }
+			private double	x(double d)								{ return 2.72; }
+
+			private byte	XYZ(char c, double d, boolean b)		{ return 1; }
+		}
+
+		Object testInstance = new TestClass();
+		new TestBuilder(testInstance)
+			.addTest("xy",		methodsFormatter.apply(new String[]{"xy", "XY", "xy_z", "XYZ", "XYZ", "x", "X"}))
+			.addTest("XYZ",	methodsFormatter.apply(new String[]{"XYZ", "XYZ", "XY", "X", "x", "xy"}))
+			.addTest("X",		methodsFormatter.apply(new String[]{"X", "x", "XY", "XYZ", "XYZ", "xy_z", "xy"}))
+			.addTest("XY",		methodsFormatter.apply(new String[]{"XY", "xy", "XYZ", "XYZ", "xy_z", "X", "x"}))
+			.addTest("xy_z",	methodsFormatter.apply(new String[]{"xy_z", "x", "xy", "XY", "X"}))
+			.addTest("x",		methodsFormatter.apply(new String[]{"x", "X", "xy_z", "xy", "XY", "XYZ", "XYZ"}))
+			.addTest("XYW",	methodsFormatter.apply(new String[]{"XY", "X", "x", "xy"}))
+			.performTests();
+
+		new ErrorTestBuilder(testInstance)
+			.addTest("other()", -1, IllegalStateException.class)
+			.addTest("bla", -1, JavaParseException.class)
+			.addTest("other(),", 8, JavaParseException.class)
+			.performTests();
+	}
+
+	private static List<String> extractSuggestions(List<CompletionSuggestion> completions) {
         return completions.stream()
             .map(completion -> completion.getInsertionInfo().getTextToInsert())
             .collect(Collectors.toList());

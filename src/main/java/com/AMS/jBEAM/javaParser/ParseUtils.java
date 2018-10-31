@@ -158,7 +158,7 @@ class ParseUtils
                                                 insertionBegin + method.getName().length() + 1,
                                                 method.getName()
                                                     + "("
-                                                    + Arrays.stream(method.getParameters()).map(Parameter::getName).collect(Collectors.joining(", "))
+                                                    + Arrays.stream(method.getParameters()).map(param -> "").collect(Collectors.joining(", "))
                                                     + ")");
     }
 

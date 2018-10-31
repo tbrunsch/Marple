@@ -14,11 +14,12 @@ class JavaExpressionParser extends AbstractJavaEntityParser
     @Override
     ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass, Class<?> expectedResultClass) {
         return JavaParser.parse(tokenStream, thisContextClass, expectedResultClass,
-            parserSettings.getFieldParser(false)//,
-            // TODO: Add more parsers
-            // parserSettings.getMethodParser(),
+            parserSettings.getFieldParser(false),
+            parserSettings.getMethodParser(false)//,
+			// TODO: Add more parsers
             // parserSettings.getClassParser(),
             // parserSettings.getConstructorParser(),
+			// parserSettings.getCastParser(),
             // parserSettings.getLiteralParser(), // also parses "null"
         );
     }
