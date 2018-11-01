@@ -48,7 +48,13 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
                     default:
                         throw new IllegalStateException("Unsupported parse result type: " + arrayIndexParseResult.getResultType());
                 }
-            }
+            } else if (nextChar == '(') {
+            	/*
+            	 * Prevent "<field>(" from being parsed as <field>. Otherwise, the expression
+            	 * "<field>()" will be ambiguous if there also exists a method with the name of <field> and no arguments.
+            	 */
+            	return new ParseError(tokenStream.getPosition() + 1, "Unexpected opening parenthesis '('");
+			}
         }
         // finished parsing
 		if (expectedResultClass != null && !ParseUtils.isConvertibleTo(currentContextClass, expectedResultClass)) {

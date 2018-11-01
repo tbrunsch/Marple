@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ReflectionUtils
 {
@@ -163,10 +164,10 @@ public class ReflectionUtils
     public static List<Field> getFields(Class<?> clazz) {
         List<Field> fields = new ArrayList<>();
         for (Class<?> curClazz = clazz; curClazz != null; curClazz = curClazz.getSuperclass()) {
-            Field[] declaredFields = curClazz.getDeclaredFields();
-            for (Field field : declaredFields) {
-                fields.add(field);
-            }
+            List<Field> declaredFields = Arrays.stream(curClazz.getDeclaredFields()).filter(field -> !field.getName().startsWith("this$")).collect(Collectors.toList());
+            // Sort fields because they are not guaranteed to be in any order
+            Collections.sort(declaredFields, Comparator.comparing(field -> field.getName().toLowerCase()));
+			fields.addAll(declaredFields);
         }
         return fields;
     }
@@ -177,10 +178,10 @@ public class ReflectionUtils
     public static List<Method> getMethods(Class<?> clazz) {
         List<Method> methods = new ArrayList<>();
         for (Class<?> curClazz = clazz; curClazz != null; curClazz = curClazz.getSuperclass()) {
-            Method[] declaredMethods = curClazz.getDeclaredMethods();
-            for (Method method : declaredMethods) {
-                methods.add(method);
-            }
+            List<Method> declaredMethods = Arrays.asList(curClazz.getDeclaredMethods());
+            // Sort methods because they are not guaranteed to be in any order
+			Collections.sort(declaredMethods, Comparator.comparing(method -> method.getName().toLowerCase()));
+			methods.addAll(declaredMethods);
         }
         return methods;
     }

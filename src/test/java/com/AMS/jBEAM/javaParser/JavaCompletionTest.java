@@ -63,11 +63,11 @@ public class JavaCompletionTest
 
 		TestClass testInstance = new TestClass();
 		new TestBuilder(testInstance)
-			.addTest("member.", "xy", "X", "XYZ", "member")
+			.addTest("member.", "member", "X", "xy", "XYZ")
 			.addTest("member.x", "X", "xy", "XYZ", "member")
 			.addTest("member.xy", "xy", "XYZ", "X", "member")
 			.addTest("member.xyz", "XYZ", "xy", "X", "member")
-			.addTest("member.mem", "member", "xy", "X", "XYZ")
+			.addTest("member.mem", "member", "X", "xy", "XYZ")
 			.performTests();
 
 		new ErrorTestBuilder(testInstance)
@@ -92,13 +92,13 @@ public class JavaCompletionTest
 		final String hashCode = "hashCode()";
 		TestClass testInstance = new TestClass();
 		new TestBuilder(testInstance)
-			.addTest("member[", "xyz", hashCode, "xyzw", "xy", "member")
+			.addTest("member[", "xyz", hashCode, "xyzw", "member", "xy")
 			.addTest("member[x", "xyz", "xyzw", "xy", hashCode, "member")
 			.addTest("member[xy", "xy", "xyz", "xyzw", hashCode, "member")
 			.addTest("member[xyz", "xyz", "xyzw", "xy", hashCode, "member")
 			.addTest("member[xyzw", "xyzw", "xyz", "xy", hashCode, "member")
 			.addTest("member[m", "member", "xyz", hashCode, "xyzw", "xy")
-			.addTest("member[xyz].", "xy", "xyz", "xyzw", "member")
+			.addTest("member[xyz].", "member", "xy", "xyz", "xyzw")
 			.addTest("member[xyzw].x", "xy", "xyz", "xyzw", "member")
 			.performTests();
 
@@ -160,6 +160,38 @@ public class JavaCompletionTest
 			.addTest("other()", -1, IllegalStateException.class)
 			.addTest("bla", -1, JavaParseException.class)
 			.addTest("other(),", 8, JavaParseException.class)
+			.performTests();
+	}
+
+	@Test
+	public void testMethodArguments() {
+    	class TestClass
+		{
+			private int 	prefixI	= 1;
+			private double 	prefixD	= 1.0;
+			private char	prefixC	= 'A';
+
+			private int		prefixI(double arg)	{ return 1; }
+			private double	prefixD(char arg)	{ return 1.0; }
+			private char	prefixC(int arg)	{ return 'A'; }
+		}
+
+		Object testInstance = new TestClass();
+    	new TestBuilder(testInstance)
+			.addTest("prefix", "prefixC", "prefixD", "prefixI", "prefixC()", "prefixD()", "prefixI()")
+			.addTest("prefixI", "prefixI", "prefixI()", "prefixC", "prefixD")
+			.addTest("prefixD", "prefixD", "prefixD()", "prefixC", "prefixI")
+			.addTest("prefixC", "prefixC", "prefixC()", "prefixD", "prefixI")
+			.addTest("prefixI(", "prefixD", "prefixD()", "prefixC", "prefixI", "prefixC()", "prefixI()")
+			.addTest("prefixD(", "prefixC", "prefixC()", "prefixD", "prefixI", "prefixD()", "prefixI()")
+			.addTest("prefixC(", "prefixI", "prefixI()", "hashCode()", "prefixC", "prefixC()", "prefixD", "prefixD()")
+			.performTests();
+
+    	new ErrorTestBuilder(testInstance)
+			.addTest("prefixI(prefixD)", -1, IllegalStateException.class)
+			.addTest("prefixD(prefixI)", 16, JavaParseException.class)
+			.addTest("prefixC(prefixI,", 16, JavaParseException.class)
+			.addTest("prefixI(prefixD))", -1, JavaParseException.class)
 			.performTests();
 	}
 
