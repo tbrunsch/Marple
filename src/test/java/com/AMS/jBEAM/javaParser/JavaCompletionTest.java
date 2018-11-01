@@ -230,6 +230,41 @@ public class JavaCompletionTest
 				.performTests();
 	}
 
+	@Test
+	public void testMethodArray() {
+    	class TestClass
+		{
+			private String 		xy		= "xy";
+			private int 		xyz		= 7;
+			private char		xyzw	= 'W';
+
+			private TestClass[] getTestClasses() { return new TestClass[0]; }
+		}
+
+		final String hashCode = "hashCode()";
+    	final String getClass = "getClass()";
+		TestClass testInstance = new TestClass();
+		new TestBuilder(testInstance)
+			.addTest("getTestClasses()[", "xyz", hashCode, "xyzw", "xy")
+			.addTest("getTestClasses()[x", "xyz", "xyzw", "xy", hashCode)
+			.addTest("getTestClasses()[xy", "xy", "xyz", "xyzw", hashCode)
+			.addTest("getTestClasses()[xyz", "xyz", "xyzw", "xy", hashCode)
+			.addTest("getTestClasses()[xyzw", "xyzw", "xyz", "xy", hashCode)
+			.addTest("getTestClasses()[g", "getTestClasses()", getClass, "xyz", hashCode, "xyzw", "xy")
+			.addTest("getTestClasses()[xyz].", "xy", "xyz", "xyzw")
+			.addTest("getTestClasses()[xyzw].x", "xy", "xyz", "xyzw")
+			.performTests();
+
+		new ErrorTestBuilder(testInstance)
+			.addTest("xy[", 3, JavaParseException.class)
+			.addTest("xyz[", 4, JavaParseException.class)
+			.addTest("xyzw[", 5, JavaParseException.class)
+			.addTest("getTestClasses()[xy].", 21, JavaParseException.class)
+			.addTest("getTestClasses()[xyz]", -1, IllegalStateException.class)
+			.addTest("getTestClasses()[xyz)", 21, JavaParseException.class)
+			.performTests();
+	}
+
 	private static List<String> extractSuggestions(List<CompletionSuggestion> completions) {
         return completions.stream()
             .map(completion -> completion.getInsertionInfo().getTextToInsert())
