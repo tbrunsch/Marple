@@ -60,7 +60,7 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 
 		List<ParseResultIF> methodParseResults = new ArrayList<>();
 		for (Method method : matchingMethods) {
-			ParseResultIF parseResult = parseMethodArgumentList(tokenStream.clone(), expectedResultClass, method);
+			ParseResultIF parseResult = parseMethodArgumentList(tokenStream.clone(), method);
 			methodParseResults.add(parseResult);
 		}
 		ParseResultIF methodParseResult = JavaParser.mergeParseResults(methodParseResults);
@@ -83,7 +83,7 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 		}
 	}
 
-	private ParseResultIF parseMethodArgumentList(JavaTokenStream tokenStream, Class<?> expectedResultClass, Method method) {
+	private ParseResultIF parseMethodArgumentList(JavaTokenStream tokenStream, Method method) {
 		Class<?>[] argumentTypes = method.getParameterTypes();
 
 		JavaToken characterToken = tokenStream.readCharacter();
@@ -139,13 +139,6 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 
 		// finished parsing
 		Class<?> methodReturnType = method.getReturnType();
-
-		// TODO: Remove the following note after implementing parsing
-		// Note: Currently, this check could be done at the beginning of the method; however, when parsing, not the methodReturnType
-		//       is important, but the real result type of the method call. This check can only be done at the end of the method.
-		if (expectedResultClass != null && !ParseUtils.isConvertibleTo(methodReturnType, expectedResultClass)) {
-			return new ParseError(tokenStream.getPosition(), "The class '" + methodReturnType.getSimpleName() + "' cannot be casted to the expected class '" + expectedResultClass.getSimpleName() + "");
-		}
 
 		// delegate parse result with corrected position (includes ')')
 		// TODO: Determine real object when doing real parsing

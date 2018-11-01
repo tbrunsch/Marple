@@ -195,6 +195,41 @@ public class JavaCompletionTest
 			.performTests();
 	}
 
+	@Test
+	public void testMethodDotFieldOrMethod() {
+    	class TestClass1
+		{
+			private int 	i	= 1;
+			private double	d	= 1.0;
+
+			private Object getObject(double d) { return null; }
+		}
+
+		class TestClass2
+		{
+			private short	s	= 1;
+			private char	c	= 'A';
+
+			private TestClass1 getTestClass(char c) { return null; }
+		}
+
+		Object testInstance = new TestClass2();
+    	new TestBuilder(testInstance)
+			.addTest("getTestClass", "getTestClass()")
+			.addTest("getTestClass(c).", "d", "i", "getObject()")
+			.addTest("getTestClass(c).get", "getObject()")
+			.addTest("getTestClass(c).getObject(", "c", "s")
+			.addTest("getTestClass(c).getObject(getTestClass(c).d).", "clone()", "equals()")
+			.performTests();
+
+		new ErrorTestBuilder(testInstance)
+				.addTest("getTestClazz().", -1, JavaParseException.class)
+				.addTest("getTestClazz().i", -1, JavaParseException.class)
+				.addTest("getTestClass().i.d", -1, JavaParseException.class)
+				.addTest("getTestClass(c).getObject(getTestClass(c).d)", -1, IllegalStateException.class)
+				.performTests();
+	}
+
 	private static List<String> extractSuggestions(List<CompletionSuggestion> completions) {
         return completions.stream()
             .map(completion -> completion.getInsertionInfo().getTextToInsert())
