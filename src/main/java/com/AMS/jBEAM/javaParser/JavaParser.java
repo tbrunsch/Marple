@@ -5,7 +5,20 @@ import java.util.stream.Collectors;
 
 public class JavaParser
 {
-    public List<CompletionSuggestion> suggestCodeCompletion(String javaExpression, int caret, Object thisContext) throws JavaParseException {
+	private static final Comparator<CompletionSuggestionIF> SUGGESTION_COMPARATOR_BY_CLASS = new Comparator<CompletionSuggestionIF>() {
+		@Override
+		public int compare(CompletionSuggestionIF suggestion1, CompletionSuggestionIF suggestion2) {
+			Class<? extends CompletionSuggestionIF> suggestionClass1 = suggestion1.getClass();
+			Class<? extends CompletionSuggestionIF> suggestionClass2 = suggestion2.getClass();
+			if (suggestionClass1 == suggestionClass2) {
+				return 0;
+			}
+			// Prefer fields over methods
+			return suggestionClass1 == CompletionSuggestionField.class ? -1 : 1;
+		}
+	};
+
+    public List<CompletionSuggestionIF> suggestCodeCompletion(String javaExpression, int caret, Object thisContext) throws JavaParseException {
         // TODO: Static parsing should also work for null
         if (thisContext == null) {
             throw new IllegalArgumentException("this is null");
@@ -27,9 +40,11 @@ public class JavaParser
                 throw new JavaParseException((ParseError) parseResult);
             case COMPLETION_SUGGESTIONS: {
                 CompletionSuggestions completionSuggestions = (CompletionSuggestions) parseResult;
-                List<CompletionSuggestion> suggestions = completionSuggestions.getSuggestions();
-                Collections.sort(suggestions, Comparator.comparingInt(CompletionSuggestion::getRating));
-                return suggestions;
+                Map<CompletionSuggestionIF, Integer> ratedSuggestions = completionSuggestions.getRatedSuggestions();
+				List<CompletionSuggestionIF> sortedSuggestions = new ArrayList<>(ratedSuggestions.keySet());
+				Collections.sort(sortedSuggestions, SUGGESTION_COMPARATOR_BY_CLASS);
+				Collections.sort(sortedSuggestions, Comparator.comparingInt(ratedSuggestions::get));
+                return sortedSuggestions;
             }
             default:
                 throw new IllegalStateException("Unsupported parse result type: " + parseResult.getResultType());
@@ -55,10 +70,19 @@ public class JavaParser
 
         if (!completionSuggestions.isEmpty()) {
             // Merge and return suggestions
-            List<CompletionSuggestion> suggestions = completionSuggestions.stream()
-                .flatMap(parseResult -> ((CompletionSuggestions) parseResult).getSuggestions().stream())
-                .collect(Collectors.toList());
-            return new CompletionSuggestions(suggestions);
+			Map<CompletionSuggestionIF, Integer> mergedRatedSuggestions = new LinkedHashMap<>();
+			for (CompletionSuggestions suggestions : completionSuggestions) {
+				Map<CompletionSuggestionIF, Integer> ratedSuggestions = suggestions.getRatedSuggestions();
+				for (CompletionSuggestionIF suggestion : ratedSuggestions.keySet()) {
+					int currentRating = mergedRatedSuggestions.containsKey(suggestion)
+										? mergedRatedSuggestions.get(suggestion)
+										: Integer.MAX_VALUE;
+					int newRating = ratedSuggestions.get(suggestion);
+					int bestRating = Math.min(currentRating, newRating);
+					mergedRatedSuggestions.put(suggestion, bestRating);
+				}
+			}
+            return new CompletionSuggestions(mergedRatedSuggestions);
         }
 
         Optional<ParseResult> firstParseResult = parseResults.stream()

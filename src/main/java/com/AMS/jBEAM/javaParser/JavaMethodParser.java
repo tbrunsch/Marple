@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -25,7 +26,7 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 
 	@Override
 	ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass, Class<?> expectedResultClass) {
-		int startPosition = tokenStream.getPosition();
+		final int startPosition = tokenStream.getPosition();
 		JavaToken methodNameToken;
 		try {
 			methodNameToken = tokenStream.readIdentifier();
@@ -33,19 +34,18 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 			return new ParseError(startPosition, "Expected an identifier");
 		}
 		String methodName = methodNameToken.getValue();
-		int endPosition = tokenStream.getPosition();
+		final int endPosition = tokenStream.getPosition();
 
 		List<Method> methods = parserSettings.getInspectionDataProvider().getMethods(currentContextClass, staticOnly);
 
 		// check for code completion
 		if (methodNameToken.isContainsCaret()) {
-			List<CompletionSuggestion> suggestions = ParseUtils.createSuggestions(
+			Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 				methods,
-				ParseUtils.methodTextInsertionInfoFunction(startPosition, endPosition),
-				ParseUtils.METHOD_DISPLAY_FUNC,
+				method -> new CompletionSuggestionMethod(method, startPosition, endPosition),
 				ParseUtils.rateMethodByNameAndClassFunc(methodName, expectedResultClass)
 			);
-			return new CompletionSuggestions(suggestions);
+			return new CompletionSuggestions(ratedSuggestions);
 		}
 
 		// no code completion requested => field name must exist
@@ -91,7 +91,7 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 		if (characterToken.isContainsCaret()) {
 			if (argumentTypes.length == 0) {
 				// no suggestions since method does not have arguments
-				return new CompletionSuggestions(Collections.emptyList());
+				return new CompletionSuggestions(Collections.emptyMap());
 			}
 			return suggestFieldsAndMethodsForMethodArgument(tokenStream, argumentTypes[0]);
 		}
@@ -134,7 +134,7 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 
 		if (characterToken.isContainsCaret()) {
 			// nothing we can suggest after ')'
-			return new CompletionSuggestions(Collections.emptyList());
+			return new CompletionSuggestions(Collections.emptyMap());
 		}
 
 		// finished parsing

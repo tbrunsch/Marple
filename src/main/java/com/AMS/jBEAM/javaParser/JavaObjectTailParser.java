@@ -1,10 +1,6 @@
 package com.AMS.jBEAM.javaParser;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Parses a sub expression following a complete Java expression, assuming the context
@@ -115,7 +111,7 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 
 				if (characterToken.isContainsCaret()) {
 					// nothing we can suggest after ']'
-					return new CompletionSuggestions(Collections.emptyList());
+					return new CompletionSuggestions(Collections.emptyMap());
 				}
 
 				// delegate parse result with corrected position (includes ']')

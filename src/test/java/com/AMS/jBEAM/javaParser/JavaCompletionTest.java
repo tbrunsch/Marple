@@ -265,9 +265,44 @@ public class JavaCompletionTest
 			.performTests();
 	}
 
-	private static List<String> extractSuggestions(List<CompletionSuggestion> completions) {
+	@Test
+	public void testMethodOverload() {
+    	class TestClass1
+		{
+			int myInt;
+		}
+
+		class TestClass2
+		{
+			String myString;
+		}
+
+		class TestClass3
+		{
+			int intValue;
+			String stringValue;
+
+			TestClass1 getTestClass(int i, String s) { return null; }
+			TestClass2 getTestClass(String s, int i) { return null; }
+		}
+
+		final String hashCode = "hashCode()";
+    	final String toString = "toString()";
+		TestClass3 testInstance = new TestClass3();
+		new TestBuilder(testInstance)
+			.addTest("getTestClass(", "intValue", "stringValue")
+			.addTest("getTestClass(i", "intValue", "stringValue", hashCode)
+			.addTest("getTestClass(s", "stringValue", "intValue")
+			.addTest("getTestClass(intValue,", "stringValue", toString, "intValue")
+			.addTest("getTestClass(stringValue,", "intValue", hashCode, "stringValue")
+			.addTest("getTestClass(intValue,stringValue).", "myInt")
+			.addTest("getTestClass(stringValue,intValue).", "myString")
+			.performTests();
+	}
+
+	private static List<String> extractSuggestions(List<CompletionSuggestionIF> completions) {
         return completions.stream()
-            .map(completion -> completion.getInsertionInfo().getTextToInsert())
+            .map(completion -> completion.getTextToInsert())
             .collect(Collectors.toList());
     }
 

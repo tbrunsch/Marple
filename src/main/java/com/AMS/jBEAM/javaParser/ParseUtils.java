@@ -2,9 +2,9 @@ package com.AMS.jBEAM.javaParser;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
@@ -96,12 +96,6 @@ class ParseUtils
     /*
      * Fields
      */
-    static final Function<Field, String>    FIELD_DISPLAY_FUNC          = ParseUtils::getFieldDisplayText;
-
-    static ToIntFunction<Field> rateFieldByNameFunc(final String expectedFieldName) {
-        return field -> rateFieldByName(field, expectedFieldName);
-    }
-
     private static int rateFieldByName(Field field, String expectedFieldName) {
         return rateStringMatch(field.getName(), expectedFieldName);
     }
@@ -118,25 +112,13 @@ class ParseUtils
         return field -> (CLASS_MATCH_NONE +1)*rateFieldByName(field, fieldName) + rateFieldByClass(field, expectedClass);
     }
 
-    static Function<Field, TextInsertionInfo> fieldTextInsertionInfoFunction(final int insertionBegin, final int insertionEnd) {
-        return field -> new TextInsertionInfo(new IntRange(insertionBegin, insertionEnd),
-                                                insertionBegin + field.getName().length(),
-                                                field.getName());
-    }
-
-    private static String getFieldDisplayText(Field field) {
+    static String getFieldDisplayText(Field field) {
         return field.getName() + " (" + field.getDeclaringClass().getSimpleName() + ")";
     }
 
     /*
      * Methods
      */
-    static final Function<Method, String>   METHOD_DISPLAY_FUNC = ParseUtils::getMethodDisplayText;
-
-    static ToIntFunction<Method> rateMethodByNameFunc(final String expectedMethodName) {
-        return method -> rateMethodByName(method, expectedMethodName);
-    }
-
     private static int rateMethodByName(Method method, String expectedMethodName) {
         return rateStringMatch(method.getName(), expectedMethodName);
     }
@@ -153,28 +135,20 @@ class ParseUtils
         return method -> (CLASS_MATCH_NONE +1)*rateMethodByName(method, methodName) + rateMethodByClass(method, expectedClass);
     }
 
-    static Function<Method, TextInsertionInfo> methodTextInsertionInfoFunction(final int insertionBegin, final int insertionEnd) {
-        return method -> new TextInsertionInfo(new IntRange(insertionBegin, insertionEnd),
-                                                insertionBegin + method.getName().length() + 1,
-                                                method.getName()
-                                                    + "("
-                                                    + Arrays.stream(method.getParameters()).map(param -> "").collect(Collectors.joining(", "))
-                                                    + ")");
-    }
-
-    private static String getMethodDisplayText(Method method) {
+    static String getMethodDisplayText(Method method) {
         return method.getName() + " (" + method.getDeclaringClass().getSimpleName() + ")";
     }
 
     /*
      * Completion Suggestions
      */
-    static <T> List<CompletionSuggestion> createSuggestions(List<T> objects, Function<T, TextInsertionInfo> textInsertionInfoFunc, Function<T, String> displayTextFunc, ToIntFunction<T> objectRatingFunc) {
-        return objects.stream()
-                .map(object -> new CompletionSuggestion(
-                    textInsertionInfoFunc.apply(object),
-                    displayTextFunc.apply(object),
-                    objectRatingFunc.applyAsInt(object)))
-                .collect(Collectors.toList());
+    static <T> Map<CompletionSuggestionIF, Integer> createRatedSuggestions(List<T> objects, Function<T, CompletionSuggestionIF> suggestionBuilder, ToIntFunction<T> ratingFunc) {
+		Map<CompletionSuggestionIF, Integer> ratedSuggestions = new LinkedHashMap<>();
+    	for (T object : objects) {
+			CompletionSuggestionIF suggestion = suggestionBuilder.apply(object);
+			int rating = ratingFunc.applyAsInt(object);
+			ratedSuggestions.put(suggestion, rating);
+		}
+		return ratedSuggestions;
     }
 }

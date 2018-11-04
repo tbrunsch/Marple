@@ -1,13 +1,13 @@
 package com.AMS.jBEAM.javaParser;
 
-import java.util.List;
+import java.util.Map;
 
 class CompletionSuggestions implements ParseResultIF
 {
-    private final List<CompletionSuggestion> suggestions;
+    private final Map<CompletionSuggestionIF, Integer> ratedSuggestions;
 
-    CompletionSuggestions(List<CompletionSuggestion> suggestions) {
-        this.suggestions = suggestions;
+    CompletionSuggestions(Map<CompletionSuggestionIF, Integer> ratedSuggestions) {
+        this.ratedSuggestions = ratedSuggestions;
     }
 
     @Override
@@ -15,7 +15,7 @@ class CompletionSuggestions implements ParseResultIF
         return ParseResultType.COMPLETION_SUGGESTIONS;
     }
 
-    List<CompletionSuggestion> getSuggestions() {
-        return suggestions;
+	Map<CompletionSuggestionIF, Integer> getRatedSuggestions() {
+        return ratedSuggestions;
     }
 }

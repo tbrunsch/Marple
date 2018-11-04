@@ -2,6 +2,7 @@ package com.AMS.jBEAM.javaParser;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -37,13 +38,12 @@ class JavaFieldParser extends AbstractJavaEntityParser
 
         // check for code completion
         if (fieldNameToken.isContainsCaret()) {
-            List<CompletionSuggestion> suggestions = ParseUtils.createSuggestions(
+            Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 				fields,
-				ParseUtils.fieldTextInsertionInfoFunction(startPosition, endPosition),
-				ParseUtils.FIELD_DISPLAY_FUNC,
+				field -> new CompletionSuggestionField(field, startPosition, endPosition),
 				ParseUtils.rateFieldByNameAndClassFunc(fieldName, expectedResultClass)
 			);
-            return new CompletionSuggestions(suggestions);
+            return new CompletionSuggestions(ratedSuggestions);
         }
 
         // no code completion requested => field name must exist

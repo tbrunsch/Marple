@@ -3,7 +3,9 @@ package com.AMS.jBEAM.javaParser;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 abstract class AbstractJavaEntityParser
 {
@@ -21,25 +23,23 @@ abstract class AbstractJavaEntityParser
         return doParse(tokenStream.clone(), currentContextClass, expectedResultClass);
     }
 
-    CompletionSuggestions suggestFieldsAndMethods(Class<?> contextClass, Class<?> expectedResultClass, int insertionBegin, int insertionEnd) {
-		List<CompletionSuggestion> suggestions = new ArrayList<>();
+    CompletionSuggestions suggestFieldsAndMethods(Class<?> contextClass, Class<?> expectedResultClass, final int insertionBegin, final int insertionEnd) {
+		Map<CompletionSuggestionIF, Integer> ratedSuggestions = new LinkedHashMap<>();
 
 		List<Field> fields = parserSettings.getInspectionDataProvider().getFields(contextClass, false);
-		suggestions.addAll(ParseUtils.createSuggestions(
+		ratedSuggestions.putAll(ParseUtils.createRatedSuggestions(
 				fields,
-				ParseUtils.fieldTextInsertionInfoFunction(insertionBegin, insertionEnd),
-				ParseUtils.FIELD_DISPLAY_FUNC,
+				field -> new CompletionSuggestionField(field, insertionBegin, insertionEnd),
 				ParseUtils.rateFieldByClassFunc(expectedResultClass))
 		);
 
 		List<Method> methods = parserSettings.getInspectionDataProvider().getMethods(contextClass, false);
-		suggestions.addAll(ParseUtils.createSuggestions(
+		ratedSuggestions.putAll(ParseUtils.createRatedSuggestions(
 				methods,
-				ParseUtils.methodTextInsertionInfoFunction(insertionBegin, insertionEnd),
-				ParseUtils.METHOD_DISPLAY_FUNC,
+				method -> new CompletionSuggestionMethod(method, insertionBegin, insertionEnd),
 				ParseUtils.rateMethodByClassFunc(expectedResultClass))
 		);
 
-		return new CompletionSuggestions(suggestions);
+		return new CompletionSuggestions(ratedSuggestions);
 	}
 }
