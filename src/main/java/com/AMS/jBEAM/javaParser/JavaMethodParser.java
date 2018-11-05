@@ -15,17 +15,17 @@ import java.util.stream.Collectors;
  *     <li>{@code <fmethod} (like {@code <context instance>.<method>} for {@code <context instance> = this})</li>
  * </ul>
  */
-public class JavaMethodParser extends AbstractJavaEntityParser
+class JavaMethodParser extends AbstractJavaEntityParser
 {
 	private final boolean staticOnly;
 
-	JavaMethodParser(JavaParserSettings parserSettings, Class<?> thisContextClass, boolean staticOnly) {
-		super(parserSettings, thisContextClass);
+	JavaMethodParser(JavaParserPool parserSettings, ObjectInfo thisInfo, boolean staticOnly) {
+		super(parserSettings, thisInfo);
 		this.staticOnly = staticOnly;
 	}
 
 	@Override
-	ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass, Class<?> expectedResultClass) {
+	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, Class<?> expectedResultClass) {
 		final int startPosition = tokenStream.getPosition();
 		JavaToken methodNameToken;
 		try {
@@ -36,7 +36,7 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 		String methodName = methodNameToken.getValue();
 		final int endPosition = tokenStream.getPosition();
 
-		List<Method> methods = parserSettings.getInspectionDataProvider().getMethods(currentContextClass, staticOnly);
+		List<Method> methods = parserPool.getInspectionDataProvider().getMethods(getClass(currentContextInfo), staticOnly);
 
 		// check for code completion
 		if (methodNameToken.isContainsCaret()) {
@@ -60,7 +60,7 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 
 		List<ParseResultIF> methodParseResults = new ArrayList<>();
 		for (Method method : matchingMethods) {
-			ParseResultIF parseResult = parseMethodArgumentList(tokenStream.clone(), method);
+			ParseResultIF parseResult = parseMethodArgumentList(tokenStream.clone(), currentContextInfo, method);
 			methodParseResults.add(parseResult);
 		}
 		ParseResultIF methodParseResult = JavaParser.mergeParseResults(methodParseResults);
@@ -76,14 +76,14 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 				int parsedToPosition = parseResult.getParsedToPosition();
 				ObjectInfo objectInfo = parseResult.getObjectInfo();
 				tokenStream.moveTo(parsedToPosition);
-				return parserSettings.getObjectTailParser().parse(tokenStream, objectInfo.getDeclaredClass(), expectedResultClass);
+				return parserPool.getObjectTailParser().parse(tokenStream, objectInfo, expectedResultClass);
 			}
 			default:
 				throw new IllegalStateException("Unsupported parse result type: " + methodParseResult.getResultType());
 		}
 	}
 
-	private ParseResultIF parseMethodArgumentList(JavaTokenStream tokenStream, Method method) {
+	private ParseResultIF parseMethodArgumentList(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, Method method) {
 		Class<?>[] argumentTypes = method.getParameterTypes();
 
 		JavaToken characterToken = tokenStream.readCharacter();
@@ -96,6 +96,7 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 			return suggestFieldsAndMethodsForMethodArgument(tokenStream, argumentTypes[0]);
 		}
 
+		ObjectInfo[] argumentInfos = new ObjectInfo[argumentTypes.length];
 		for (int i = 0; i < argumentTypes.length; i++) {
 			if (i > 0) {
 				int position = tokenStream.getPosition();
@@ -108,7 +109,7 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 				}
 			}
 
-			ParseResultIF argumentParseResult = parserSettings.getExpressionParser().parse(tokenStream, thisContextClass, argumentTypes[i]);
+			ParseResultIF argumentParseResult = parserPool.getExpressionParser().parse(tokenStream, thisInfo, argumentTypes[i]);
 			switch (argumentParseResult.getResultType()) {
 				case COMPLETION_SUGGESTIONS:
 					// code completion inside "[]" => propagate completion suggestions
@@ -120,6 +121,8 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 					ParseResult parseResult = ((ParseResult) argumentParseResult);
 					int parsedToPosition = parseResult.getParsedToPosition();
 					tokenStream.moveTo(parsedToPosition);
+					ObjectInfo argumentInfo = parseResult.getObjectInfo();
+					argumentInfos[i] = argumentInfo;
 					break;
 				}
 				default:
@@ -138,16 +141,15 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 		}
 
 		// finished parsing
-		Class<?> methodReturnType = method.getReturnType();
+		ObjectInfo methodReturnInfo = getMethodReturnInfo(currentContextInfo, method, argumentInfos);
 
 		// delegate parse result with corrected position (includes ')')
-		// TODO: Determine real object when doing real parsing
-		return new ParseResult(tokenStream.getPosition(), new ObjectInfo(null, methodReturnType));
+		return new ParseResult(tokenStream.getPosition(), methodReturnInfo);
 	}
 
 	private CompletionSuggestions suggestFieldsAndMethodsForMethodArgument(JavaTokenStream tokenStream, Class<?> argumentClass) {
 		int insertionBegin, insertionEnd;
 		insertionBegin = insertionEnd = tokenStream.getPosition();
-		return suggestFieldsAndMethods(thisContextClass, argumentClass, insertionBegin, insertionEnd);
+		return suggestFieldsAndMethods(thisInfo, argumentClass, insertionBegin, insertionEnd);
 	}
 }

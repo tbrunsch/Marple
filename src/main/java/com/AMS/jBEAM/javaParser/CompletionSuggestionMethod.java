@@ -24,7 +24,7 @@ class CompletionSuggestionMethod implements CompletionSuggestionIF
 
 	@Override
 	public int getCaretPositionAfterInsertion() {
-		return insertionBegin + method.getName().length() + 1;
+		return insertionBegin + method.getName().length() + (method.getParameterCount() == 0 ? 2 : 1);
 	}
 
 	@Override

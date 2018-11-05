@@ -5,6 +5,10 @@ class ObjectInfo
     private final Object    object;
     private final Class<?>  declaredClass;
 
+    ObjectInfo(Object object) {
+    	this(object, object == null ? null : object.getClass());
+	}
+
     ObjectInfo(Object object, Class<?> declaredClass) {
         this.object = object;
         this.declaredClass = declaredClass;

@@ -1,26 +1,24 @@
 package com.AMS.jBEAM.javaParser;
 
-import java.util.List;
-
 /**
  * Parses an arbitrary Java expression
  */
 class JavaExpressionParser extends AbstractJavaEntityParser
 {
-    JavaExpressionParser(JavaParserSettings parserSettings, Class<?> thisContextClass) {
-        super(parserSettings, thisContextClass);
+    JavaExpressionParser(JavaParserPool parserSettings, ObjectInfo thisInfo) {
+        super(parserSettings, thisInfo);
     }
 
     @Override
-    ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass, Class<?> expectedResultClass) {
-        return JavaParser.parse(tokenStream, thisContextClass, expectedResultClass,
-            parserSettings.getFieldParser(false),
-            parserSettings.getMethodParser(false)//,
+    ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, Class<?> expectedResultClass) {
+        return JavaParser.parse(tokenStream, thisInfo, expectedResultClass,
+            parserPool.getFieldParser(false),
+            parserPool.getMethodParser(false)//,
 			// TODO: Add more parsers
-            // parserSettings.getClassParser(),
-            // parserSettings.getConstructorParser(),
-			// parserSettings.getCastParser(),
-            // parserSettings.getLiteralParser(), // also parses "null"
+            // parserPool.getClassParser(),
+            // parserPool.getConstructorParser(),
+			// parserPool.getCastParser(),
+            // parserPool.getLiteralParser(), // also parses "null"
         );
     }
 }

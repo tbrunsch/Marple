@@ -17,13 +17,13 @@ class JavaFieldParser extends AbstractJavaEntityParser
 {
     private final boolean staticOnly;
 
-    JavaFieldParser(JavaParserSettings parserSettings, Class<?> thisContextClass, boolean staticOnly) {
-        super(parserSettings, thisContextClass);
+    JavaFieldParser(JavaParserPool parserSettings, ObjectInfo thisInfo, boolean staticOnly) {
+        super(parserSettings, thisInfo);
         this.staticOnly = staticOnly;
     }
 
     @Override
-    ParseResultIF doParse(JavaTokenStream tokenStream, Class<?> currentContextClass, Class<?> expectedResultClass) {
+    ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, Class<?> expectedResultClass) {
         int startPosition = tokenStream.getPosition();
         JavaToken fieldNameToken;
         try {
@@ -34,7 +34,7 @@ class JavaFieldParser extends AbstractJavaEntityParser
         String fieldName = fieldNameToken.getValue();
         int endPosition = tokenStream.getPosition();
 
-        List<Field> fields = parserSettings.getInspectionDataProvider().getFields(currentContextClass, staticOnly);
+        List<Field> fields = parserPool.getInspectionDataProvider().getFields(getClass(currentContextInfo), staticOnly);
 
         // check for code completion
         if (fieldNameToken.isContainsCaret()) {
@@ -53,8 +53,8 @@ class JavaFieldParser extends AbstractJavaEntityParser
         }
 
         Field matchingField = firstFieldMatch.get();
-        Class<?> matchingFieldClass = matchingField.getType();
+        ObjectInfo matchingFieldInfo = getFieldInfo(currentContextInfo, matchingField);
 
-        return parserSettings.getObjectTailParser().parse(tokenStream, matchingFieldClass, expectedResultClass);
+        return parserPool.getObjectTailParser().parse(tokenStream, matchingFieldInfo, expectedResultClass);
     }
 }
