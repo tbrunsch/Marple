@@ -52,7 +52,7 @@ public class JavaParser
 				if (result.getParsedToPosition() != javaExpression.length()) {
 					throw new JavaParseException(new ParseError(result.getParsedToPosition(), "Unexpected character"));
 				} else {
-					return result.getObjectInfo();
+					return result.getObjectInfo().getObject();
 				}
 			}
 			case PARSE_ERROR:
