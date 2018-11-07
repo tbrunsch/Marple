@@ -329,6 +329,147 @@ public class JavaExpressionEvaluationTest
 			.test("getTestClass(getTestClass(j)).myInt");
 	}
 
+	@Test
+	public void testStringLiteral() {
+		class TestClass
+		{
+			String getString(String s) { return s; }
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("\"xyz\"", "xyz")
+			.test("getString(\"xyz\")", "xyz")
+			.test("getString(\"\\\"\")", "\"")
+			.test("getString(\"\\n\")", "\n")
+			.test("getString(\"\\r\")", "\r")
+			.test("getString(\"\\t\")", "\t");
+
+		new ErrorTestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("getString(xyz)")
+			.test("getString(\"xyz")
+			.test("getString(\"xyz)")
+			.test("getString(xyz\")")
+			.test("getString(\"\\\")");
+	}
+
+	@Test
+	public void testCharacterLiteral() {
+		class TestClass
+		{
+			char getChar(char c) { return c; }
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("'x'", 'x')
+			.test("getChar('x')", 'x')
+			.test("getChar('\\'')", '\'')
+			.test("getChar('\"')", '"')
+			.test("getChar('\\\"')", '\"')
+			.test("getChar('\\n')", '\n')
+			.test("getChar('\\r')", '\r')
+			.test("getChar('\\t')", '\t');
+
+		new ErrorTestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("getChar(x)")
+			.test("getChar('x")
+			.test("getChar('x)")
+			.test("getChar(x')")
+			.test("getChar('\')");
+	}
+
+	@Test
+	public void testBooleanLiteral() {
+		class TestClass
+		{
+			boolean getBoolean(boolean b) { return b; }
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("true", true)
+			.test("false", false)
+			.test("getBoolean(true)", true)
+			.test("getBoolean(false)", false)
+			.test("true.equals(true)", true)		// unintended, but acceptable
+			.test("true.equals(false)", false)	// extension of Java syntax
+			.test("false.equals(true)", false)	// because these literals are
+			.test("false.equals(false)", true);	// treated as objects
+
+		new ErrorTestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("getBoolean(tru)")
+			.test("getBoolean(fals)")
+			.test("getBoolean(TRUE)")
+			.test("getBoolean(FALSE)");
+	}
+
+	@Test
+	public void testNullLiteral() {
+		class TestClass
+		{
+			Object getObject(Object o) { return o; }
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("null", null)
+			.test("getObject(null)", null);
+
+		new ErrorTestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("nul")
+			.test("getObject(nul)")
+			.test("getObject(null");
+	}
+
+	@Test
+	public void testIntegerLiteral() {
+		class TestClass
+		{
+			byte getByte(byte b) { return b; }
+			short getShort(short s) { return s; }
+			int getInt(int i) { return i; }
+			long getLong(long l) { return l; }
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("120", (byte) 120)
+			.test("getByte(120)", (byte) 120)
+			.test("1234", (short) 1234)
+			.test("getShort(1234)", (short) 1234)
+			.test("100000", 100000)
+			.test("getInt(100000)", 100000)
+			.test("5000000000L", 5000000000L)
+			.test("getLong(5000000000l)", 5000000000l);
+
+		new ErrorTestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("getByte(1234)")
+			.test("getShort(100000)")
+			.test("getInt(5000000000)");
+	}
+
+	@Test
+	public void testFloatingPointLiteral() {
+		class TestClass
+		{
+			float getFloat(float f) { return f; }
+			double getDouble(double d) { return d; }
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("123f", 123f)
+			.test("123e0", 123e0)
+			.test("-123e+07", -123e+07)
+			.test("+123e-13F", +123e-13F)
+			.test("123.d", 123.d)
+			.test("123.e2D", 123.e2D)
+			.test("123.456f", 123.456f)
+			.test("+.1e-1d", +.1e-1d)
+			.test("-.2e3f", -.2e3f);
+	}
+
 	/*
 	 * Class for creating tests with expected successful code completions
 	 */

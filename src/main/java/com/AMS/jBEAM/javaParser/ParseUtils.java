@@ -54,8 +54,13 @@ class ParseUtils
 
     private static int rateClassMatch(Class<?> actual, Class<?> expected) {
     	if (expected == null) {
-    		// No expectations
+    		// no expectations
 			return CLASS_MATCH_FULL;
+		}
+
+		if (actual == null) {
+			// null object is convertible to any non-primitive class
+			return expected.isPrimitive() ? CLASS_MATCH_NONE : CLASS_MATCH_FULL;
 		}
 
         if (actual == expected) {

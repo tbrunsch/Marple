@@ -87,8 +87,8 @@ public class JavaParser
 
     static ParseResultIF parse(final JavaTokenStream tokenStream, final ObjectInfo currentContextInfo, final Class<?> expectedResultClass, AbstractJavaEntityParser... parsers) {
         List<ParseResultIF> parseResults = Arrays.stream(parsers)
-                .map(parser -> parser.parse(tokenStream, currentContextInfo, expectedResultClass))
-                .collect(Collectors.toList());
+            .map(parser -> parser.parse(tokenStream, currentContextInfo, expectedResultClass))
+            .collect(Collectors.toList());
         return mergeParseResults(parseResults);
     }
 

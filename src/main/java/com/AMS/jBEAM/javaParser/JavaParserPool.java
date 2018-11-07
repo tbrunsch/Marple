@@ -11,6 +11,7 @@ class JavaParserPool
     private final AbstractJavaEntityParser  	staticFieldParser;
 	private final AbstractJavaEntityParser  	methodParser;
 	private final AbstractJavaEntityParser  	staticMethodParser;
+	private final AbstractJavaEntityParser		literalParser;
     private final AbstractJavaEntityParser  	objectTailParser;
 
     JavaParserPool(ObjectInfo thisInfo, EvaluationMode evaluationMode) {
@@ -21,6 +22,7 @@ class JavaParserPool
         staticFieldParser = new JavaFieldParser(this, thisInfo, true);
 		methodParser = new JavaMethodParser(this, thisInfo, false);
 		staticMethodParser = new JavaMethodParser(this, thisInfo, true);
+		literalParser = new JavaLiteralParser(this, thisInfo);
         objectTailParser = new JavaObjectTailParser(this, thisInfo);
     }
 
@@ -42,6 +44,10 @@ class JavaParserPool
 
     AbstractJavaEntityParser getMethodParser(boolean staticOnly) {
     	return staticOnly ? staticMethodParser : methodParser;
+	}
+
+	AbstractJavaEntityParser getLiteralParser() {
+    	return literalParser;
 	}
 
     AbstractJavaEntityParser getObjectTailParser() {

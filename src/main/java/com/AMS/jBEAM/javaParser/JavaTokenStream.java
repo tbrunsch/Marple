@@ -12,6 +12,11 @@ class JavaTokenStream implements Cloneable
     private static final Pattern    IDENTIFIER_PATTERN  		= Pattern.compile("^([A-Za-z][_A-Za-z0-9]*).*");
     private static final Pattern	STRING_LITERAL_PATTERN		= Pattern.compile("^\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\".*");
     private static final Pattern	CHARACTER_LITERAL_PATTERN	= Pattern.compile("^'(\\\\.|[^\\\\])'.*");
+    private static final Pattern	NAMED_LITERAL_PATTERN		= IDENTIFIER_PATTERN;
+    private static final Pattern	INTEGER_LITERAL_PATTERN		= Pattern.compile("^(0|-?[1-9][0-9]*)($|[^0-9dDeEfFL].*)");
+	private static final Pattern	LONG_LITERAL_PATTERN		= Pattern.compile("^(0|-?[1-9][0-9]*)[lL].*");
+    private static final Pattern	FLOAT_LITERAL_PATTERN 		= Pattern.compile("^([+-]?([0-9]+\\.?|[0-9]*\\.[0-9]+)([eE][+-]?[0-9]+)?[fF]).*");
+	private static final Pattern	DOUBLE_LITERAL_PATTERN 		= Pattern.compile("^([+-]?([0-9]+\\.?|[0-9]*\\.[0-9]+)([eE][+-]?[0-9]+)?[dD]?).*");
 
 	private static final Map<Character, Character> INTERPRETATION_OF_ESCAPED_CHARACTERS = ImmutableMap.<Character, Character>builder()
 		.put('t', '\t')
@@ -83,6 +88,26 @@ class JavaTokenStream implements Cloneable
 	JavaToken readCharacterLiteral() throws JavaTokenParseException {
 		JavaToken escapedCharacterLiteralToken = readRegex(CHARACTER_LITERAL_PATTERN, 1, 2, "No character literal found");
 		return unescapeStringToken(escapedCharacterLiteralToken);
+	}
+
+	JavaToken readNamedLiteral() throws JavaTokenParseException {
+		return readRegex(NAMED_LITERAL_PATTERN, 1, 0, "No named literal found");
+	}
+
+	JavaToken readIntegerLiteral() throws JavaTokenParseException {
+    	return readRegex(INTEGER_LITERAL_PATTERN, 1, 0, "No integer literal found");
+	}
+
+	JavaToken readLongLiteral() throws JavaTokenParseException {
+		return readRegex(LONG_LITERAL_PATTERN, 1, 1, "No long literal found");
+	}
+
+	JavaToken readFloatLiteral() throws JavaTokenParseException {
+		return readRegex(FLOAT_LITERAL_PATTERN, 1, 0, "No float literal found");
+	}
+
+	JavaToken readDoubleLiteral() throws JavaTokenParseException {
+		return readRegex(DOUBLE_LITERAL_PATTERN, 1, 0, "No double literal found");
 	}
 
 	private JavaToken unescapeStringToken(JavaToken stringToken) throws JavaTokenParseException {
