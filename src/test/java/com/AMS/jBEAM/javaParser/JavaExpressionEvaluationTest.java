@@ -391,11 +391,7 @@ public class JavaExpressionEvaluationTest
 			.test("true", true)
 			.test("false", false)
 			.test("getBoolean(true)", true)
-			.test("getBoolean(false)", false)
-			.test("true.equals(true)", true)		// unintended, but acceptable
-			.test("true.equals(false)", false)	// extension of Java syntax
-			.test("false.equals(true)", false)	// because these literals are
-			.test("false.equals(false)", true);	// treated as objects
+			.test("getBoolean(false)", false);
 
 		new ErrorTestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
 			.test("getBoolean(tru)")

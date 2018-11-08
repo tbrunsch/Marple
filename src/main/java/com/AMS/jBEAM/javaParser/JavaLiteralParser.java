@@ -21,11 +21,11 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 			case '\'':
 				return parseCharacterLiteral(tokenStream, expectedResultClass);
 			case 't':
-				return parseNamedLiteral(tokenStream, true, expectedResultClass);
+				return parseNamedLiteral(tokenStream, true, boolean.class, expectedResultClass);
 			case 'f':
-				return parseNamedLiteral(tokenStream, false, expectedResultClass);
+				return parseNamedLiteral(tokenStream, false, boolean.class, expectedResultClass);
 			case 'n':
-				return parseNamedLiteral(tokenStream, null, expectedResultClass);
+				return parseNamedLiteral(tokenStream, null, null, expectedResultClass);
 			default: {
 				if (!"+-.0123456789".contains(String.valueOf(c))) {
 					return new ParseError(startPosition, "Expected a literal");
@@ -84,11 +84,11 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		if (characterLiteralValue.length() != 1) {
 			throw new IllegalStateException("Internal error parsing character literals. It should represent exactly 1 character, but it represents " + characterLiteralValue.length());
 		}
-		ObjectInfo stringLiteralInfo = new ObjectInfo(characterLiteralValue.charAt(0));
+		ObjectInfo stringLiteralInfo = new ObjectInfo(characterLiteralValue.charAt(0), char.class);
 		return parserPool.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectedResultClass);
 	}
 
-	private ParseResultIF parseNamedLiteral(JavaTokenStream tokenStream, Object namedLiteral, Class<?> expectedResultClass) {
+	private ParseResultIF parseNamedLiteral(JavaTokenStream tokenStream, Object namedLiteral, Class<?> literalClass, Class<?> expectedResultClass) {
 		String literalName = namedLiteral == null ? "null" : namedLiteral.toString();
 
 		int startPosition = tokenStream.getPosition();
@@ -105,7 +105,7 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		if (!literalToken.getValue().equals(literalName)) {
 			return new ParseError(startPosition, "Expected '" + literalName + "'");
 		}
-		ObjectInfo namedLiteralInfo = new ObjectInfo(namedLiteral);
+		ObjectInfo namedLiteralInfo = new ObjectInfo(namedLiteral, literalClass);
 		return parserPool.getObjectTailParser().parse(tokenStream, namedLiteralInfo, expectedResultClass);
 	}
 
@@ -129,7 +129,7 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 			return new ParseError(startPosition, "Invalid long literal");
 		}
 
-		ObjectInfo longLiteralInfo = new ObjectInfo(literalValue);
+		ObjectInfo longLiteralInfo = new ObjectInfo(literalValue, long.class);
 		return parserPool.getObjectTailParser().parse(tokenStream, longLiteralInfo, expectedResultClass);
 	}
 
@@ -153,16 +153,14 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 			return new ParseError(startPosition, "Invalid integer literal");
 		}
 
-		final Object literalValueWithSmallestPossibleDataType;
+		final ObjectInfo integerLiteralInfo;
 		if (Byte.MIN_VALUE <= literalValue && literalValue <= Byte.MAX_VALUE) {
-			literalValueWithSmallestPossibleDataType = (byte) literalValue;
+			integerLiteralInfo = new ObjectInfo((byte) literalValue, byte.class);
 		} else if (Short.MIN_VALUE <= literalValue && literalValue <= Short.MAX_VALUE) {
-			literalValueWithSmallestPossibleDataType = (short) literalValue;
+			integerLiteralInfo = new ObjectInfo((short) literalValue, short.class);
 		} else {
-			literalValueWithSmallestPossibleDataType = literalValue;
+			integerLiteralInfo = new ObjectInfo(literalValue, int.class);
 		}
-
-		ObjectInfo integerLiteralInfo = new ObjectInfo(literalValueWithSmallestPossibleDataType);
 		return parserPool.getObjectTailParser().parse(tokenStream, integerLiteralInfo, expectedResultClass);
 	}
 
@@ -185,7 +183,7 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		} catch (NumberFormatException e) {
 			return new ParseError(startPosition, "Invalid float literal");
 		}
-		ObjectInfo floatLiteralInfo = new ObjectInfo(literalValue);
+		ObjectInfo floatLiteralInfo = new ObjectInfo(literalValue, float.class);
 		return parserPool.getObjectTailParser().parse(tokenStream, floatLiteralInfo, expectedResultClass);
 	}
 
@@ -208,7 +206,7 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		} catch (NumberFormatException e) {
 			return new ParseError(startPosition, "Invalid double literal");
 		}
-		ObjectInfo doubleLiteralInfo = new ObjectInfo(literalValue);
+		ObjectInfo doubleLiteralInfo = new ObjectInfo(literalValue, double.class);
 		return parserPool.getObjectTailParser().parse(tokenStream, doubleLiteralInfo, expectedResultClass);
 	}
 }
