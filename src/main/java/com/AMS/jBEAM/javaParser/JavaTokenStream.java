@@ -9,14 +9,15 @@ import java.util.regex.Pattern;
 class JavaTokenStream implements Cloneable
 {
     // TODO: Support white spaces
-    private static final Pattern    IDENTIFIER_PATTERN  		= Pattern.compile("^([A-Za-z][_A-Za-z0-9]*).*");
-    private static final Pattern	STRING_LITERAL_PATTERN		= Pattern.compile("^\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\".*");
-    private static final Pattern	CHARACTER_LITERAL_PATTERN	= Pattern.compile("^'(\\\\.|[^\\\\])'.*");
+	private static final Pattern	CHARACTER_PATTERN			= Pattern.compile("^(\\s*([^\\s])\\s*).*");
+    private static final Pattern    IDENTIFIER_PATTERN  		= Pattern.compile("^(\\s*([A-Za-z][_A-Za-z0-9]*)\\s*).*");
+    private static final Pattern	STRING_LITERAL_PATTERN		= Pattern.compile("^(\\s*\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"\\s*).*");
+    private static final Pattern	CHARACTER_LITERAL_PATTERN	= Pattern.compile("^(\\s*'(\\\\.|[^\\\\])'\\s*).*");
     private static final Pattern	NAMED_LITERAL_PATTERN		= IDENTIFIER_PATTERN;
-    private static final Pattern	INTEGER_LITERAL_PATTERN		= Pattern.compile("^(0|-?[1-9][0-9]*)($|[^0-9dDeEfFL].*)");
-	private static final Pattern	LONG_LITERAL_PATTERN		= Pattern.compile("^(0|-?[1-9][0-9]*)[lL].*");
-    private static final Pattern	FLOAT_LITERAL_PATTERN 		= Pattern.compile("^([+-]?([0-9]+\\.?|[0-9]*\\.[0-9]+)([eE][+-]?[0-9]+)?[fF]).*");
-	private static final Pattern	DOUBLE_LITERAL_PATTERN 		= Pattern.compile("^([+-]?([0-9]+\\.?|[0-9]*\\.[0-9]+)([eE][+-]?[0-9]+)?[dD]?).*");
+    private static final Pattern	INTEGER_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)\\s*)($|[^0-9dDeEfFL].*)");
+	private static final Pattern	LONG_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)[lL]\\s*).*");
+    private static final Pattern	FLOAT_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+([eE][+-]?[0-9]+)?|\\.[0-9]+([eE][+-]?[0-9]+)?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?)[fF])\\s*).*");
+	private static final Pattern	DOUBLE_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+(([eE][+-]?[0-9]+)?[dD]|[eE][+-]?[0-9]+[dD]?)|\\.[0-9]+([eE][+-]?[0-9]+)?[dD]?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?[dD]?))\\s*).*");
 
 	private static final Map<Character, Character> INTERPRETATION_OF_ESCAPED_CHARACTERS = ImmutableMap.<Character, Character>builder()
 		.put('t', '\t')
@@ -69,7 +70,7 @@ class JavaTokenStream implements Cloneable
     }
 
     boolean hasMore() {
-        return position < javaExpression.length();
+        return position < javaExpression.length() && CHARACTER_PATTERN.matcher(javaExpression.substring(position)).matches();
     }
 
     int getPosition() {
@@ -77,37 +78,37 @@ class JavaTokenStream implements Cloneable
     }
 
     JavaToken readIdentifier() throws JavaTokenParseException {
-    	return readRegex(IDENTIFIER_PATTERN, 1, 0, "No identifier found");
+    	return readRegex(IDENTIFIER_PATTERN, 2, "No identifier found");
     }
 
     JavaToken readStringLiteral() throws JavaTokenParseException {
-    	JavaToken escapedStringLiteralToken = readRegex(STRING_LITERAL_PATTERN, 1, 2, "No string literal found");
+    	JavaToken escapedStringLiteralToken = readRegex(STRING_LITERAL_PATTERN, 2, "No string literal found");
 		return unescapeStringToken(escapedStringLiteralToken);
 	}
 
 	JavaToken readCharacterLiteral() throws JavaTokenParseException {
-		JavaToken escapedCharacterLiteralToken = readRegex(CHARACTER_LITERAL_PATTERN, 1, 2, "No character literal found");
+		JavaToken escapedCharacterLiteralToken = readRegex(CHARACTER_LITERAL_PATTERN, 2, "No character literal found");
 		return unescapeStringToken(escapedCharacterLiteralToken);
 	}
 
 	JavaToken readNamedLiteral() throws JavaTokenParseException {
-		return readRegex(NAMED_LITERAL_PATTERN, 1, 0, "No named literal found");
+		return readRegex(NAMED_LITERAL_PATTERN, 2, "No named literal found");
 	}
 
 	JavaToken readIntegerLiteral() throws JavaTokenParseException {
-    	return readRegex(INTEGER_LITERAL_PATTERN, 1, 0, "No integer literal found");
+    	return readRegex(INTEGER_LITERAL_PATTERN, 2, "No integer literal found");
 	}
 
 	JavaToken readLongLiteral() throws JavaTokenParseException {
-		return readRegex(LONG_LITERAL_PATTERN, 1, 1, "No long literal found");
+		return readRegex(LONG_LITERAL_PATTERN, 2, "No long literal found");
 	}
 
 	JavaToken readFloatLiteral() throws JavaTokenParseException {
-		return readRegex(FLOAT_LITERAL_PATTERN, 1, 0, "No float literal found");
+		return readRegex(FLOAT_LITERAL_PATTERN, 2, "No float literal found");
 	}
 
 	JavaToken readDoubleLiteral() throws JavaTokenParseException {
-		return readRegex(DOUBLE_LITERAL_PATTERN, 1, 0, "No double literal found");
+		return readRegex(DOUBLE_LITERAL_PATTERN, 2, "No double literal found");
 	}
 
 	private JavaToken unescapeStringToken(JavaToken stringToken) throws JavaTokenParseException {
@@ -120,26 +121,33 @@ class JavaTokenStream implements Cloneable
 		}
 	}
 
-	private JavaToken readRegex(Pattern regex, int groupIndexToExtract, int tokenLengthCorrection, String errorMessage) throws JavaTokenParseException {
+	private JavaToken readRegex(Pattern regex, int groupIndexToExtract, String errorMessage) throws JavaTokenParseException {
 		Matcher matcher = regex.matcher(javaExpression.substring(position));
 		if (!matcher.matches()) {
 			throw new JavaTokenParseException(errorMessage);
 		}
 		String extractedString = matcher.group(groupIndexToExtract);
-		// TODO: Only correct if no white spaces
-		int length = extractedString.length() + tokenLengthCorrection;
+		String stringWithSpaces = matcher.group(1);
+		int length = stringWithSpaces.length();
 		boolean containsCaret = moveForward(length);
 		return new JavaToken(extractedString, containsCaret);
 	}
 
     char peekCharacter() {
-        return javaExpression.charAt(position);
+		Matcher matcher = CHARACTER_PATTERN.matcher(javaExpression.substring(position));
+		if (!matcher.matches()) {
+			return 0;
+		}
+		String character = matcher.group(2);
+		return character.charAt(0);
     }
 
     JavaToken readCharacter() {
-        char c = peekCharacter();
-        boolean containsCaret = moveForward(1);
-        return new JavaToken(String.valueOf(c), containsCaret);
+		try {
+			return readRegex(CHARACTER_PATTERN, 2, null);
+		} catch (JavaTokenParseException e) {
+			return null;
+		}
     }
 
     /**
