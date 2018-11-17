@@ -142,9 +142,13 @@ class JavaTokenStream implements Cloneable
 		return character.charAt(0);
     }
 
-    JavaToken readCharacter() {
+    JavaToken readCharacter() throws JavaTokenParseException {
+		return readRegex(CHARACTER_PATTERN, 2, null);
+    }
+
+    JavaToken readCharacterUnchecked() {
 		try {
-			return readRegex(CHARACTER_PATTERN, 2, null);
+			return readCharacter();
 		} catch (JavaTokenParseException e) {
 			return null;
 		}

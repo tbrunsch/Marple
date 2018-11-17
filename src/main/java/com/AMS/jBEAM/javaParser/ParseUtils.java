@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
-import java.util.stream.Collectors;
 
 class ParseUtils
 {
@@ -45,53 +44,53 @@ class ParseUtils
         }
     }
 
-    private static final int CLASS_MATCH_FULL					= 0;
-    private static final int CLASS_MATCH_PRIMITIVE_BOXED		= 1;
-    private static final int CLASS_MATCH_INHERITANCE			= 2;
-    private static final int CLASS_MATCH_BOXED_AND_INHERITANCE  = 3;
-    private static final int CLASS_MATCH_PRIMITIVE_CONVERSION	= 4;
-    private static final int CLASS_MATCH_NONE                   = 5;
+    static final int CLASS_MATCH_FULL                   = 0;
+    static final int CLASS_MATCH_INHERITANCE            = 1;
+    static final int CLASS_MATCH_PRIMITIVE_CONVERSION   = 2;
+    static final int CLASS_MATCH_BOXED                  = 3;
+    static final int CLASS_MATCH_BOXED_AND_CONVERSION   = 4;
+    static final int CLASS_MATCH_BOXED_AND_INHERITANCE  = 5;
+    static final int CLASS_MATCH_NONE                   = 6;
 
-    private static int rateClassMatch(Class<?> actual, Class<?> expected) {
+    static int rateClassMatch(Class<?> actual, Class<?> expected) {
     	if (expected == null) {
     		// no expectations
 			return CLASS_MATCH_FULL;
 		}
 
 		if (actual == null) {
-			// null object is convertible to any non-primitive class
+			// null object (only object without class) is convertible to any non-primitive class
 			return expected.isPrimitive() ? CLASS_MATCH_NONE : CLASS_MATCH_FULL;
 		}
 
         if (actual == expected) {
             return CLASS_MATCH_FULL;
         }
-        if (actual.isPrimitive()) {
-            Class<?> boxedClass = ReflectionUtils.getBoxedClass(actual);
-            if (boxedClass == expected) {
-                // e.g. actual == int.class, expected = Integer.class
-                return CLASS_MATCH_PRIMITIVE_BOXED;
-            }
-            if (expected.isAssignableFrom(boxedClass)) {
-                // e.g. actual == int.class, expected == Number.class
-                return CLASS_MATCH_BOXED_AND_INHERITANCE;
-            }
-        } else {
-            Class<?> primitiveClass = ReflectionUtils.getPrimitiveClass(actual);
-            if (primitiveClass == expected) {
-                // e.g. actual == Integer.class, expected == int.class
-                return CLASS_MATCH_PRIMITIVE_BOXED;
-            }
-            if (expected.isAssignableFrom(actual)) {
-                // e.g. actual == Integer.class, expected == Number.class
-                return CLASS_MATCH_INHERITANCE;
-            }
-        }
-        if (ReflectionUtils.isPrimitiveConvertibleTo(actual, expected)) {
-            // e.g. actual == int.class or Integer.class, expected == double.class or Double.class
-            return CLASS_MATCH_PRIMITIVE_CONVERSION;
-        }
-        return CLASS_MATCH_NONE;
+
+		boolean primitiveConvertible = ReflectionUtils.isPrimitiveConvertibleTo(actual, expected);
+		if (expected.isPrimitive()) {
+			if (actual.isPrimitive()) {
+        		return primitiveConvertible
+						? CLASS_MATCH_PRIMITIVE_CONVERSION	// int -> double
+						: CLASS_MATCH_NONE;					// int -> boolean
+			} else {
+				Class<?> actualUnboxed = ReflectionUtils.getPrimitiveClass(actual);
+				return	actualUnboxed == expected	? CLASS_MATCH_BOXED :				// Integer -> int
+						primitiveConvertible		? CLASS_MATCH_BOXED_AND_CONVERSION	// Integer -> double
+													: CLASS_MATCH_NONE;					// Integer -> boolean
+			}
+		} else {
+			if (actual.isPrimitive()) {
+				Class<?> actualBoxed = ReflectionUtils.getBoxedClass(actual);
+				return	actualBoxed == expected					? CLASS_MATCH_BOXED :					// int -> Integer
+						primitiveConvertible					? CLASS_MATCH_BOXED_AND_CONVERSION :	// int -> Double
+						expected.isAssignableFrom(actualBoxed)	? CLASS_MATCH_BOXED_AND_INHERITANCE		// int -> Number
+																: CLASS_MATCH_NONE;						// int -> String
+			} else {
+				return	expected.isAssignableFrom(actual)	? CLASS_MATCH_INHERITANCE	// Integer -> Number
+															: CLASS_MATCH_NONE;			// Integer -> Double
+			}
+		}
     }
 
     public static boolean isConvertibleTo(Class<?> source, Class<?> target) {
@@ -105,16 +104,18 @@ class ParseUtils
         return rateStringMatch(field.getName(), expectedFieldName);
     }
 
-    static ToIntFunction<Field> rateFieldByClassFunc(final Class<?> expectedClass) {
-        return field -> rateFieldByClass(field, expectedClass);
+    static ToIntFunction<Field> rateFieldByClassesFunc(final List<Class<?>> expectedClasses) {
+        return field -> rateFieldByClasses(field, expectedClasses);
     }
 
-    private static int rateFieldByClass(Field field, Class<?> expectedClass) {
-        return rateClassMatch(field.getType(), expectedClass);
+    private static int rateFieldByClasses(Field field, List<Class<?>> expectedClasses) {
+        return	expectedClasses == null		? CLASS_MATCH_FULL :
+				expectedClasses.isEmpty()	? CLASS_MATCH_NONE
+											: expectedClasses.stream().mapToInt(expectedClass -> rateClassMatch(field.getType(), expectedClass)).min().getAsInt();
     }
 
-    static ToIntFunction<Field> rateFieldByNameAndClassFunc(final String fieldName, final Class<?> expectedClass) {
-        return field -> (CLASS_MATCH_NONE +1)*rateFieldByName(field, fieldName) + rateFieldByClass(field, expectedClass);
+    static ToIntFunction<Field> rateFieldByNameAndClassesFunc(final String fieldName, final List<Class<?>> expectedClasses) {
+        return field -> (CLASS_MATCH_NONE +1)*rateFieldByName(field, fieldName) + rateFieldByClasses(field, expectedClasses);
     }
 
     static String getFieldDisplayText(Field field) {
@@ -128,16 +129,18 @@ class ParseUtils
         return rateStringMatch(method.getName(), expectedMethodName);
     }
 
-    static ToIntFunction<Method> rateMethodByClassFunc(final Class<?> expectedClass) {
-        return method -> rateMethodByClass(method, expectedClass);
+    static ToIntFunction<Method> rateMethodByClassesFunc(final List<Class<?>> expectedClasses) {
+        return method -> rateMethodByClasses(method, expectedClasses);
     }
 
-    private static int rateMethodByClass(Method method, Class<?> expectedClass) {
-        return rateClassMatch(method.getReturnType(), expectedClass);
+    private static int rateMethodByClasses(Method method, List<Class<?>> expectedClasses) {
+        return	expectedClasses == null		? CLASS_MATCH_FULL :
+				expectedClasses.isEmpty()	? CLASS_MATCH_NONE
+											: expectedClasses.stream().mapToInt(expectedClass -> rateClassMatch(method.getReturnType(), expectedClass)).min().getAsInt();
     }
 
-    static ToIntFunction<Method> rateMethodByNameAndClassFunc(final String methodName, final Class<?> expectedClass) {
-        return method -> (CLASS_MATCH_NONE +1)*rateMethodByName(method, methodName) + rateMethodByClass(method, expectedClass);
+    static ToIntFunction<Method> rateMethodByNameAndClassesFunc(final String methodName, final List<Class<?>> expectedClasses) {
+        return method -> (CLASS_MATCH_NONE +1)*rateMethodByName(method, methodName) + rateMethodByClasses(method, expectedClasses);
     }
 
     static String getMethodDisplayText(Method method) {

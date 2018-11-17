@@ -519,6 +519,69 @@ public class JavaExpressionEvaluationTest
 			.test("  getTestClass( s, sValue, c, i, f, l, b, d  ) . d", 3 - 2.34e-56);
 	}
 
+	@Test
+	public void testAmbiguity() {
+		class TestClass
+		{
+			char c = 'A';
+			byte b = 123;
+			short s = (short) 1234;
+			int i = 123456789;
+			long l = 5000000000L;
+			Object o1 = new Double(1.23);
+			Object o2 = new Float(2.34f);
+
+			char get(char c) { return c; }
+			byte get(byte b) { return b; }
+			int get(int l) { return i; }
+			double get(double d) { return d; }
+			Object get(Object o) { return o; }
+			Object get(Float f) { return f + 1.0f; }
+		}
+
+		TestClass testInstance = new TestClass();
+		new TestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("get(c)", testInstance.get(testInstance.c))
+			.test("get(b)", testInstance.get(testInstance.b))
+			.test("get(i)", testInstance.get(testInstance.i))
+			.test("get(l)", testInstance.get(testInstance.l))
+			.test("get(o1)", testInstance.get(testInstance.o1))
+			.test("get(o2)", testInstance.get(testInstance.o2));
+
+		new TestExecuter(testInstance, EvaluationMode.DUCK_TYPING)
+			.test("get(o1)", testInstance.get(testInstance.o1))
+			.test("get(o2)", testInstance.get((Float) testInstance.o2));
+
+		new ErrorTestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("get(s)");
+	}
+
+	@Test
+	public void testMethodOverloadSideEffects() {
+		/*
+		 * It is important that expression are not evaluated multiple times
+		 * when searching for the right method overload. Otherwise, side effects
+		 * (which is critical anyway) may also occur multiple times.
+		 */
+
+		class TestClass
+		{
+			int count = 0;
+
+			int f(int i, float f) { return i; };
+			int f(int i, String s) { return i; };
+
+			int getInt() { return ++count; }
+		}
+
+		TestClass testInstance = new TestClass();
+		new TestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("f(getInt(), 1.0f)", 1)
+			.test("f(getInt(), \"Test\")", 2)
+			.test("f(getInt(), \"Test\")", 3)
+			.test("f(getInt(), 1.0f)", 4);
+	}
+
 	/*
 	 * Class for creating tests with expected successful code completions
 	 */
@@ -547,7 +610,7 @@ public class JavaExpressionEvaluationTest
 	/*
 	 * Class for creating tests with expected exceptions
 	 */
-	static class ErrorTestExecuter
+	private static class ErrorTestExecuter
 	{
 		private final Object													testInstance;
 		private final EvaluationMode 											evaluationMode;

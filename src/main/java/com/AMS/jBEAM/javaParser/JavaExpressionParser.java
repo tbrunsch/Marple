@@ -1,5 +1,7 @@
 package com.AMS.jBEAM.javaParser;
 
+import java.util.List;
+
 /**
  * Parses an arbitrary Java expression
  */
@@ -10,8 +12,8 @@ class JavaExpressionParser extends AbstractJavaEntityParser
     }
 
     @Override
-    ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, Class<?> expectedResultClass) {
-        return JavaParser.parse(tokenStream, thisInfo, expectedResultClass,
+    ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+        return JavaParser.parse(tokenStream, thisInfo, expectedResultClasses,
 			parserPool.getLiteralParser(),
             parserPool.getFieldParser(false),
             parserPool.getMethodParser(false)	//,

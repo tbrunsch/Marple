@@ -1,6 +1,7 @@
 package com.AMS.jBEAM.javaParser;
 
 import java.util.Collections;
+import java.util.List;
 
 class JavaLiteralParser extends AbstractJavaEntityParser
 {
@@ -9,7 +10,7 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, Class<?> expectedResultClass) {
+	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
 		if (!tokenStream.hasMore()) {
 			return new ParseError(startPosition, "Expected a literal");
@@ -17,32 +18,32 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		char c = tokenStream.peekCharacter();
 		switch (c) {
 			case '\"':
-				return parseStringLiteral(tokenStream, expectedResultClass);
+				return parseStringLiteral(tokenStream, expectedResultClasses);
 			case '\'':
-				return parseCharacterLiteral(tokenStream, expectedResultClass);
+				return parseCharacterLiteral(tokenStream, expectedResultClasses);
 			case 't':
-				return parseNamedLiteral(tokenStream, true, boolean.class, expectedResultClass);
+				return parseNamedLiteral(tokenStream, true, boolean.class, expectedResultClasses);
 			case 'f':
-				return parseNamedLiteral(tokenStream, false, boolean.class, expectedResultClass);
+				return parseNamedLiteral(tokenStream, false, boolean.class, expectedResultClasses);
 			case 'n':
-				return parseNamedLiteral(tokenStream, null, null, expectedResultClass);
+				return parseNamedLiteral(tokenStream, null, null, expectedResultClasses);
 			default: {
 				if (!"+-.0123456789".contains(String.valueOf(c))) {
 					return new ParseError(startPosition, "Expected a literal");
 				}
-				ParseResultIF longParseResult = parseLongLiteral(tokenStream.clone(), expectedResultClass);
+				ParseResultIF longParseResult = parseLongLiteral(tokenStream.clone(), expectedResultClasses);
 				if (longParseResult.getResultType() != ParseResultType.PARSE_ERROR) {
 					return longParseResult;
 				}
-				ParseResultIF integerParseResult = parseIntegerLiteral(tokenStream.clone(), expectedResultClass);
+				ParseResultIF integerParseResult = parseIntegerLiteral(tokenStream.clone(), expectedResultClasses);
 				if (integerParseResult.getResultType() != ParseResultType.PARSE_ERROR) {
 					return integerParseResult;
 				}
-				ParseResultIF floatParseResult = parseFloatLiteral(tokenStream.clone(), expectedResultClass);
+				ParseResultIF floatParseResult = parseFloatLiteral(tokenStream.clone(), expectedResultClasses);
 				if (floatParseResult.getResultType() != ParseResultType.PARSE_ERROR) {
 					return floatParseResult;
 				}
-				ParseResultIF doubleParseResult = parseDoubleLiteral(tokenStream.clone(), expectedResultClass);
+				ParseResultIF doubleParseResult = parseDoubleLiteral(tokenStream.clone(), expectedResultClasses);
 				if (doubleParseResult.getResultType() != ParseResultType.PARSE_ERROR) {
 					return doubleParseResult;
 				}
@@ -51,7 +52,7 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		}
 	}
 
-	private ParseResultIF parseStringLiteral(JavaTokenStream tokenStream, Class<?> expectedResultClass) {
+	private ParseResultIF parseStringLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
 		JavaToken stringLiteralToken;
 		try {
@@ -61,14 +62,14 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		}
 		if (stringLiteralToken.isContainsCaret()) {
 			// No suggestions possible
-			return new CompletionSuggestions(Collections.emptyMap());
+			return CompletionSuggestions.NONE;
 		}
 		String stringLiteralValue = stringLiteralToken.getValue();
 		ObjectInfo stringLiteralInfo = new ObjectInfo(stringLiteralValue);
-		return parserPool.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectedResultClass);
+		return parserPool.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectedResultClasses);
 	}
 
-	private ParseResultIF parseCharacterLiteral(JavaTokenStream tokenStream, Class<?> expectedResultClass) {
+	private ParseResultIF parseCharacterLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
 		JavaToken characterLiteralToken;
 		try {
@@ -78,17 +79,17 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		}
 		if (characterLiteralToken.isContainsCaret()) {
 			// No suggestions possible
-			return new CompletionSuggestions(Collections.emptyMap());
+			return CompletionSuggestions.NONE;
 		}
 		String characterLiteralValue = characterLiteralToken.getValue();
 		if (characterLiteralValue.length() != 1) {
 			throw new IllegalStateException("Internal error parsing character literals. It should represent exactly 1 character, but it represents " + characterLiteralValue.length());
 		}
 		ObjectInfo stringLiteralInfo = new ObjectInfo(characterLiteralValue.charAt(0), char.class);
-		return parserPool.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectedResultClass);
+		return parserPool.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectedResultClasses);
 	}
 
-	private ParseResultIF parseNamedLiteral(JavaTokenStream tokenStream, Object namedLiteral, Class<?> literalClass, Class<?> expectedResultClass) {
+	private ParseResultIF parseNamedLiteral(JavaTokenStream tokenStream, Object namedLiteral, Class<?> literalClass, List<Class<?>> expectedResultClasses) {
 		String literalName = namedLiteral == null ? "null" : namedLiteral.toString();
 
 		int startPosition = tokenStream.getPosition();
@@ -100,16 +101,16 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		}
 		if (literalToken.isContainsCaret()) {
 			// No suggestions possible
-			return new CompletionSuggestions(Collections.emptyMap());
+			return CompletionSuggestions.NONE;
 		}
 		if (!literalToken.getValue().equals(literalName)) {
 			return new ParseError(startPosition, "Expected '" + literalName + "'");
 		}
 		ObjectInfo namedLiteralInfo = new ObjectInfo(namedLiteral, literalClass);
-		return parserPool.getObjectTailParser().parse(tokenStream, namedLiteralInfo, expectedResultClass);
+		return parserPool.getObjectTailParser().parse(tokenStream, namedLiteralInfo, expectedResultClasses);
 	}
 
-	private ParseResultIF parseLongLiteral(JavaTokenStream tokenStream, Class<?> expectedResultClass) {
+	private ParseResultIF parseLongLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
 		JavaToken longToken;
 		try {
@@ -119,7 +120,7 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		}
 		if (longToken.isContainsCaret()) {
 			// No suggestions possible
-			return new CompletionSuggestions(Collections.emptyMap());
+			return CompletionSuggestions.NONE;
 		}
 
 		long literalValue;
@@ -130,10 +131,10 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		}
 
 		ObjectInfo longLiteralInfo = new ObjectInfo(literalValue, long.class);
-		return parserPool.getObjectTailParser().parse(tokenStream, longLiteralInfo, expectedResultClass);
+		return parserPool.getObjectTailParser().parse(tokenStream, longLiteralInfo, expectedResultClasses);
 	}
 
-	private ParseResultIF parseIntegerLiteral(JavaTokenStream tokenStream, Class<?> expectedResultClass) {
+	private ParseResultIF parseIntegerLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
 		JavaToken integerToken;
 		try {
@@ -143,7 +144,7 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		}
 		if (integerToken.isContainsCaret()) {
 			// No suggestions possible
-			return new CompletionSuggestions(Collections.emptyMap());
+			return CompletionSuggestions.NONE;
 		}
 
 		int literalValue;
@@ -161,10 +162,10 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		} else {
 			integerLiteralInfo = new ObjectInfo(literalValue, int.class);
 		}
-		return parserPool.getObjectTailParser().parse(tokenStream, integerLiteralInfo, expectedResultClass);
+		return parserPool.getObjectTailParser().parse(tokenStream, integerLiteralInfo, expectedResultClasses);
 	}
 
-	private ParseResultIF parseFloatLiteral(JavaTokenStream tokenStream, Class<?> expectedResultClass) {
+	private ParseResultIF parseFloatLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
 		JavaToken floatToken;
 		try {
@@ -174,7 +175,7 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		}
 		if (floatToken.isContainsCaret()) {
 			// No suggestions possible
-			return new CompletionSuggestions(Collections.emptyMap());
+			return CompletionSuggestions.NONE;
 		}
 
 		float literalValue;
@@ -184,10 +185,10 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 			return new ParseError(startPosition, "Invalid float literal");
 		}
 		ObjectInfo floatLiteralInfo = new ObjectInfo(literalValue, float.class);
-		return parserPool.getObjectTailParser().parse(tokenStream, floatLiteralInfo, expectedResultClass);
+		return parserPool.getObjectTailParser().parse(tokenStream, floatLiteralInfo, expectedResultClasses);
 	}
 
-	private ParseResultIF parseDoubleLiteral(JavaTokenStream tokenStream, Class<?> expectedResultClass) {
+	private ParseResultIF parseDoubleLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
 		JavaToken doubleToken;
 		try {
@@ -197,7 +198,7 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		}
 		if (doubleToken.isContainsCaret()) {
 			// No suggestions possible
-			return new CompletionSuggestions(Collections.emptyMap());
+			return CompletionSuggestions.NONE;
 		}
 
 		double literalValue;
@@ -207,6 +208,6 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 			return new ParseError(startPosition, "Invalid double literal");
 		}
 		ObjectInfo doubleLiteralInfo = new ObjectInfo(literalValue, double.class);
-		return parserPool.getObjectTailParser().parse(tokenStream, doubleLiteralInfo, expectedResultClass);
+		return parserPool.getObjectTailParser().parse(tokenStream, doubleLiteralInfo, expectedResultClasses);
 	}
 }

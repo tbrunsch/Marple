@@ -23,7 +23,7 @@ class JavaFieldParser extends AbstractJavaEntityParser
     }
 
     @Override
-    ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, Class<?> expectedResultClass) {
+    ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
         int startPosition = tokenStream.getPosition();
         JavaToken fieldNameToken;
         try {
@@ -41,7 +41,7 @@ class JavaFieldParser extends AbstractJavaEntityParser
             Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 				fields,
 				field -> new CompletionSuggestionField(field, startPosition, endPosition),
-				ParseUtils.rateFieldByNameAndClassFunc(fieldName, expectedResultClass)
+				ParseUtils.rateFieldByNameAndClassesFunc(fieldName, expectedResultClasses)
 			);
             return new CompletionSuggestions(ratedSuggestions);
         }
@@ -55,6 +55,6 @@ class JavaFieldParser extends AbstractJavaEntityParser
         Field matchingField = firstFieldMatch.get();
         ObjectInfo matchingFieldInfo = getFieldInfo(currentContextInfo, matchingField);
 
-        return parserPool.getObjectTailParser().parse(tokenStream, matchingFieldInfo, expectedResultClass);
+        return parserPool.getObjectTailParser().parse(tokenStream, matchingFieldInfo, expectedResultClasses);
     }
 }

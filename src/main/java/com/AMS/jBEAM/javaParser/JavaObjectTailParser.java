@@ -1,6 +1,9 @@
 package com.AMS.jBEAM.javaParser;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Parses a sub expression following a complete Java expression, assuming the context
@@ -16,11 +19,11 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
     }
 
     @Override
-    ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, Class<?> expectedResultClass) {
+    ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
         if (tokenStream.hasMore()) {
             char nextChar = tokenStream.peekCharacter();
             if (nextChar == '.') {
-            	return parseDot(tokenStream, currentContextInfo, expectedResultClass);
+            	return parseDot(tokenStream, currentContextInfo, expectedResultClasses);
             } else if (nextChar == '[') {
                 Class<?> elementClass = getClass(currentContextInfo).getComponentType();
                 if (elementClass == null) {
@@ -33,6 +36,7 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
                         // code completion inside "[]" => propagate completion suggestions
                         return arrayIndexParseResult;
                     case PARSE_ERROR:
+					case AMBIGUOUS_PARSE_RESULT:
                         // always propagate errors
                         return arrayIndexParseResult;
                     case PARSE_RESULT: {
@@ -41,7 +45,7 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 						ObjectInfo indexInfo = parseResult.getObjectInfo();
 						ObjectInfo elementInfo = getArrayElementInfo(currentContextInfo, indexInfo);
                         tokenStream.moveTo(parsedToPosition);
-                        return parserPool.getObjectTailParser().parse(tokenStream, elementInfo, expectedResultClass);
+                        return parserPool.getObjectTailParser().parse(tokenStream, elementInfo, expectedResultClasses);
                     }
                     default:
                         throw new IllegalStateException("Unsupported parse result type: " + arrayIndexParseResult.getResultType());
@@ -55,15 +59,16 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 			}
         }
         // finished parsing
-		if (expectedResultClass != null && !ParseUtils.isConvertibleTo(getClass(currentContextInfo), expectedResultClass)) {
-			return new ParseError(tokenStream.getPosition(), "The class '" + getClass(currentContextInfo).getSimpleName() + "' cannot be casted to the expected class '" + expectedResultClass.getSimpleName() + "");
+		if (expectedResultClasses != null
+				&& expectedResultClasses.stream().noneMatch(expectedResultClass -> ParseUtils.isConvertibleTo(getClass(currentContextInfo), expectedResultClass))) {
+			return new ParseError(tokenStream.getPosition(), "The class '" + getClass(currentContextInfo).getSimpleName() + "' cannot be casted to any of the expected class '" + expectedResultClasses.stream().map(clazz -> clazz.getSimpleName()).collect(Collectors.joining("', '")) + "'");
 		}
 
         return new ParseResult(tokenStream.getPosition(), currentContextInfo);
     }
 
-    private ParseResultIF parseDot(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, Class<?> expectedResultClass) {
-		JavaToken characterToken = tokenStream.readCharacter();
+    private ParseResultIF parseDot(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+		JavaToken characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals(".");
 		if (characterToken.isContainsCaret()) {
 			int insertionBegin = tokenStream.getPosition();
@@ -74,31 +79,32 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 			} catch (JavaTokenStream.JavaTokenParseException e) {
 				insertionEnd = insertionBegin;
 			}
-			return suggestFieldsAndMethods(currentContextInfo, expectedResultClass, insertionBegin, insertionEnd);
+			return suggestFieldsAndMethods(currentContextInfo, expectedResultClasses, insertionBegin, insertionEnd);
 		}
 
-		return JavaParser.parse(tokenStream, currentContextInfo, expectedResultClass,
+		return JavaParser.parse(tokenStream, currentContextInfo, expectedResultClasses,
 				parserPool.getFieldParser(false),
 				parserPool.getMethodParser(false)
 		);
 	}
 
 	private ParseResultIF parseArrayIndex(JavaTokenStream tokenStream) {
-		Class<?> expectedResultClass = int.class;
-		JavaToken characterToken = tokenStream.readCharacter();
+		List<Class<?>> expectedResultClasses = Arrays.asList(int.class);
+		JavaToken characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals("[");
 		if (characterToken.isContainsCaret()) {
 			int insertionBegin, insertionEnd;
 			insertionBegin = insertionEnd = tokenStream.getPosition();
-			return suggestFieldsAndMethods(thisInfo, expectedResultClass, insertionBegin, insertionEnd);
+			return suggestFieldsAndMethods(thisInfo, expectedResultClasses, insertionBegin, insertionEnd);
 		}
 
-		ParseResultIF arrayIndexParseResult = parserPool.getExpressionParser().parse(tokenStream, thisInfo, expectedResultClass);
+		ParseResultIF arrayIndexParseResult = parserPool.getExpressionParser().parse(tokenStream, thisInfo, expectedResultClasses);
 		switch (arrayIndexParseResult.getResultType()) {
 			case COMPLETION_SUGGESTIONS:
 				// code completion inside "[]" => propagate completion suggestions
 				return arrayIndexParseResult;
 			case PARSE_ERROR:
+			case AMBIGUOUS_PARSE_RESULT:
 				// always propagate errors
 				return arrayIndexParseResult;
 			case PARSE_RESULT: {
@@ -106,13 +112,15 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 				int parsedToPosition = parseResult.getParsedToPosition();
 
 				tokenStream.moveTo(parsedToPosition);
-				if (!tokenStream.hasMore() || !(characterToken = tokenStream.readCharacter()).getValue().equals("]")) {
+				characterToken = tokenStream.readCharacterUnchecked();
+
+				if (characterToken == null || characterToken.getValue().charAt(0) != ']') {
 					return new ParseError(parsedToPosition, "Expected closing bracket ']'");
 				}
 
 				if (characterToken.isContainsCaret()) {
 					// nothing we can suggest after ']'
-					return new CompletionSuggestions(Collections.emptyMap());
+					return CompletionSuggestions.NONE;
 				}
 
 				// delegate parse result with corrected position (includes ']')

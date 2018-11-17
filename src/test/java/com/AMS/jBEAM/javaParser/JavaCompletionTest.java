@@ -502,7 +502,7 @@ public class JavaCompletionTest
 	/*
 	 * Class for creating tests with expected exceptions
 	 */
-	static class ErrorTestExecuter
+	private static class ErrorTestExecuter
 	{
 		private final Object													testInstance;
 		private final EvaluationMode 											evaluationMode;

@@ -1,10 +1,7 @@
 package com.AMS.jBEAM.javaParser;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -25,7 +22,7 @@ class JavaMethodParser extends AbstractJavaEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, Class<?> expectedResultClass) {
+	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		final int startPosition = tokenStream.getPosition();
 		JavaToken methodNameToken;
 		try {
@@ -43,7 +40,7 @@ class JavaMethodParser extends AbstractJavaEntityParser
 			Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 				methods,
 				method -> new CompletionSuggestionMethod(method, startPosition, endPosition),
-				ParseUtils.rateMethodByNameAndClassFunc(methodName, expectedResultClass)
+				ParseUtils.rateMethodByNameAndClassesFunc(methodName, expectedResultClasses)
 			);
 			return new CompletionSuggestions(ratedSuggestions);
 		}
@@ -58,98 +55,42 @@ class JavaMethodParser extends AbstractJavaEntityParser
 			return new ParseError(tokenStream.getPosition(), "Expected opening parenthesis '('");
 		}
 
-		List<ParseResultIF> methodParseResults = new ArrayList<>();
-		for (Method method : matchingMethods) {
-			ParseResultIF parseResult = parseMethodArgumentList(tokenStream.clone(), currentContextInfo, method);
-			methodParseResults.add(parseResult);
-		}
-		ParseResultIF methodParseResult = JavaParser.mergeParseResults(methodParseResults);
-		switch (methodParseResult.getResultType()) {
-			case COMPLETION_SUGGESTIONS:
-				// code completion inside "()" => propagate completion suggestions
-				return methodParseResult;
-			case PARSE_ERROR:
-				// always propagate errors
-				return methodParseResult;
-			case PARSE_RESULT: {
-				ParseResult parseResult = (ParseResult) methodParseResult;
-				int parsedToPosition = parseResult.getParsedToPosition();
-				ObjectInfo objectInfo = parseResult.getObjectInfo();
-				tokenStream.moveTo(parsedToPosition);
-				return parserPool.getObjectTailParser().parse(tokenStream, objectInfo, expectedResultClass);
+		List<ParseResultIF> argumentParseResults = parseMethodArguments(tokenStream, matchingMethods);
+
+		if (!argumentParseResults.isEmpty()) {
+			ParseResultIF lastArgumentParseResult = argumentParseResults.get(argumentParseResults.size()-1);
+			if (lastArgumentParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
+				// Immediately propagate anything but parse results (code completion, errors, ambiguous parse results)
+				return lastArgumentParseResult;
 			}
-			default:
-				throw new IllegalStateException("Unsupported parse result type: " + methodParseResult.getResultType());
+		}
+
+		List<ObjectInfo> argumentInfos = argumentParseResults.stream()
+			.map(ParseResult.class::cast)
+			.map(ParseResult::getObjectInfo)
+			.collect(Collectors.toList());
+		List<Method> bestMatchingMethods = getBestMatchingMethods(matchingMethods, argumentInfos);
+
+		switch (bestMatchingMethods.size()) {
+			case 0:
+				return new ParseError(tokenStream.getPosition(), "No method matches the given arguments");
+			case 1: {
+				Method bestMatchingMethod = bestMatchingMethods.get(0);
+				ObjectInfo methodReturnInfo = getMethodReturnInfo(currentContextInfo, bestMatchingMethod, argumentInfos);
+				return parserPool.getObjectTailParser().parse(tokenStream, methodReturnInfo, expectedResultClasses);
+			}
+			default: {
+				String error = "Ambiguous method call. Possible candidates are:\n"
+								+ bestMatchingMethods.stream().map(JavaMethodParser::formatMethod).collect(Collectors.joining("\n"));
+				return new AmbiguousParseResult(tokenStream.getPosition(), error);
+			}
 		}
 	}
 
-	private ParseResultIF parseMethodArgumentList(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, Method method) {
-		Class<?>[] argumentTypes = method.getParameterTypes();
-
-		JavaToken characterToken = tokenStream.readCharacter();
-		assert characterToken.getValue().equals("(");
-		if (characterToken.isContainsCaret()) {
-			if (argumentTypes.length == 0) {
-				// no suggestions since method does not have arguments
-				return new CompletionSuggestions(Collections.emptyMap());
-			}
-			return suggestFieldsAndMethodsForMethodArgument(tokenStream, argumentTypes[0]);
-		}
-
-		ObjectInfo[] argumentInfos = new ObjectInfo[argumentTypes.length];
-		for (int i = 0; i < argumentTypes.length; i++) {
-			if (i > 0) {
-				int position = tokenStream.getPosition();
-				if (!tokenStream.hasMore() || !(characterToken = tokenStream.readCharacter()).getValue().equals(",")) {
-					return new ParseError(position, "Expected comma ','");
-				}
-
-				if (characterToken.isContainsCaret()) {
-					return suggestFieldsAndMethodsForMethodArgument(tokenStream, argumentTypes[i]);
-				}
-			}
-
-			ParseResultIF argumentParseResult = parserPool.getExpressionParser().parse(tokenStream, thisInfo, argumentTypes[i]);
-			switch (argumentParseResult.getResultType()) {
-				case COMPLETION_SUGGESTIONS:
-					// code completion inside "[]" => propagate completion suggestions
-					return argumentParseResult;
-				case PARSE_ERROR:
-					// always propagate errors
-					return argumentParseResult;
-				case PARSE_RESULT: {
-					ParseResult parseResult = ((ParseResult) argumentParseResult);
-					int parsedToPosition = parseResult.getParsedToPosition();
-					tokenStream.moveTo(parsedToPosition);
-					ObjectInfo argumentInfo = parseResult.getObjectInfo();
-					argumentInfos[i] = argumentInfo;
-					break;
-				}
-				default:
-					throw new IllegalStateException("Unsupported parse result type: " + argumentParseResult.getResultType());
-			}
-		}
-
-		int position = tokenStream.getPosition();
-		if (!tokenStream.hasMore() || !(characterToken = tokenStream.readCharacter()).getValue().equals(")")) {
-			return new ParseError(position, "Expected closing parenthesis ')'");
-		}
-
-		if (characterToken.isContainsCaret()) {
-			// nothing we can suggest after ')'
-			return new CompletionSuggestions(Collections.emptyMap());
-		}
-
-		// finished parsing
-		ObjectInfo methodReturnInfo = getMethodReturnInfo(currentContextInfo, method, argumentInfos);
-
-		// delegate parse result with corrected position (includes ')')
-		return new ParseResult(tokenStream.getPosition(), methodReturnInfo);
-	}
-
-	private CompletionSuggestions suggestFieldsAndMethodsForMethodArgument(JavaTokenStream tokenStream, Class<?> argumentClass) {
-		int insertionBegin, insertionEnd;
-		insertionBegin = insertionEnd = tokenStream.getPosition();
-		return suggestFieldsAndMethods(thisInfo, argumentClass, insertionBegin, insertionEnd);
+	private static String formatMethod(Method method) {
+		return method.getName()
+				+ "("
+				+ Arrays.stream(method.getParameterTypes()).map(Class::getSimpleName).collect(Collectors.joining(", "))
+				+ ")";
 	}
 }

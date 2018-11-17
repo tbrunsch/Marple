@@ -21,6 +21,4 @@ class JavaInspectionDataProvider
         // TODO: Consider settings
         return ReflectionUtils.getMethods(clazz);
     }
-
-    //Class<?> getClass()
 }
