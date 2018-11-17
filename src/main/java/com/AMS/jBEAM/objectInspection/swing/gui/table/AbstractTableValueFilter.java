@@ -5,19 +5,19 @@ import java.util.Set;
 
 abstract class AbstractTableValueFilter implements TableValueFilterIF
 {
-    private final Set<Runnable> filterChangedListeners  = new HashSet<>();
+	private final Set<Runnable> filterChangedListeners	= new HashSet<>();
 
-    @Override
-    public void addFilterChangedListener(Runnable listener) {
-        filterChangedListeners.add(listener);
-    }
+	@Override
+	public void addFilterChangedListener(Runnable listener) {
+		filterChangedListeners.add(listener);
+	}
 
-    @Override
-    public void removeFilterChangedListener(Runnable listener) {
-        filterChangedListeners.remove(listener);
-    }
+	@Override
+	public void removeFilterChangedListener(Runnable listener) {
+		filterChangedListeners.remove(listener);
+	}
 
-    void fireFilterChanged() {
-        filterChangedListeners.forEach(Runnable::run);
-    }
+	void fireFilterChanged() {
+		filterChangedListeners.forEach(Runnable::run);
+	}
 }

@@ -7,20 +7,20 @@ import java.util.List;
  */
 class JavaExpressionParser extends AbstractJavaEntityParser
 {
-    JavaExpressionParser(JavaParserPool parserSettings, ObjectInfo thisInfo) {
-        super(parserSettings, thisInfo);
-    }
+	JavaExpressionParser(JavaParserPool parserSettings, ObjectInfo thisInfo) {
+		super(parserSettings, thisInfo);
+	}
 
-    @Override
-    ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
-        return JavaParser.parse(tokenStream, thisInfo, expectedResultClasses,
+	@Override
+	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+		return JavaParser.parse(tokenStream, thisInfo, expectedResultClasses,
 			parserPool.getLiteralParser(),
-            parserPool.getFieldParser(false),
-            parserPool.getMethodParser(false)	//,
+			parserPool.getFieldParser(false),
+			parserPool.getMethodParser(false)	//,
 			// TODO: Add more parsers
-            // parserPool.getClassParser(),
-            // parserPool.getConstructorParser(),
+			// parserPool.getClassParser(),
+			// parserPool.getConstructorParser(),
 			// parserPool.getCastParser()
-        );
-    }
+		);
+	}
 }

@@ -1,6 +1,5 @@
 package com.AMS.jBEAM.javaParser;
 
-import java.util.Collections;
 import java.util.List;
 
 class JavaLiteralParser extends AbstractJavaEntityParser

@@ -2,8 +2,8 @@ package com.AMS.jBEAM.objectInspection;
 
 public interface InspectionLinkIF extends Runnable
 {
-    Object getObjectToInspect();
+	Object getObjectToInspect();
 
-    // Should only be called by ObjectInspector
-    void inspect(ObjectInspector inspector);
+	// Should only be called by ObjectInspector
+	void inspect(ObjectInspector inspector);
 }

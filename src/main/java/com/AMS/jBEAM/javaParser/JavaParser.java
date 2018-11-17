@@ -18,10 +18,10 @@ public class JavaParser
 		}
 	};
 
-    public List<CompletionSuggestionIF> suggestCodeCompletion(String javaExpression, EvaluationMode evaluationMode, int caret, Object thisContext) throws JavaParseException {
-        ParseResultIF parseResult = parse(javaExpression, evaluationMode, caret, thisContext);
-        switch (parseResult.getResultType()) {
-            case PARSE_RESULT: {
+	public List<CompletionSuggestionIF> suggestCodeCompletion(String javaExpression, EvaluationMode evaluationMode, int caret, Object thisContext) throws JavaParseException {
+		ParseResultIF parseResult = parse(javaExpression, evaluationMode, caret, thisContext);
+		switch (parseResult.getResultType()) {
+			case PARSE_RESULT: {
 				ParseResult result = (ParseResult) parseResult;
 				if (result.getParsedToPosition() != javaExpression.length()) {
 					throw new JavaParseException(result.getParsedToPosition(), "Unexpected character");
@@ -29,7 +29,7 @@ public class JavaParser
 					throw new IllegalStateException("Internal error: No completions available");
 				}
 			}
-            case PARSE_ERROR: {
+			case PARSE_ERROR: {
 				ParseError error = (ParseError) parseResult;
 				throw new JavaParseException(error.getPosition(), error.getMessage());
 			}
@@ -37,20 +37,20 @@ public class JavaParser
 				AmbiguousParseResult result = (AmbiguousParseResult) parseResult;
 				throw new JavaParseException(result.getPosition(), result.getMessage());
 			}
-            case COMPLETION_SUGGESTIONS: {
-                CompletionSuggestions completionSuggestions = (CompletionSuggestions) parseResult;
-                Map<CompletionSuggestionIF, Integer> ratedSuggestions = completionSuggestions.getRatedSuggestions();
+			case COMPLETION_SUGGESTIONS: {
+				CompletionSuggestions completionSuggestions = (CompletionSuggestions) parseResult;
+				Map<CompletionSuggestionIF, Integer> ratedSuggestions = completionSuggestions.getRatedSuggestions();
 				List<CompletionSuggestionIF> sortedSuggestions = new ArrayList<>(ratedSuggestions.keySet());
 				Collections.sort(sortedSuggestions, SUGGESTION_COMPARATOR_BY_CLASS);
 				Collections.sort(sortedSuggestions, Comparator.comparingInt(ratedSuggestions::get));
-                return sortedSuggestions;
-            }
-            default:
-                throw new IllegalStateException("Unsupported parse result type: " + parseResult.getResultType());
-        }
-    }
+				return sortedSuggestions;
+			}
+			default:
+				throw new IllegalStateException("Unsupported parse result type: " + parseResult.getResultType());
+		}
+	}
 
-    public Object evaluate(String javaExpression, EvaluationMode evaluationMode, Object thisContext) throws JavaParseException {
+	public Object evaluate(String javaExpression, EvaluationMode evaluationMode, Object thisContext) throws JavaParseException {
 		ParseResultIF parseResult = parse(javaExpression, evaluationMode,-1, thisContext);
 		switch (parseResult.getResultType()) {
 			case PARSE_RESULT: {
@@ -97,25 +97,25 @@ public class JavaParser
 		}
 	}
 
-    static ParseResultIF parse(final JavaTokenStream tokenStream, final ObjectInfo currentContextInfo, final List<Class<?>> expectedResultClasses, AbstractJavaEntityParser... parsers) {
-        List<ParseResultIF> parseResults = Arrays.stream(parsers)
-            .map(parser -> parser.parse(tokenStream, currentContextInfo, expectedResultClasses))
-            .collect(Collectors.toList());
-        return mergeParseResults(parseResults);
-    }
+	static ParseResultIF parse(final JavaTokenStream tokenStream, final ObjectInfo currentContextInfo, final List<Class<?>> expectedResultClasses, AbstractJavaEntityParser... parsers) {
+		List<ParseResultIF> parseResults = Arrays.stream(parsers)
+			.map(parser -> parser.parse(tokenStream, currentContextInfo, expectedResultClasses))
+			.collect(Collectors.toList());
+		return mergeParseResults(parseResults);
+	}
 
-    static ParseResultIF mergeParseResults(List<ParseResultIF> parseResults) {
-        if (parseResults.isEmpty()) {
-            throw new IllegalArgumentException("Cannot merge 0 parse results");
-        }
+	static ParseResultIF mergeParseResults(List<ParseResultIF> parseResults) {
+		if (parseResults.isEmpty()) {
+			throw new IllegalArgumentException("Cannot merge 0 parse results");
+		}
 
-        List<AmbiguousParseResult> ambiguousResults = filterParseResults(parseResults, AmbiguousParseResult.class);
-        List<ParseResult> results = filterParseResults(parseResults, ParseResult.class);
-        List<CompletionSuggestions> completionSuggestions = filterParseResults(parseResults, CompletionSuggestions.class);
-        List<ParseError> errors = filterParseResults(parseResults, ParseError.class);
+		List<AmbiguousParseResult> ambiguousResults = filterParseResults(parseResults, AmbiguousParseResult.class);
+		List<ParseResult> results = filterParseResults(parseResults, ParseResult.class);
+		List<CompletionSuggestions> completionSuggestions = filterParseResults(parseResults, CompletionSuggestions.class);
+		List<ParseError> errors = filterParseResults(parseResults, ParseError.class);
 
-        if (!completionSuggestions.isEmpty()) {
-            // Merge and return suggestions
+		if (!completionSuggestions.isEmpty()) {
+			// Merge and return suggestions
 			Map<CompletionSuggestionIF, Integer> mergedRatedSuggestions = new LinkedHashMap<>();
 			for (CompletionSuggestions suggestions : completionSuggestions) {
 				Map<CompletionSuggestionIF, Integer> ratedSuggestions = suggestions.getRatedSuggestions();
@@ -128,13 +128,13 @@ public class JavaParser
 					mergedRatedSuggestions.put(suggestion, bestRating);
 				}
 			}
-            return new CompletionSuggestions(mergedRatedSuggestions);
-        }
+			return new CompletionSuggestions(mergedRatedSuggestions);
+		}
 
-        boolean ambiguous = !ambiguousResults.isEmpty() || results.size() > 1;
-        if (ambiguous) {
-        	int position = ambiguousResults.isEmpty() ? results.get(0).getParsedToPosition() : ambiguousResults.get(0).getPosition();
-        	String message = "Ambiguous expression:\n"
+		boolean ambiguous = !ambiguousResults.isEmpty() || results.size() > 1;
+		if (ambiguous) {
+			int position = ambiguousResults.isEmpty() ? results.get(0).getParsedToPosition() : ambiguousResults.get(0).getPosition();
+			String message = "Ambiguous expression:\n"
 							+ ambiguousResults.stream().map(AmbiguousParseResult::getMessage).collect(Collectors.joining("\n"))
 							+ results.stream().map(result -> "Expression can be evaluated to object of type " + result.getObjectInfo().getDeclaredClass().getSimpleName());
 			return new AmbiguousParseResult(position, message);
@@ -150,9 +150,9 @@ public class JavaParser
 		} else {
 			return errors.get(0);
 		}
-    }
+	}
 
-    private static <T> List<T> filterParseResults(List<ParseResultIF> parseResults, Class<T> filterClass) {
+	private static <T> List<T> filterParseResults(List<ParseResultIF> parseResults, Class<T> filterClass) {
 		return parseResults.stream().filter(filterClass::isInstance).map(filterClass::cast).collect(Collectors.toList());
 	}
 }

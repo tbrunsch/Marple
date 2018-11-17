@@ -5,9 +5,9 @@ import java.util.function.Predicate;
 
 public interface TableValueFilterIF extends Predicate<Object>
 {
-    boolean isActive();
-    void addAvailableValue(Object o);
-    JComponent getEditor();
-    void addFilterChangedListener(Runnable listener);
-    void removeFilterChangedListener(Runnable listener);
+	boolean isActive();
+	void addAvailableValue(Object o);
+	JComponent getEditor();
+	void addFilterChangedListener(Runnable listener);
+	void removeFilterChangedListener(Runnable listener);
 }

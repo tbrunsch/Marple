@@ -7,37 +7,37 @@ import java.util.stream.IntStream;
 
 abstract class AbstractJavaEntityParser
 {
-    final JavaParserPool 	parserPool;
-    final ObjectInfo 		thisInfo;
+	final JavaParserPool	parserPool;
+	final ObjectInfo		thisInfo;
 
-    AbstractJavaEntityParser(JavaParserPool parserPool, ObjectInfo thisInfo) {
-        this.parserPool = parserPool;
-        this.thisInfo = thisInfo;
-    }
+	AbstractJavaEntityParser(JavaParserPool parserPool, ObjectInfo thisInfo) {
+		this.parserPool = parserPool;
+		this.thisInfo = thisInfo;
+	}
 
-    abstract ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses);
+	abstract ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses);
 
-    ParseResultIF parse(final JavaTokenStream tokenStream, ObjectInfo currentContextInfo, final List<Class<?>> expectedResultClasses) {
-        return doParse(tokenStream.clone(), currentContextInfo, expectedResultClasses);
-    }
+	ParseResultIF parse(final JavaTokenStream tokenStream, ObjectInfo currentContextInfo, final List<Class<?>> expectedResultClasses) {
+		return doParse(tokenStream.clone(), currentContextInfo, expectedResultClasses);
+	}
 
-    private Class<?> getClass(Object object, Class<?> declaredClass) {
-    	if (parserPool.getEvaluationMode() == EvaluationMode.DUCK_TYPING && object != null) {
+	private Class<?> getClass(Object object, Class<?> declaredClass) {
+		if (parserPool.getEvaluationMode() == EvaluationMode.DUCK_TYPING && object != null) {
 			Class<?> clazz = object.getClass();
 			return declaredClass.isPrimitive()
 					? ReflectionUtils.getPrimitiveClass(clazz)
 					: clazz;
 		} else {
-    		return declaredClass;
+			return declaredClass;
 		}
 	}
 
-    Class<?> getClass(ObjectInfo objectInfo) {
-    	return getClass(objectInfo.getObject(), objectInfo.getDeclaredClass());
+	Class<?> getClass(ObjectInfo objectInfo) {
+		return getClass(objectInfo.getObject(), objectInfo.getDeclaredClass());
 	}
 
 	ObjectInfo getFieldInfo(ObjectInfo contextInfo, Field field) throws NullPointerException {
-    	final Object fieldValue;
+		final Object fieldValue;
 		if (parserPool.getEvaluationMode() == EvaluationMode.NONE) {
 			fieldValue = null;
 		} else {
@@ -79,20 +79,20 @@ abstract class AbstractJavaEntityParser
 	}
 
 	ObjectInfo getArrayElementInfo(ObjectInfo arrayInfo, ObjectInfo indexInfo) throws NullPointerException {
-    	final Object arrayElementValue;
-    	if (parserPool.getEvaluationMode() == EvaluationMode.NONE) {
+		final Object arrayElementValue;
+		if (parserPool.getEvaluationMode() == EvaluationMode.NONE) {
 			arrayElementValue = null;
 		} else {
-    		Object arrayObject = arrayInfo.getObject();
+			Object arrayObject = arrayInfo.getObject();
 			Object indexObject = indexInfo.getObject();
 			int index = ReflectionUtils.convertTo(indexObject, int.class);
 			arrayElementValue = Array.get(arrayObject, index);
 		}
 		Class<?> arrayElementClass = getClass(arrayElementValue, getClass(arrayInfo).getComponentType());
-    	return new ObjectInfo(arrayElementValue, arrayElementClass);
+		return new ObjectInfo(arrayElementValue, arrayElementClass);
 	}
 
-    CompletionSuggestions suggestFieldsAndMethods(ObjectInfo contextInfo, List<Class<?>> expectedResultClasses, final int insertionBegin, final int insertionEnd) {
+	CompletionSuggestions suggestFieldsAndMethods(ObjectInfo contextInfo, List<Class<?>> expectedResultClasses, final int insertionBegin, final int insertionEnd) {
 		Map<CompletionSuggestionIF, Integer> ratedSuggestions = new LinkedHashMap<>();
 
 		Class<?> contextClass = getClass(contextInfo);
@@ -115,9 +115,9 @@ abstract class AbstractJavaEntityParser
 	}
 
 	List<ParseResultIF> parseMethodArguments(JavaTokenStream tokenStream, List<? extends Executable> availableMethods) {
-    	List<ParseResultIF> methodArguments = new ArrayList<>();
+		List<ParseResultIF> methodArguments = new ArrayList<>();
 
-    	int position = tokenStream.getPosition();
+		int position = tokenStream.getPosition();
 		JavaToken characterToken = tokenStream.readCharacterUnchecked();
 		boolean requestedCodeCompletionBeforeNextArgument = characterToken.isContainsCaret();
 
@@ -210,11 +210,11 @@ abstract class AbstractJavaEntityParser
 	}
 
 	private static boolean isArgumentIndexValid(Executable method, int argIndex) {
-    	return method.isVarArgs() || method.getParameterCount() > argIndex;
+		return method.isVarArgs() || method.getParameterCount() > argIndex;
 	}
 
 	private boolean acceptsArgumentInfo(Executable method, int argIndex, ObjectInfo argInfo) {
-    	final Class<?> expectedArgumentType;
+		final Class<?> expectedArgumentType;
 		int numArguments = method.getParameterCount();
 		if (argIndex < numArguments) {
 			expectedArgumentType = method.getParameterTypes()[argIndex];
@@ -236,20 +236,20 @@ abstract class AbstractJavaEntityParser
 	}
 
 	<T extends Executable> List<T> getBestMatchingMethods(List<T> availableMethods, List<ObjectInfo> argumentInfos) {
-    	int[] methodMatchRating = availableMethods.stream()
+		int[] methodMatchRating = availableMethods.stream()
 			.mapToInt(method -> rateArgumentMatch(method, argumentInfos))
 			.toArray();
 
-    	List<T> methods;
+		List<T> methods;
 
-    	int[][] allowedRatingsByPhase = {
+		int[][] allowedRatingsByPhase = {
 			{ ParseUtils.CLASS_MATCH_FULL },
 			{ ParseUtils.CLASS_MATCH_INHERITANCE, ParseUtils.CLASS_MATCH_PRIMITIVE_CONVERSION},
 			{ ParseUtils.CLASS_MATCH_BOXED, ParseUtils.CLASS_MATCH_BOXED_AND_CONVERSION, ParseUtils.CLASS_MATCH_BOXED_AND_INHERITANCE }
 		};
 
-    	for (boolean allowVariadicMethods : Arrays.asList(false, true)) {
-    		for (int[] allowedRatings : allowedRatingsByPhase) {
+		for (boolean allowVariadicMethods : Arrays.asList(false, true)) {
+			for (int[] allowedRatings : allowedRatingsByPhase) {
 				methods = filterMethods(availableMethods, allowedRatings, allowVariadicMethods, methodMatchRating);
 				if (!methods.isEmpty()) {
 					return methods;
@@ -299,11 +299,11 @@ abstract class AbstractJavaEntityParser
 	}
 
 	private static <T extends Executable> List<T> filterMethods(List<T> methods, int[] allowedRatings, boolean allowVariadicMethods, int[] methodMatchRating) {
-    	List<T> filteredMethods = new ArrayList<>();
-    	for (int i = 0; i < methods.size(); i++) {
-    		int rating = methodMatchRating[i];
-    		if (IntStream.of(allowedRatings).noneMatch(allowedRating -> rating == allowedRating)) {
-    			continue;
+		List<T> filteredMethods = new ArrayList<>();
+		for (int i = 0; i < methods.size(); i++) {
+			int rating = methodMatchRating[i];
+			if (IntStream.of(allowedRatings).noneMatch(allowedRating -> rating == allowedRating)) {
+				continue;
 			}
 			T method = methods.get(i);
 			if (!allowVariadicMethods && method.isVarArgs()) {

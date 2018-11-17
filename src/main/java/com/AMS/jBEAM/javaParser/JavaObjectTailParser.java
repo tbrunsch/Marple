@@ -14,60 +14,60 @@ import java.util.stream.Collectors;
  */
 class JavaObjectTailParser extends AbstractJavaEntityParser
 {
-    JavaObjectTailParser(JavaParserPool parserSettings, ObjectInfo thisInfo) {
-        super(parserSettings, thisInfo);
-    }
+	JavaObjectTailParser(JavaParserPool parserSettings, ObjectInfo thisInfo) {
+		super(parserSettings, thisInfo);
+	}
 
-    @Override
-    ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
-        if (tokenStream.hasMore()) {
-            char nextChar = tokenStream.peekCharacter();
-            if (nextChar == '.') {
-            	return parseDot(tokenStream, currentContextInfo, expectedResultClasses);
-            } else if (nextChar == '[') {
-                Class<?> elementClass = getClass(currentContextInfo).getComponentType();
-                if (elementClass == null) {
-                    // no array type
-                    return new ParseError(tokenStream.getPosition(), "Cannot apply [] to non-array types");
-                }
-                ParseResultIF arrayIndexParseResult = parseArrayIndex(tokenStream);
-                switch (arrayIndexParseResult.getResultType()) {
-                    case COMPLETION_SUGGESTIONS:
-                        // code completion inside "[]" => propagate completion suggestions
-                        return arrayIndexParseResult;
-                    case PARSE_ERROR:
+	@Override
+	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+		if (tokenStream.hasMore()) {
+			char nextChar = tokenStream.peekCharacter();
+			if (nextChar == '.') {
+				return parseDot(tokenStream, currentContextInfo, expectedResultClasses);
+			} else if (nextChar == '[') {
+				Class<?> elementClass = getClass(currentContextInfo).getComponentType();
+				if (elementClass == null) {
+					// no array type
+					return new ParseError(tokenStream.getPosition(), "Cannot apply [] to non-array types");
+				}
+				ParseResultIF arrayIndexParseResult = parseArrayIndex(tokenStream);
+				switch (arrayIndexParseResult.getResultType()) {
+					case COMPLETION_SUGGESTIONS:
+						// code completion inside "[]" => propagate completion suggestions
+						return arrayIndexParseResult;
+					case PARSE_ERROR:
 					case AMBIGUOUS_PARSE_RESULT:
-                        // always propagate errors
-                        return arrayIndexParseResult;
-                    case PARSE_RESULT: {
+						// always propagate errors
+						return arrayIndexParseResult;
+					case PARSE_RESULT: {
 						ParseResult parseResult = (ParseResult) arrayIndexParseResult;
 						int parsedToPosition = parseResult.getParsedToPosition();
 						ObjectInfo indexInfo = parseResult.getObjectInfo();
 						ObjectInfo elementInfo = getArrayElementInfo(currentContextInfo, indexInfo);
-                        tokenStream.moveTo(parsedToPosition);
-                        return parserPool.getObjectTailParser().parse(tokenStream, elementInfo, expectedResultClasses);
-                    }
-                    default:
-                        throw new IllegalStateException("Unsupported parse result type: " + arrayIndexParseResult.getResultType());
-                }
-            } else if (nextChar == '(') {
-            	/*
-            	 * Prevent "<field>(" from being parsed as <field>. Otherwise, the expression
-            	 * "<field>()" will be ambiguous if there also exists a method with the name of <field> and no arguments.
-            	 */
-            	return new ParseError(tokenStream.getPosition() + 1, "Unexpected opening parenthesis '('");
+						tokenStream.moveTo(parsedToPosition);
+						return parserPool.getObjectTailParser().parse(tokenStream, elementInfo, expectedResultClasses);
+					}
+					default:
+						throw new IllegalStateException("Unsupported parse result type: " + arrayIndexParseResult.getResultType());
+				}
+			} else if (nextChar == '(') {
+				/*
+				 * Prevent "<field>(" from being parsed as <field>. Otherwise, the expression
+				 * "<field>()" will be ambiguous if there also exists a method with the name of <field> and no arguments.
+				 */
+				return new ParseError(tokenStream.getPosition() + 1, "Unexpected opening parenthesis '('");
 			}
-        }
-        // finished parsing
+		}
+		// finished parsing
 		if (expectedResultClasses != null
 				&& expectedResultClasses.stream().noneMatch(expectedResultClass -> ParseUtils.isConvertibleTo(getClass(currentContextInfo), expectedResultClass))) {
 			return new ParseError(tokenStream.getPosition(), "The class '" + getClass(currentContextInfo).getSimpleName() + "' cannot be casted to any of the expected class '" + expectedResultClasses.stream().map(clazz -> clazz.getSimpleName()).collect(Collectors.joining("', '")) + "'");
 		}
 
-        return new ParseResult(tokenStream.getPosition(), currentContextInfo);
-    }
+		return new ParseResult(tokenStream.getPosition(), currentContextInfo);
+	}
 
-    private ParseResultIF parseDot(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	private ParseResultIF parseDot(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		JavaToken characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals(".");
 		if (characterToken.isContainsCaret()) {

@@ -7,18 +7,18 @@ class CompletionSuggestions implements ParseResultIF
 {
 	static final CompletionSuggestions NONE	= new CompletionSuggestions(Collections.emptyMap());
 
-    private final Map<CompletionSuggestionIF, Integer> ratedSuggestions;
+	private final Map<CompletionSuggestionIF, Integer> ratedSuggestions;
 
-    CompletionSuggestions(Map<CompletionSuggestionIF, Integer> ratedSuggestions) {
-        this.ratedSuggestions = ratedSuggestions;
-    }
+	CompletionSuggestions(Map<CompletionSuggestionIF, Integer> ratedSuggestions) {
+		this.ratedSuggestions = ratedSuggestions;
+	}
 
-    @Override
-    public ParseResultType getResultType() {
-        return ParseResultType.COMPLETION_SUGGESTIONS;
-    }
+	@Override
+	public ParseResultType getResultType() {
+		return ParseResultType.COMPLETION_SUGGESTIONS;
+	}
 
 	Map<CompletionSuggestionIF, Integer> getRatedSuggestions() {
-        return ratedSuggestions;
-    }
+		return ratedSuggestions;
+	}
 }

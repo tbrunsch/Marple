@@ -8,15 +8,14 @@ import java.util.regex.Pattern;
 
 class JavaTokenStream implements Cloneable
 {
-    // TODO: Support white spaces
 	private static final Pattern	CHARACTER_PATTERN			= Pattern.compile("^(\\s*([^\\s])\\s*).*");
-    private static final Pattern    IDENTIFIER_PATTERN  		= Pattern.compile("^(\\s*([A-Za-z][_A-Za-z0-9]*)\\s*).*");
-    private static final Pattern	STRING_LITERAL_PATTERN		= Pattern.compile("^(\\s*\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"\\s*).*");
-    private static final Pattern	CHARACTER_LITERAL_PATTERN	= Pattern.compile("^(\\s*'(\\\\.|[^\\\\])'\\s*).*");
-    private static final Pattern	NAMED_LITERAL_PATTERN		= IDENTIFIER_PATTERN;
-    private static final Pattern	INTEGER_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)\\s*)($|[^0-9dDeEfFL].*)");
+	private static final Pattern	IDENTIFIER_PATTERN  		= Pattern.compile("^(\\s*([A-Za-z][_A-Za-z0-9]*)\\s*).*");
+	private static final Pattern	STRING_LITERAL_PATTERN		= Pattern.compile("^(\\s*\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"\\s*).*");
+	private static final Pattern	CHARACTER_LITERAL_PATTERN	= Pattern.compile("^(\\s*'(\\\\.|[^\\\\])'\\s*).*");
+	private static final Pattern	NAMED_LITERAL_PATTERN		= IDENTIFIER_PATTERN;
+	private static final Pattern	INTEGER_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)\\s*)($|[^0-9dDeEfFL].*)");
 	private static final Pattern	LONG_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)[lL]\\s*).*");
-    private static final Pattern	FLOAT_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+([eE][+-]?[0-9]+)?|\\.[0-9]+([eE][+-]?[0-9]+)?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?)[fF])\\s*).*");
+	private static final Pattern	FLOAT_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+([eE][+-]?[0-9]+)?|\\.[0-9]+([eE][+-]?[0-9]+)?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?)[fF])\\s*).*");
 	private static final Pattern	DOUBLE_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+(([eE][+-]?[0-9]+)?[dD]|[eE][+-]?[0-9]+[dD]?)|\\.[0-9]+([eE][+-]?[0-9]+)?[dD]?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?[dD]?))\\s*).*");
 
 	private static final Map<Character, Character> INTERPRETATION_OF_ESCAPED_CHARACTERS = ImmutableMap.<Character, Character>builder()
@@ -54,35 +53,35 @@ class JavaTokenStream implements Cloneable
 		return unescapedString.toString();
 	}
 
-	private final String    javaExpression;
-    private final int       caret;
+	private final String	javaExpression;
+	private final int	   caret;
 
-    private int             position;
+	private int			 position;
 
-    JavaTokenStream(String javaExpression, int caret) {
-        this(javaExpression, caret, 0);
-    }
+	JavaTokenStream(String javaExpression, int caret) {
+		this(javaExpression, caret, 0);
+	}
 
-    private JavaTokenStream(String javaExpression, int caret, int position) {
-        this.javaExpression = javaExpression;
-        this.caret = caret;
-        this.position = position;
-    }
+	private JavaTokenStream(String javaExpression, int caret, int position) {
+		this.javaExpression = javaExpression;
+		this.caret = caret;
+		this.position = position;
+	}
 
-    boolean hasMore() {
-        return position < javaExpression.length() && CHARACTER_PATTERN.matcher(javaExpression.substring(position)).matches();
-    }
+	boolean hasMore() {
+		return position < javaExpression.length() && CHARACTER_PATTERN.matcher(javaExpression.substring(position)).matches();
+	}
 
-    int getPosition() {
-        return position;
-    }
+	int getPosition() {
+		return position;
+	}
 
-    JavaToken readIdentifier() throws JavaTokenParseException {
-    	return readRegex(IDENTIFIER_PATTERN, 2, "No identifier found");
-    }
+	JavaToken readIdentifier() throws JavaTokenParseException {
+		return readRegex(IDENTIFIER_PATTERN, 2, "No identifier found");
+	}
 
-    JavaToken readStringLiteral() throws JavaTokenParseException {
-    	JavaToken escapedStringLiteralToken = readRegex(STRING_LITERAL_PATTERN, 2, "No string literal found");
+	JavaToken readStringLiteral() throws JavaTokenParseException {
+		JavaToken escapedStringLiteralToken = readRegex(STRING_LITERAL_PATTERN, 2, "No string literal found");
 		return unescapeStringToken(escapedStringLiteralToken);
 	}
 
@@ -96,7 +95,7 @@ class JavaTokenStream implements Cloneable
 	}
 
 	JavaToken readIntegerLiteral() throws JavaTokenParseException {
-    	return readRegex(INTEGER_LITERAL_PATTERN, 2, "No integer literal found");
+		return readRegex(INTEGER_LITERAL_PATTERN, 2, "No integer literal found");
 	}
 
 	JavaToken readLongLiteral() throws JavaTokenParseException {
@@ -133,50 +132,50 @@ class JavaTokenStream implements Cloneable
 		return new JavaToken(extractedString, containsCaret);
 	}
 
-    char peekCharacter() {
+	char peekCharacter() {
 		Matcher matcher = CHARACTER_PATTERN.matcher(javaExpression.substring(position));
 		if (!matcher.matches()) {
 			return 0;
 		}
 		String character = matcher.group(2);
 		return character.charAt(0);
-    }
+	}
 
-    JavaToken readCharacter() throws JavaTokenParseException {
+	JavaToken readCharacter() throws JavaTokenParseException {
 		return readRegex(CHARACTER_PATTERN, 2, null);
-    }
+	}
 
-    JavaToken readCharacterUnchecked() {
+	JavaToken readCharacterUnchecked() {
 		try {
 			return readCharacter();
 		} catch (JavaTokenParseException e) {
 			return null;
 		}
-    }
+	}
 
-    /**
-     * Returns true whether the position strived the caret when moving from position to nextPosition
-     */
-    private boolean moveForward(int numCharacters) {
-        int newPosition = position + numCharacters;
-        boolean containsCaret = position < caret && caret <= newPosition;
-        moveTo(newPosition);
-        return containsCaret;
-    }
+	/**
+	 * Returns true whether the position strived the caret when moving from position to nextPosition
+	 */
+	private boolean moveForward(int numCharacters) {
+		int newPosition = position + numCharacters;
+		boolean containsCaret = position < caret && caret <= newPosition;
+		moveTo(newPosition);
+		return containsCaret;
+	}
 
-    void moveTo(int newPosition) {
-        position = newPosition;
-    }
+	void moveTo(int newPosition) {
+		position = newPosition;
+	}
 
-    @Override
-    public JavaTokenStream clone() {
-        return new JavaTokenStream(javaExpression, caret, position);
-    }
+	@Override
+	public JavaTokenStream clone() {
+		return new JavaTokenStream(javaExpression, caret, position);
+	}
 
-    static class JavaTokenParseException extends Exception
-    {
-        JavaTokenParseException(String message) {
-            super(message);
-        }
-    }
+	static class JavaTokenParseException extends Exception
+	{
+		JavaTokenParseException(String message) {
+			super(message);
+		}
+	}
 }

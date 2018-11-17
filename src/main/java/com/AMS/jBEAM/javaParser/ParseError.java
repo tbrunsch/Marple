@@ -2,24 +2,24 @@ package com.AMS.jBEAM.javaParser;
 
 class ParseError implements ParseResultIF
 {
-    private final int       position;
-    private final String    message;
+	private final int		position;
+	private final String	message;
 
-    ParseError(int position, String message) {
-        this.position = position;
-        this.message = message;
-    }
+	ParseError(int position, String message) {
+		this.position = position;
+		this.message = message;
+	}
 
-    @Override
-    public ParseResultType getResultType() {
-        return ParseResultType.PARSE_ERROR;
-    }
+	@Override
+	public ParseResultType getResultType() {
+		return ParseResultType.PARSE_ERROR;
+	}
 
-    int getPosition() {
-        return position;
-    }
+	int getPosition() {
+		return position;
+	}
 
-    String getMessage() {
-        return message;
-    }
+	String getMessage() {
+		return message;
+	}
 }

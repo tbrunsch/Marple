@@ -15,46 +15,46 @@ import java.util.Optional;
  */
 class JavaFieldParser extends AbstractJavaEntityParser
 {
-    private final boolean staticOnly;
+	private final boolean staticOnly;
 
-    JavaFieldParser(JavaParserPool parserSettings, ObjectInfo thisInfo, boolean staticOnly) {
-        super(parserSettings, thisInfo);
-        this.staticOnly = staticOnly;
-    }
+	JavaFieldParser(JavaParserPool parserSettings, ObjectInfo thisInfo, boolean staticOnly) {
+		super(parserSettings, thisInfo);
+		this.staticOnly = staticOnly;
+	}
 
-    @Override
-    ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
-        int startPosition = tokenStream.getPosition();
-        JavaToken fieldNameToken;
-        try {
-            fieldNameToken = tokenStream.readIdentifier();
-        } catch (JavaTokenStream.JavaTokenParseException e) {
-            return new ParseError(startPosition, "Expected an identifier");
-        }
-        String fieldName = fieldNameToken.getValue();
-        int endPosition = tokenStream.getPosition();
+	@Override
+	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+		int startPosition = tokenStream.getPosition();
+		JavaToken fieldNameToken;
+		try {
+			fieldNameToken = tokenStream.readIdentifier();
+		} catch (JavaTokenStream.JavaTokenParseException e) {
+			return new ParseError(startPosition, "Expected an identifier");
+		}
+		String fieldName = fieldNameToken.getValue();
+		int endPosition = tokenStream.getPosition();
 
-        List<Field> fields = parserPool.getInspectionDataProvider().getFields(getClass(currentContextInfo), staticOnly);
+		List<Field> fields = parserPool.getInspectionDataProvider().getFields(getClass(currentContextInfo), staticOnly);
 
-        // check for code completion
-        if (fieldNameToken.isContainsCaret()) {
-            Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
+		// check for code completion
+		if (fieldNameToken.isContainsCaret()) {
+			Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 				fields,
 				field -> new CompletionSuggestionField(field, startPosition, endPosition),
 				ParseUtils.rateFieldByNameAndClassesFunc(fieldName, expectedResultClasses)
 			);
-            return new CompletionSuggestions(ratedSuggestions);
-        }
+			return new CompletionSuggestions(ratedSuggestions);
+		}
 
-        // no code completion requested => field name must exist
-        Optional<Field> firstFieldMatch = fields.stream().filter(field -> field.getName().equals(fieldName)).findFirst();
-        if (!firstFieldMatch.isPresent()) {
-            return new ParseError(startPosition, "Unknown field '" + fieldName + "'");
-        }
+		// no code completion requested => field name must exist
+		Optional<Field> firstFieldMatch = fields.stream().filter(field -> field.getName().equals(fieldName)).findFirst();
+		if (!firstFieldMatch.isPresent()) {
+			return new ParseError(startPosition, "Unknown field '" + fieldName + "'");
+		}
 
-        Field matchingField = firstFieldMatch.get();
-        ObjectInfo matchingFieldInfo = getFieldInfo(currentContextInfo, matchingField);
+		Field matchingField = firstFieldMatch.get();
+		ObjectInfo matchingFieldInfo = getFieldInfo(currentContextInfo, matchingField);
 
-        return parserPool.getObjectTailParser().parse(tokenStream, matchingFieldInfo, expectedResultClasses);
-    }
+		return parserPool.getObjectTailParser().parse(tokenStream, matchingFieldInfo, expectedResultClasses);
+	}
 }
