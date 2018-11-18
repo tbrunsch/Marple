@@ -175,6 +175,25 @@ public class JavaCompletionTest
 	}
 
 	@Test
+	public void testMethodParseErrorAndSideEffect() {
+		class TestClass
+		{
+			int sideEffectCounter = 0;
+
+			double f(int i, String s) {
+				return 1.0;
+			}
+			int g() { return sideEffectCounter++; }
+		}
+
+		TestClass testInstance = new TestClass();
+		new ErrorTestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("f(g(), s)", 9, JavaParseException.class);
+
+		assertEquals("Triggered side effect despite parse error", testInstance.sideEffectCounter, 0);
+	}
+
+	@Test
 	public void testMethod() {
 		/*
 		 * Convention for this test: Methods whose names consist of n characters have n arguments.

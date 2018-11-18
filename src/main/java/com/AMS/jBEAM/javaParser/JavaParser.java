@@ -19,7 +19,19 @@ public class JavaParser
 	};
 
 	public List<CompletionSuggestionIF> suggestCodeCompletion(String javaExpression, EvaluationMode evaluationMode, int caret, Object thisContext) throws JavaParseException {
-		ParseResultIF parseResult = parse(javaExpression, evaluationMode, caret, thisContext);
+		ParseResultIF parseResult;
+
+		if (evaluationMode == EvaluationMode.STRONGLY_TYPED) {
+			// First iteration without evaluation to avoid side effects when errors occur
+			parseResult = parse(javaExpression, EvaluationMode.NONE, caret, thisContext);
+			if (parseResult.getResultType() == ParseResultType.COMPLETION_SUGGESTIONS) {
+				// Second iteration with evaluation (side effects cannot be avoided)
+				parseResult = parse(javaExpression, evaluationMode, caret, thisContext);
+			}
+		} else {
+			parseResult = parse(javaExpression, evaluationMode, caret, thisContext);
+		}
+
 		switch (parseResult.getResultType()) {
 			case PARSE_RESULT: {
 				ParseResult result = (ParseResult) parseResult;
@@ -51,7 +63,19 @@ public class JavaParser
 	}
 
 	public Object evaluate(String javaExpression, EvaluationMode evaluationMode, Object thisContext) throws JavaParseException {
-		ParseResultIF parseResult = parse(javaExpression, evaluationMode,-1, thisContext);
+		ParseResultIF parseResult;
+
+		if (evaluationMode == EvaluationMode.STRONGLY_TYPED) {
+			// First iteration without evaluation to avoid side effects when errors occur
+			parseResult = parse(javaExpression, EvaluationMode.NONE,-1, thisContext);
+			if (parseResult.getResultType() == ParseResultType.PARSE_RESULT) {
+				// Second iteration with evaluation (side effects cannot be avoided)
+				parseResult = parse(javaExpression, evaluationMode,-1, thisContext);
+			}
+		} else {
+			parseResult = parse(javaExpression, evaluationMode,-1, thisContext);
+		}
+
 		switch (parseResult.getResultType()) {
 			case PARSE_RESULT: {
 				ParseResult result = (ParseResult) parseResult;

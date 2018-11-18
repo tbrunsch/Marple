@@ -582,6 +582,24 @@ public class JavaExpressionEvaluationTest
 			.test("f(getInt(), 1.0f)", 4);
 	}
 
+	@Test
+	public void testMethodParseErrorAndSideEffect() {
+		class TestClass
+		{
+			int sideEffectCounter = 0;
+
+			double f(int i, String s) {
+				return 1.0;
+			}
+			int g() { return sideEffectCounter++; }
+		}
+
+		TestClass testInstance = new TestClass();
+		new ErrorTestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("f(g(), s)");
+
+		assertEquals("Triggered side effect despite parse error", testInstance.sideEffectCounter, 0);
+	}
 	/*
 	 * Class for creating tests with expected successful code completions
 	 */
