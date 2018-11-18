@@ -1,9 +1,6 @@
 package com.AMS.jBEAM.javaParser;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -170,6 +167,7 @@ public class ReflectionUtils
 											.collect(Collectors.toList());
 			// Sort fields because they are not guaranteed to be in any order
 			Collections.sort(declaredFields, Comparator.comparing(field -> field.getName().toLowerCase()));
+
 			for (Field field : declaredFields) {
 				if (filterShadowedFields) {
 					String fieldName = field.getName();
@@ -188,12 +186,25 @@ public class ReflectionUtils
 	 * Methods
 	 */
 	public static List<Method> getMethods(Class<?> clazz) {
+		Multimap<String, Class<?>[]> encounteredSignatures = ArrayListMultimap.create();
+
 		List<Method> methods = new ArrayList<>();
 		for (Class<?> curClazz = clazz; curClazz != null; curClazz = curClazz.getSuperclass()) {
 			List<Method> declaredMethods = Arrays.asList(curClazz.getDeclaredMethods());
 			// Sort methods because they are not guaranteed to be in any order
 			Collections.sort(declaredMethods, Comparator.comparing(method -> method.getName().toLowerCase()));
-			methods.addAll(declaredMethods);
+
+			for (Method method : declaredMethods) {
+				String methodName = method.getName();
+				Collection<Class<?>[]> encounteredArgumentTypeCombinations = encounteredSignatures.get(methodName);
+				Class<?>[] argumentTypes = method.getParameterTypes();
+				boolean isOverriden = encounteredArgumentTypeCombinations.stream().anyMatch(types -> Arrays.equals(argumentTypes, types));
+				if (isOverriden) {
+					continue;
+				}
+				encounteredSignatures.put(methodName, argumentTypes);
+				methods.add(method);
+			}
 		}
 		return methods;
 	}
