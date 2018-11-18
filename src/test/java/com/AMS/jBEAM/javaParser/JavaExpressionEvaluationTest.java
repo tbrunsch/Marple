@@ -600,6 +600,28 @@ public class JavaExpressionEvaluationTest
 
 		assertEquals("Triggered side effect despite parse error", testInstance.sideEffectCounter, 0);
 	}
+
+	@Test
+	public void testParenthesizedExpression() {
+		class TestClass
+		{
+			int y = 1;
+			double x = 2.0;
+
+			void goDoNothing() {}
+			Float getFloat(int i) { return i + 0.5f; }
+		}
+
+		final String getClass = "getClass()";
+		Object testInstance = new TestClass();
+		new TestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("(getFloat(y).toString())", "1.5")
+			.test("(getFloat(y)).toString()", "1.5")
+			.test("(getFloat(y).toString()).length()", 3)
+			.test("((x))", 2.0)
+			.test("(((1.3e-7)))", 1.3e-7);
+	}
+
 	/*
 	 * Class for creating tests with expected successful code completions
 	 */

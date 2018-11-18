@@ -373,7 +373,7 @@ public class JavaCompletionTest
 
 		final String hashCode = "hashCode()";
 		final String getClass = "getClass()";
-		TestClass testInstance = new TestClass();
+		Object testInstance = new TestClass();
 		new TestExecuter(testInstance, EvaluationMode.NONE)
 			.test("getTestClasses()[", "xyz", hashCode, "xyzw", "xy")
 			.test("getTestClasses()[x", "xyz", "xyzw", "xy", hashCode)
@@ -403,7 +403,7 @@ public class JavaCompletionTest
 			private Object getArray(int size) { return new TestClass[size]; }
 		}
 
-		TestClass testInstance = new TestClass();
+		Object testInstance = new TestClass();
 		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
 			.test("getArray(size)[", 15, JavaParseException.class);
 
@@ -435,7 +435,7 @@ public class JavaCompletionTest
 
 		final String hashCode = "hashCode()";
 		final String toString = "toString()";
-		TestClass3 testInstance = new TestClass3();
+		Object testInstance = new TestClass3();
 		new TestExecuter(testInstance, EvaluationMode.NONE)
 			.test("getTestClass(", "intValue", "stringValue")
 			.test("getTestClass(i", "intValue", "stringValue", hashCode)
@@ -469,13 +469,32 @@ public class JavaCompletionTest
 			TestClass2 getTestClass(TestClass2 testClass) { return testClass; }
 		}
 
-		TestClass3 testInstance = new TestClass3();
+		Object testInstance = new TestClass3();
 		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
 			.test("getTestClass(getTestClass(i)).", 30, JavaParseException.class);
 
 		new TestExecuter(testInstance, EvaluationMode.DUCK_TYPING)
 			.test("getTestClass(getTestClass(i)).", "myInt")
 			.test("getTestClass(getTestClass(j)).", "myString");
+	}
+
+	@Test
+	public void testParenthesizedExpression() {
+		class TestClass
+		{
+			int y = 1;
+			double x = 2.0;
+
+			void goDoNothing() {}
+			Float getFloat(int i) { return i + 0.5f; }
+		}
+
+		final String getClass = "getClass()";
+		Object testInstance = new TestClass();
+		new TestExecuter(testInstance, EvaluationMode.NONE)
+			.test("(", "x", "y", "getFloat()", "goDoNothing()")
+			.test("(g", "getFloat()", "goDoNothing()", getClass)
+			.test("(getFloat(y).toString()).le", "length()");
 	}
 
 	private static List<String> extractSuggestions(List<CompletionSuggestionIF> completions) {

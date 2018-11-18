@@ -93,9 +93,7 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 		JavaToken characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals("[");
 		if (characterToken.isContainsCaret()) {
-			int insertionBegin, insertionEnd;
-			insertionBegin = insertionEnd = tokenStream.getPosition();
-			return suggestFieldsAndMethods(thisInfo, expectedResultClasses, insertionBegin, insertionEnd);
+			return suggestFieldsAndMethods(tokenStream, expectedResultClasses);
 		}
 
 		ParseResultIF arrayIndexParseResult = parserPool.getExpressionParser().parse(tokenStream, thisInfo, expectedResultClasses);

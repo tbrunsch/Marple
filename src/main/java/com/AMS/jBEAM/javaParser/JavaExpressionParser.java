@@ -16,7 +16,8 @@ class JavaExpressionParser extends AbstractJavaEntityParser
 		return JavaParser.parse(tokenStream, thisInfo, expectedResultClasses,
 			parserPool.getLiteralParser(),
 			parserPool.getFieldParser(false),
-			parserPool.getMethodParser(false)	//,
+			parserPool.getMethodParser(false),
+			parserPool.getParenthesizedExpressionParser()
 			// TODO: Add more parsers
 			// parserPool.getClassParser(),
 			// parserPool.getConstructorParser(),

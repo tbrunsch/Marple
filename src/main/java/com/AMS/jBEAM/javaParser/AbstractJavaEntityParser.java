@@ -92,7 +92,13 @@ abstract class AbstractJavaEntityParser
 		return new ObjectInfo(arrayElementValue, arrayElementClass);
 	}
 
-	CompletionSuggestions suggestFieldsAndMethods(ObjectInfo contextInfo, List<Class<?>> expectedResultClasses, final int insertionBegin, final int insertionEnd) {
+	CompletionSuggestions suggestFieldsAndMethods(JavaTokenStream tokenStream, List<Class<?>> expectedClasses) {
+		int insertionBegin, insertionEnd;
+		insertionBegin = insertionEnd = tokenStream.getPosition();
+		return suggestFieldsAndMethods(thisInfo, expectedClasses, insertionBegin, insertionEnd);
+	}
+
+	CompletionSuggestions suggestFieldsAndMethods(ObjectInfo contextInfo, List<Class<?>> expectedClasses, final int insertionBegin, final int insertionEnd) {
 		Map<CompletionSuggestionIF, Integer> ratedSuggestions = new LinkedHashMap<>();
 
 		Class<?> contextClass = getClass(contextInfo);
@@ -101,14 +107,14 @@ abstract class AbstractJavaEntityParser
 		ratedSuggestions.putAll(ParseUtils.createRatedSuggestions(
 				fields,
 				field -> new CompletionSuggestionField(field, insertionBegin, insertionEnd),
-				ParseUtils.rateFieldByClassesFunc(expectedResultClasses))
+				ParseUtils.rateFieldByClassesFunc(expectedClasses))
 		);
 
 		List<Method> methods = parserPool.getInspectionDataProvider().getMethods(contextClass, false);
 		ratedSuggestions.putAll(ParseUtils.createRatedSuggestions(
 				methods,
 				method -> new CompletionSuggestionMethod(method, insertionBegin, insertionEnd),
-				ParseUtils.rateMethodByClassesFunc(expectedResultClasses))
+				ParseUtils.rateMethodByClassesFunc(expectedClasses))
 		);
 
 		return new CompletionSuggestions(ratedSuggestions);
@@ -154,7 +160,7 @@ abstract class AbstractJavaEntityParser
 					// no suggestions since no further arguments expected
 					methodArguments.add(CompletionSuggestions.NONE);
 				} else {
-					methodArguments.add(suggestFieldsAndMethodsForExpectedClasses(tokenStream, expectedArgumentTypes_i));
+					methodArguments.add(suggestFieldsAndMethods(tokenStream, expectedArgumentTypes_i));
 				}
 				return methodArguments;
 			}
@@ -227,12 +233,6 @@ abstract class AbstractJavaEntityParser
 		}
 		Class<?> argClass = getClass(argInfo);
 		return ParseUtils.isConvertibleTo(argClass, expectedArgumentType);
-	}
-
-	private CompletionSuggestions suggestFieldsAndMethodsForExpectedClasses(JavaTokenStream tokenStream, List<Class<?>> expectedClasses) {
-		int insertionBegin, insertionEnd;
-		insertionBegin = insertionEnd = tokenStream.getPosition();
-		return suggestFieldsAndMethods(thisInfo, expectedClasses, insertionBegin, insertionEnd);
 	}
 
 	<T extends Executable> List<T> getBestMatchingMethods(List<T> availableMethods, List<ObjectInfo> argumentInfos) {

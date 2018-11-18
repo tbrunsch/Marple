@@ -13,6 +13,7 @@ class JavaParserPool
 	private final AbstractJavaEntityParser		staticMethodParser;
 	private final AbstractJavaEntityParser		literalParser;
 	private final AbstractJavaEntityParser		objectTailParser;
+	private final AbstractJavaEntityParser		parenthesizedExpressionParser;
 
 	JavaParserPool(ObjectInfo thisInfo, EvaluationMode evaluationMode) {
 		this.evaluationMode = evaluationMode;
@@ -24,6 +25,7 @@ class JavaParserPool
 		staticMethodParser = new JavaMethodParser(this, thisInfo, true);
 		literalParser = new JavaLiteralParser(this, thisInfo);
 		objectTailParser = new JavaObjectTailParser(this, thisInfo);
+		parenthesizedExpressionParser = new JavaParenthesizedExpressionParser(this, thisInfo);
 	}
 
 	EvaluationMode getEvaluationMode() {
@@ -52,5 +54,9 @@ class JavaParserPool
 
 	AbstractJavaEntityParser getObjectTailParser() {
 		return objectTailParser;
+	}
+
+	AbstractJavaEntityParser getParenthesizedExpressionParser() {
+		return parenthesizedExpressionParser;
 	}
 }
