@@ -11,7 +11,7 @@ class JavaInspectionDataProvider
 			throw new IllegalArgumentException("Flag 'staticFieldsOnly' is currently not supported");
 		}
 		// TODO: Consider settings
-		return ReflectionUtils.getFields(clazz);
+		return ReflectionUtils.getFields(clazz, true);
 	}
 
 	List<Method> getMethods(Class<?> clazz, boolean staticMethodsOnly) {

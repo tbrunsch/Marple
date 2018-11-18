@@ -18,7 +18,7 @@ class SwingFieldInspectionPanel extends JPanel
 	public SwingFieldInspectionPanel(final Object object) {
 		super(new GridBagLayout());
 
-		List<Field> fields = ReflectionUtils.getFields(object.getClass());
+		List<Field> fields = ReflectionUtils.getFields(object.getClass(), false);
 		fields.forEach(field -> field.setAccessible(true));
 
 		List<ColumnDescriptionIF<Field>> columnDescriptions = createColumnDescriptionsFor(object);

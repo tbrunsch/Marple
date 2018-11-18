@@ -142,7 +142,7 @@ public class ReflectionUtils
 	public static <T> Map<T, List<Field>> findFieldValues(Object instance, Set<T> fieldValues) {
 		Map<T, List<Field>> fieldsByValue = new HashMap<>();
 		if (instance != null) {
-			List<Field> fields = getFields(instance.getClass());
+			List<Field> fields = getFields(instance.getClass(), false);
 			for (Field field : fields) {
 				try {
 					field.setAccessible(true);
@@ -161,13 +161,25 @@ public class ReflectionUtils
 		return fieldsByValue;
 	}
 
-	public static List<Field> getFields(Class<?> clazz) {
+	public static List<Field> getFields(Class<?> clazz, boolean filterShadowedFields) {
+		Set<String> encounteredFieldNames = new HashSet<>();
 		List<Field> fields = new ArrayList<>();
 		for (Class<?> curClazz = clazz; curClazz != null; curClazz = curClazz.getSuperclass()) {
-			List<Field> declaredFields = Arrays.stream(curClazz.getDeclaredFields()).filter(field -> !field.getName().startsWith("this$")).collect(Collectors.toList());
+			List<Field> declaredFields = Arrays.stream(curClazz.getDeclaredFields())
+											.filter(field -> !field.getName().startsWith("this$"))
+											.collect(Collectors.toList());
 			// Sort fields because they are not guaranteed to be in any order
 			Collections.sort(declaredFields, Comparator.comparing(field -> field.getName().toLowerCase()));
-			fields.addAll(declaredFields);
+			for (Field field : declaredFields) {
+				if (filterShadowedFields) {
+					String fieldName = field.getName();
+					if (encounteredFieldNames.contains(fieldName)) {
+						continue;
+					}
+					encounteredFieldNames.add(fieldName);
+				}
+				fields.add(field);
+			}
 		}
 		return fields;
 	}
