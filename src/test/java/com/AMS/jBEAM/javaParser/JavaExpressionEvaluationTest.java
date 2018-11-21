@@ -419,6 +419,22 @@ public class JavaExpressionEvaluationTest
 	}
 
 	@Test
+	public void testThisLiteral() {
+		class TestClass
+		{
+			int value;
+
+			TestClass(int value) { this.value = value; }
+			int getValue(TestClass testInstance) { return testInstance.value; }
+		}
+
+		Object testInstance = new TestClass(23);
+		new TestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("this.value", 23)
+			.test("getValue(this)", 23);
+	}
+
+	@Test
 	public void testIntegerLiteral() {
 		class TestClass
 		{

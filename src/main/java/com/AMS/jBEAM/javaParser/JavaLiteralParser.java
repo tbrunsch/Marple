@@ -20,12 +20,23 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 				return parseStringLiteral(tokenStream, expectedResultClasses);
 			case '\'':
 				return parseCharacterLiteral(tokenStream, expectedResultClasses);
-			case 't':
-				return parseNamedLiteral(tokenStream, true, boolean.class, expectedResultClasses);
+			case 't': {
+				JavaTokenStream tempTokenStream = tokenStream.clone();
+				tempTokenStream.readCharacterUnchecked();
+				if (tempTokenStream.hasMore()) {
+					c = tempTokenStream.peekCharacter();
+					if (c == 'r') {
+						return parseNamedLiteral(tokenStream, "true", true, boolean.class, expectedResultClasses);
+					} else if (c == 'h') {
+						return parseNamedLiteral(tokenStream, "this", thisInfo.getObject(), thisInfo.getDeclaredClass(), expectedResultClasses);
+					}
+				}
+				return new ParseError(startPosition, "Expected a literal");
+			}
 			case 'f':
-				return parseNamedLiteral(tokenStream, false, boolean.class, expectedResultClasses);
+				return parseNamedLiteral(tokenStream, "false", false, boolean.class, expectedResultClasses);
 			case 'n':
-				return parseNamedLiteral(tokenStream, null, null, expectedResultClasses);
+				return parseNamedLiteral(tokenStream, "null", null, null, expectedResultClasses);
 			default: {
 				if (!"+-.0123456789".contains(String.valueOf(c))) {
 					return new ParseError(startPosition, "Expected a literal");
@@ -88,9 +99,7 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		return parserPool.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectedResultClasses);
 	}
 
-	private ParseResultIF parseNamedLiteral(JavaTokenStream tokenStream, Object namedLiteral, Class<?> literalClass, List<Class<?>> expectedResultClasses) {
-		String literalName = namedLiteral == null ? "null" : namedLiteral.toString();
-
+	private ParseResultIF parseNamedLiteral(JavaTokenStream tokenStream, String literalName, Object literalValue, Class<?> literalClass, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
 		JavaToken literalToken;
 		try {
@@ -105,7 +114,7 @@ class JavaLiteralParser extends AbstractJavaEntityParser
 		if (!literalToken.getValue().equals(literalName)) {
 			return new ParseError(startPosition, "Expected '" + literalName + "'");
 		}
-		ObjectInfo namedLiteralInfo = new ObjectInfo(namedLiteral, literalClass);
+		ObjectInfo namedLiteralInfo = new ObjectInfo(literalValue, literalClass);
 		return parserPool.getObjectTailParser().parse(tokenStream, namedLiteralInfo, expectedResultClasses);
 	}
 
