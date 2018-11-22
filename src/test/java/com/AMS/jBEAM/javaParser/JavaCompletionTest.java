@@ -529,7 +529,7 @@ public class JavaCompletionTest
 					javaExpression,
 					expectedSuggestions,
 					suggestions),
-					suggestions.size() > expectedSuggestions.length);
+					suggestions.size() >= expectedSuggestions.length);
 			for (int i = 0; i < expectedSuggestions.length; i++) {
 				assertEquals("Expression: " + javaExpression, expectedSuggestions[i], suggestions.get(i));
 			}
