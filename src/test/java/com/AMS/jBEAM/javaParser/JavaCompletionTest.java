@@ -34,7 +34,7 @@ public class JavaCompletionTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecuter(testInstance, EvaluationMode.NONE)
+		new TestExecutor(testInstance, EvaluationMode.NONE)
 			.test("xy",   "xy", "XY", "xy_z", "XYZ", "x", "X")
 			.test("XYZ",  "XYZ", "XY", "X", "x", "xy")
 			.test("X", "X", "x", "XY", "XYZ", "xy_z", "xy")
@@ -43,7 +43,7 @@ public class JavaCompletionTest
 			.test("x", "x", "X", "xy_z", "xy", "XY", "XYZ")
 			.test("XYW", "XY", "X", "x", "xy");
 
-		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
+		new ErrorTestExecutor(testInstance, EvaluationMode.NONE)
 			.test("xy", -1, IllegalStateException.class)
 			.test("bla", -1, JavaParseException.class)
 			.test("xy,", 3, JavaParseException.class);
@@ -61,14 +61,14 @@ public class JavaCompletionTest
 		}
 
 		TestClass testInstance = new TestClass();
-		new TestExecuter(testInstance, EvaluationMode.NONE)
+		new TestExecutor(testInstance, EvaluationMode.NONE)
 			.test("member.", "member", "X", "xy", "XYZ")
 			.test("member.x", "X", "xy", "XYZ", "member")
 			.test("member.xy", "xy", "XYZ", "X", "member")
 			.test("member.xyz", "XYZ", "xy", "X", "member")
 			.test("member.mem", "member", "X", "xy", "XYZ");
 
-		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
+		new ErrorTestExecutor(testInstance, EvaluationMode.NONE)
 			.test("membeR.", -1, JavaParseException.class)
 			.test("MEMBER.xy", -1, JavaParseException.class)
 			.test("member.xy.XY", -1, JavaParseException.class)
@@ -94,13 +94,13 @@ public class JavaCompletionTest
 		}
 
 		TestClass testInstance = new TestClass();
-		new TestExecuter(testInstance, EvaluationMode.NONE)
+		new TestExecutor(testInstance, EvaluationMode.NONE)
 			.test("member.", "x", "xyz")
 			.test("member.x", "x", "xyz")
 			.test("member.xy", "xyz", "x")
 			.test("member.xyz", "xyz", "x");
 
-		new TestExecuter(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
 			.test("member.", "xy", "x", "xyz")
 			.test("member.x", "x", "xy", "xyz")
 			.test("member.xy", "xy", "xyz", "x")
@@ -120,7 +120,7 @@ public class JavaCompletionTest
 
 		final String hashCode = "hashCode()";
 		TestClass testInstance = new TestClass();
-		new TestExecuter(testInstance, EvaluationMode.NONE)
+		new TestExecutor(testInstance, EvaluationMode.NONE)
 			.test("member[", "xyz", hashCode, "xyzw", "member", "xy")
 			.test("member[x", "xyz", "xyzw", "xy", hashCode, "member")
 			.test("member[xy", "xy", "xyz", "xyzw", hashCode, "member")
@@ -130,7 +130,7 @@ public class JavaCompletionTest
 			.test("member[xyz].", "member", "xy", "xyz", "xyzw")
 			.test("member[xyzw].x", "xy", "xyz", "xyzw", "member");
 
-		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
+		new ErrorTestExecutor(testInstance, EvaluationMode.NONE)
 			.test("xy[", 3, JavaParseException.class)
 			.test("xyz[", 4, JavaParseException.class)
 			.test("xyzw[", 5, JavaParseException.class)
@@ -161,15 +161,15 @@ public class JavaCompletionTest
 		}
 
 		TestClass testInstance = new TestClass();
-		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
+		new ErrorTestExecutor(testInstance, EvaluationMode.NONE)
 			.test("array[", 6, JavaParseException.class);
 
-		new TestExecuter(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
 			.test("array[", "i0", "i1", "i2")
 			.test("array[i0].", "value")
 			.test("array[i1].", "index");
 
-		new ErrorTestExecuter(testInstance, EvaluationMode.DUCK_TYPING)
+		new ErrorTestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
 			.test("array[i2].", 10, JavaParseException.class)
 			.test("array[array[i1].index].", 23, JavaParseException.class);
 	}
@@ -187,7 +187,7 @@ public class JavaCompletionTest
 		}
 
 		TestClass testInstance = new TestClass();
-		new ErrorTestExecuter(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
 			.test("f(g(), s)", 9, JavaParseException.class);
 
 		assertEquals("Triggered side effect despite parse error", testInstance.sideEffectCounter, 0);
@@ -227,7 +227,7 @@ public class JavaCompletionTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecuter(testInstance, EvaluationMode.NONE)
+		new TestExecutor(testInstance, EvaluationMode.NONE)
 			.test("xy",		methodsFormatter.apply(new String[]{"xy", "XY", "xy_z", "XYZ", "XYZ", "x", "X"}))
 			.test("XYZ",	methodsFormatter.apply(new String[]{"XYZ", "XYZ", "XY", "X", "x", "xy"}))
 			.test("X",		methodsFormatter.apply(new String[]{"X", "x", "XY", "XYZ", "XYZ", "xy_z", "xy"}))
@@ -236,7 +236,7 @@ public class JavaCompletionTest
 			.test("x",		methodsFormatter.apply(new String[]{"x", "X", "xy_z", "xy", "XY", "XYZ", "XYZ"}))
 			.test("XYW",	methodsFormatter.apply(new String[]{"XY", "X", "x", "xy"}));
 
-		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
+		new ErrorTestExecutor(testInstance, EvaluationMode.NONE)
 			.test("other()", -1, IllegalStateException.class)
 			.test("bla", -1, JavaParseException.class)
 			.test("other(),", 8, JavaParseException.class);
@@ -256,7 +256,7 @@ public class JavaCompletionTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecuter(testInstance, EvaluationMode.NONE)
+		new TestExecutor(testInstance, EvaluationMode.NONE)
 			.test("prefix", "prefixC", "prefixD", "prefixI", "prefixC()", "prefixD()", "prefixI()")
 			.test("prefixI", "prefixI", "prefixI()", "prefixC", "prefixD")
 			.test("prefixD", "prefixD", "prefixD()", "prefixC", "prefixI")
@@ -265,7 +265,7 @@ public class JavaCompletionTest
 			.test("prefixD(", "prefixC", "prefixC()", "prefixD", "prefixI", "prefixD()", "prefixI()")
 			.test("prefixC(", "prefixI", "prefixI()", "hashCode()", "prefixC", "prefixC()", "prefixD", "prefixD()");
 
-		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
+		new ErrorTestExecutor(testInstance, EvaluationMode.NONE)
 			.test("prefixI(prefixD)", -1, IllegalStateException.class)
 			.test("prefixD(prefixI)", 16, JavaParseException.class)
 			.test("prefixC(prefixI,", 16, JavaParseException.class)
@@ -281,10 +281,10 @@ public class JavaCompletionTest
 		}
 
 		Object testInstance = new TestClass();
-		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
+		new ErrorTestExecutor(testInstance, EvaluationMode.NONE)
 			.test("getTestClassObject(getObject()).get", 35, JavaParseException.class);
 
-		new TestExecuter(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
 			.test("getTestClassObject(getObject()).get", "getObject()", "getTestClassObject()", "getClass()");
 	}
 
@@ -307,18 +307,18 @@ public class JavaCompletionTest
 		}
 
 		Object testInstance = new TestClass2();
-		new TestExecuter(testInstance, EvaluationMode.NONE)
+		new TestExecutor(testInstance, EvaluationMode.NONE)
 			.test("getTestClass", "getTestClass()")
 			.test("getTestClass(c).", "d", "i", "getObject()")
 			.test("getTestClass(c).get", "getObject()")
 			.test("getTestClass(c).getObject(", "c", "s")
 			.test("getTestClass(c).getObject(getTestClass(c).d).", "clone()", "equals()");
 
-		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
-				.test("getTestClazz().", -1, JavaParseException.class)
-				.test("getTestClazz().i", -1, JavaParseException.class)
-				.test("getTestClass().i.d", -1, JavaParseException.class)
-				.test("getTestClass(c).getObject(getTestClass(c).d)", -1, IllegalStateException.class);
+		new ErrorTestExecutor(testInstance, EvaluationMode.NONE)
+			.test("getTestClazz().", -1, JavaParseException.class)
+			.test("getTestClazz().i", -1, JavaParseException.class)
+			.test("getTestClass().i.d", -1, JavaParseException.class)
+			.test("getTestClass(c).getObject(getTestClass(c).d)", -1, IllegalStateException.class);
 	}
 
 	@Test
@@ -345,14 +345,14 @@ public class JavaCompletionTest
 
 		final String getClass = "getClass()";
 		Object testInstance = new TestClass();
-		new TestExecuter(testInstance, EvaluationMode.NONE)
+		new TestExecutor(testInstance, EvaluationMode.NONE)
 			.test("getObject().", "x", "xyz", "getInt()")
 			.test("getObject().x", "x", "xyz", "getInt()")
 			.test("getObject().xy", "xyz", "x", "getInt()")
 			.test("getObject().xyz", "xyz", "x", "getInt()")
 			.test("getObject().get", "getInt()", getClass, "x", "xyz");
 
-		new TestExecuter(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
 			.test("getObject().", "xy", "x", "xyz", "getDouble()", "getInt()")
 			.test("getObject().x", "x", "xy", "xyz", "getDouble()", "getInt()")
 			.test("getObject().xy", "xy", "xyz", "x", "getDouble()", "getInt()")
@@ -374,7 +374,7 @@ public class JavaCompletionTest
 		final String hashCode = "hashCode()";
 		final String getClass = "getClass()";
 		Object testInstance = new TestClass();
-		new TestExecuter(testInstance, EvaluationMode.NONE)
+		new TestExecutor(testInstance, EvaluationMode.NONE)
 			.test("getTestClasses()[", "xyz", hashCode, "xyzw", "xy")
 			.test("getTestClasses()[x", "xyz", "xyzw", "xy", hashCode)
 			.test("getTestClasses()[xy", "xy", "xyz", "xyzw", hashCode)
@@ -384,7 +384,7 @@ public class JavaCompletionTest
 			.test("getTestClasses()[xyz].", "xy", "xyz", "xyzw")
 			.test("getTestClasses()[xyzw].x", "xy", "xyz", "xyzw");
 
-		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
+		new ErrorTestExecutor(testInstance, EvaluationMode.NONE)
 			.test("xy[", 3, JavaParseException.class)
 			.test("xyz[", 4, JavaParseException.class)
 			.test("xyzw[", 5, JavaParseException.class)
@@ -404,10 +404,10 @@ public class JavaCompletionTest
 		}
 
 		Object testInstance = new TestClass();
-		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
+		new ErrorTestExecutor(testInstance, EvaluationMode.NONE)
 			.test("getArray(size)[", 15, JavaParseException.class);
 
-		new TestExecuter(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
 			.test("getArray(size)[", "index", "size")
 			.test("getArray(size)[index].", "index", "size");
 	}
@@ -436,7 +436,7 @@ public class JavaCompletionTest
 		final String hashCode = "hashCode()";
 		final String toString = "toString()";
 		Object testInstance = new TestClass3();
-		new TestExecuter(testInstance, EvaluationMode.NONE)
+		new TestExecutor(testInstance, EvaluationMode.NONE)
 			.test("getTestClass(", "intValue", "stringValue")
 			.test("getTestClass(i", "intValue", "stringValue", hashCode)
 			.test("getTestClass(s", "stringValue", "intValue")
@@ -470,10 +470,10 @@ public class JavaCompletionTest
 		}
 
 		Object testInstance = new TestClass3();
-		new ErrorTestExecuter(testInstance, EvaluationMode.NONE)
+		new ErrorTestExecutor(testInstance, EvaluationMode.NONE)
 			.test("getTestClass(getTestClass(i)).", 30, JavaParseException.class);
 
-		new TestExecuter(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
 			.test("getTestClass(getTestClass(i)).", "myInt")
 			.test("getTestClass(getTestClass(j)).", "myString");
 	}
@@ -491,10 +491,39 @@ public class JavaCompletionTest
 
 		final String getClass = "getClass()";
 		Object testInstance = new TestClass();
-		new TestExecuter(testInstance, EvaluationMode.NONE)
+		new TestExecutor(testInstance, EvaluationMode.NONE)
 			.test("(", "x", "y", "getFloat()", "goDoNothing()")
 			.test("(g", "getFloat()", "goDoNothing()", getClass)
 			.test("(getFloat(y).toString()).le", "length()");
+	}
+
+	@Test
+	public void testClassCast() {
+		class TestClass
+		{
+			final int i;
+			final double d;
+			final Object o;
+
+			TestClass(int i, double d) {
+				this.i = i;
+				this.d = d;
+				o = this;
+			}
+
+			TestClass get(TestClass o) { return o; }
+		}
+
+		Object testInstance = new TestClass(5, -2.0);
+		new TestExecutor(testInstance, EvaluationMode.NONE)
+			.test("get((TestClass) o).", "d", "i", "o")
+			.test("get((TestClass) this).", "d", "i", "o")
+			.test("get(this).", "d", "i", "o")				// no cast required for this
+			.test("(com.AMS.jBEAM.javaPars", "javaParser")
+			.test("(com.AMS.jBEAM.javaParser.JavaCo", "JavaCompletionTest");
+
+		new ErrorTestExecutor(testInstance, EvaluationMode.NONE)
+			.test("get(o).", 7, JavaParseException.class);
 	}
 
 	private static List<String> extractSuggestions(List<CompletionSuggestionIF> completions) {
@@ -506,17 +535,17 @@ public class JavaCompletionTest
 	/*
 	 * Class for creating tests with expected successful code completions
 	 */
-	private static class TestExecuter
+	private static class TestExecutor
 	{
 		private final Object					testInstance;
 		private final EvaluationMode 			evaluationMode;
 
-		TestExecuter(Object testInstance, EvaluationMode evaluationMode) {
+		TestExecutor(Object testInstance, EvaluationMode evaluationMode) {
 			this.testInstance = testInstance;
 			this.evaluationMode = evaluationMode;
 		}
 
-		TestExecuter test(String javaExpression, String... expectedSuggestions) {
+		TestExecutor test(String javaExpression, String... expectedSuggestions) {
 			JavaParser parser = new JavaParser();
 			int caret = javaExpression.length();
 			List<String> suggestions = null;
@@ -540,17 +569,17 @@ public class JavaCompletionTest
 	/*
 	 * Class for creating tests with expected exceptions
 	 */
-	private static class ErrorTestExecuter
+	private static class ErrorTestExecutor
 	{
-		private final Object													testInstance;
-		private final EvaluationMode 											evaluationMode;
+		private final Object			testInstance;
+		private final EvaluationMode	evaluationMode;
 
-		ErrorTestExecuter(Object testInstance, EvaluationMode evaluationMode) {
+		ErrorTestExecutor(Object testInstance, EvaluationMode evaluationMode) {
 			this.testInstance = testInstance;
 			this.evaluationMode = evaluationMode;
 		}
 
-		ErrorTestExecuter test(String javaExpression, int caret, Class<? extends Exception> expectedExceptionClass) {
+		ErrorTestExecutor test(String javaExpression, int caret, Class<? extends Exception> expectedExceptionClass) {
 			JavaParser parser = new JavaParser();
 			try {
 				parser.suggestCodeCompletion(javaExpression, evaluationMode, caret, testInstance);

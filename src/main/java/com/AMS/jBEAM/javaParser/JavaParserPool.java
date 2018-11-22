@@ -2,6 +2,9 @@ package com.AMS.jBEAM.javaParser;
 
 class JavaParserPool
 {
+	// TODO: Make configurable
+	private final Imports						imports					= new Imports();
+
 	private final JavaInspectionDataProvider	inspectionDataProvider  = new JavaInspectionDataProvider();
 
 	private final EvaluationMode				evaluationMode;
@@ -14,6 +17,7 @@ class JavaParserPool
 	private final AbstractJavaEntityParser		literalParser;
 	private final AbstractJavaEntityParser		objectTailParser;
 	private final AbstractJavaEntityParser		parenthesizedExpressionParser;
+	private final AbstractJavaEntityParser 		castParser;
 
 	JavaParserPool(ObjectInfo thisInfo, EvaluationMode evaluationMode) {
 		this.evaluationMode = evaluationMode;
@@ -26,6 +30,7 @@ class JavaParserPool
 		literalParser = new JavaLiteralParser(this, thisInfo);
 		objectTailParser = new JavaObjectTailParser(this, thisInfo);
 		parenthesizedExpressionParser = new JavaParenthesizedExpressionParser(this, thisInfo);
+		castParser = new JavaCastParser(this, thisInfo);
 	}
 
 	EvaluationMode getEvaluationMode() {
@@ -34,6 +39,10 @@ class JavaParserPool
 
 	JavaInspectionDataProvider getInspectionDataProvider() {
 		return inspectionDataProvider;
+	}
+
+	Imports getImports() {
+		return imports;
 	}
 
 	AbstractJavaEntityParser getExpressionParser() {
@@ -59,4 +68,6 @@ class JavaParserPool
 	AbstractJavaEntityParser getParenthesizedExpressionParser() {
 		return parenthesizedExpressionParser;
 	}
+
+	AbstractJavaEntityParser getCastParser() { return castParser; }
 }

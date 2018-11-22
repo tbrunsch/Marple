@@ -67,7 +67,7 @@ class ParseUtils
 			return CLASS_MATCH_FULL;
 		}
 
-		boolean primitiveConvertible = ReflectionUtils.isPrimitiveConvertibleTo(actual, expected);
+		boolean primitiveConvertible = ReflectionUtils.isPrimitiveConvertibleTo(actual, expected, false);
 		if (expected.isPrimitive()) {
 			if (actual.isPrimitive()) {
 				return primitiveConvertible
@@ -115,7 +115,7 @@ class ParseUtils
 	}
 
 	static ToIntFunction<Field> rateFieldByNameAndClassesFunc(final String fieldName, final List<Class<?>> expectedClasses) {
-		return field -> (CLASS_MATCH_NONE +1)*rateFieldByName(field, fieldName) + rateFieldByClasses(field, expectedClasses);
+		return field -> (CLASS_MATCH_NONE + 1)*rateFieldByName(field, fieldName) + rateFieldByClasses(field, expectedClasses);
 	}
 
 	static String getFieldDisplayText(Field field) {
@@ -140,11 +140,46 @@ class ParseUtils
 	}
 
 	static ToIntFunction<Method> rateMethodByNameAndClassesFunc(final String methodName, final List<Class<?>> expectedClasses) {
-		return method -> (CLASS_MATCH_NONE +1)*rateMethodByName(method, methodName) + rateMethodByClasses(method, expectedClasses);
+		return method -> (CLASS_MATCH_NONE + 1)*rateMethodByName(method, methodName) + rateMethodByClasses(method, expectedClasses);
 	}
 
 	static String getMethodDisplayText(Method method) {
 		return method.getName() + " (" + method.getDeclaringClass().getSimpleName() + ")";
+	}
+
+	/*
+	 * Classes
+	 */
+	private static int rateClassByName(JavaClassInfo classInfo, String expectedSimpleClassName) {
+		// transformation required to make it comparable to rated fields and methods
+		return (CLASS_MATCH_NONE + 1)*rateStringMatch(classInfo.getSimpleNameWithoutLeadingDigits(), expectedSimpleClassName) + CLASS_MATCH_NONE;
+	}
+
+	static ToIntFunction<JavaClassInfo> rateClassByNameFunc(final String simpleClassName) {
+		return classInfo -> rateClassByName(classInfo, simpleClassName);
+	}
+
+	static String getClassDisplayText(JavaClassInfo classInfo) {
+		return classInfo.getName();
+	}
+
+	/*
+	 * Packages
+	 */
+	private static int ratePackageByName(Package pack, String expectedPackageName) {
+		String packageName = pack.getName();
+		int lastDotIndex = packageName.lastIndexOf('.');
+		String subpackageName = packageName.substring(lastDotIndex + 1);
+		// transformation required to make it comparable to rated fields and methods
+		return (CLASS_MATCH_NONE + 1)*rateStringMatch(subpackageName, expectedPackageName) + CLASS_MATCH_NONE;
+	}
+
+	static ToIntFunction<Package> ratePackageByNameFunc(final String packageName) {
+		return pack -> ratePackageByName(pack, packageName);
+	}
+
+	static String getPackageDisplayText(Package pack) {
+		return pack.getName();
 	}
 
 	/*

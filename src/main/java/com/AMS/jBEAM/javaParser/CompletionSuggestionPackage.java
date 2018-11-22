@@ -1,16 +1,15 @@
 package com.AMS.jBEAM.javaParser;
 
-import java.lang.reflect.Field;
 import java.util.Objects;
 
-class CompletionSuggestionField implements CompletionSuggestionIF
+class CompletionSuggestionPackage implements CompletionSuggestionIF
 {
-	private final Field field;
-	private final int 	insertionBegin;
-	private final int 	insertionEnd;
+	private final Package	pack;
+	private final int 		insertionBegin;
+	private final int 		insertionEnd;
 
-	CompletionSuggestionField(Field field, int insertionBegin, int insertionEnd) {
-		this.field = field;
+	CompletionSuggestionPackage(Package pack, int insertionBegin, int insertionEnd) {
+		this.pack = pack;
 		this.insertionBegin = insertionBegin;
 		this.insertionEnd = insertionEnd;
 	}
@@ -27,26 +26,28 @@ class CompletionSuggestionField implements CompletionSuggestionIF
 
 	@Override
 	public String getTextToInsert() {
-		return field.getName();
+		String packageName = pack.getName();
+		int lastDotIndex = packageName.lastIndexOf('.');
+		return lastDotIndex < 0 ? packageName : packageName.substring(lastDotIndex + 1);
 	}
 
 	@Override
 	public String toString() {
-		return ParseUtils.getFieldDisplayText(field);
+		return ParseUtils.getPackageDisplayText(pack);
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		CompletionSuggestionField that = (CompletionSuggestionField) o;
+		CompletionSuggestionPackage that = (CompletionSuggestionPackage) o;
 		return insertionBegin == that.insertionBegin &&
 				insertionEnd == that.insertionEnd &&
-				Objects.equals(field, that.field);
+				Objects.equals(pack, that.pack);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(field, insertionBegin, insertionEnd);
+		return Objects.hash(pack, insertionBegin, insertionEnd);
 	}
 }

@@ -109,6 +109,9 @@ public class JavaParser
 		ObjectInfo thisInfo = new ObjectInfo(thisContext);
 		JavaParserPool parserPool  = new JavaParserPool(thisInfo, evaluationMode);
 		JavaTokenStream tokenStream = new JavaTokenStream(javaExpression, caret);
+		if (thisContext != null) {
+			parserPool.getImports().importClass(new JavaClassInfo(thisContext.getClass().getName()));
+		}
 		try {
 			return parserPool.getExpressionParser().parse(tokenStream, thisInfo, null);
 		} catch (Exception e) {

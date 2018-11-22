@@ -1,16 +1,15 @@
 package com.AMS.jBEAM.javaParser;
 
-import java.lang.reflect.Field;
 import java.util.Objects;
 
-class CompletionSuggestionField implements CompletionSuggestionIF
+class CompletionSuggestionClass implements CompletionSuggestionIF
 {
-	private final Field field;
-	private final int 	insertionBegin;
-	private final int 	insertionEnd;
+	private final JavaClassInfo	classInfo;
+	private final int 			insertionBegin;
+	private final int 			insertionEnd;
 
-	CompletionSuggestionField(Field field, int insertionBegin, int insertionEnd) {
-		this.field = field;
+	CompletionSuggestionClass(JavaClassInfo classInfo, int insertionBegin, int insertionEnd) {
+		this.classInfo = classInfo;
 		this.insertionBegin = insertionBegin;
 		this.insertionEnd = insertionEnd;
 	}
@@ -27,26 +26,26 @@ class CompletionSuggestionField implements CompletionSuggestionIF
 
 	@Override
 	public String getTextToInsert() {
-		return field.getName();
+		return classInfo.getSimpleNameWithoutLeadingDigits();
 	}
 
 	@Override
 	public String toString() {
-		return ParseUtils.getFieldDisplayText(field);
+		return ParseUtils.getClassDisplayText(classInfo);
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		CompletionSuggestionField that = (CompletionSuggestionField) o;
+		CompletionSuggestionClass that = (CompletionSuggestionClass) o;
 		return insertionBegin == that.insertionBegin &&
 				insertionEnd == that.insertionEnd &&
-				Objects.equals(field, that.field);
+				Objects.equals(classInfo, that.classInfo);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(field, insertionBegin, insertionEnd);
+		return Objects.hash(classInfo, insertionBegin, insertionEnd);
 	}
 }

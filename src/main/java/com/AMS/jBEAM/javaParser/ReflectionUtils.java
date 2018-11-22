@@ -13,11 +13,16 @@ public class ReflectionUtils
 	/*
 	 * Type Conversions
 	 */
-	private static final BiMap<Class<?>, Class<?>>								PRIMITIVE_TO_BOXED_CLASS	= HashBiMap.create();
-	private static final Table<Class<?>, Class<?>, Function<Object, Object>>	PRIMITIVE_CONVERSIONS 		= HashBasedTable.create();
+	private static final BiMap<Class<?>, Class<?>>								PRIMITIVE_TO_BOXED_CLASS		= HashBiMap.create();
+	private static final Table<Class<?>, Class<?>, Function<Object, Object>>	PRIMITIVE_CONVERSIONS 			= HashBasedTable.create();
+	private static final Table<Class<?>, Class<?>, Function<Object, Object>>	PRIMITIVE_NARROWING_CONVERSIONS	= HashBasedTable.create();
 
 	private static <S, T> void addConversion(Class<S> sourceClass, Class<T> targetClass, Function<S, T> conversion) {
 		PRIMITIVE_CONVERSIONS.put(sourceClass, targetClass, value -> conversion.apply((S) value));
+	}
+
+	private static <T, S> void addNarrowingConversion(Class<T> sourceClass, Class<S> targetClass, Function<T, S> narrowingConversion) {
+		PRIMITIVE_NARROWING_CONVERSIONS.put(sourceClass, targetClass, value -> narrowingConversion.apply((T) value));
 	}
 
 	private static <S> void addPrimitiveBoxedConversions(Class<S> primitiveClass, Class<S> boxedClass, Function<S, S> conversion) {
@@ -26,11 +31,17 @@ public class ReflectionUtils
 		PRIMITIVE_TO_BOXED_CLASS.put(primitiveClass, boxedClass);
 	}
 
-	private static <S, T> void addConversions(Class<S> primitiveSourceClass, Class<S> boxedSourceClass, Class<T> primitiveTargetClass, Class<T> boxedTargetClass, Function<S, T> conversion) {
+	private static <S, T> void addConversions(Class<S> primitiveSourceClass, Class<T> primitiveTargetClass, Function<S, T> conversion, Function<T, S> narrowingConversion) {
+		Class<S> boxedSourceClass = (Class<S>) getBoxedClass(primitiveSourceClass);
+		Class<T> boxedTargetClass = (Class<T>) getBoxedClass(primitiveTargetClass);
 		addConversion(primitiveSourceClass, primitiveTargetClass, 	conversion);
 		addConversion(primitiveSourceClass, boxedTargetClass, 		conversion);
 		addConversion(boxedSourceClass, 	primitiveTargetClass, 	conversion);
 		addConversion(boxedSourceClass, 	boxedTargetClass, 		conversion);
+		addNarrowingConversion(primitiveTargetClass, 	primitiveSourceClass,	narrowingConversion);
+		addNarrowingConversion(boxedTargetClass, 		primitiveSourceClass,	narrowingConversion);
+		addNarrowingConversion(primitiveTargetClass, 	boxedSourceClass,		narrowingConversion);
+		addNarrowingConversion(boxedTargetClass, 		boxedSourceClass,		narrowingConversion);
 	}
 
 	public static Class<?> getBoxedClass(Class<?> primitiveClass) {
@@ -41,11 +52,16 @@ public class ReflectionUtils
 		return PRIMITIVE_TO_BOXED_CLASS.inverse().get(boxedClass);
 	}
 
-	public static boolean isPrimitiveConvertibleTo(Class<?> sourceClass, Class<?> targetClass) {
-		return PRIMITIVE_CONVERSIONS.contains(sourceClass, targetClass);
+	public static Set<Class<?>> getPrimitiveClasses() {
+		return PRIMITIVE_TO_BOXED_CLASS.keySet();
 	}
 
-	public static <T> T convertTo(Object value, Class<T> targetClass) {
+	public static boolean isPrimitiveConvertibleTo(Class<?> sourceClass, Class<?> targetClass, boolean allowNarrowing) {
+		return PRIMITIVE_CONVERSIONS.contains(sourceClass, targetClass)
+				|| (allowNarrowing && PRIMITIVE_NARROWING_CONVERSIONS.contains(sourceClass, targetClass));
+	}
+
+	public static <T> T convertTo(Object value, Class<T> targetClass, boolean allowNarrowing) {
 		if (value == null) {
 			return null;
 		}
@@ -57,46 +73,48 @@ public class ReflectionUtils
 			Function<Object, Object> conversion = PRIMITIVE_CONVERSIONS.get(sourceClass, targetClass);
 			return (T) conversion.apply(value);
 		}
+		if (allowNarrowing && PRIMITIVE_NARROWING_CONVERSIONS.contains(sourceClass, targetClass)) {
+			Function<Object, Object> conversion = PRIMITIVE_NARROWING_CONVERSIONS.get(sourceClass, targetClass);
+			return (T) conversion.apply(value);
+		}
 		throw new ClassCastException("Cannot cast '" + sourceClass.getSimpleName() + "' to '" + targetClass + "'");
 	}
 
 	static {
-		addPrimitiveBoxedConversions(byte.class, Byte.class, b -> b.byteValue());
-		addConversions(byte.class, Byte.class, short.class, 	Short.class, 	b -> (short) 	b.byteValue());
-		addConversions(byte.class, Byte.class, int.class, 		Integer.class, 	b -> (int) 		b.byteValue());
-		addConversions(byte.class, Byte.class, long.class, 		Long.class, 	b -> (long) 	b.byteValue());
-		addConversions(byte.class, Byte.class, float.class, 	Float.class, 	b -> (float) 	b.byteValue());
-		addConversions(byte.class, Byte.class, double.class,	Double.class, 	b -> (double) 	b.byteValue());
+		addPrimitiveBoxedConversions(byte.class,	Byte.class,			b -> b.byteValue());
+		addPrimitiveBoxedConversions(short.class,	Short.class,		s -> s.shortValue());
+		addPrimitiveBoxedConversions(int.class,		Integer.class,		i -> i.intValue());
+		addPrimitiveBoxedConversions(long.class,	Long.class,			l -> l.longValue());
+		addPrimitiveBoxedConversions(float.class,	Float.class,		f -> f.floatValue());
+		addPrimitiveBoxedConversions(double.class,	Double.class,		d -> d.doubleValue());
+		addPrimitiveBoxedConversions(boolean.class,	Boolean.class,		b -> b.booleanValue());
+		addPrimitiveBoxedConversions(char.class,	Character.class,	c -> c.charValue());
+		addPrimitiveBoxedConversions(void.class,	Void.class,			v -> null);
 
-		addPrimitiveBoxedConversions(short.class, Short.class, s -> s.shortValue());
-		addConversions(short.class, Short.class, int.class,		Integer.class,	s -> (int) 		s.shortValue());
-		addConversions(short.class, Short.class, long.class,	Long.class,		s -> (long) 	s.shortValue());
-		addConversions(short.class, Short.class, float.class,	Float.class,	s -> (float) 	s.shortValue());
-		addConversions(short.class, Short.class, double.class,	Double.class,	s -> (double) 	s.shortValue());
+		addConversions(byte.class,	short.class, 	b -> b.shortValue(),	s -> s.byteValue());
+		addConversions(byte.class,	int.class, 		b -> b.intValue(),		i -> i.byteValue());
+		addConversions(byte.class,	long.class, 	b -> b.longValue(),		l -> l.byteValue());
+		addConversions(byte.class,	float.class, 	b -> b.floatValue(),	f -> f.byteValue());
+		addConversions(byte.class,	double.class,	b -> b.doubleValue(),	d -> d.byteValue());
 
-		addPrimitiveBoxedConversions(int.class, Integer.class, i -> i.intValue());
-		addConversions(int.class, Integer.class, long.class,	Long.class,		i -> (long) 	i.intValue());
-		addConversions(int.class, Integer.class, float.class,	Float.class,	i -> (float) 	i.intValue());
-		addConversions(int.class, Integer.class, double.class,	Double.class,	i -> (double) 	i.intValue());
+		addConversions(short.class,	int.class,		s -> s.intValue(),		i -> i.shortValue());
+		addConversions(short.class,	long.class,		s -> s.longValue(),		l -> l.shortValue());
+		addConversions(short.class,	float.class,	s -> s.floatValue(),	f -> f.shortValue());
+		addConversions(short.class,	double.class,	s -> s.doubleValue(),	d -> d.shortValue());
 
-		addPrimitiveBoxedConversions(long.class, Long.class, l -> l.longValue());
-		addConversions(long.class, Long.class, float.class,		Float.class,	l -> (float) 	l.longValue());
-		addConversions(long.class, Long.class, double.class,	Double.class,	l -> (double) 	l.longValue());
+		addConversions(int.class,	long.class,		i -> i.longValue(),		l -> l.intValue());
+		addConversions(int.class,	float.class,	i -> i.floatValue(),	f -> f.intValue());
+		addConversions(int.class,	double.class,	i -> i.doubleValue(),	d -> d.intValue());
 
-		addPrimitiveBoxedConversions(float.class, Float.class, f -> f.floatValue());
-		addConversions(float.class, Float.class, double.class,	Double.class,	f -> (double) 	f.floatValue());
+		addConversions(long.class,	float.class,	l -> l.floatValue(),	f -> f.longValue());
+		addConversions(long.class,	double.class,	l -> l.doubleValue(),	d -> d.longValue());
 
-		addPrimitiveBoxedConversions(double.class, Double.class, d -> d.doubleValue());
+		addConversions(float.class,	double.class,	f -> f.doubleValue(),	d -> d.floatValue());
 
-		addPrimitiveBoxedConversions(boolean.class, Boolean.class, b -> b.booleanValue());
-
-		addPrimitiveBoxedConversions(char.class, Character.class, c -> c.charValue());
-		addConversions(char.class, Character.class, int.class, 		Integer.class, 	c -> (int) 		c.charValue());
-		addConversions(char.class, Character.class, long.class, 	Long.class, 	c -> (long) 	c.charValue());
-		addConversions(char.class, Character.class, float.class, 	Float.class, 	c -> (float) 	c.charValue());
-		addConversions(char.class, Character.class, double.class, 	Double.class, 	c -> (double) 	c.charValue());
-
-		addPrimitiveBoxedConversions(void.class, Void.class, v -> null);
+		addConversions(char.class,	int.class, 		c -> (int) 		c.charValue(),	i -> (char) i.intValue());
+		addConversions(char.class,	long.class, 	c -> (long) 	c.charValue(),	l -> (char) l.longValue());
+		addConversions(char.class,	float.class, 	c -> (float) 	c.charValue(),	f -> (char) f.floatValue());
+		addConversions(char.class,	double.class, 	c -> (double) 	c.charValue(),	d -> (char) d.doubleValue());
 	}
 
 	/*

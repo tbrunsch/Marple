@@ -17,11 +17,11 @@ class JavaExpressionParser extends AbstractJavaEntityParser
 			parserPool.getLiteralParser(),
 			parserPool.getFieldParser(false),
 			parserPool.getMethodParser(false),
-			parserPool.getParenthesizedExpressionParser()
+			parserPool.getParenthesizedExpressionParser(),
+			parserPool.getCastParser()
 			// TODO: Add more parsers
 			// parserPool.getClassParser(),
-			// parserPool.getConstructorParser(),
-			// parserPool.getCastParser()
+			// parserPool.getConstructorParser()
 		);
 	}
 }
