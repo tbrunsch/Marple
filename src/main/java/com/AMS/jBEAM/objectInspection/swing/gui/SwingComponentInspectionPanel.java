@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.objectInspection.swing.gui;
 
 import com.AMS.jBEAM.objectInspection.InspectionLinkIF;
-import com.AMS.jBEAM.javaParser.ReflectionUtils;
+import com.AMS.jBEAM.common.ReflectionUtils;
 import com.AMS.jBEAM.objectInspection.swing.SwingObjectInspector;
 
 import javax.swing.*;

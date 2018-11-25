@@ -1,5 +1,6 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.AMS.jBEAM.common.ReflectionUtils;
 import org.junit.Test;
 
 import java.lang.reflect.Field;

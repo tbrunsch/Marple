@@ -1,11 +1,12 @@
 package com.AMS.jBEAM.javaParser;
 
-import com.google.common.base.Joiner;
+import com.AMS.jBEAM.javaParser.result.*;
+import com.AMS.jBEAM.javaParser.tokenizer.JavaTokenStream;
+import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static com.AMS.jBEAM.javaParser.ParseError.ErrorType;
+import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 
 public class JavaParser
 {
@@ -22,18 +23,19 @@ public class JavaParser
 		}
 	};
 
-	public List<CompletionSuggestionIF> suggestCodeCompletion(String javaExpression, EvaluationMode evaluationMode, int caret, Object thisContext) throws JavaParseException {
+	public List<CompletionSuggestionIF> suggestCodeCompletion(String javaExpression, JavaParserSettings settings, int caret, Object thisContext) throws JavaParseException {
 		ParseResultIF parseResult;
 
+		EvaluationMode evaluationMode = settings.getEvaluationModeCodeCompletion();
 		if (evaluationMode == EvaluationMode.STRONGLY_TYPED) {
 			// First iteration without evaluation to avoid side effects when errors occur
-			parseResult = parse(javaExpression, EvaluationMode.NONE, caret, thisContext);
+			parseResult = parse(javaExpression, settings, EvaluationMode.NONE, caret, thisContext);
 			if (parseResult.getResultType() == ParseResultType.COMPLETION_SUGGESTIONS) {
 				// Second iteration with evaluation (side effects cannot be avoided)
-				parseResult = parse(javaExpression, evaluationMode, caret, thisContext);
+				parseResult = parse(javaExpression, settings, evaluationMode, caret, thisContext);
 			}
 		} else {
-			parseResult = parse(javaExpression, evaluationMode, caret, thisContext);
+			parseResult = parse(javaExpression, settings, evaluationMode, caret, thisContext);
 		}
 
 		switch (parseResult.getResultType()) {
@@ -66,18 +68,19 @@ public class JavaParser
 		}
 	}
 
-	public Object evaluate(String javaExpression, EvaluationMode evaluationMode, Object thisContext) throws JavaParseException {
+	public Object evaluate(String javaExpression, JavaParserSettings settings, Object thisContext) throws JavaParseException {
 		ParseResultIF parseResult;
 
+		EvaluationMode evaluationMode = settings.getEvaluationModeCodeEvaluation();
 		if (evaluationMode == EvaluationMode.STRONGLY_TYPED) {
 			// First iteration without evaluation to avoid side effects when errors occur
-			parseResult = parse(javaExpression, EvaluationMode.NONE,-1, thisContext);
+			parseResult = parse(javaExpression, settings, EvaluationMode.NONE,-1, thisContext);
 			if (parseResult.getResultType() == ParseResultType.PARSE_RESULT) {
 				// Second iteration with evaluation (side effects cannot be avoided)
-				parseResult = parse(javaExpression, evaluationMode,-1, thisContext);
+				parseResult = parse(javaExpression, settings, evaluationMode,-1, thisContext);
 			}
 		} else {
-			parseResult = parse(javaExpression, evaluationMode,-1, thisContext);
+			parseResult = parse(javaExpression, settings, evaluationMode,-1, thisContext);
 		}
 
 		switch (parseResult.getResultType()) {
@@ -105,17 +108,14 @@ public class JavaParser
 		}
 	}
 
-	private ParseResultIF parse(String javaExpression, EvaluationMode evaluationMode, int caret, Object thisContext) {
+	private ParseResultIF parse(String javaExpression, JavaParserSettings settings, EvaluationMode evaluationMode, int caret, Object thisContext) {
 		// TODO: Static parsing should also work for null
 		if (thisContext == null) {
 			throw new IllegalArgumentException("this is null");
 		}
 		ObjectInfo thisInfo = new ObjectInfo(thisContext);
-		JavaParserPool parserPool  = new JavaParserPool(thisInfo, evaluationMode);
+		JavaParserContext parserPool  = new JavaParserContext(thisInfo, settings, evaluationMode);
 		JavaTokenStream tokenStream = new JavaTokenStream(javaExpression, caret);
-		if (thisContext != null) {
-			parserPool.getImports().importClass(new JavaClassInfo(thisContext.getClass().getName()));
-		}
 		try {
 			return parserPool.getExpressionParser().parse(tokenStream, thisInfo, null);
 		} catch (Exception e) {
@@ -126,92 +126,5 @@ public class JavaParser
 			}
 			return new ParseError(-1, message, ErrorType.EVALUATION_EXCEPTION, e);
 		}
-	}
-
-	static ParseResultIF parse(final JavaTokenStream tokenStream, final ObjectInfo currentContextInfo, final List<Class<?>> expectedResultClasses, AbstractJavaEntityParser... parsers) {
-		List<ParseResultIF> parseResults = Arrays.stream(parsers)
-			.map(parser -> parser.parse(tokenStream, currentContextInfo, expectedResultClasses))
-			.collect(Collectors.toList());
-		return mergeParseResults(parseResults);
-	}
-
-	static ParseResultIF mergeParseResults(List<ParseResultIF> parseResults) {
-		if (parseResults.isEmpty()) {
-			throw new IllegalArgumentException("Cannot merge 0 parse results");
-		}
-
-		List<AmbiguousParseResult> ambiguousResults = filterParseResults(parseResults, AmbiguousParseResult.class);
-		List<ParseResult> results = filterParseResults(parseResults, ParseResult.class);
-		List<CompletionSuggestions> completionSuggestions = filterParseResults(parseResults, CompletionSuggestions.class);
-		List<ParseError> errors = filterParseResults(parseResults, ParseError.class);
-
-		if (!completionSuggestions.isEmpty()) {
-			// Merge and return suggestions
-			Map<CompletionSuggestionIF, Integer> mergedRatedSuggestions = new LinkedHashMap<>();
-			for (CompletionSuggestions suggestions : completionSuggestions) {
-				Map<CompletionSuggestionIF, Integer> ratedSuggestions = suggestions.getRatedSuggestions();
-				for (CompletionSuggestionIF suggestion : ratedSuggestions.keySet()) {
-					int currentRating = mergedRatedSuggestions.containsKey(suggestion)
-										? mergedRatedSuggestions.get(suggestion)
-										: Integer.MAX_VALUE;
-					int newRating = ratedSuggestions.get(suggestion);
-					int bestRating = Math.min(currentRating, newRating);
-					mergedRatedSuggestions.put(suggestion, bestRating);
-				}
-			}
-			return new CompletionSuggestions(mergedRatedSuggestions);
-		}
-
-		boolean ambiguous = !ambiguousResults.isEmpty() || results.size() > 1;
-		if (ambiguous) {
-			int position = ambiguousResults.isEmpty() ? results.get(0).getParsedToPosition() : ambiguousResults.get(0).getPosition();
-			String message = "Ambiguous expression:\n"
-							+ ambiguousResults.stream().map(AmbiguousParseResult::getMessage).collect(Collectors.joining("\n"))
-							+ (ambiguousResults.size() > 0 && results.size() > 0 ? "\n" : "")
-							+ results.stream().map(result -> "Expression can be evaluated to object of type " + result.getObjectInfo().getDeclaredClass().getSimpleName()).collect(Collectors.joining("\n"));
-			return new AmbiguousParseResult(position, message);
-		}
-
-		if (results.size() == 1) {
-			return results.get(0);
-		}
-
-		if (errors.size() > 1) {
-			return mergeParseErrors(errors);
-		} else {
-			return errors.get(0);
-		}
-	}
-
-	private static <T> List<T> filterParseResults(List<ParseResultIF> parseResults, Class<T> filterClass) {
-		return parseResults.stream().filter(filterClass::isInstance).map(filterClass::cast).collect(Collectors.toList());
-	}
-
-	private static ParseError mergeParseErrors(List<ParseError> errors) {
-		for (ErrorType errorType : ErrorType.values()) {
-			List<ParseError> errorsOfCurrentType = errors.stream().filter(error -> error.getErrorType() == errorType).collect(Collectors.toList());
-			if (errorsOfCurrentType.isEmpty()) {
-				continue;
-			}
-			if (errorsOfCurrentType.size() == 1) {
-				return errorsOfCurrentType.get(0);
-			}
-			Set<Integer> positions = errorsOfCurrentType.stream().map(ParseError::getPosition).collect(Collectors.toSet());
-			final int position;
-			final List<String> messages;
-			final String messagePrefix;
-			if (positions.size() == 1) {
-				position = positions.iterator().next();
-				messages = errorsOfCurrentType.stream().map(ParseError::getMessage).collect(Collectors.toList());
-				messagePrefix = "";
-			} else {
-				position = 0;
-				messages = errorsOfCurrentType.stream().map(error -> "Position " + error.getPosition() + ": " + error.getMessage()).collect(Collectors.toList());
-				messagePrefix = "Could not parse expression due to the following errors: ";
-			}
-			String message = Joiner.on("\n").join(messages);
-			return new ParseError(position, messagePrefix + message, errorType);
-		}
-		return new ParseError(-1, "Internal error: Failed merging parse errors", ErrorType.INTERNAL_ERROR);
 	}
 }

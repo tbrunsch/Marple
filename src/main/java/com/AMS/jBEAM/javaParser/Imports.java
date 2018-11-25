@@ -1,9 +1,11 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.AMS.jBEAM.javaParser.utils.JavaClassInfo;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-class Imports
+public class Imports
 {
 	private final Set<JavaClassInfo>	classes		= new LinkedHashSet<>();
 	private final Set<Package> 			packages	= new LinkedHashSet<>();
@@ -16,11 +18,11 @@ class Imports
 		packages.add(pack);
 	}
 
-	Set<JavaClassInfo> getImportedClasses() {
+	public Set<JavaClassInfo> getImportedClasses() {
 		return classes;
 	}
 
-	Set<Package> getImportedPackages() {
+	public Set<Package> getImportedPackages() {
 		return packages;
 	}
 }

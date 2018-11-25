@@ -1,5 +1,6 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.AMS.jBEAM.javaParser.result.CompletionSuggestionIF;
 import com.google.common.base.Joiner;
 import org.junit.Test;
 
@@ -537,12 +538,12 @@ public class JavaCompletionTest
 	 */
 	private static class TestExecutor
 	{
-		private final Object					testInstance;
-		private final EvaluationMode 			evaluationMode;
+		private final Object				testInstance;
+		private final JavaParserSettings	settings;
 
 		TestExecutor(Object testInstance, EvaluationMode evaluationMode) {
 			this.testInstance = testInstance;
-			this.evaluationMode = evaluationMode;
+			this.settings = new JavaParserSettings(new Imports(), evaluationMode, EvaluationMode.STRONGLY_TYPED);
 		}
 
 		TestExecutor test(String javaExpression, String... expectedSuggestions) {
@@ -550,7 +551,7 @@ public class JavaCompletionTest
 			int caret = javaExpression.length();
 			List<String> suggestions = null;
 			try {
-				suggestions = extractSuggestions(parser.suggestCodeCompletion(javaExpression, evaluationMode, caret, testInstance));
+				suggestions = extractSuggestions(parser.suggestCodeCompletion(javaExpression, settings, caret, testInstance));
 			} catch (JavaParseException e) {
 				assertTrue("Exception during code completion: " + e.getMessage(), false);
 			}
@@ -571,18 +572,18 @@ public class JavaCompletionTest
 	 */
 	private static class ErrorTestExecutor
 	{
-		private final Object			testInstance;
-		private final EvaluationMode	evaluationMode;
+		private final Object				testInstance;
+		private final JavaParserSettings	settings;
 
 		ErrorTestExecutor(Object testInstance, EvaluationMode evaluationMode) {
 			this.testInstance = testInstance;
-			this.evaluationMode = evaluationMode;
+			this.settings = new JavaParserSettings(new Imports(), evaluationMode, EvaluationMode.STRONGLY_TYPED);
 		}
 
 		ErrorTestExecutor test(String javaExpression, int caret, Class<? extends Exception> expectedExceptionClass) {
 			JavaParser parser = new JavaParser();
 			try {
-				parser.suggestCodeCompletion(javaExpression, evaluationMode, caret, testInstance);
+				parser.suggestCodeCompletion(javaExpression, settings, caret, testInstance);
 				assertTrue("Expression: " + javaExpression + " - Expected an exception", false);
 			} catch (JavaParseException | IllegalStateException e) {
 				assertTrue("Expression: " + javaExpression + " - Expected exception of class '" + expectedExceptionClass.getSimpleName() + "', but caught an exception of class '" + e.getClass().getSimpleName() + "'", expectedExceptionClass.isInstance(e));

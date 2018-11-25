@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.objectInspection.swing.gui;
 
-import com.AMS.jBEAM.javaParser.ReflectionUtils;
+import com.AMS.jBEAM.common.ReflectionUtils;
 import com.AMS.jBEAM.objectInspection.common.AccessModifier;
 import com.AMS.jBEAM.objectInspection.swing.SwingObjectInspector;
 import com.AMS.jBEAM.objectInspection.swing.gui.table.*;

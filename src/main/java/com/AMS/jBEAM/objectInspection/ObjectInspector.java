@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.objectInspection;
 
-import com.AMS.jBEAM.javaParser.ReflectionUtils;
+import com.AMS.jBEAM.common.ReflectionUtils;
 
 import java.util.*;
 import java.util.List;

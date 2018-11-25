@@ -694,18 +694,18 @@ public class JavaExpressionEvaluationTest
 	 */
 	private static class TestExecutor
 	{
-		private final Object					testInstance;
-		private final EvaluationMode 			evaluationMode;
+		private final Object				testInstance;
+		private final JavaParserSettings	settings;
 
 		TestExecutor(Object testInstance, EvaluationMode evaluationMode) {
 			this.testInstance = testInstance;
-			this.evaluationMode = evaluationMode;
+			this.settings = new JavaParserSettings(new Imports(), EvaluationMode.NONE, evaluationMode);
 		}
 
 		TestExecutor test(String javaExpression, Object expectedValue) {
 			JavaParser parser = new JavaParser();
 			try {
-				Object actualValue = parser.evaluate(javaExpression, evaluationMode, testInstance);
+				Object actualValue = parser.evaluate(javaExpression, settings, testInstance);
 				assertEquals("Expression: " + javaExpression, expectedValue, actualValue);
 			} catch (JavaParseException e) {
 				assertTrue("Exception during expression evaluation: " + e.getMessage(), false);
@@ -719,19 +719,19 @@ public class JavaExpressionEvaluationTest
 	 */
 	private static class ErrorTestExecutor
 	{
-		private final Object			testInstance;
-		private final EvaluationMode	evaluationMode;
+		private final Object				testInstance;
+		private final JavaParserSettings	settings;
 
 		ErrorTestExecutor(Object testInstance, EvaluationMode evaluationMode) {
 			this.testInstance = testInstance;
-			this.evaluationMode = evaluationMode;
+			this.settings = new JavaParserSettings(new Imports(), EvaluationMode.NONE, evaluationMode);
 		}
 
 		ErrorTestExecutor test(String javaExpression) {
 			Class<? extends Exception> expectedExceptionClass = JavaParseException.class;
 			JavaParser parser = new JavaParser();
 			try {
-				parser.evaluate(javaExpression, evaluationMode, testInstance);
+				parser.evaluate(javaExpression, settings, testInstance);
 				assertTrue("Expression: " + javaExpression + " - Expected an exception", false);
 			} catch (JavaParseException | IllegalStateException e) {
 				assertTrue("Expression: " + javaExpression + " - Expected exception of class '" + expectedExceptionClass.getSimpleName() + "', but caught an exception of class '" + e.getClass().getSimpleName() + "'", expectedExceptionClass.isInstance(e));
