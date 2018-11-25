@@ -15,61 +15,39 @@ import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 
 public class JavaLiteralParser extends AbstractJavaEntityParser
 {
+	private final AbstractJavaEntityParser	intParser;
+	private final AbstractJavaEntityParser	longParser;
+	private final AbstractJavaEntityParser	floatParser;
+	private final AbstractJavaEntityParser	doubleParser;
+
 	public JavaLiteralParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
 		super(parserContext, thisInfo);
+		intParser 		= new NumericLiteralParser<>(parserContext, thisInfo, int.class,	JavaTokenStream::readIntegerLiteral,	Integer::parseInt,		"Invalid int literal");
+		longParser 		= new NumericLiteralParser<>(parserContext, thisInfo, long.class,	JavaTokenStream::readLongLiteral, 		Long::parseLong,		"Invalid long literal");
+		floatParser 	= new NumericLiteralParser<>(parserContext, thisInfo, float.class,	JavaTokenStream::readFloatLiteral,		Float::parseFloat,		"Invalid float literal");
+		doubleParser 	= new NumericLiteralParser<>(parserContext, thisInfo, double.class,	JavaTokenStream::readDoubleLiteral,		Double::parseDouble,	"Invalid double literal");
 	}
 
 	@Override
 	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
-		int startPosition = tokenStream.getPosition();
 		if (!tokenStream.hasMore()) {
-			return new ParseError(startPosition, "Expected a literal", ErrorType.SYNTAX_ERROR);
+			return new ParseError(tokenStream.getPosition(), "Expected a literal", ErrorType.WRONG_PARSER);
 		}
-		char c = tokenStream.peekCharacter();
-		switch (c) {
-			case '\"':
-				return parseStringLiteral(tokenStream, expectedResultClasses);
-			case '\'':
-				return parseCharacterLiteral(tokenStream, expectedResultClasses);
-			case 't': {
-				JavaTokenStream tempTokenStream = tokenStream.clone();
-				tempTokenStream.readCharacterUnchecked();
-				if (tempTokenStream.hasMore()) {
-					c = tempTokenStream.peekCharacter();
-					if (c == 'r') {
-						return parseNamedLiteral(tokenStream, "true", true, boolean.class, expectedResultClasses);
-					} else if (c == 'h') {
-						return parseNamedLiteral(tokenStream, "this", thisInfo.getObject(), thisInfo.getDeclaredClass(), expectedResultClasses);
-					}
-				}
-				return new ParseError(startPosition, "Expected a literal", ErrorType.WRONG_PARSER);
-			}
-			case 'f':
-				return parseNamedLiteral(tokenStream, "false", false, boolean.class, expectedResultClasses);
-			case 'n':
-				return parseNamedLiteral(tokenStream, "null", null, null, expectedResultClasses);
-			default: {
-				if (!"+-.0123456789".contains(String.valueOf(c))) {
-					return new ParseError(startPosition, "Expected a literal", ErrorType.WRONG_PARSER);
-				}
-				ParseResultIF longParseResult = parseLongLiteral(tokenStream.clone(), expectedResultClasses);
-				if (longParseResult.getResultType() != ParseResultType.PARSE_ERROR) {
-					return longParseResult;
-				}
-				ParseResultIF integerParseResult = parseIntegerLiteral(tokenStream.clone(), expectedResultClasses);
-				if (integerParseResult.getResultType() != ParseResultType.PARSE_ERROR) {
-					return integerParseResult;
-				}
-				ParseResultIF floatParseResult = parseFloatLiteral(tokenStream.clone(), expectedResultClasses);
-				if (floatParseResult.getResultType() != ParseResultType.PARSE_ERROR) {
-					return floatParseResult;
-				}
-				ParseResultIF doubleParseResult = parseDoubleLiteral(tokenStream.clone(), expectedResultClasses);
-				if (doubleParseResult.getResultType() != ParseResultType.PARSE_ERROR) {
-					return doubleParseResult;
-				}
-				return new ParseError(startPosition, "Expected a numeric literal", ErrorType.SYNTAX_ERROR);
-			}
+		String characters = tokenStream.peekCharacters();
+		if (characters.startsWith("\"")) {
+			return parseStringLiteral(tokenStream, expectedResultClasses);
+		} else if (characters.startsWith("'")) {
+			return parseCharacterLiteral(tokenStream, expectedResultClasses);
+		} else if (characters.startsWith("true")) {
+			return parseNamedLiteral(tokenStream, "true", true, boolean.class, expectedResultClasses);
+		} else if (characters.startsWith("false")) {
+			return parseNamedLiteral(tokenStream, "false", false, boolean.class, expectedResultClasses);
+		} else if (characters.startsWith("null")) {
+			return parseNamedLiteral(tokenStream, "null", null, null, expectedResultClasses);
+		} else if (characters.startsWith("this")) {
+			return parseNamedLiteral(tokenStream, "this", thisInfo.getObject(), thisInfo.getDeclaredClass(), expectedResultClasses);
+		} else {
+			return parseNumericLiteral(tokenStream, currentContextInfo, expectedResultClasses);
 		}
 	}
 
@@ -129,104 +107,73 @@ public class JavaLiteralParser extends AbstractJavaEntityParser
 		return parserContext.getObjectTailParser().parse(tokenStream, namedLiteralInfo, expectedResultClasses);
 	}
 
-	private ParseResultIF parseLongLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
+	private ParseResultIF parseNumericLiteral(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
-		JavaToken longToken;
-		try {
-			longToken = tokenStream.readLongLiteral();
-		} catch (JavaTokenStream.JavaTokenParseException e) {
-			return new ParseError(startPosition, "Expected an integer literal", ErrorType.WRONG_PARSER);
-		}
-		if (longToken.isContainsCaret()) {
-			// No suggestions possible
-			return CompletionSuggestions.NONE;
+		char c = tokenStream.peekCharacter();
+		if (!"+-.0123456789".contains(String.valueOf(c))) {
+			return new ParseError(startPosition, "Expected a literal", ErrorType.WRONG_PARSER);
 		}
 
-		long literalValue;
-		try {
-			literalValue = Long.parseLong(longToken.getValue());
-		} catch (NumberFormatException e) {
-			return new ParseError(startPosition, "Invalid long literal", ErrorType.SEMANTIC_ERROR);
+		AbstractJavaEntityParser[] parsers = { longParser, intParser, floatParser, doubleParser };
+		for (AbstractJavaEntityParser parser : parsers) {
+			ParseResultIF parseResult = parser.parse(tokenStream, currentContextInfo, expectedResultClasses);
+			if (parseResult.getResultType() != ParseResultType.PARSE_ERROR) {
+				return parseResult;
+			}
 		}
-
-		ObjectInfo longLiteralInfo = new ObjectInfo(literalValue, long.class);
-		return parserContext.getObjectTailParser().parse(tokenStream, longLiteralInfo, expectedResultClasses);
+		return new ParseError(startPosition, "Expected a numeric literal", ErrorType.WRONG_PARSER);
 	}
 
-	private ParseResultIF parseIntegerLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
-		int startPosition = tokenStream.getPosition();
-		JavaToken integerToken;
-		try {
-			integerToken = tokenStream.readIntegerLiteral();
-		} catch (JavaTokenStream.JavaTokenParseException e) {
-			return new ParseError(startPosition, "Expected an integer literal", ErrorType.WRONG_PARSER);
-		}
-		if (integerToken.isContainsCaret()) {
-			// No suggestions possible
-			return CompletionSuggestions.NONE;
+	private static class NumericLiteralParser<T> extends AbstractJavaEntityParser
+	{
+		private final Class<T>				numericType;
+		private final NumericTokenReader	tokenReader;
+		private final NumericValueParser<T>	valueParser;
+		private final String				wrongTypeError;
+
+		NumericLiteralParser(JavaParserContext parserContext, ObjectInfo thisInfo, Class<T> numericType, NumericTokenReader tokenReader, NumericValueParser<T> valueParser, String wrongTypeError) {
+			super(parserContext, thisInfo);
+			this.numericType = numericType;
+			this.tokenReader = tokenReader;
+			this.valueParser = valueParser;
+			this.wrongTypeError = wrongTypeError;
 		}
 
-		int literalValue;
-		try {
-			literalValue = Integer.parseInt(integerToken.getValue());
-		} catch (NumberFormatException e) {
-			return new ParseError(startPosition, "Invalid integer literal", ErrorType.SEMANTIC_ERROR);
-		}
+		@Override
+		ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+			int startPosition = tokenStream.getPosition();
+			JavaToken token;
+			try {
+				token = tokenReader.read(tokenStream);
+			} catch (JavaTokenStream.JavaTokenParseException e) {
+				return new ParseError(startPosition, wrongTypeError, ErrorType.WRONG_PARSER);
+			}
+			if (token.isContainsCaret()) {
+				// No suggestions possible
+				return CompletionSuggestions.NONE;
+			}
 
-		final ObjectInfo integerLiteralInfo;
-		if (Byte.MIN_VALUE <= literalValue && literalValue <= Byte.MAX_VALUE) {
-			integerLiteralInfo = new ObjectInfo((byte) literalValue, byte.class);
-		} else if (Short.MIN_VALUE <= literalValue && literalValue <= Short.MAX_VALUE) {
-			integerLiteralInfo = new ObjectInfo((short) literalValue, short.class);
-		} else {
-			integerLiteralInfo = new ObjectInfo(literalValue, int.class);
+			T literalValue;
+			try {
+				literalValue = valueParser.parse(token.getValue());
+			} catch (NumberFormatException e) {
+				return new ParseError(startPosition, wrongTypeError, ErrorType.SEMANTIC_ERROR);
+			}
+
+			ObjectInfo literalInfo = new ObjectInfo(literalValue, numericType);
+			return parserContext.getObjectTailParser().parse(tokenStream, literalInfo, expectedResultClasses);
 		}
-		return parserContext.getObjectTailParser().parse(tokenStream, integerLiteralInfo, expectedResultClasses);
 	}
 
-	private ParseResultIF parseFloatLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
-		int startPosition = tokenStream.getPosition();
-		JavaToken floatToken;
-		try {
-			floatToken = tokenStream.readFloatLiteral();
-		} catch (JavaTokenStream.JavaTokenParseException e) {
-			return new ParseError(startPosition, "Expected a float literal", ErrorType.WRONG_PARSER);
-		}
-		if (floatToken.isContainsCaret()) {
-			// No suggestions possible
-			return CompletionSuggestions.NONE;
-		}
-
-		float literalValue;
-		try {
-			literalValue = Float.parseFloat(floatToken.getValue());
-		} catch (NumberFormatException e) {
-			return new ParseError(startPosition, "Invalid float literal", ErrorType.SEMANTIC_ERROR);
-		}
-		ObjectInfo floatLiteralInfo = new ObjectInfo(literalValue, float.class);
-		return parserContext.getObjectTailParser().parse(tokenStream, floatLiteralInfo, expectedResultClasses);
+	@FunctionalInterface
+	private interface NumericTokenReader
+	{
+		JavaToken read(JavaTokenStream tokenStream) throws JavaTokenStream.JavaTokenParseException;
 	}
 
-	private ParseResultIF parseDoubleLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
-		int startPosition = tokenStream.getPosition();
-		JavaToken doubleToken;
-		try {
-			doubleToken = tokenStream.readDoubleLiteral();
-		} catch (JavaTokenStream.JavaTokenParseException e) {
-			return new ParseError(startPosition, "Expected a double literal", ErrorType.WRONG_PARSER);
-		}
-		if (doubleToken.isContainsCaret()) {
-			// No suggestions possible
-			return CompletionSuggestions.NONE;
-		}
-
-		double literalValue;
-		try {
-			literalValue = Double.parseDouble(doubleToken.getValue());
-		} catch (NumberFormatException e) {
-			return new ParseError(startPosition, "Invalid double literal", ErrorType.SEMANTIC_ERROR);
-		}
-		ObjectInfo doubleLiteralInfo = new ObjectInfo(literalValue, double.class);
-		return parserContext.getObjectTailParser().parse(tokenStream, doubleLiteralInfo, expectedResultClasses);
+	@FunctionalInterface
+	private interface NumericValueParser<T>
+	{
+		T parse(String s) throws NumberFormatException;
 	}
 }

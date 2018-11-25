@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 public class JavaTokenStream implements Cloneable
 {
 	private static final Pattern	CHARACTER_PATTERN			= Pattern.compile("^(\\s*([^\\s])\\s*).*");
+	private static final Pattern	CHARACTERS_PATTERN			= Pattern.compile("^(\\s*([^\\s]+)\\s*).*");
 	private static final Pattern	IDENTIFIER_PATTERN  		= Pattern.compile("^(\\s*([A-Za-z][_A-Za-z0-9]*)\\s*).*");
 	private static final Pattern	STRING_LITERAL_PATTERN		= Pattern.compile("^(\\s*\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"\\s*).*");
 	private static final Pattern	CHARACTER_LITERAL_PATTERN	= Pattern.compile("^(\\s*'(\\\\.|[^\\\\])'\\s*).*");
@@ -133,12 +134,16 @@ public class JavaTokenStream implements Cloneable
 	}
 
 	public char peekCharacter() {
-		Matcher matcher = CHARACTER_PATTERN.matcher(javaExpression.substring(position));
+		String characters = peekCharacters();
+		return characters == null ? 0 : characters.charAt(0);
+	}
+
+	public String peekCharacters() {
+		Matcher matcher = CHARACTERS_PATTERN.matcher(javaExpression.substring(position));
 		if (!matcher.matches()) {
-			return 0;
+			return null;
 		}
-		String character = matcher.group(2);
-		return character.charAt(0);
+		return matcher.group(2);
 	}
 
 	JavaToken readCharacter() throws JavaTokenParseException {

@@ -444,20 +444,20 @@ public class JavaExpressionEvaluationTest
 			long getLong(long l) { return l; }
 		}
 
-		Object testInstance = new TestClass();
+		TestClass testInstance = new TestClass();
 		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
-			.test("120", (byte) 120)
-			.test("getByte(120)", (byte) 120)
-			.test("1234", (short) 1234)
-			.test("getShort(1234)", (short) 1234)
+			.test("120", 120)
+			.test("getByte((byte) 120)", testInstance.getByte((byte) 120))
+			.test("1234", 1234)
+			.test("getShort((short) 1234)", testInstance.getShort((short) 1234))
 			.test("100000", 100000)
-			.test("getInt(100000)", 100000)
+			.test("getInt(100000)", testInstance.getInt(100000))
 			.test("5000000000L", 5000000000L)
-			.test("getLong(5000000000l)", 5000000000l);
+			.test("getLong(5000000000l)", testInstance.getLong(5000000000l));
 
 		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
-			.test("getByte(1234)")
-			.test("getShort(100000)")
+			.test("getByte(123)")
+			.test("getShort(1000)")
 			.test("getInt(5000000000)");
 	}
 
