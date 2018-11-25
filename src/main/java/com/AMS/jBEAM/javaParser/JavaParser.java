@@ -1,7 +1,11 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.google.common.base.Joiner;
+
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.AMS.jBEAM.javaParser.ParseError.ErrorType;
 
 public class JavaParser
 {
@@ -87,7 +91,7 @@ public class JavaParser
 			}
 			case PARSE_ERROR: {
 				ParseError error = (ParseError) parseResult;
-				throw new JavaParseException(error.getPosition(), error.getMessage());
+				throw new JavaParseException(error.getPosition(), error.getMessage(), error.getException());
 			}
 			case AMBIGUOUS_PARSE_RESULT: {
 				AmbiguousParseResult result = (AmbiguousParseResult) parseResult;
@@ -120,7 +124,7 @@ public class JavaParser
 			if (error != null) {
 				message += ("\n" + error);
 			}
-			return new ParseError(-1, message);
+			return new ParseError(-1, message, ErrorType.EVALUATION_EXCEPTION, e);
 		}
 	}
 
@@ -163,7 +167,8 @@ public class JavaParser
 			int position = ambiguousResults.isEmpty() ? results.get(0).getParsedToPosition() : ambiguousResults.get(0).getPosition();
 			String message = "Ambiguous expression:\n"
 							+ ambiguousResults.stream().map(AmbiguousParseResult::getMessage).collect(Collectors.joining("\n"))
-							+ results.stream().map(result -> "Expression can be evaluated to object of type " + result.getObjectInfo().getDeclaredClass().getSimpleName());
+							+ (ambiguousResults.size() > 0 && results.size() > 0 ? "\n" : "")
+							+ results.stream().map(result -> "Expression can be evaluated to object of type " + result.getObjectInfo().getDeclaredClass().getSimpleName()).collect(Collectors.joining("\n"));
 			return new AmbiguousParseResult(position, message);
 		}
 
@@ -172,8 +177,7 @@ public class JavaParser
 		}
 
 		if (errors.size() > 1) {
-			int position = errors.get(0).getPosition();
-			return new ParseError(position, "Could not parse expression");
+			return mergeParseErrors(errors);
 		} else {
 			return errors.get(0);
 		}
@@ -181,5 +185,33 @@ public class JavaParser
 
 	private static <T> List<T> filterParseResults(List<ParseResultIF> parseResults, Class<T> filterClass) {
 		return parseResults.stream().filter(filterClass::isInstance).map(filterClass::cast).collect(Collectors.toList());
+	}
+
+	private static ParseError mergeParseErrors(List<ParseError> errors) {
+		for (ErrorType errorType : ErrorType.values()) {
+			List<ParseError> errorsOfCurrentType = errors.stream().filter(error -> error.getErrorType() == errorType).collect(Collectors.toList());
+			if (errorsOfCurrentType.isEmpty()) {
+				continue;
+			}
+			if (errorsOfCurrentType.size() == 1) {
+				return errorsOfCurrentType.get(0);
+			}
+			Set<Integer> positions = errorsOfCurrentType.stream().map(ParseError::getPosition).collect(Collectors.toSet());
+			final int position;
+			final List<String> messages;
+			final String messagePrefix;
+			if (positions.size() == 1) {
+				position = positions.iterator().next();
+				messages = errorsOfCurrentType.stream().map(ParseError::getMessage).collect(Collectors.toList());
+				messagePrefix = "";
+			} else {
+				position = 0;
+				messages = errorsOfCurrentType.stream().map(error -> "Position " + error.getPosition() + ": " + error.getMessage()).collect(Collectors.toList());
+				messagePrefix = "Could not parse expression due to the following errors: ";
+			}
+			String message = Joiner.on("\n").join(messages);
+			return new ParseError(position, messagePrefix + message, errorType);
+		}
+		return new ParseError(-1, "Internal error: Failed merging parse errors", ErrorType.INTERNAL_ERROR);
 	}
 }

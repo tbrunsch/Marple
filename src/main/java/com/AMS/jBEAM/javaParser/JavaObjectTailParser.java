@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.AMS.jBEAM.javaParser.ParseError.*;
+
 /**
  * Parses a sub expression following a complete Java expression, assuming the context
  * <ul>
@@ -20,6 +22,7 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 
 	@Override
 	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+		int startPosition = tokenStream.getPosition();
 		if (tokenStream.hasMore()) {
 			char nextChar = tokenStream.peekCharacter();
 			if (nextChar == '.') {
@@ -28,7 +31,7 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 				Class<?> elementClass = getClass(currentContextInfo).getComponentType();
 				if (elementClass == null) {
 					// no array type
-					return new ParseError(tokenStream.getPosition(), "Cannot apply [] to non-array types");
+					return new ParseError(tokenStream.getPosition(), "Cannot apply [] to non-array types", ErrorType.SEMANTIC_ERROR);
 				}
 				ParseResultIF arrayIndexParseResult = parseArrayIndex(tokenStream);
 				switch (arrayIndexParseResult.getResultType()) {
@@ -43,25 +46,30 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 						ParseResult parseResult = (ParseResult) arrayIndexParseResult;
 						int parsedToPosition = parseResult.getParsedToPosition();
 						ObjectInfo indexInfo = parseResult.getObjectInfo();
-						ObjectInfo elementInfo = getArrayElementInfo(currentContextInfo, indexInfo);
+						ObjectInfo elementInfo;
+						try {
+							elementInfo = getArrayElementInfo(currentContextInfo, indexInfo);
+						} catch (ClassCastException | ArrayIndexOutOfBoundsException e) {
+							return new ParseError(startPosition, e.getClass().getSimpleName() + " during array index evaluation", ErrorType.EVALUATION_EXCEPTION, e);
+						}
 						tokenStream.moveTo(parsedToPosition);
 						return parserPool.getObjectTailParser().parse(tokenStream, elementInfo, expectedResultClasses);
 					}
 					default:
 						throw new IllegalStateException("Unsupported parse result type: " + arrayIndexParseResult.getResultType());
 				}
-			} else if (nextChar == '(') {
-				/*
-				 * Prevent "<field>(" from being parsed as <field>. Otherwise, the expression
-				 * "<field>()" will be ambiguous if there also exists a method with the name of <field> and no arguments.
-				 */
-				return new ParseError(tokenStream.getPosition() + 1, "Unexpected opening parenthesis '('");
 			}
 		}
 		// finished parsing
 		if (expectedResultClasses != null
 				&& expectedResultClasses.stream().noneMatch(expectedResultClass -> ParseUtils.isConvertibleTo(getClass(currentContextInfo), expectedResultClass))) {
-			return new ParseError(tokenStream.getPosition(), "The class '" + getClass(currentContextInfo).getSimpleName() + "' cannot be casted to any of the expected class '" + expectedResultClasses.stream().map(clazz -> clazz.getSimpleName()).collect(Collectors.joining("', '")) + "'");
+			String messagePrefix = "The class '" + getClass(currentContextInfo).getSimpleName() + "' cannot be casted to ";
+			String messageMiddle = expectedResultClasses.size() > 1
+									? "any of the expected classes "
+									: "the expected class ";
+			String messageSuffix = "'" + expectedResultClasses.stream().map(clazz -> clazz.getSimpleName()).collect(Collectors.joining("', '")) + "'";
+
+			return new ParseError(tokenStream.getPosition(), messagePrefix + messageMiddle + messageSuffix, ErrorType.SEMANTIC_ERROR);
 		}
 
 		return new ParseResult(tokenStream.getPosition(), currentContextInfo);
@@ -113,7 +121,7 @@ class JavaObjectTailParser extends AbstractJavaEntityParser
 				characterToken = tokenStream.readCharacterUnchecked();
 
 				if (characterToken == null || characterToken.getValue().charAt(0) != ']') {
-					return new ParseError(parsedToPosition, "Expected closing bracket ']'");
+					return new ParseError(parsedToPosition, "Expected closing bracket ']'", ErrorType.SYNTAX_ERROR);
 				}
 
 				if (characterToken.isContainsCaret()) {

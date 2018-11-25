@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.AMS.jBEAM.javaParser.ParseError.*;
+
 /**
  * Parses a sub expression starting with a field {@code <field>}, assuming the context
  * <ul>
@@ -29,7 +31,7 @@ class JavaFieldParser extends AbstractJavaEntityParser
 		try {
 			fieldNameToken = tokenStream.readIdentifier();
 		} catch (JavaTokenStream.JavaTokenParseException e) {
-			return new ParseError(startPosition, "Expected an identifier");
+			return new ParseError(startPosition, "Expected an identifier", ErrorType.WRONG_PARSER);
 		}
 		String fieldName = fieldNameToken.getValue();
 		int endPosition = tokenStream.getPosition();
@@ -46,10 +48,14 @@ class JavaFieldParser extends AbstractJavaEntityParser
 			return new CompletionSuggestions(ratedSuggestions);
 		}
 
+		if (tokenStream.hasMore() && tokenStream.peekCharacter() == '(') {
+			return new ParseError(tokenStream.getPosition() + 1, "Unexpected opening parenthesis '('", ErrorType.WRONG_PARSER);
+		}
+
 		// no code completion requested => field name must exist
 		Optional<Field> firstFieldMatch = fields.stream().filter(field -> field.getName().equals(fieldName)).findFirst();
 		if (!firstFieldMatch.isPresent()) {
-			return new ParseError(startPosition, "Unknown field '" + fieldName + "'");
+			return new ParseError(startPosition, "Unknown field '" + fieldName + "'", ErrorType.SEMANTIC_ERROR);
 		}
 
 		Field matchingField = firstFieldMatch.get();

@@ -1,5 +1,7 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.AMS.jBEAM.javaParser.ParseError.ErrorType;
+
 import java.util.List;
 
 class JavaCastParser extends AbstractJavaEntityParser
@@ -13,7 +15,7 @@ class JavaCastParser extends AbstractJavaEntityParser
 		int position = tokenStream.getPosition();
 		JavaToken characterToken = tokenStream.readCharacterUnchecked();
 		if (characterToken == null || characterToken.getValue().charAt(0) != '(') {
-			return new ParseError(position, "Expected opening parenthesis '('");
+			return new ParseError(position, "Expected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
 		if (characterToken.isContainsCaret()) {
 			// nothing we can suggest after '('
@@ -34,7 +36,7 @@ class JavaCastParser extends AbstractJavaEntityParser
 				int parsedToPosition = parseResult.getParsedToPosition();
 				ObjectInfo classInfo = parseResult.getObjectInfo();
 				if (!(classInfo.getObject() instanceof Class<?>)) {
-					return new ParseError(parsedToPosition, "Internal error: Did not parse class correctly");
+					return new ParseError(parsedToPosition, "Internal error: Did not parse class correctly", ErrorType.INTERNAL_ERROR);
 				}
 				Class<?> targetClass = (Class<?>) classInfo.getObject();
 
@@ -42,7 +44,7 @@ class JavaCastParser extends AbstractJavaEntityParser
 
 				characterToken = tokenStream.readCharacterUnchecked();
 				if (characterToken == null || characterToken.getValue().charAt(0) != ')') {
-					return new ParseError(position, "Expected closing parenthesis ')'");
+					return new ParseError(position, "Expected closing parenthesis ')'", ErrorType.SYNTAX_ERROR);
 				}
 				if (characterToken.isContainsCaret()) {
 					// nothing we can suggest after ')'
@@ -76,7 +78,7 @@ class JavaCastParser extends AbstractJavaEntityParser
 					ObjectInfo castInfo = getCastInfo(objectInfo, targetClass);
 					return new ParseResult(parsedToPosition, castInfo);
 				} catch (ClassCastException e) {
-					return new ParseError(tokenStream.getPosition(), "Cannot cast expression to '" + targetClass + "'");
+					return new ParseError(tokenStream.getPosition(), "Cannot cast expression to '" + targetClass + "'", ErrorType.SEMANTIC_ERROR, e);
 				}
 			}
 			default:

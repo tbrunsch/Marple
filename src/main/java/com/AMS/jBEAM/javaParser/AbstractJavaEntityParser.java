@@ -1,5 +1,6 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.AMS.jBEAM.javaParser.ParseError.ErrorType;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.ClassPath;
 
@@ -150,7 +151,7 @@ abstract class AbstractJavaEntityParser
 		// The case requestedCodeCompletionBeforeNextArgument == true will be handled at the beginning of the first loop iteration
 		if (!requestedCodeCompletionBeforeNextArgument) {
 			if (!tokenStream.hasMore()) {
-				methodArguments.add(new ParseError(tokenStream.getPosition(), "Expected argument or closing parenthesis ')'"));
+				methodArguments.add(new ParseError(tokenStream.getPosition(), "Expected argument or closing parenthesis ')'", ErrorType.SYNTAX_ERROR));
 				return methodArguments;
 			}
 
@@ -168,7 +169,7 @@ abstract class AbstractJavaEntityParser
 			List<Class<?>> expectedArgumentTypes_i = availableMethods.stream().map(method -> method.getParameterTypes()[i]).distinct().collect(Collectors.toList());
 
 			if (expectedArgumentTypes_i.isEmpty()) {
-				methodArguments.add(new ParseError(tokenStream.getPosition(), "No further arguments expected"));
+				methodArguments.add(new ParseError(tokenStream.getPosition(), "No further arguments expected", ErrorType.SEMANTIC_ERROR));
 				return methodArguments;
 			}
 
@@ -212,7 +213,7 @@ abstract class AbstractJavaEntityParser
 			characterToken = tokenStream.readCharacterUnchecked();
 
 			if (characterToken == null) {
-				methodArguments.add(new ParseError(position, "Expected comma ',' or closing parenthesis ')'"));
+				methodArguments.add(new ParseError(position, "Expected comma ',' or closing parenthesis ')'", ErrorType.SYNTAX_ERROR));
 				return methodArguments;
 			}
 
@@ -225,7 +226,7 @@ abstract class AbstractJavaEntityParser
 			}
 
 			if (characterToken.getValue().charAt(0) != ',') {
-				methodArguments.add(new ParseError(position, "Expected comma ',' or closing parenthesis ')'"));
+				methodArguments.add(new ParseError(position, "Expected comma ',' or closing parenthesis ')'", ErrorType.SYNTAX_ERROR));
 				return methodArguments;
 			}
 
@@ -343,7 +344,7 @@ abstract class AbstractJavaEntityParser
 				identifierToken = tokenStream.readIdentifier();
 			} catch (JavaTokenStream.JavaTokenParseException e) {
 				return lastDetectedClass == null
-						? new ParseError(tokenStream.getPosition(), "Expected sub-package or class name")
+						? new ParseError(tokenStream.getPosition(), "Expected sub-package or class name", ErrorType.SYNTAX_ERROR)
 						: new ParseResult(lastParsedToPosition, new ObjectInfo(lastDetectedClass));
 
 			}
@@ -362,7 +363,7 @@ abstract class AbstractJavaEntityParser
 			JavaToken characterToken = tokenStream.readCharacterUnchecked();
 			if (characterToken == null ||  characterToken.getValue().charAt(0) != '.') {
 				return lastDetectedClass == null
-						? new ParseError(lastParsedToPosition, "Expected sub-package or class name")
+						? new ParseError(lastParsedToPosition, "Expected sub-package or class name", ErrorType.SYNTAX_ERROR)
 						: new ParseResult(lastParsedToPosition, new ObjectInfo(lastDetectedClass));
 			}
 			className += ".";

@@ -1,5 +1,7 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.AMS.jBEAM.javaParser.ParseError.ErrorType;
+
 import java.util.List;
 
 class JavaParenthesizedExpressionParser extends AbstractJavaEntityParser
@@ -13,7 +15,7 @@ class JavaParenthesizedExpressionParser extends AbstractJavaEntityParser
 		int position = tokenStream.getPosition();
 		JavaToken characterToken = tokenStream.readCharacterUnchecked();
 		if (characterToken == null || characterToken.getValue().charAt(0) != '(') {
-			return new ParseError(position, "Expected opening parenthesis '('");
+			return new ParseError(position, "Expected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
 		if (characterToken.isContainsCaret()) {
 			return suggestFieldsAndMethods(tokenStream, expectedResultClasses);
@@ -36,7 +38,7 @@ class JavaParenthesizedExpressionParser extends AbstractJavaEntityParser
 
 				characterToken = tokenStream.readCharacterUnchecked();
 				if (characterToken == null || characterToken.getValue().charAt(0) != ')') {
-					return new ParseError(position, "Expected closing parenthesis ')'");
+					return new ParseError(position, "Expected closing parenthesis ')'", ErrorType.SYNTAX_ERROR);
 				}
 				if (characterToken.isContainsCaret()) {
 					// nothing we can suggest after ')'

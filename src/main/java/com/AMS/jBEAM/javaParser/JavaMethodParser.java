@@ -4,6 +4,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.AMS.jBEAM.javaParser.ParseError.*;
+
 /**
  * Parses a sub expression starting with a method {@code <method>}, assuming the context
  * <ul>
@@ -28,7 +30,7 @@ class JavaMethodParser extends AbstractJavaEntityParser
 		try {
 			methodNameToken = tokenStream.readIdentifier();
 		} catch (JavaTokenStream.JavaTokenParseException e) {
-			return new ParseError(startPosition, "Expected an identifier");
+			return new ParseError(startPosition, "Expected an identifier", ErrorType.WRONG_PARSER);
 		}
 		String methodName = methodNameToken.getValue();
 		final int endPosition = tokenStream.getPosition();
@@ -45,14 +47,14 @@ class JavaMethodParser extends AbstractJavaEntityParser
 			return new CompletionSuggestions(ratedSuggestions);
 		}
 
-		// no code completion requested => field name must exist
-		List<Method> matchingMethods = methods.stream().filter(method -> method.getName().equals(methodName)).collect(Collectors.toList());
-		if (matchingMethods.isEmpty()) {
-			return new ParseError(startPosition, "Unknown method '" + methodName + "'");
+		if (!tokenStream.hasMore() || tokenStream.peekCharacter() != '(') {
+			return new ParseError(tokenStream.getPosition(), "Expected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
 
-		if (!tokenStream.hasMore() || tokenStream.peekCharacter() != '(') {
-			return new ParseError(tokenStream.getPosition(), "Expected opening parenthesis '('");
+		// no code completion requested => method name must exist
+		List<Method> matchingMethods = methods.stream().filter(method -> method.getName().equals(methodName)).collect(Collectors.toList());
+		if (matchingMethods.isEmpty()) {
+			return new ParseError(startPosition, "Unknown method '" + methodName + "'", ErrorType.SEMANTIC_ERROR);
 		}
 
 		List<ParseResultIF> argumentParseResults = parseMethodArguments(tokenStream, matchingMethods);
@@ -73,10 +75,15 @@ class JavaMethodParser extends AbstractJavaEntityParser
 
 		switch (bestMatchingMethods.size()) {
 			case 0:
-				return new ParseError(tokenStream.getPosition(), "No method matches the given arguments");
+				return new ParseError(tokenStream.getPosition(), "No method matches the given arguments", ErrorType.SEMANTIC_ERROR);
 			case 1: {
 				Method bestMatchingMethod = bestMatchingMethods.get(0);
-				ObjectInfo methodReturnInfo = getMethodReturnInfo(currentContextInfo, bestMatchingMethod, argumentInfos);
+				ObjectInfo methodReturnInfo;
+				try {
+					methodReturnInfo = getMethodReturnInfo(currentContextInfo, bestMatchingMethod, argumentInfos);
+				} catch (Exception e) {
+					return new ParseError(startPosition, "Exception during method evaluation", ErrorType.EVALUATION_EXCEPTION, e);
+				}
 				return parserPool.getObjectTailParser().parse(tokenStream, methodReturnInfo, expectedResultClasses);
 			}
 			default: {
