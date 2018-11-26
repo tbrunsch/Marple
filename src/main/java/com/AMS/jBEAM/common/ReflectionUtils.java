@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ReflectionUtils
@@ -177,6 +178,10 @@ public class ReflectionUtils
 	}
 
 	public static List<Field> getFields(Class<?> clazz, boolean filterShadowedFields) {
+		return getFields(clazz, filterShadowedFields, modifiers -> true);
+	}
+
+	public static List<Field> getFields(Class<?> clazz, boolean filterShadowedFields, Predicate<Integer> modifierFilter) {
 		Set<String> encounteredFieldNames = new HashSet<>();
 		List<Field> fields = new ArrayList<>();
 		for (Class<?> curClazz = clazz; curClazz != null; curClazz = curClazz.getSuperclass()) {
@@ -186,7 +191,7 @@ public class ReflectionUtils
 			// Sort fields because they are not guaranteed to be in any order
 			Collections.sort(declaredFields, Comparator.comparing(field -> field.getName().toLowerCase()));
 
-			for (Field field : declaredFields) {
+			for (Field field : Iterables.filter(declaredFields, field -> modifierFilter.test(field.getModifiers()))) {
 				if (filterShadowedFields) {
 					String fieldName = field.getName();
 					if (encounteredFieldNames.contains(fieldName)) {
@@ -204,6 +209,10 @@ public class ReflectionUtils
 	 * Methods
 	 */
 	public static List<Method> getMethods(Class<?> clazz) {
+		return getMethods(clazz, modifiers -> true);
+	}
+
+	public static List<Method> getMethods(Class<?> clazz, Predicate<Integer> modifierFilter) {
 		Multimap<String, Class<?>[]> encounteredSignatures = ArrayListMultimap.create();
 
 		List<Method> methods = new ArrayList<>();
@@ -212,7 +221,7 @@ public class ReflectionUtils
 			// Sort methods because they are not guaranteed to be in any order
 			Collections.sort(declaredMethods, Comparator.comparing(method -> method.getName().toLowerCase()));
 
-			for (Method method : declaredMethods) {
+			for (Method method : Iterables.filter(declaredMethods, method -> modifierFilter.test(method.getModifiers()))) {
 				String methodName = method.getName();
 				Collection<Class<?>[]> encounteredArgumentTypeCombinations = encounteredSignatures.get(methodName);
 				Class<?>[] argumentTypes = method.getParameterTypes();
