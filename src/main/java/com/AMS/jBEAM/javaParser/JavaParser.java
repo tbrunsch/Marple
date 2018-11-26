@@ -109,10 +109,6 @@ public class JavaParser
 	}
 
 	private ParseResultIF parse(String javaExpression, JavaParserSettings settings, EvaluationMode evaluationMode, int caret, Object thisContext) {
-		// TODO: Static parsing should also work for null
-		if (thisContext == null) {
-			throw new IllegalArgumentException("this is null");
-		}
 		ObjectInfo thisInfo = new ObjectInfo(thisContext);
 		JavaParserContext parserPool  = new JavaParserContext(thisInfo, settings, evaluationMode);
 		JavaTokenStream tokenStream = new JavaTokenStream(javaExpression, caret);

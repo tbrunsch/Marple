@@ -34,6 +34,11 @@ public class JavaFieldParser extends AbstractJavaEntityParser
 	@Override
 	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
+
+		if (thisInfo.getObject() == null && !staticOnly) {
+			return new ParseError(startPosition, "Null object does not have any fields", ErrorType.WRONG_PARSER);
+		}
+
 		JavaToken fieldNameToken;
 		try {
 			fieldNameToken = tokenStream.readIdentifier();

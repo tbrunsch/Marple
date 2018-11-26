@@ -35,6 +35,11 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 	@Override
 	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		final int startPosition = tokenStream.getPosition();
+
+		if (thisInfo.getObject() == null && !staticOnly) {
+			return new ParseError(startPosition, "Null object does not have any methods", ErrorType.WRONG_PARSER);
+		}
+
 		JavaToken methodNameToken;
 		try {
 			methodNameToken = tokenStream.readIdentifier();
