@@ -1,11 +1,8 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.JavaParserContext;
-import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
-import com.AMS.jBEAM.javaParser.result.ParseError;
+import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
-import com.AMS.jBEAM.javaParser.result.ParseResult;
-import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.tokenizer.JavaToken;
 import com.AMS.jBEAM.javaParser.tokenizer.JavaTokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
@@ -30,33 +27,26 @@ public class JavaParenthesizedExpressionParser extends AbstractJavaEntityParser
 		}
 
 		ParseResultIF expressionParseResult = parserContext.getExpressionParser().parse(tokenStream, currentContextInfo, expectedResultClasses);
-		switch (expressionParseResult.getResultType()) {
-			case COMPLETION_SUGGESTIONS:
-				// code completion inside "()" => propagate completion suggestions
-				return expressionParseResult;
-			case PARSE_ERROR:
-			case AMBIGUOUS_PARSE_RESULT:
-				// always propagate errors
-				return expressionParseResult;
-			case PARSE_RESULT: {
-				ParseResult parseResult = (ParseResult) expressionParseResult;
-				int parsedToPosition = parseResult.getParsedToPosition();
-				ObjectInfo objectInfo = parseResult.getObjectInfo();
-				tokenStream.moveTo(parsedToPosition);
 
-				characterToken = tokenStream.readCharacterUnchecked();
-				if (characterToken == null || characterToken.getValue().charAt(0) != ')') {
-					return new ParseError(position, "Expected closing parenthesis ')'", ErrorType.SYNTAX_ERROR);
-				}
-				if (characterToken.isContainsCaret()) {
-					// nothing we can suggest after ')'
-					return CompletionSuggestions.NONE;
-				}
-
-				return parserContext.getObjectTailParser().parse(tokenStream, objectInfo, expectedResultClasses);
-			}
-			default:
-				throw new IllegalStateException("Unsupported parse result type: " + expressionParseResult.getResultType());
+		// propagate anything except results
+		if (expressionParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
+			return expressionParseResult;
 		}
+
+		ParseResult parseResult = (ParseResult) expressionParseResult;
+		int parsedToPosition = parseResult.getParsedToPosition();
+		ObjectInfo objectInfo = parseResult.getObjectInfo();
+		tokenStream.moveTo(parsedToPosition);
+
+		characterToken = tokenStream.readCharacterUnchecked();
+		if (characterToken == null || characterToken.getValue().charAt(0) != ')') {
+			return new ParseError(position, "Expected closing parenthesis ')'", ErrorType.SYNTAX_ERROR);
+		}
+		if (characterToken.isContainsCaret()) {
+			// nothing we can suggest after ')'
+			return CompletionSuggestions.NONE;
+		}
+
+		return parserContext.getTailParser(false).parse(tokenStream, objectInfo, expectedResultClasses);
 	}
 }

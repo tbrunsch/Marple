@@ -74,6 +74,6 @@ public class JavaFieldParser extends AbstractJavaEntityParser
 		Field matchingField = firstFieldMatch.get();
 		ObjectInfo matchingFieldInfo = parserContext.getObjectInfoProvider().getFieldInfo(currentContextInfo, matchingField);
 
-		return parserContext.getObjectTailParser().parse(tokenStream, matchingFieldInfo, expectedResultClasses);
+		return parserContext.getTailParser(false).parse(tokenStream, matchingFieldInfo, expectedResultClasses);
 	}
 }

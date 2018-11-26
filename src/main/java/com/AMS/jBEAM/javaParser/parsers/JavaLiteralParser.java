@@ -65,7 +65,7 @@ public class JavaLiteralParser extends AbstractJavaEntityParser
 		}
 		String stringLiteralValue = stringLiteralToken.getValue();
 		ObjectInfo stringLiteralInfo = new ObjectInfo(stringLiteralValue);
-		return parserContext.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectedResultClasses);
+		return parserContext.getTailParser(false).parse(tokenStream, stringLiteralInfo, expectedResultClasses);
 	}
 
 	private ParseResultIF parseCharacterLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
@@ -85,7 +85,7 @@ public class JavaLiteralParser extends AbstractJavaEntityParser
 			throw new IllegalStateException("Internal error parsing character literals. It should represent exactly 1 character, but it represents " + characterLiteralValue.length());
 		}
 		ObjectInfo stringLiteralInfo = new ObjectInfo(characterLiteralValue.charAt(0), char.class);
-		return parserContext.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectedResultClasses);
+		return parserContext.getTailParser(false).parse(tokenStream, stringLiteralInfo, expectedResultClasses);
 	}
 
 	private ParseResultIF parseNamedLiteral(JavaTokenStream tokenStream, String literalName, Object literalValue, Class<?> literalClass, List<Class<?>> expectedResultClasses) {
@@ -104,7 +104,7 @@ public class JavaLiteralParser extends AbstractJavaEntityParser
 			return new ParseError(startPosition, "Expected '" + literalName + "'", ErrorType.WRONG_PARSER);
 		}
 		ObjectInfo namedLiteralInfo = new ObjectInfo(literalValue, literalClass);
-		return parserContext.getObjectTailParser().parse(tokenStream, namedLiteralInfo, expectedResultClasses);
+		return parserContext.getTailParser(false).parse(tokenStream, namedLiteralInfo, expectedResultClasses);
 	}
 
 	private ParseResultIF parseNumericLiteral(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
@@ -161,7 +161,7 @@ public class JavaLiteralParser extends AbstractJavaEntityParser
 			}
 
 			ObjectInfo literalInfo = new ObjectInfo(literalValue, numericType);
-			return parserContext.getObjectTailParser().parse(tokenStream, literalInfo, expectedResultClasses);
+			return parserContext.getTailParser(false).parse(tokenStream, literalInfo, expectedResultClasses);
 		}
 	}
 

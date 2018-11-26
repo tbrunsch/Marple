@@ -689,6 +689,43 @@ public class JavaExpressionEvaluationTest
 			.test("(String) o1");
 	}
 
+	private static class ClassParserTestClass
+	{
+		int i = 23;
+		static long l = -17L;
+		private static byte b = (byte) 25;
+		double d = 1.3;
+		static float f = 27.5f;
+
+		static int getInt() { return 0; }
+		long getLong() { return 1L; }
+		private static String getString() { return "abc"; }
+		static double getDouble() { return 2.0; }
+		float getFloat() { return 3.0f; }
+	}
+
+	@Test
+	public void testClass() {
+		Object testInstance = null;
+		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED, AccessLevel.PACKAGE_PRIVATE)
+			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.l", -17L)
+			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.f", 27.5f)
+			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.getInt()", 0)
+			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.getDouble()", 2.0);
+
+		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED, AccessLevel.PUBLIC)
+			.test("java.lang.Math.pow(1.5, 2.5)", Math.pow(1.5, 2.5))
+			.test("java.lang.Math.PI", Math.PI);
+
+		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED, AccessLevel.PACKAGE_PRIVATE)
+			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.i")
+			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.b")
+			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.d")
+			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.getLong()")
+			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.getString()")
+			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.getFloat()");
+	}
+
 	/*
 	 * Class for creating tests with expected successful code completions
 	 */
@@ -698,8 +735,12 @@ public class JavaExpressionEvaluationTest
 		private final JavaParserSettings	settings;
 
 		TestExecutor(Object testInstance, EvaluationMode evaluationMode) {
+			this(testInstance, evaluationMode, AccessLevel.PRIVATE);
+		}
+
+		TestExecutor(Object testInstance, EvaluationMode evaluationMode, AccessLevel minimumAccessLevel) {
 			this.testInstance = testInstance;
-			this.settings = new JavaParserSettings(new Imports(), EvaluationMode.NONE, evaluationMode);
+			this.settings = new JavaParserSettings(new Imports(), minimumAccessLevel, EvaluationMode.NONE, evaluationMode);
 		}
 
 		TestExecutor test(String javaExpression, Object expectedValue) {
@@ -723,8 +764,11 @@ public class JavaExpressionEvaluationTest
 		private final JavaParserSettings	settings;
 
 		ErrorTestExecutor(Object testInstance, EvaluationMode evaluationMode) {
+			this(testInstance, evaluationMode, AccessLevel.PRIVATE);
+		}
+		ErrorTestExecutor(Object testInstance, EvaluationMode evaluationMode, AccessLevel minimumAccessLevel) {
 			this.testInstance = testInstance;
-			this.settings = new JavaParserSettings(new Imports(), EvaluationMode.NONE, evaluationMode);
+			this.settings = new JavaParserSettings(new Imports(), minimumAccessLevel, EvaluationMode.NONE, evaluationMode);
 		}
 
 		ErrorTestExecutor test(String javaExpression) {

@@ -21,24 +21,28 @@ public class FieldAndMethodDataProvider
 	}
 
 	public CompletionSuggestions suggestFieldsAndMethods(JavaTokenStream tokenStream, List<Class<?>> expectedClasses) {
+		ObjectInfo thisInfo = parserContext.getThisInfo();
+		if (thisInfo.getObject() == null) {
+			return CompletionSuggestions.NONE;
+		}
 		int insertionBegin, insertionEnd;
 		insertionBegin = insertionEnd = tokenStream.getPosition();
-		return suggestFieldsAndMethods(parserContext.getThisInfo(), expectedClasses, insertionBegin, insertionEnd);
+		return suggestFieldsAndMethods(thisInfo, expectedClasses, insertionBegin, insertionEnd, false);
 	}
 
-	public CompletionSuggestions suggestFieldsAndMethods(ObjectInfo contextInfo, List<Class<?>> expectedClasses, final int insertionBegin, final int insertionEnd) {
+	public CompletionSuggestions suggestFieldsAndMethods(ObjectInfo contextInfo, List<Class<?>> expectedClasses, final int insertionBegin, final int insertionEnd, boolean staticOnly) {
 		Map<CompletionSuggestionIF, Integer> ratedSuggestions = new LinkedHashMap<>();
 
 		Class<?> contextClass = parserContext.getObjectInfoProvider().getClass(contextInfo);
 
-		List<Field> fields = parserContext.getInspectionDataProvider().getFields(contextClass, false);
+		List<Field> fields = parserContext.getInspectionDataProvider().getFields(contextClass, staticOnly);
 		ratedSuggestions.putAll(ParseUtils.createRatedSuggestions(
 				fields,
 				field -> new CompletionSuggestionField(field, insertionBegin, insertionEnd),
 				ParseUtils.rateFieldByClassesFunc(expectedClasses))
 		);
 
-		List<Method> methods = parserContext.getInspectionDataProvider().getMethods(contextClass, false);
+		List<Method> methods = parserContext.getInspectionDataProvider().getMethods(contextClass, staticOnly);
 		ratedSuggestions.putAll(ParseUtils.createRatedSuggestions(
 				methods,
 				method -> new CompletionSuggestionMethod(method, insertionBegin, insertionEnd),
@@ -98,25 +102,17 @@ public class FieldAndMethodDataProvider
 			 */
 			ParseResultIF argumentParseResult_i = parserContext.getExpressionParser().parse(tokenStream, parserContext.getThisInfo(), expectedArgumentTypes_i);
 			methodArguments.add(argumentParseResult_i);
-			switch (argumentParseResult_i.getResultType()) {
-				case COMPLETION_SUGGESTIONS:
-					// code completion inside "[]" => propagate completion suggestions
-					return methodArguments;
-				case PARSE_ERROR:
-				case AMBIGUOUS_PARSE_RESULT:
-					// always propagate errors
-					return methodArguments;
-				case PARSE_RESULT: {
-					ParseResult parseResult = ((ParseResult) argumentParseResult_i);
-					int parsedToPosition = parseResult.getParsedToPosition();
-					tokenStream.moveTo(parsedToPosition);
-					ObjectInfo argumentInfo = parseResult.getObjectInfo();
-					availableMethods = availableMethods.stream().filter(method -> acceptsArgumentInfo(method, i, argumentInfo)).collect(Collectors.toList());
-					break;
-				}
-				default:
-					throw new IllegalStateException("Unsupported parse result type: " + argumentParseResult_i.getResultType());
+
+			// always stop except for results
+			if (argumentParseResult_i.getResultType() != ParseResultType.PARSE_RESULT) {
+				return methodArguments;
 			}
+
+			ParseResult parseResult = ((ParseResult) argumentParseResult_i);
+			int parsedToPosition = parseResult.getParsedToPosition();
+			tokenStream.moveTo(parsedToPosition);
+			ObjectInfo argumentInfo = parseResult.getObjectInfo();
+			availableMethods = availableMethods.stream().filter(method -> acceptsArgumentInfo(method, i, argumentInfo)).collect(Collectors.toList());
 
 			position = tokenStream.getPosition();
 			characterToken = tokenStream.readCharacterUnchecked();

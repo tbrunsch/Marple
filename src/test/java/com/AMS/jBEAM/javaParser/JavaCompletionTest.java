@@ -527,6 +527,35 @@ public class JavaCompletionTest
 			.test("get(o).", 7, JavaParseException.class);
 	}
 
+	private static class ClassParserTestClass
+	{
+		int i;
+		static long l;
+		private static byte b;
+		double d;
+		static float f;
+
+		static int getInt() { return 0; }
+		long getLong() { return 1L; }
+		private static String getString() { return "abc"; }
+		static double getDouble() { return 2.0; }
+		float getFloat() { return 3.0f; }
+	}
+
+	@Test
+	public void testClass() {
+		Object testInstance = null;
+		new TestExecutor(testInstance, EvaluationMode.NONE, AccessLevel.PACKAGE_PRIVATE)
+			.test("com.AMS.jBEAM.javaParser.JavaCompletionTest.ClassParserTestClass.", "f", "l", "getDouble()", "getInt()")
+			.test("String.CASE_I", "CASE_INSENSITIVE_ORDER")
+			.test("String.val", "valueOf()");
+
+		new TestExecutor(testInstance, EvaluationMode.NONE, AccessLevel.PUBLIC)
+			.test("java.lang.Ma", "Math")
+			.test("java.lang.Math.p", "pow(, )", "PI")
+			.test("java.lang.Math.P", "PI", "pow(, )");
+	}
+
 	private static List<String> extractSuggestions(List<CompletionSuggestionIF> completions) {
 		return completions.stream()
 			.map(completion -> completion.getTextToInsert())
@@ -542,8 +571,12 @@ public class JavaCompletionTest
 		private final JavaParserSettings	settings;
 
 		TestExecutor(Object testInstance, EvaluationMode evaluationMode) {
+			this(testInstance, evaluationMode, AccessLevel.PRIVATE);
+		}
+
+		TestExecutor(Object testInstance, EvaluationMode evaluationMode, AccessLevel minimumAccessLevel) {
 			this.testInstance = testInstance;
-			this.settings = new JavaParserSettings(new Imports(), evaluationMode, EvaluationMode.STRONGLY_TYPED);
+			this.settings = new JavaParserSettings(new Imports(), minimumAccessLevel, evaluationMode, EvaluationMode.STRONGLY_TYPED);
 		}
 
 		TestExecutor test(String javaExpression, String... expectedSuggestions) {
@@ -577,7 +610,7 @@ public class JavaCompletionTest
 
 		ErrorTestExecutor(Object testInstance, EvaluationMode evaluationMode) {
 			this.testInstance = testInstance;
-			this.settings = new JavaParserSettings(new Imports(), evaluationMode, EvaluationMode.STRONGLY_TYPED);
+			this.settings = new JavaParserSettings(new Imports(), AccessLevel.PRIVATE, evaluationMode, EvaluationMode.STRONGLY_TYPED);
 		}
 
 		ErrorTestExecutor test(String javaExpression, int caret, Class<? extends Exception> expectedExceptionClass) {

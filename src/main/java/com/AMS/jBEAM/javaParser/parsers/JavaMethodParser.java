@@ -99,7 +99,7 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 				} catch (Exception e) {
 					return new ParseError(startPosition, "Exception during method evaluation", ErrorType.EVALUATION_EXCEPTION, e);
 				}
-				return parserContext.getObjectTailParser().parse(tokenStream, methodReturnInfo, expectedResultClasses);
+				return parserContext.getTailParser(false).parse(tokenStream, methodReturnInfo, expectedResultClasses);
 			}
 			default: {
 				String error = "Ambiguous method call. Possible candidates are:\n"
