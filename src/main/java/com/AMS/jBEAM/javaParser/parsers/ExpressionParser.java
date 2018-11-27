@@ -2,7 +2,7 @@ package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.JavaParserContext;
 import com.AMS.jBEAM.javaParser.result.ParseResultIF;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaTokenStream;
+import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 
@@ -11,14 +11,14 @@ import java.util.List;
 /**
  * Parses an arbitrary Java expression
  */
-public class JavaExpressionParser extends AbstractJavaEntityParser
+public class ExpressionParser extends AbstractEntityParser
 {
-	public JavaExpressionParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
+	public ExpressionParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
 		super(parserContext, thisInfo);
 	}
 
 	@Override
-	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		return ParseUtils.parse(tokenStream, thisInfo, expectedResultClasses,
 			parserContext.getLiteralParser(),
 			parserContext.getFieldParser(false),

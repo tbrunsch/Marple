@@ -2,14 +2,14 @@ package com.AMS.jBEAM.javaParser.utils;
 
 import java.util.Objects;
 
-public class JavaClassInfo
+public class ClassInfo
 {
 	private final String fullyQualifiedClassName;
 
 	/**
 	 * Inner classes must be separated by "$"
 	 */
-	public JavaClassInfo(String fullyQualifiedClassName) {
+	public ClassInfo(String fullyQualifiedClassName) {
 		this.fullyQualifiedClassName = fullyQualifiedClassName;
 	}
 
@@ -30,7 +30,7 @@ public class JavaClassInfo
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		JavaClassInfo that = (JavaClassInfo) o;
+		ClassInfo that = (ClassInfo) o;
 		return Objects.equals(fullyQualifiedClassName, that.fullyQualifiedClassName);
 	}
 

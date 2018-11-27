@@ -1,16 +1,16 @@
 package com.AMS.jBEAM.javaParser;
 
-import com.AMS.jBEAM.javaParser.utils.JavaClassInfo;
+import com.AMS.jBEAM.javaParser.utils.ClassInfo;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class Imports
 {
-	private final Set<JavaClassInfo>	classes		= new LinkedHashSet<>();
+	private final Set<ClassInfo>	classes		= new LinkedHashSet<>();
 	private final Set<Package> 			packages	= new LinkedHashSet<>();
 
-	void importClass(JavaClassInfo classInfo) {
+	void importClass(ClassInfo classInfo) {
 		classes.add(classInfo);
 	}
 
@@ -18,7 +18,7 @@ public class Imports
 		packages.add(pack);
 	}
 
-	public Set<JavaClassInfo> getImportedClasses() {
+	public Set<ClassInfo> getImportedClasses() {
 		return classes;
 	}
 

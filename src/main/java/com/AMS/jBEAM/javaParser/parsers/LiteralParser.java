@@ -5,31 +5,31 @@ import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
 import com.AMS.jBEAM.javaParser.result.ParseError;
 import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.result.ParseResultType;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaToken;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaTokenStream;
+import com.AMS.jBEAM.javaParser.tokenizer.Token;
+import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 
 import java.util.List;
 
 import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 
-public class JavaLiteralParser extends AbstractJavaEntityParser
+public class LiteralParser extends AbstractEntityParser
 {
-	private final AbstractJavaEntityParser	intParser;
-	private final AbstractJavaEntityParser	longParser;
-	private final AbstractJavaEntityParser	floatParser;
-	private final AbstractJavaEntityParser	doubleParser;
+	private final AbstractEntityParser intParser;
+	private final AbstractEntityParser longParser;
+	private final AbstractEntityParser floatParser;
+	private final AbstractEntityParser doubleParser;
 
-	public JavaLiteralParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
+	public LiteralParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
 		super(parserContext, thisInfo);
-		intParser 		= new NumericLiteralParser<>(parserContext, thisInfo, int.class,	JavaTokenStream::readIntegerLiteral,	Integer::parseInt,		"Invalid int literal");
-		longParser 		= new NumericLiteralParser<>(parserContext, thisInfo, long.class,	JavaTokenStream::readLongLiteral, 		Long::parseLong,		"Invalid long literal");
-		floatParser 	= new NumericLiteralParser<>(parserContext, thisInfo, float.class,	JavaTokenStream::readFloatLiteral,		Float::parseFloat,		"Invalid float literal");
-		doubleParser 	= new NumericLiteralParser<>(parserContext, thisInfo, double.class,	JavaTokenStream::readDoubleLiteral,		Double::parseDouble,	"Invalid double literal");
+		intParser 		= new NumericLiteralParser<>(parserContext, thisInfo, int.class,	TokenStream::readIntegerLiteral,	Integer::parseInt,		"Invalid int literal");
+		longParser 		= new NumericLiteralParser<>(parserContext, thisInfo, long.class,	TokenStream::readLongLiteral, 		Long::parseLong,		"Invalid long literal");
+		floatParser 	= new NumericLiteralParser<>(parserContext, thisInfo, float.class,	TokenStream::readFloatLiteral,		Float::parseFloat,		"Invalid float literal");
+		doubleParser 	= new NumericLiteralParser<>(parserContext, thisInfo, double.class,	TokenStream::readDoubleLiteral,		Double::parseDouble,	"Invalid double literal");
 	}
 
 	@Override
-	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		if (!tokenStream.hasMore()) {
 			return new ParseError(tokenStream.getPosition(), "Expected a literal", ErrorType.WRONG_PARSER);
 		}
@@ -51,12 +51,12 @@ public class JavaLiteralParser extends AbstractJavaEntityParser
 		}
 	}
 
-	private ParseResultIF parseStringLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
+	private ParseResultIF parseStringLiteral(TokenStream tokenStream, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
-		JavaToken stringLiteralToken;
+		Token stringLiteralToken;
 		try {
 			stringLiteralToken = tokenStream.readStringLiteral();
-		} catch (JavaTokenStream.JavaTokenParseException e) {
+		} catch (TokenStream.JavaTokenParseException e) {
 			return new ParseError(startPosition, "Expected a string literal", ErrorType.SYNTAX_ERROR);
 		}
 		if (stringLiteralToken.isContainsCaret()) {
@@ -68,12 +68,12 @@ public class JavaLiteralParser extends AbstractJavaEntityParser
 		return parserContext.getTailParser(false).parse(tokenStream, stringLiteralInfo, expectedResultClasses);
 	}
 
-	private ParseResultIF parseCharacterLiteral(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses) {
+	private ParseResultIF parseCharacterLiteral(TokenStream tokenStream, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
-		JavaToken characterLiteralToken;
+		Token characterLiteralToken;
 		try {
 			characterLiteralToken = tokenStream.readCharacterLiteral();
-		} catch (JavaTokenStream.JavaTokenParseException e) {
+		} catch (TokenStream.JavaTokenParseException e) {
 			return new ParseError(startPosition, "Expected a character literal", ErrorType.SYNTAX_ERROR);
 		}
 		if (characterLiteralToken.isContainsCaret()) {
@@ -88,12 +88,12 @@ public class JavaLiteralParser extends AbstractJavaEntityParser
 		return parserContext.getTailParser(false).parse(tokenStream, stringLiteralInfo, expectedResultClasses);
 	}
 
-	private ParseResultIF parseNamedLiteral(JavaTokenStream tokenStream, String literalName, Object literalValue, Class<?> literalClass, List<Class<?>> expectedResultClasses) {
+	private ParseResultIF parseNamedLiteral(TokenStream tokenStream, String literalName, Object literalValue, Class<?> literalClass, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
-		JavaToken literalToken;
+		Token literalToken;
 		try {
 			literalToken = tokenStream.readNamedLiteral();
-		} catch (JavaTokenStream.JavaTokenParseException e) {
+		} catch (TokenStream.JavaTokenParseException e) {
 			return new ParseError(startPosition, "Expected '" + literalName + "'", ErrorType.WRONG_PARSER);
 		}
 		if (literalToken.isContainsCaret()) {
@@ -107,15 +107,15 @@ public class JavaLiteralParser extends AbstractJavaEntityParser
 		return parserContext.getTailParser(false).parse(tokenStream, namedLiteralInfo, expectedResultClasses);
 	}
 
-	private ParseResultIF parseNumericLiteral(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	private ParseResultIF parseNumericLiteral(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
 		char c = tokenStream.peekCharacter();
 		if (!"+-.0123456789".contains(String.valueOf(c))) {
 			return new ParseError(startPosition, "Expected a literal", ErrorType.WRONG_PARSER);
 		}
 
-		AbstractJavaEntityParser[] parsers = { longParser, intParser, floatParser, doubleParser };
-		for (AbstractJavaEntityParser parser : parsers) {
+		AbstractEntityParser[] parsers = { longParser, intParser, floatParser, doubleParser };
+		for (AbstractEntityParser parser : parsers) {
 			ParseResultIF parseResult = parser.parse(tokenStream, currentContextInfo, expectedResultClasses);
 			if (parseResult.getResultType() != ParseResultType.PARSE_ERROR) {
 				return parseResult;
@@ -124,7 +124,7 @@ public class JavaLiteralParser extends AbstractJavaEntityParser
 		return new ParseError(startPosition, "Expected a numeric literal", ErrorType.WRONG_PARSER);
 	}
 
-	private static class NumericLiteralParser<T> extends AbstractJavaEntityParser
+	private static class NumericLiteralParser<T> extends AbstractEntityParser
 	{
 		private final Class<T>				numericType;
 		private final NumericTokenReader	tokenReader;
@@ -140,12 +140,12 @@ public class JavaLiteralParser extends AbstractJavaEntityParser
 		}
 
 		@Override
-		ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+		ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 			int startPosition = tokenStream.getPosition();
-			JavaToken token;
+			Token token;
 			try {
 				token = tokenReader.read(tokenStream);
-			} catch (JavaTokenStream.JavaTokenParseException e) {
+			} catch (TokenStream.JavaTokenParseException e) {
 				return new ParseError(startPosition, wrongTypeError, ErrorType.WRONG_PARSER);
 			}
 			if (token.isContainsCaret()) {
@@ -168,7 +168,7 @@ public class JavaLiteralParser extends AbstractJavaEntityParser
 	@FunctionalInterface
 	private interface NumericTokenReader
 	{
-		JavaToken read(JavaTokenStream tokenStream) throws JavaTokenStream.JavaTokenParseException;
+		Token read(TokenStream tokenStream) throws TokenStream.JavaTokenParseException;
 	}
 
 	@FunctionalInterface

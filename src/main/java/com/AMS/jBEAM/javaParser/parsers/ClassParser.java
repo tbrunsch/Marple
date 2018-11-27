@@ -6,20 +6,19 @@ import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 import com.AMS.jBEAM.javaParser.result.ParseResult;
 import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.result.ParseResultType;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaToken;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaTokenStream;
+import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 
 import java.util.List;
 
-public class JavaClassParser extends AbstractJavaEntityParser
+public class ClassParser extends AbstractEntityParser
 {
-	public JavaClassParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
+	public ClassParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
 		super(parserContext, thisInfo);
 	}
 
 	@Override
-	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream, expectedResultClasses, false, true);
 
 		// propagate anything except results

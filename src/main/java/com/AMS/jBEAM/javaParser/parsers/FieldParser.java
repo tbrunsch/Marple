@@ -2,8 +2,8 @@ package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.JavaParserContext;
 import com.AMS.jBEAM.javaParser.result.*;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaToken;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaTokenStream;
+import com.AMS.jBEAM.javaParser.tokenizer.Token;
+import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 
@@ -22,27 +22,27 @@ import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
  *     <li>{@code <field>} (like {@code <context instance>.<field>} for {@code <context instance> = this})</li>
  * </ul>
  */
-public class JavaFieldParser extends AbstractJavaEntityParser
+public class FieldParser extends AbstractEntityParser
 {
 	private final boolean staticOnly;
 
-	public JavaFieldParser(JavaParserContext parserContext, ObjectInfo thisInfo, boolean staticOnly) {
+	public FieldParser(JavaParserContext parserContext, ObjectInfo thisInfo, boolean staticOnly) {
 		super(parserContext, thisInfo);
 		this.staticOnly = staticOnly;
 	}
 
 	@Override
-	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
 
 		if (thisInfo.getObject() == null && !staticOnly) {
 			return new ParseError(startPosition, "Null object does not have any fields", ErrorType.WRONG_PARSER);
 		}
 
-		JavaToken fieldNameToken;
+		Token fieldNameToken;
 		try {
 			fieldNameToken = tokenStream.readIdentifier();
-		} catch (JavaTokenStream.JavaTokenParseException e) {
+		} catch (TokenStream.JavaTokenParseException e) {
 			return new ParseError(startPosition, "Expected an identifier", ErrorType.WRONG_PARSER);
 		}
 		String fieldName = fieldNameToken.getValue();

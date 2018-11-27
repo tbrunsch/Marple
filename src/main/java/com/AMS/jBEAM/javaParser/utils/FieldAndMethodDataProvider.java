@@ -2,8 +2,8 @@ package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.javaParser.JavaParserContext;
 import com.AMS.jBEAM.javaParser.result.*;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaToken;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaTokenStream;
+import com.AMS.jBEAM.javaParser.tokenizer.Token;
+import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
@@ -20,7 +20,7 @@ public class FieldAndMethodDataProvider
 		this.parserContext = parserContext;
 	}
 
-	public CompletionSuggestions suggestFieldsAndMethods(JavaTokenStream tokenStream, List<Class<?>> expectedClasses) {
+	public CompletionSuggestions suggestFieldsAndMethods(TokenStream tokenStream, List<Class<?>> expectedClasses) {
 		ObjectInfo thisInfo = parserContext.getThisInfo();
 		if (thisInfo.getObject() == null) {
 			return CompletionSuggestions.NONE;
@@ -52,11 +52,11 @@ public class FieldAndMethodDataProvider
 		return new CompletionSuggestions(ratedSuggestions);
 	}
 
-	public List<ParseResultIF> parseMethodArguments(JavaTokenStream tokenStream, List<? extends Executable> availableMethods) {
+	public List<ParseResultIF> parseMethodArguments(TokenStream tokenStream, List<? extends Executable> availableMethods) {
 		List<ParseResultIF> methodArguments = new ArrayList<>();
 
 		int position = tokenStream.getPosition();
-		JavaToken characterToken = tokenStream.readCharacterUnchecked();
+		Token characterToken = tokenStream.readCharacterUnchecked();
 		boolean requestedCodeCompletionBeforeNextArgument = characterToken.isContainsCaret();
 
 		assert characterToken.getValue().charAt(0) == '(';

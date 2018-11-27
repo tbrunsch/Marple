@@ -1,9 +1,9 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
-import com.AMS.jBEAM.javaParser.parsers.AbstractJavaEntityParser;
+import com.AMS.jBEAM.javaParser.parsers.AbstractEntityParser;
 import com.AMS.jBEAM.javaParser.result.*;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaTokenStream;
+import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.google.common.base.Joiner;
 
 import java.lang.reflect.Field;
@@ -18,7 +18,7 @@ public class ParseUtils
 	/*
 	 * Parsing
 	 */
-	public static ParseResultIF parse(final JavaTokenStream tokenStream, final ObjectInfo currentContextInfo, final List<Class<?>> expectedResultClasses, AbstractJavaEntityParser... parsers) {
+	public static ParseResultIF parse(final TokenStream tokenStream, final ObjectInfo currentContextInfo, final List<Class<?>> expectedResultClasses, AbstractEntityParser... parsers) {
 		List<ParseResultIF> parseResults = Arrays.stream(parsers)
 				.map(parser -> parser.parse(tokenStream, currentContextInfo, expectedResultClasses))
 				.collect(Collectors.toList());
@@ -245,16 +245,16 @@ public class ParseUtils
 	/*
 	 * Classes
 	 */
-	private static int rateClassByName(JavaClassInfo classInfo, String expectedSimpleClassName) {
+	private static int rateClassByName(ClassInfo classInfo, String expectedSimpleClassName) {
 		// transformation required to make it comparable to rated fields and methods
 		return (CLASS_MATCH_NONE + 1)*rateStringMatch(classInfo.getSimpleNameWithoutLeadingDigits(), expectedSimpleClassName) + CLASS_MATCH_NONE;
 	}
 
-	static ToIntFunction<JavaClassInfo> rateClassByNameFunc(final String simpleClassName) {
+	static ToIntFunction<ClassInfo> rateClassByNameFunc(final String simpleClassName) {
 		return classInfo -> rateClassByName(classInfo, simpleClassName);
 	}
 
-	public static String getClassDisplayText(JavaClassInfo classInfo) {
+	public static String getClassDisplayText(ClassInfo classInfo) {
 		return classInfo.getName();
 	}
 

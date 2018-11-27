@@ -2,8 +2,8 @@ package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.JavaParserContext;
 import com.AMS.jBEAM.javaParser.result.*;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaToken;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaTokenStream;
+import com.AMS.jBEAM.javaParser.tokenizer.Token;
+import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 
@@ -23,27 +23,27 @@ import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
  *     <li>{@code <fmethod} (like {@code <context instance>.<method>} for {@code <context instance> = this})</li>
  * </ul>
  */
-public class JavaMethodParser extends AbstractJavaEntityParser
+public class MethodParser extends AbstractEntityParser
 {
 	private final boolean staticOnly;
 
-	public JavaMethodParser(JavaParserContext parserContext, ObjectInfo thisInfo, boolean staticOnly) {
+	public MethodParser(JavaParserContext parserContext, ObjectInfo thisInfo, boolean staticOnly) {
 		super(parserContext, thisInfo);
 		this.staticOnly = staticOnly;
 	}
 
 	@Override
-	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		final int startPosition = tokenStream.getPosition();
 
 		if (thisInfo.getObject() == null && !staticOnly) {
 			return new ParseError(startPosition, "Null object does not have any methods", ErrorType.WRONG_PARSER);
 		}
 
-		JavaToken methodNameToken;
+		Token methodNameToken;
 		try {
 			methodNameToken = tokenStream.readIdentifier();
-		} catch (JavaTokenStream.JavaTokenParseException e) {
+		} catch (TokenStream.JavaTokenParseException e) {
 			return new ParseError(startPosition, "Expected an identifier", ErrorType.WRONG_PARSER);
 		}
 		String methodName = methodNameToken.getValue();
@@ -103,7 +103,7 @@ public class JavaMethodParser extends AbstractJavaEntityParser
 			}
 			default: {
 				String error = "Ambiguous method call. Possible candidates are:\n"
-								+ bestMatchingMethods.stream().map(JavaMethodParser::formatMethod).collect(Collectors.joining("\n"));
+								+ bestMatchingMethods.stream().map(MethodParser::formatMethod).collect(Collectors.joining("\n"));
 				return new AmbiguousParseResult(tokenStream.getPosition(), error);
 			}
 		}

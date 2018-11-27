@@ -4,8 +4,8 @@ import com.AMS.jBEAM.javaParser.Imports;
 import com.AMS.jBEAM.javaParser.JavaParserContext;
 import com.AMS.jBEAM.common.ReflectionUtils;
 import com.AMS.jBEAM.javaParser.result.*;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaToken;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaTokenStream;
+import com.AMS.jBEAM.javaParser.tokenizer.Token;
+import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.ClassPath;
 
@@ -22,7 +22,7 @@ public class ClassDataProvider
 				clazz -> clazz
 				)
 		);
-	private static final List<JavaClassInfo>	PRIMITIVE_CLASS_INFOS		= PRIMITIVE_CLASSES_BY_NAME.keySet().stream().map(JavaClassInfo::new).collect(Collectors.toList());
+	private static final List<ClassInfo>	PRIMITIVE_CLASS_INFOS		= PRIMITIVE_CLASSES_BY_NAME.keySet().stream().map(ClassInfo::new).collect(Collectors.toList());
 
 	private final JavaParserContext parserContext;
 	private final Imports 			imports;
@@ -32,16 +32,16 @@ public class ClassDataProvider
 		this.imports = imports;
 	}
 
-	public ParseResultIF readClass(JavaTokenStream tokenStream, List<Class<?>> expectedResultClasses, boolean includePrimitiveClasses, boolean returnClassInsteadOfCompletionsIfAvailable) {
+	public ParseResultIF readClass(TokenStream tokenStream, List<Class<?>> expectedResultClasses, boolean includePrimitiveClasses, boolean returnClassInsteadOfCompletionsIfAvailable) {
 		String className = "";
 		Class<?> lastDetectedClass = null;
 		int lastParsedToPosition = -1;
 		while (true) {
 			int identifierStartPosition = tokenStream.getPosition();
-			JavaToken identifierToken;
+			Token identifierToken;
 			try {
 				identifierToken = tokenStream.readIdentifier();
-			} catch (JavaTokenStream.JavaTokenParseException e) {
+			} catch (TokenStream.JavaTokenParseException e) {
 				return lastDetectedClass == null
 						? new ParseError(tokenStream.getPosition(), "Expected sub-package or class name", ParseError.ErrorType.SYNTAX_ERROR)
 						: new ParseResult(lastParsedToPosition, new ObjectInfo(null, lastDetectedClass));
@@ -61,7 +61,7 @@ public class ClassDataProvider
 			lastDetectedClass = detectedClass;
 			lastParsedToPosition = tokenStream.getPosition();
 
-			JavaToken characterToken = tokenStream.readCharacterUnchecked();
+			Token characterToken = tokenStream.readCharacterUnchecked();
 			if (characterToken == null ||  characterToken.getValue().charAt(0) != '.') {
 				return lastDetectedClass == null
 						? new ParseError(lastParsedToPosition, "Expected sub-package or class name", ParseError.ErrorType.SYNTAX_ERROR)
@@ -87,7 +87,7 @@ public class ClassDataProvider
 	}
 
 	private Class<?> getClassImportedViaClassName(String className, boolean includePrimitiveClasses) {
-		for (JavaClassInfo importedClass : getImportedClasses(includePrimitiveClasses)) {
+		for (ClassInfo importedClass : getImportedClasses(includePrimitiveClasses)) {
 			String simpleName = importedClass.getSimpleNameWithoutLeadingDigits();
 			if (className.equals(simpleName) || className.startsWith(simpleName + ".")) {
 				// Replace simpleName by fully qualified imported name and replace '.' by '$' when separating inner classes
@@ -120,7 +120,7 @@ public class ClassDataProvider
 		ImmutableMap.Builder<CompletionSuggestionIF, Integer> suggestionBuilder = ImmutableMap.builder();
 
 		// Imported classes
-		Set<JavaClassInfo> importedClasses = getImportedClasses(includePrimitiveClasses);
+		Set<ClassInfo> importedClasses = getImportedClasses(includePrimitiveClasses);
 		suggestionBuilder.putAll(suggestClasses(importedClasses, insertionBegin, insertionEnd, classOrPackagePrefix, true));
 
 		// Imported packages
@@ -134,8 +134,8 @@ public class ClassDataProvider
 		} catch (IOException e) {
 			classes = Collections.emptySet();
 		}
-		List<JavaClassInfo> knownNotImportedClasses = classes.stream()
-				.map(classInfo -> new JavaClassInfo(classInfo.getName()))
+		List<ClassInfo> knownNotImportedClasses = classes.stream()
+				.map(classInfo -> new ClassInfo(classInfo.getName()))
 				.filter(classInfo -> !importedClasses.contains(classInfo))
 				.collect(Collectors.toList());
 		suggestionBuilder.putAll(suggestClasses(knownNotImportedClasses, insertionBegin, insertionEnd, classOrPackagePrefix, false));
@@ -149,12 +149,12 @@ public class ClassDataProvider
 		return new CompletionSuggestions(suggestionBuilder.build());
 	}
 
-	private static Map<CompletionSuggestionIF, Integer> suggestClasses(Collection<JavaClassInfo> classes, int insertionBegin, int insertionEnd, String classOrPackagePrefix, boolean allowUnqualifiedUsage) {
+	private static Map<CompletionSuggestionIF, Integer> suggestClasses(Collection<ClassInfo> classes, int insertionBegin, int insertionEnd, String classOrPackagePrefix, boolean allowUnqualifiedUsage) {
 		String parentLeaf = getParentLeaf(classOrPackagePrefix);
 		String parentPath = getParentPath(classOrPackagePrefix);
-		List<JavaClassInfo> classesToConsider = new ArrayList<>();
+		List<ClassInfo> classesToConsider = new ArrayList<>();
 		if (parentPath != null) {
-			for (JavaClassInfo classInfo : classes) {
+			for (ClassInfo classInfo : classes) {
 				if (Objects.equals(getParentPath(classInfo.getName()), parentPath)) {
 					classesToConsider.add(classInfo);
 				}
@@ -185,14 +185,14 @@ public class ClassDataProvider
 		);
 	}
 
-	private Set<JavaClassInfo> getImportedClasses(boolean includePrimitiveClasses) {
-		Set<JavaClassInfo> importedClasses = new LinkedHashSet<>();
+	private Set<ClassInfo> getImportedClasses(boolean includePrimitiveClasses) {
+		Set<ClassInfo> importedClasses = new LinkedHashSet<>();
 		if (includePrimitiveClasses) {
 			importedClasses.addAll(PRIMITIVE_CLASS_INFOS);
 		}
 		Class<?> thisClass = parserContext.getThisInfo().getDeclaredClass();
 		if (thisClass != null) {
-			importedClasses.add(new JavaClassInfo(thisClass.getName()));
+			importedClasses.add(new ClassInfo(thisClass.getName()));
 		}
 		importedClasses.addAll(imports.getImportedClasses());
 		return importedClasses;

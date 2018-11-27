@@ -1,17 +1,17 @@
 package com.AMS.jBEAM.javaParser.result;
 
-import com.AMS.jBEAM.javaParser.utils.JavaClassInfo;
+import com.AMS.jBEAM.javaParser.utils.ClassInfo;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 
 import java.util.Objects;
 
 public class CompletionSuggestionClass implements CompletionSuggestionIF
 {
-	private final JavaClassInfo classInfo;
+	private final ClassInfo classInfo;
 	private final int 			insertionBegin;
 	private final int 			insertionEnd;
 
-	public CompletionSuggestionClass(JavaClassInfo classInfo, int insertionBegin, int insertionEnd) {
+	public CompletionSuggestionClass(ClassInfo classInfo, int insertionBegin, int insertionEnd) {
 		this.classInfo = classInfo;
 		this.insertionBegin = insertionBegin;
 		this.insertionEnd = insertionEnd;

@@ -3,22 +3,22 @@ package com.AMS.jBEAM.javaParser.parsers;
 import com.AMS.jBEAM.javaParser.JavaParserContext;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaToken;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaTokenStream;
+import com.AMS.jBEAM.javaParser.tokenizer.Token;
+import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 
 import java.util.List;
 
-public class JavaCastParser extends AbstractJavaEntityParser
+public class CastParser extends AbstractEntityParser
 {
-	public JavaCastParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
+	public CastParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
 		super(parserContext, thisInfo);
 	}
 
 	@Override
-	ParseResultIF doParse(JavaTokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		int position = tokenStream.getPosition();
-		JavaToken characterToken = tokenStream.readCharacterUnchecked();
+		Token characterToken = tokenStream.readCharacterUnchecked();
 		if (characterToken == null || characterToken.getValue().charAt(0) != '(') {
 			return new ParseError(position, "Expected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
@@ -53,7 +53,7 @@ public class JavaCastParser extends AbstractJavaEntityParser
 		return parseAndCast(tokenStream, targetClass);
 	}
 
-	private ParseResultIF parseAndCast(JavaTokenStream tokenStream, Class<?> targetClass) {
+	private ParseResultIF parseAndCast(TokenStream tokenStream, Class<?> targetClass) {
 		ParseResultIF objectParseResult = parserContext.getExpressionParser().parse(tokenStream, thisInfo, null);
 
 		// propagate anything except results

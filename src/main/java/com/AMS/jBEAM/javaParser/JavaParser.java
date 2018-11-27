@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser;
 
 import com.AMS.jBEAM.javaParser.result.*;
-import com.AMS.jBEAM.javaParser.tokenizer.JavaTokenStream;
+import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 
 import java.util.*;
@@ -111,7 +111,7 @@ public class JavaParser
 	private ParseResultIF parse(String javaExpression, JavaParserSettings settings, EvaluationMode evaluationMode, int caret, Object thisContext) {
 		ObjectInfo thisInfo = new ObjectInfo(thisContext);
 		JavaParserContext parserPool  = new JavaParserContext(thisInfo, settings, evaluationMode);
-		JavaTokenStream tokenStream = new JavaTokenStream(javaExpression, caret);
+		TokenStream tokenStream = new TokenStream(javaExpression, caret);
 		try {
 			return parserPool.getExpressionParser().parse(tokenStream, thisInfo, null);
 		} catch (Exception e) {

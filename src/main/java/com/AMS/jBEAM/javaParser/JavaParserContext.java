@@ -11,36 +11,36 @@ public class JavaParserContext
 	private final FieldAndMethodDataProvider	fieldAndMethodDataProvider;
 	private final ClassDataProvider				classDataProvider;
 
-	private final AbstractJavaEntityParser javaExpressionParser;
-	private final AbstractJavaEntityParser		fieldParser;
-	private final AbstractJavaEntityParser		staticFieldParser;
-	private final AbstractJavaEntityParser		methodParser;
-	private final AbstractJavaEntityParser		staticMethodParser;
-	private final AbstractJavaEntityParser		tailParser;
-	private final AbstractJavaEntityParser		staticTailParser;
-	private final AbstractJavaEntityParser		literalParser;
-	private final AbstractJavaEntityParser		parenthesizedExpressionParser;
-	private final AbstractJavaEntityParser 		castParser;
-	private final AbstractJavaEntityParser		classParser;
+	private final AbstractEntityParser			javaExpressionParser;
+	private final AbstractEntityParser			fieldParser;
+	private final AbstractEntityParser			staticFieldParser;
+	private final AbstractEntityParser			methodParser;
+	private final AbstractEntityParser			staticMethodParser;
+	private final AbstractEntityParser			tailParser;
+	private final AbstractEntityParser			staticTailParser;
+	private final AbstractEntityParser			literalParser;
+	private final AbstractEntityParser			parenthesizedExpressionParser;
+	private final AbstractEntityParser			castParser;
+	private final AbstractEntityParser			classParser;
 
 	JavaParserContext(ObjectInfo thisInfo, JavaParserSettings settings, EvaluationMode evaluationMode) {
 		this.thisInfo = thisInfo;
-		inspectionDataProvider  = new InspectionDataProvider(settings);
-		objectInfoProvider = new ObjectInfoProvider(evaluationMode);
-		fieldAndMethodDataProvider = new FieldAndMethodDataProvider(this);
-		classDataProvider = new ClassDataProvider(this, settings.getImports());
+		inspectionDataProvider 			= new InspectionDataProvider(settings);
+		objectInfoProvider				= new ObjectInfoProvider(evaluationMode);
+		fieldAndMethodDataProvider		= new FieldAndMethodDataProvider(this);
+		classDataProvider				= new ClassDataProvider(this, settings.getImports());
 
-		javaExpressionParser = new JavaExpressionParser(this, thisInfo);
-		fieldParser = new JavaFieldParser(this, thisInfo, false);
-		staticFieldParser = new JavaFieldParser(this, thisInfo, true);
-		methodParser = new JavaMethodParser(this, thisInfo, false);
-		staticMethodParser = new JavaMethodParser(this, thisInfo, true);
-		tailParser = new JavaTailParser(this, thisInfo, false);
-		staticTailParser = new JavaTailParser(this, thisInfo, true);
-		literalParser = new JavaLiteralParser(this, thisInfo);
-		parenthesizedExpressionParser = new JavaParenthesizedExpressionParser(this, thisInfo);
-		castParser = new JavaCastParser(this, thisInfo);
-		classParser = new JavaClassParser(this, thisInfo);
+		javaExpressionParser			= new ExpressionParser(this, thisInfo);
+		fieldParser						= new FieldParser(this, thisInfo, false);
+		staticFieldParser				= new FieldParser(this, thisInfo, true);
+		methodParser					= new MethodParser(this, thisInfo, false);
+		staticMethodParser				= new MethodParser(this, thisInfo, true);
+		tailParser						= new TailParser(this, thisInfo, false);
+		staticTailParser				= new TailParser(this, thisInfo, true);
+		literalParser					= new LiteralParser(this, thisInfo);
+		parenthesizedExpressionParser	= new ParenthesizedExpressionParser(this, thisInfo);
+		castParser						= new CastParser(this, thisInfo);
+		classParser						= new ClassParser(this, thisInfo);
 	}
 
 	public ObjectInfo getThisInfo() {
@@ -63,31 +63,31 @@ public class JavaParserContext
 		return classDataProvider;
 	}
 
-	public AbstractJavaEntityParser getExpressionParser() {
+	public AbstractEntityParser getExpressionParser() {
 		return javaExpressionParser;
 	}
 
-	public AbstractJavaEntityParser getFieldParser(boolean staticOnly) {
+	public AbstractEntityParser getFieldParser(boolean staticOnly) {
 		return staticOnly ? staticFieldParser : fieldParser;
 	}
 
-	public AbstractJavaEntityParser getMethodParser(boolean staticOnly) {
+	public AbstractEntityParser getMethodParser(boolean staticOnly) {
 		return staticOnly ? staticMethodParser : methodParser;
 	}
 
-	public AbstractJavaEntityParser getTailParser(boolean staticOnly) {
+	public AbstractEntityParser getTailParser(boolean staticOnly) {
 		return staticOnly ? staticTailParser : tailParser;
 	}
 
-	public AbstractJavaEntityParser getLiteralParser() {
+	public AbstractEntityParser getLiteralParser() {
 		return literalParser;
 	}
 
-	public AbstractJavaEntityParser getParenthesizedExpressionParser() {
+	public AbstractEntityParser getParenthesizedExpressionParser() {
 		return parenthesizedExpressionParser;
 	}
 
-	public AbstractJavaEntityParser getCastParser() { return castParser; }
+	public AbstractEntityParser getCastParser() { return castParser; }
 
-	public AbstractJavaEntityParser getClassParser() { return classParser; }
+	public AbstractEntityParser getClassParser() { return classParser; }
 }

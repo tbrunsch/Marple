@@ -1,11 +1,11 @@
 package com.AMS.jBEAM.javaParser.tokenizer;
 
-public class JavaToken
+public class Token
 {
 	private final String	value;
 	private final boolean   containsCaret;
 
-	JavaToken(String value, boolean containsCaret) {
+	Token(String value, boolean containsCaret) {
 		this.value = value;
 		this.containsCaret = containsCaret;
 	}

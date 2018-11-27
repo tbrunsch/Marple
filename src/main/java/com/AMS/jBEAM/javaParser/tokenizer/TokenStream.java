@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class JavaTokenStream implements Cloneable
+public class TokenStream implements Cloneable
 {
 	private static final Pattern	CHARACTER_PATTERN			= Pattern.compile("^(\\s*([^\\s])\\s*).*");
 	private static final Pattern	CHARACTERS_PATTERN			= Pattern.compile("^(\\s*([^\\s]+)\\s*).*");
@@ -59,11 +59,11 @@ public class JavaTokenStream implements Cloneable
 
 	private int			 position;
 
-	public JavaTokenStream(String javaExpression, int caret) {
+	public TokenStream(String javaExpression, int caret) {
 		this(javaExpression, caret, 0);
 	}
 
-	private JavaTokenStream(String javaExpression, int caret, int position) {
+	private TokenStream(String javaExpression, int caret, int position) {
 		this.javaExpression = javaExpression;
 		this.caret = caret;
 		this.position = position;
@@ -77,51 +77,51 @@ public class JavaTokenStream implements Cloneable
 		return position;
 	}
 
-	public JavaToken readIdentifier() throws JavaTokenParseException {
+	public Token readIdentifier() throws JavaTokenParseException {
 		return readRegex(IDENTIFIER_PATTERN, 2, "No identifier found");
 	}
 
-	public JavaToken readStringLiteral() throws JavaTokenParseException {
-		JavaToken escapedStringLiteralToken = readRegex(STRING_LITERAL_PATTERN, 2, "No string literal found");
+	public Token readStringLiteral() throws JavaTokenParseException {
+		Token escapedStringLiteralToken = readRegex(STRING_LITERAL_PATTERN, 2, "No string literal found");
 		return unescapeStringToken(escapedStringLiteralToken);
 	}
 
-	public JavaToken readCharacterLiteral() throws JavaTokenParseException {
-		JavaToken escapedCharacterLiteralToken = readRegex(CHARACTER_LITERAL_PATTERN, 2, "No character literal found");
+	public Token readCharacterLiteral() throws JavaTokenParseException {
+		Token escapedCharacterLiteralToken = readRegex(CHARACTER_LITERAL_PATTERN, 2, "No character literal found");
 		return unescapeStringToken(escapedCharacterLiteralToken);
 	}
 
-	public JavaToken readNamedLiteral() throws JavaTokenParseException {
+	public Token readNamedLiteral() throws JavaTokenParseException {
 		return readRegex(NAMED_LITERAL_PATTERN, 2, "No named literal found");
 	}
 
-	public JavaToken readIntegerLiteral() throws JavaTokenParseException {
+	public Token readIntegerLiteral() throws JavaTokenParseException {
 		return readRegex(INTEGER_LITERAL_PATTERN, 2, "No integer literal found");
 	}
 
-	public JavaToken readLongLiteral() throws JavaTokenParseException {
+	public Token readLongLiteral() throws JavaTokenParseException {
 		return readRegex(LONG_LITERAL_PATTERN, 2, "No long literal found");
 	}
 
-	public JavaToken readFloatLiteral() throws JavaTokenParseException {
+	public Token readFloatLiteral() throws JavaTokenParseException {
 		return readRegex(FLOAT_LITERAL_PATTERN, 2, "No float literal found");
 	}
 
-	public JavaToken readDoubleLiteral() throws JavaTokenParseException {
+	public Token readDoubleLiteral() throws JavaTokenParseException {
 		return readRegex(DOUBLE_LITERAL_PATTERN, 2, "No double literal found");
 	}
 
-	private JavaToken unescapeStringToken(JavaToken stringToken) throws JavaTokenParseException {
+	private Token unescapeStringToken(Token stringToken) throws JavaTokenParseException {
 		String escapedString = stringToken.getValue();
 		try {
 			String unescapedString = unescapeCharacters(escapedString);
-			return new JavaToken(unescapedString, stringToken.isContainsCaret());
+			return new Token(unescapedString, stringToken.isContainsCaret());
 		} catch (IllegalArgumentException e) {
 			throw new JavaTokenParseException(e.getMessage());
 		}
 	}
 
-	private JavaToken readRegex(Pattern regex, int groupIndexToExtract, String errorMessage) throws JavaTokenParseException {
+	private Token readRegex(Pattern regex, int groupIndexToExtract, String errorMessage) throws JavaTokenParseException {
 		Matcher matcher = regex.matcher(javaExpression.substring(position));
 		if (!matcher.matches()) {
 			throw new JavaTokenParseException(errorMessage);
@@ -130,7 +130,7 @@ public class JavaTokenStream implements Cloneable
 		String stringWithSpaces = matcher.group(1);
 		int length = stringWithSpaces.length();
 		boolean containsCaret = moveForward(length);
-		return new JavaToken(extractedString, containsCaret);
+		return new Token(extractedString, containsCaret);
 	}
 
 	public char peekCharacter() {
@@ -146,11 +146,11 @@ public class JavaTokenStream implements Cloneable
 		return matcher.group(2);
 	}
 
-	JavaToken readCharacter() throws JavaTokenParseException {
+	Token readCharacter() throws JavaTokenParseException {
 		return readRegex(CHARACTER_PATTERN, 2, null);
 	}
 
-	public JavaToken readCharacterUnchecked() {
+	public Token readCharacterUnchecked() {
 		try {
 			return readCharacter();
 		} catch (JavaTokenParseException e) {
@@ -173,8 +173,8 @@ public class JavaTokenStream implements Cloneable
 	}
 
 	@Override
-	public JavaTokenStream clone() {
-		return new JavaTokenStream(javaExpression, caret, position);
+	public TokenStream clone() {
+		return new TokenStream(javaExpression, caret, position);
 	}
 
 	public static class JavaTokenParseException extends Exception
