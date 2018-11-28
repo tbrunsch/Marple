@@ -86,21 +86,16 @@ public class ParseUtils
 			if (errorsOfCurrentType.size() == 1) {
 				return errorsOfCurrentType.get(0);
 			}
-			Set<Integer> positions = errorsOfCurrentType.stream().map(ParseError::getPosition).collect(Collectors.toSet());
-			final int position;
-			final List<String> messages;
-			final String messagePrefix;
-			if (positions.size() == 1) {
-				position = positions.iterator().next();
-				messages = errorsOfCurrentType.stream().map(ParseError::getMessage).collect(Collectors.toList());
-				messagePrefix = "";
-			} else {
-				position = 0;
-				messages = errorsOfCurrentType.stream().map(error -> "Position " + error.getPosition() + ": " + error.getMessage()).collect(Collectors.toList());
-				messagePrefix = "Could not parse expression due to the following errors: ";
-			}
-			String message = Joiner.on("\n").join(messages);
-			return new ParseError(position, messagePrefix + message, errorType);
+			/*
+			 * Heuristic: Only consider errors with maximum position. These are probably
+			 *            errors of parsers that are most likely supposed to match.
+			 */
+			int maxPosition = errorsOfCurrentType.stream().mapToInt(ParseError::getPosition).max().getAsInt();
+			String message = errorsOfCurrentType.stream()
+								.filter(error -> error.getPosition() == maxPosition)
+								.map(ParseError::getMessage)
+								.collect(Collectors.joining("\n"));
+			return new ParseError(maxPosition, message, errorType);
 		}
 		return new ParseError(-1, "Internal error: Failed merging parse errors", ParseError.ErrorType.INTERNAL_ERROR);
 	}
