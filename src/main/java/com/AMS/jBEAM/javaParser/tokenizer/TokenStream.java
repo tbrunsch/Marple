@@ -13,7 +13,7 @@ public class TokenStream implements Cloneable
 	private static final Pattern	IDENTIFIER_PATTERN  		= Pattern.compile("^(\\s*([A-Za-z][_A-Za-z0-9]*)\\s*).*");
 	private static final Pattern	STRING_LITERAL_PATTERN		= Pattern.compile("^(\\s*\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"\\s*).*");
 	private static final Pattern	CHARACTER_LITERAL_PATTERN	= Pattern.compile("^(\\s*'(\\\\.|[^\\\\])'\\s*).*");
-	private static final Pattern	NAMED_LITERAL_PATTERN		= IDENTIFIER_PATTERN;
+	private static final Pattern	KEYWORD_PATTERN				= IDENTIFIER_PATTERN;
 	private static final Pattern	INTEGER_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)\\s*)($|[^0-9dDeEfFL].*)");
 	private static final Pattern	LONG_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)[lL]\\s*).*");
 	private static final Pattern	FLOAT_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+([eE][+-]?[0-9]+)?|\\.[0-9]+([eE][+-]?[0-9]+)?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?)[fF])\\s*).*");
@@ -91,8 +91,8 @@ public class TokenStream implements Cloneable
 		return unescapeStringToken(escapedCharacterLiteralToken);
 	}
 
-	public Token readNamedLiteral() throws JavaTokenParseException {
-		return readRegex(NAMED_LITERAL_PATTERN, 2, "No named literal found");
+	public Token readKeyWordUnchecked() {
+		return readRegexUnchecked(KEYWORD_PATTERN, 2, "No named literal found");
 	}
 
 	public Token readIntegerLiteral() throws JavaTokenParseException {
@@ -133,6 +133,14 @@ public class TokenStream implements Cloneable
 		return new Token(extractedString, containsCaret);
 	}
 
+	private Token readRegexUnchecked(Pattern regex, int groupIndexToExtract, String errorMessage) {
+		try {
+			return readRegex(regex, groupIndexToExtract, errorMessage);
+		} catch (JavaTokenParseException e) {
+			return null;
+		}
+	}
+
 	public char peekCharacter() {
 		String characters = peekCharacters();
 		return characters == null ? 0 : characters.charAt(0);
@@ -146,16 +154,8 @@ public class TokenStream implements Cloneable
 		return matcher.group(2);
 	}
 
-	Token readCharacter() throws JavaTokenParseException {
-		return readRegex(CHARACTER_PATTERN, 2, null);
-	}
-
 	public Token readCharacterUnchecked() {
-		try {
-			return readCharacter();
-		} catch (JavaTokenParseException e) {
-			return null;
-		}
+		return readRegexUnchecked(CHARACTER_PATTERN, 2, null);
 	}
 
 	/**

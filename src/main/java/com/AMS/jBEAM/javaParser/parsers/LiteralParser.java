@@ -90,10 +90,8 @@ public class LiteralParser extends AbstractEntityParser
 
 	private ParseResultIF parseNamedLiteral(TokenStream tokenStream, String literalName, Object literalValue, Class<?> literalClass, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
-		Token literalToken;
-		try {
-			literalToken = tokenStream.readNamedLiteral();
-		} catch (TokenStream.JavaTokenParseException e) {
+		Token literalToken = tokenStream.readKeyWordUnchecked();
+		if (literalToken == null) {
 			return new ParseError(startPosition, "Expected '" + literalName + "'", ErrorType.WRONG_PARSER);
 		}
 		if (literalToken.isContainsCaret()) {
