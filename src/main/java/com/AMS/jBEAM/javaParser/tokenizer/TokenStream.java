@@ -177,6 +177,13 @@ public class TokenStream implements Cloneable
 		return new TokenStream(javaExpression, caret, position);
 	}
 
+	@Override
+	public String toString() {
+		return javaExpression.substring(0, position)
+				+ "^"
+				+ javaExpression.substring(position);
+	}
+
 	public static class JavaTokenParseException extends Exception
 	{
 		JavaTokenParseException(String message) {
