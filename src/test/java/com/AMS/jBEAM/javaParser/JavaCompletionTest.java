@@ -556,6 +556,46 @@ public class JavaCompletionTest
 			.test("java.lang.Math.P", "PI", "pow(, )");
 	}
 
+	private static class ConstructorParserTestClass
+	{
+		final int i;
+		final double d;
+		final Object o;
+
+		ConstructorParserTestClass(int i, float f) {
+			this.i = i;
+			this.d = f;
+			o = this;
+		}
+
+		ConstructorParserTestClass(String s, double d, int i) {
+			this.i = i;
+			this.d = d;
+			this.o = s;
+		}
+
+		ConstructorParserTestClass(Object o, int i) {
+			this.i = i;
+			this.d = 0.0;
+			this.o = o;
+		}
+	}
+
+	@Test
+	public void testConstructor() {
+		Object testInstance = new ConstructorParserTestClass(5, -2.0f);
+		new TestExecutor(testInstance, EvaluationMode.NONE)
+			.test("new ConstructorParserTestC", "ConstructorParserTestClass")
+			.test("new ConstructorParserTestClass(", "i", "o")
+			.test("new ConstructorParserTestClass(i, ", "i")
+			.test("new ConstructorParserTestClass(o, ", "i")
+			.test("new ConstructorParserTestClass(\"bla\", ","d", "i")
+			.test("new ConstructorParserTestClass(\"bla\", i, ", "i")
+			.test("new ConstructorParserTestClass(\"bla\", d, i).", "d", "i", "o")
+			.test("new com.AMS.jBEAM.javaPars", "javaParser")
+			.test("new com.AMS.jBEAM.javaParser.JavaCo", "JavaCompletionTest");
+	}
+
 	private static List<String> extractSuggestions(List<CompletionSuggestionIF> completions) {
 		return completions.stream()
 			.map(completion -> completion.getTextToInsert())

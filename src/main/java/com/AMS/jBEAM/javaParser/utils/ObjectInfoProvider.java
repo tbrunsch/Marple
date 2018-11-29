@@ -46,7 +46,7 @@ public class ObjectInfoProvider
 		return new ObjectInfo(fieldValue, fieldClass);
 	}
 
-	public ObjectInfo getMethodReturnInfo(ObjectInfo contextInfo, Method method, List<ObjectInfo> argumentInfos) throws NullPointerException {
+	public ObjectInfo getMethodReturnInfo(ObjectInfo contextInfo, Executable method, List<ObjectInfo> argumentInfos) throws NullPointerException {
 		final Object methodReturnValue;
 		if (evaluationMode == EvaluationMode.NONE) {
 			methodReturnValue = null;
@@ -60,14 +60,29 @@ public class ObjectInfoProvider
 			}
 			try {
 				method.setAccessible(true);
-				methodReturnValue = method.invoke(contextObject, arguments);
+				if (method instanceof Method) {
+					methodReturnValue = ((Method) method).invoke(contextObject, arguments);
+				} else if (method instanceof Constructor<?>) {
+					methodReturnValue = ((Constructor<?>) method).newInstance(arguments);
+				} else {
+					throw new IllegalArgumentException("Method '" + method.getName() + "' is neither a method nor a constructor");
+				}
 			} catch (IllegalAccessException e) {
-				throw new IllegalStateException("Internal error: Unexpected IllegalAccessException: " + e.getMessage());
+				throw new IllegalStateException("Internal error: Unexpected IllegalAccessException: " + e.getMessage(), e);
 			} catch (InvocationTargetException e) {
-				throw new IllegalStateException("Internal error: Unexpected InvocationTargetException: " + e.getMessage());
+				throw new IllegalStateException("Internal error: Unexpected InvocationTargetException: " + e.getMessage(), e);
+			} catch (InstantiationException e) {
+				throw new IllegalStateException("Internal error: Unexpected InstantiationException: " + e.getMessage(), e);
 			}
 		}
-		Class<?> methodReturnClass = getClass(methodReturnValue, method.getReturnType());
+		Class<?> methodReturnClass;
+		if (method instanceof Method) {
+			methodReturnClass = getClass(methodReturnValue, ((Method) method).getReturnType());
+		} else if (method instanceof Constructor<?>) {
+			methodReturnClass = method.getDeclaringClass();
+		} else {
+			throw new IllegalArgumentException("Method '" + method.getName() + "' is neither a method nor a constructor");
+		}
 		return new ObjectInfo(methodReturnValue, methodReturnClass);
 	}
 

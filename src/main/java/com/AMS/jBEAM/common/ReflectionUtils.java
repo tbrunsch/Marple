@@ -2,6 +2,7 @@ package com.AMS.jBEAM.common;
 
 import com.google.common.collect.*;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -234,5 +235,11 @@ public class ReflectionUtils
 			}
 		}
 		return methods;
+	}
+
+	public static List<Constructor<?>> getConstructors(Class<?> clazz, Predicate<Integer> modifierFilter) {
+		return Arrays.stream(clazz.getDeclaredConstructors())
+				.filter(constructor -> modifierFilter.test(constructor.getModifiers()))
+				.collect(Collectors.toList());
 	}
 }

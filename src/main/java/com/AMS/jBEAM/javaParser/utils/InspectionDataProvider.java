@@ -5,9 +5,11 @@ import com.AMS.jBEAM.javaParser.JavaParserSettings;
 import com.AMS.jBEAM.common.ReflectionUtils;
 import com.sun.org.apache.xpath.internal.operations.Mod;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -44,5 +46,9 @@ public class InspectionDataProvider
 	public List<Method> getMethods(Class<?> clazz, boolean staticOnly) {
 		Predicate<Integer> modifierFilter = staticOnly ? accessLevelFilter.and(STATIC_FILTER) : accessLevelFilter;
 		return ReflectionUtils.getMethods(clazz, modifierFilter);
+	}
+
+	public List<Constructor<?>> getConstructors(Class<?> clazz) {
+		return ReflectionUtils.getConstructors(clazz, accessLevelFilter);
 	}
 }

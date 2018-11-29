@@ -22,6 +22,7 @@ public class JavaParserContext
 	private final AbstractEntityParser			parenthesizedExpressionParser;
 	private final AbstractEntityParser			castParser;
 	private final AbstractEntityParser			classParser;
+	private final AbstractEntityParser			constructorParser;
 
 	JavaParserContext(ObjectInfo thisInfo, JavaParserSettings settings, EvaluationMode evaluationMode) {
 		this.thisInfo = thisInfo;
@@ -41,6 +42,7 @@ public class JavaParserContext
 		parenthesizedExpressionParser	= new ParenthesizedExpressionParser(this, thisInfo);
 		castParser						= new CastParser(this, thisInfo);
 		classParser						= new ClassParser(this, thisInfo);
+		constructorParser				= new ConstructorParser(this, thisInfo);
 	}
 
 	public ObjectInfo getThisInfo() {
@@ -90,4 +92,8 @@ public class JavaParserContext
 	public AbstractEntityParser getCastParser() { return castParser; }
 
 	public AbstractEntityParser getClassParser() { return classParser; }
+
+	public AbstractEntityParser getConstructorParser() {
+		return constructorParser;
+	}
 }
