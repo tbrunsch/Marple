@@ -9,7 +9,6 @@ import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 
@@ -33,7 +32,6 @@ public class TailParser extends AbstractEntityParser
 	@Override
 	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
-		Class<?> currentContextClass = parserContext.getObjectInfoProvider().getClass(currentContextInfo);
 		if (tokenStream.hasMore()) {
 			char nextChar = tokenStream.peekCharacter();
 			if (nextChar == '.') {
@@ -43,6 +41,7 @@ public class TailParser extends AbstractEntityParser
 					return new ParseError(tokenStream.getPosition(), "Cannot apply [] to classes", ErrorType.SYNTAX_ERROR);
 				}
 
+				Class<?> currentContextClass = parserContext.getObjectInfoProvider().getClass(currentContextInfo);
 				Class<?> elementClass = currentContextClass.getComponentType();
 				if (elementClass == null) {
 					// no array type
@@ -70,17 +69,7 @@ public class TailParser extends AbstractEntityParser
 			}
 		}
 		// finished parsing
-		if (expectedResultClasses != null && expectedResultClasses.stream().noneMatch(expectedResultClass -> ParseUtils.isConvertibleTo(currentContextClass, expectedResultClass))) {
-			String messagePrefix = "The class '" + currentContextClass.getSimpleName() + "' is not assignable to ";
-			String messageMiddle = expectedResultClasses.size() > 1
-									? "any of the expected classes "
-									: "the expected class ";
-			String messageSuffix = "'" + expectedResultClasses.stream().map(clazz -> clazz.getSimpleName()).collect(Collectors.joining("', '")) + "'";
-
-			return new ParseError(tokenStream.getPosition(), messagePrefix + messageMiddle + messageSuffix, ErrorType.SEMANTIC_ERROR);
-		}
-
-		return new ParseResult(tokenStream.getPosition(), currentContextInfo);
+		return ParseUtils.createParseResult(parserContext, currentContextInfo, expectedResultClasses, tokenStream.getPosition());
 	}
 
 	private ParseResultIF parseDot(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {

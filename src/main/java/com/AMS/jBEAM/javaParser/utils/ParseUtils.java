@@ -1,14 +1,17 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
+import com.AMS.jBEAM.javaParser.JavaParserContext;
 import com.AMS.jBEAM.javaParser.parsers.AbstractEntityParser;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
-import com.google.common.base.Joiner;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
@@ -98,6 +101,21 @@ public class ParseUtils
 			return new ParseError(maxPosition, message, errorType);
 		}
 		return new ParseError(-1, "Internal error: Failed merging parse errors", ParseError.ErrorType.INTERNAL_ERROR);
+	}
+
+	public static ParseResultIF createParseResult(JavaParserContext parserContext, ObjectInfo resultInfo, List<Class<?>> expectedResultClasses, int parsedToPosition) {
+		Class<?> resultClass = parserContext.getObjectInfoProvider().getClass(resultInfo);
+		if (expectedResultClasses != null && expectedResultClasses.stream().noneMatch(expectedResultClass -> ParseUtils.isConvertibleTo(resultClass, expectedResultClass))) {
+			String messagePrefix = "The class '" + resultClass.getSimpleName() + "' is not assignable to ";
+			String messageMiddle = expectedResultClasses.size() > 1
+					? "any of the expected classes "
+					: "the expected class ";
+			String messageSuffix = "'" + expectedResultClasses.stream().map(clazz -> clazz.getSimpleName()).collect(Collectors.joining("', '")) + "'";
+
+			return new ParseError(parsedToPosition, messagePrefix + messageMiddle + messageSuffix, ParseError.ErrorType.SEMANTIC_ERROR);
+		}
+
+		return new ParseResult(parsedToPosition, resultInfo);
 	}
 
 	/*
