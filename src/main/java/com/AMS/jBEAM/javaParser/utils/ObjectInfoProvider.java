@@ -8,13 +8,7 @@ import java.util.List;
 
 public class ObjectInfoProvider
 {
-	private final EvaluationMode evaluationMode;
-
-	public ObjectInfoProvider(EvaluationMode evaluationMode) {
-		this.evaluationMode = evaluationMode;
-	}
-
-	private Class<?> getClass(Object object, Class<?> declaredClass) {
+	private static Class<?> getClass(Object object, Class<?> declaredClass, EvaluationMode evaluationMode) {
 		if (evaluationMode == EvaluationMode.DUCK_TYPING && object != null) {
 			Class<?> clazz = object.getClass();
 			return declaredClass.isPrimitive()
@@ -25,8 +19,29 @@ public class ObjectInfoProvider
 		}
 	}
 
+	static Class<?> getClass(ObjectInfo objectInfo, EvaluationMode evaluationMode) {
+		return getClass(objectInfo.getObject(), objectInfo.getDeclaredClass(), evaluationMode);
+	}
+
+	static ObjectInfo getCastInfo(ObjectInfo objectInfo, Class<?> targetClass, EvaluationMode evaluationMode) throws ClassCastException {
+		Object castedValue = evaluationMode == EvaluationMode.NONE
+				? null
+				: ReflectionUtils.convertTo(objectInfo.getObject(), targetClass, true);
+		return new ObjectInfo(castedValue, targetClass);
+	}
+
+	private final EvaluationMode evaluationMode;
+
+	public ObjectInfoProvider(EvaluationMode evaluationMode) {
+		this.evaluationMode = evaluationMode;
+	}
+
+	private Class<?> getClass(Object object, Class<?> declaredClass) {
+		return getClass(object, declaredClass, evaluationMode);
+	}
+
 	public Class<?> getClass(ObjectInfo objectInfo) {
-		return getClass(objectInfo.getObject(), objectInfo.getDeclaredClass());
+		return getClass(objectInfo, evaluationMode);
 	}
 
 	public ObjectInfo getFieldInfo(ObjectInfo contextInfo, Field field) throws NullPointerException {
@@ -101,9 +116,6 @@ public class ObjectInfoProvider
 	}
 
 	public ObjectInfo getCastInfo(ObjectInfo objectInfo, Class<?> targetClass) throws ClassCastException {
-		Object castedValue = evaluationMode == EvaluationMode.NONE
-								? null
-								: ReflectionUtils.convertTo(objectInfo.getObject(), targetClass, true);
-		return new ObjectInfo(castedValue, targetClass);
+		return getCastInfo(objectInfo, targetClass, evaluationMode);
 	}
 }

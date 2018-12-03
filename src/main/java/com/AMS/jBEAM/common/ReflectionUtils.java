@@ -28,8 +28,10 @@ public class ReflectionUtils
 	}
 
 	private static <S> void addPrimitiveBoxedConversions(Class<S> primitiveClass, Class<S> boxedClass, Function<S, S> conversion) {
-		addConversion(primitiveClass, boxedClass, conversion);
-		addConversion(boxedClass, primitiveClass, conversion);
+		addConversion(primitiveClass, primitiveClass, 	conversion);
+		addConversion(primitiveClass, boxedClass,		conversion);
+		addConversion(boxedClass, primitiveClass, 		conversion);
+		addConversion(boxedClass, boxedClass, 			conversion);
 		PRIMITIVE_TO_BOXED_CLASS.put(primitiveClass, boxedClass);
 	}
 

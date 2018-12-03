@@ -113,7 +113,7 @@ public class JavaParser
 		JavaParserContext parserPool  = new JavaParserContext(thisInfo, settings, evaluationMode);
 		TokenStream tokenStream = new TokenStream(javaExpression, caret);
 		try {
-			return parserPool.getExpressionParser().parse(tokenStream, thisInfo, null);
+			return parserPool.getCompoundExpressionParser().parse(tokenStream, thisInfo, null);
 		} catch (Exception e) {
 			String message = e.getClass().getSimpleName();
 			String error = e.getMessage();

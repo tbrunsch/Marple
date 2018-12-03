@@ -101,7 +101,7 @@ public class TailParser extends AbstractEntityParser
 			return parserContext.getFieldAndMethodDataProvider().suggestFieldsAndMethods(tokenStream, expectedResultClasses);
 		}
 
-		ParseResultIF arrayIndexParseResult = parserContext.getExpressionParser().parse(tokenStream, thisInfo, expectedResultClasses);
+		ParseResultIF arrayIndexParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, thisInfo, expectedResultClasses);
 
 		// propagate anything except results
 		if (arrayIndexParseResult.getResultType() != ParseResultType.PARSE_RESULT) {

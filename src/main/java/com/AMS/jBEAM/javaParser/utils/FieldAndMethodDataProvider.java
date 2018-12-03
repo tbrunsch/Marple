@@ -100,7 +100,7 @@ public class FieldAndMethodDataProvider
 			/*
 			 * Parse expression for argument i
 			 */
-			ParseResultIF argumentParseResult_i = parserContext.getExpressionParser().parse(tokenStream, parserContext.getThisInfo(), expectedArgumentTypes_i);
+			ParseResultIF argumentParseResult_i = parserContext.getCompoundExpressionParser().parse(tokenStream, parserContext.getThisInfo(), expectedArgumentTypes_i);
 			methodArguments.add(argumentParseResult_i);
 
 			// always stop except for results

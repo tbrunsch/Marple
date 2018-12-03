@@ -785,6 +785,116 @@ public class JavaExpressionEvaluationTest
 			.test("new ConstructorParserTestClass(0, 0, 0, 0, 0)");
 	}
 
+	@Test
+	public void testBinaryOperator() {
+		new TestExecutor(null, EvaluationMode.STRONGLY_TYPED)
+			.test("5 *7- 8 / 3*2 + 4 * 2", 5*7 - 8/3*2 + 4*2)
+			.test("5 + 7 * 8", 5 + 7 * 8)
+			.test("(5 + 7) * 8", (5 + 7) * 8)
+			.test(" 5%3 -7 / 2.0", 5 % 3 - 7/2.0)
+			.test("5 + 4 + \"Test\"", 5 + 4 + "Test")
+			.test("-27 >> 2 << 2", -27 >> 2 << 2)
+			.test("-23456 >>> 3 << 1", -23456 >>> 3 << 1)
+			.test("9*3 < 4*7", 9*3 < 4*7)
+			.test("9*4 < 3.0*12", 9*4 < 3.0*12)
+			.test("9*3 <= 4*7", 9*3 <= 4*7)
+			.test("9*4 <= 3.0*12", 9*4 <= 3.0*12)
+			.test("5*5 <= 4*6", 5*5 <= 4*6)
+			.test("4*7 > 9*3", 4*7 > 9*3)
+			.test("3.0*12 > 9*4", 3.0*12 > 9*4)
+			.test("4*7 >= 9*3", 4*7 >= 9*3)
+			.test("3.0*12 >= 9*4", 3.0*12 >= 9*4)
+			.test("4*6 >= 5*5", 4*6 >= 5*5)
+			.test("9*3 == 4*7", 9*3 == 4*7)
+			.test("9*4 == 3.0*12", 9*4 == 3.0*12)
+			.test("5*5 == 4*6", 5*5 == 4*6)
+			.test("9*3 != 4*7", 9*3 != 4*7)
+			.test("9*4 != 3.0*12", 9*4 != 3.0*12)
+			.test("5*5 != 4*6", 5*5 != 4*6)
+			.test("123 & 234", 123 & 234)
+			.test("123 ^ 234", 123 ^ 234)
+			.test("123 | 234", 123 | 234)
+			.test("false && false", false && false)
+			.test("false && true", false && true)
+			.test("true && false", true && false)
+			.test("true && true", true && true)
+			.test("false || false", false || false)
+			.test("false || true", false || true)
+			.test("true || false", true || false)
+			.test("true || true", true || true);
+	}
+
+	@Test
+	public void testBinaryOperatorShortCircuitEvaluation() {
+		class TestClass
+		{
+			int counter 			= 0;
+			TestClass npeTrigger	= null;
+
+			TestClass reset() {
+				counter = 0;
+				return this;
+			}
+
+			boolean FALSE() {
+				counter++;
+				return false;
+			}
+
+			boolean TRUE() {
+				counter++;
+				return true;
+			}
+
+			int getCounter(boolean dummy) {
+				return counter;
+			}
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("reset().getCounter(FALSE())", 1)
+			.test("reset().getCounter(FALSE() && FALSE())", 1)
+			.test("reset().getCounter(FALSE() && TRUE())", 1)
+			.test("reset().getCounter(TRUE() && FALSE())", 2)
+			.test("reset().getCounter(TRUE() && TRUE())", 2)
+			.test("reset().getCounter(FALSE() || FALSE())", 2)
+			.test("reset().getCounter(FALSE() || TRUE())", 2)
+			.test("reset().getCounter(TRUE() || FALSE())", 1)
+			.test("reset().getCounter(TRUE() || TRUE())", 1)
+			.test("npeTrigger != null && npeTrigger.counter > 0", false);
+	}
+
+	@Test
+	public void testAssignment() {
+		class TestClass
+		{
+			double 	d = 3.0;
+			float 	f = 2.f;
+			int 	i = 5;
+
+			TestClass reset() {
+				d = 3.0;
+				f = 2.f;
+				i = 5;
+				return this;
+			}
+
+			TestClass get(int dummy) {
+				return this;
+			}
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("reset().get(d = 7.0).a", 7.0)
+			.test("reset().get(f = -1).f", -1.f)
+			.test("reset().get(i = 13).i", 13)
+			.test("reset().get(d = f = i = -3).d", -3.0)
+			.test("reset().get(d = f = i = -3).f", -3.f)
+			.test("reset().get(d = f = i = -3).i", -3);
+	}
+
 	/*
 	 * Class for creating tests with expected successful code completions
 	 */

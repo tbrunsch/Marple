@@ -2,22 +2,27 @@ package com.AMS.jBEAM.javaParser.tokenizer;
 
 import com.google.common.collect.ImmutableMap;
 
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class TokenStream implements Cloneable
 {
-	private static final Pattern	CHARACTER_PATTERN			= Pattern.compile("^(\\s*([^\\s])\\s*).*");
-	private static final Pattern	CHARACTERS_PATTERN			= Pattern.compile("^(\\s*([^\\s]+)\\s*).*");
-	private static final Pattern	IDENTIFIER_PATTERN  		= Pattern.compile("^(\\s*([A-Za-z][_A-Za-z0-9]*)\\s*).*");
-	private static final Pattern	STRING_LITERAL_PATTERN		= Pattern.compile("^(\\s*\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"\\s*).*");
-	private static final Pattern	CHARACTER_LITERAL_PATTERN	= Pattern.compile("^(\\s*'(\\\\.|[^\\\\])'\\s*).*");
-	private static final Pattern	KEYWORD_PATTERN				= IDENTIFIER_PATTERN;
-	private static final Pattern	INTEGER_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)\\s*)($|[^0-9dDeEfFL].*)");
-	private static final Pattern	LONG_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)[lL]\\s*).*");
-	private static final Pattern	FLOAT_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+([eE][+-]?[0-9]+)?|\\.[0-9]+([eE][+-]?[0-9]+)?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?)[fF])\\s*).*");
-	private static final Pattern	DOUBLE_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+(([eE][+-]?[0-9]+)?[dD]|[eE][+-]?[0-9]+[dD]?)|\\.[0-9]+([eE][+-]?[0-9]+)?[dD]?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?[dD]?))\\s*).*");
+	private static final Pattern		OPTIONAL_SPACE				= Pattern.compile("^(\\s*).*");
+	private static final Pattern		CHARACTER_PATTERN			= Pattern.compile("^(\\s*([^\\s])\\s*).*");
+	private static final Pattern		CHARACTERS_PATTERN			= Pattern.compile("^(\\s*([^\\s]+)\\s*).*");
+	private static final Pattern		IDENTIFIER_PATTERN  		= Pattern.compile("^(\\s*([A-Za-z][_A-Za-z0-9]*)\\s*).*");
+	private static final Pattern		STRING_LITERAL_PATTERN		= Pattern.compile("^(\\s*\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"\\s*).*");
+	private static final Pattern		CHARACTER_LITERAL_PATTERN	= Pattern.compile("^(\\s*'(\\\\.|[^\\\\])'\\s*).*");
+	private static final Pattern		KEYWORD_PATTERN				= IDENTIFIER_PATTERN;
+	private static final Pattern		INTEGER_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)\\s*)($|[^0-9dDeEfFL].*)");
+	private static final Pattern		LONG_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)[lL]\\s*).*");
+	private static final Pattern		FLOAT_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+([eE][+-]?[0-9]+)?|\\.[0-9]+([eE][+-]?[0-9]+)?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?)[fF])\\s*).*");
+	private static final Pattern		DOUBLE_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+(([eE][+-]?[0-9]+)?[dD]|[eE][+-]?[0-9]+[dD]?)|\\.[0-9]+([eE][+-]?[0-9]+)?[dD]?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?[dD]?))\\s*).*");
+
+	// Binary operators, sorted from longest to shortest to ensure that, e.g., "==" is tested before "="
+	private static final List<String> 	OPERATORS					= Arrays.stream(Operator.values()).map(Operator::getOperator).sorted(Comparator.comparingInt(String::length).reversed()).collect(Collectors.toList());
 
 	private static final Map<Character, Character> INTERPRETATION_OF_ESCAPED_CHARACTERS = ImmutableMap.<Character, Character>builder()
 		.put('t', '\t')
@@ -156,6 +161,32 @@ public class TokenStream implements Cloneable
 
 	public Token readCharacterUnchecked() {
 		return readRegexUnchecked(CHARACTER_PATTERN, 2, null);
+	}
+
+	public Token readOperatorUnchecked() {
+		boolean containsCaret = false;
+
+		containsCaret |= readRegexUnchecked(OPTIONAL_SPACE, 1, null).isContainsCaret();
+
+		int expressionLength = javaExpression.length();
+		String detectedOperator = null;
+		for (String operator : OPERATORS) {
+			int endIndex = position + operator.length();
+			if (endIndex <= expressionLength && operator.equals(javaExpression.substring(position, endIndex))) {
+				detectedOperator = operator;
+				break;
+			}
+		}
+
+		if (detectedOperator == null) {
+			return null;
+		}
+
+		containsCaret |= moveForward(detectedOperator.length());
+
+		containsCaret |= readRegexUnchecked(OPTIONAL_SPACE, 1, null).isContainsCaret();
+
+		return new Token(detectedOperator, containsCaret);
 	}
 
 	/**

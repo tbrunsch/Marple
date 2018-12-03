@@ -10,8 +10,9 @@ public class JavaParserContext
 	private final ObjectInfoProvider			objectInfoProvider;
 	private final FieldAndMethodDataProvider	fieldAndMethodDataProvider;
 	private final ClassDataProvider				classDataProvider;
+	private final BinaryOperatorResultProvider binaryOperatorResultProvider;
 
-	private final AbstractEntityParser			javaExpressionParser;
+	private final AbstractEntityParser 			expressionParser;
 	private final AbstractEntityParser			fieldParser;
 	private final AbstractEntityParser			staticFieldParser;
 	private final AbstractEntityParser			methodParser;
@@ -23,6 +24,7 @@ public class JavaParserContext
 	private final AbstractEntityParser			castParser;
 	private final AbstractEntityParser			classParser;
 	private final AbstractEntityParser			constructorParser;
+	private final AbstractEntityParser			compoundExpressionParser;
 
 	JavaParserContext(ObjectInfo thisInfo, JavaParserSettings settings, EvaluationMode evaluationMode) {
 		this.thisInfo = thisInfo;
@@ -30,8 +32,9 @@ public class JavaParserContext
 		objectInfoProvider				= new ObjectInfoProvider(evaluationMode);
 		fieldAndMethodDataProvider		= new FieldAndMethodDataProvider(this);
 		classDataProvider				= new ClassDataProvider(this, settings.getImports());
+		binaryOperatorResultProvider = new BinaryOperatorResultProvider(evaluationMode);
 
-		javaExpressionParser			= new ExpressionParser(this, thisInfo);
+		expressionParser 				= new ExpressionParser(this, thisInfo);
 		fieldParser						= new FieldParser(this, thisInfo, false);
 		staticFieldParser				= new FieldParser(this, thisInfo, true);
 		methodParser					= new MethodParser(this, thisInfo, false);
@@ -43,6 +46,7 @@ public class JavaParserContext
 		castParser						= new CastParser(this, thisInfo);
 		classParser						= new ClassParser(this, thisInfo);
 		constructorParser				= new ConstructorParser(this, thisInfo);
+		compoundExpressionParser		= createCompoundExpressionParser(Integer.MAX_VALUE);
 	}
 
 	public ObjectInfo getThisInfo() {
@@ -65,8 +69,12 @@ public class JavaParserContext
 		return classDataProvider;
 	}
 
+	public BinaryOperatorResultProvider getBinaryOperatorResultProvider() {
+		return binaryOperatorResultProvider;
+	}
+
 	public AbstractEntityParser getExpressionParser() {
-		return javaExpressionParser;
+		return expressionParser;
 	}
 
 	public AbstractEntityParser getFieldParser(boolean staticOnly) {
@@ -95,5 +103,13 @@ public class JavaParserContext
 
 	public AbstractEntityParser getConstructorParser() {
 		return constructorParser;
+	}
+
+	public AbstractEntityParser getCompoundExpressionParser() {
+		return compoundExpressionParser;
+	}
+
+	public AbstractEntityParser createCompoundExpressionParser(int maxOperatorPrecedenceLevelToConsider) {
+		return new CompoundExpressionParser(this, thisInfo, maxOperatorPrecedenceLevelToConsider);
 	}
 }

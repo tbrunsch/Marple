@@ -26,7 +26,7 @@ public class ParenthesizedExpressionParser extends AbstractEntityParser
 			return parserContext.getFieldAndMethodDataProvider().suggestFieldsAndMethods(tokenStream, expectedResultClasses);
 		}
 
-		ParseResultIF expressionParseResult = parserContext.getExpressionParser().parse(tokenStream, currentContextInfo, expectedResultClasses);
+		ParseResultIF expressionParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, currentContextInfo, expectedResultClasses);
 
 		// propagate anything except results
 		if (expressionParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
