@@ -1,15 +1,13 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.javaParser.AccessLevel;
-import com.AMS.jBEAM.javaParser.JavaParserSettings;
+import com.AMS.jBEAM.javaParser.ParserSettings;
 import com.AMS.jBEAM.common.ReflectionUtils;
-import com.sun.org.apache.xpath.internal.operations.Mod;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -19,7 +17,7 @@ public class InspectionDataProvider
 
 	private final Predicate<Integer> accessLevelFilter;
 
-	public InspectionDataProvider(JavaParserSettings parserSettings) {
+	public InspectionDataProvider(ParserSettings parserSettings) {
 		accessLevelFilter = createAccessLevelFilter(parserSettings.getMinimumAccessLevel());
 	}
 

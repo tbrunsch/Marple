@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.EvaluationMode;
-import com.AMS.jBEAM.javaParser.JavaParserContext;
+import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 import com.AMS.jBEAM.javaParser.tokenizer.Operator;
@@ -44,7 +44,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 
 	private final int maxOperatorPrecedenceLevelToConsider;
 
-	public CompoundExpressionParser(JavaParserContext parserContext, ObjectInfo thisInfo, int maxOperatorPrecedenceLevelToConsider) {
+	public CompoundExpressionParser(ParserContext parserContext, ObjectInfo thisInfo, int maxOperatorPrecedenceLevelToConsider) {
 		super(parserContext, thisInfo);
 		this.maxOperatorPrecedenceLevelToConsider = maxOperatorPrecedenceLevelToConsider;
 	}
@@ -67,7 +67,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 		 * If short circuit evaluation becomes active, then we must switch to a non-evaluating context,
 		 * but still check for syntax errors.
 		 */
-		JavaParserContext context = parserContext;
+		ParserContext context = parserContext;
 		boolean considerOperatorResult = true;
 		while (true) {
 			Token operatorToken = tokenStream.readOperatorUnchecked();
@@ -136,7 +136,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 		}
 	}
 
-	private ObjectInfo applyOperator(JavaParserContext context, ObjectInfo lhs, ObjectInfo rhs, Operator operator) throws OperatorException {
+	private ObjectInfo applyOperator(ParserContext context, ObjectInfo lhs, ObjectInfo rhs, Operator operator) throws OperatorException {
 		return OPERATOR_IMPLEMENTATIONS.get(operator).apply(context.getBinaryOperatorResultProvider(), lhs, rhs);
 	}
 
@@ -145,8 +145,8 @@ public class CompoundExpressionParser extends AbstractEntityParser
 			|| operator == Operator.LOGICAL_OR	&& Boolean.TRUE.equals(objectInfo.getObject());
 	}
 
-	private JavaParserContext createContextWithoutEvaluation() {
-		return new JavaParserContext(parserContext.getThisInfo(), parserContext.getSettings(), EvaluationMode.NONE);
+	private ParserContext createContextWithoutEvaluation() {
+		return new ParserContext(parserContext.getThisInfo(), parserContext.getSettings(), EvaluationMode.NONE);
 	}
 
 	@FunctionalInterface

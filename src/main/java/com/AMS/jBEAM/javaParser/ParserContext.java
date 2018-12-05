@@ -3,10 +3,10 @@ package com.AMS.jBEAM.javaParser;
 import com.AMS.jBEAM.javaParser.parsers.*;
 import com.AMS.jBEAM.javaParser.utils.*;
 
-public class JavaParserContext
+public class ParserContext
 {
 	private final ObjectInfo					thisInfo;
-	private final JavaParserSettings			settings;
+	private final ParserSettings 				settings;
 
 	private final InspectionDataProvider 		inspectionDataProvider;
 	private final ObjectInfoProvider			objectInfoProvider;
@@ -28,7 +28,7 @@ public class JavaParserContext
 	private final AbstractEntityParser			constructorParser;
 	private final AbstractEntityParser			compoundExpressionParser;
 
-	public JavaParserContext(ObjectInfo thisInfo, JavaParserSettings settings, EvaluationMode evaluationMode) {
+	public ParserContext(ObjectInfo thisInfo, ParserSettings settings, EvaluationMode evaluationMode) {
 		this.thisInfo = thisInfo;
 		this.settings = settings;
 
@@ -36,7 +36,7 @@ public class JavaParserContext
 		objectInfoProvider				= new ObjectInfoProvider(evaluationMode);
 		fieldAndMethodDataProvider		= new FieldAndMethodDataProvider(this);
 		classDataProvider				= new ClassDataProvider(this, settings.getImports());
-		binaryOperatorResultProvider = new BinaryOperatorResultProvider(evaluationMode);
+		binaryOperatorResultProvider 	= new BinaryOperatorResultProvider(evaluationMode);
 
 		expressionParser 				= new ExpressionParser(this, thisInfo);
 		fieldParser						= new FieldParser(this, thisInfo, false);
@@ -57,7 +57,7 @@ public class JavaParserContext
 		return thisInfo;
 	}
 
-	public JavaParserSettings getSettings() {
+	public ParserSettings getSettings() {
 		return settings;
 	}
 

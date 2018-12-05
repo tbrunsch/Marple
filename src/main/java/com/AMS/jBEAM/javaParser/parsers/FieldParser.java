@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.JavaParserContext;
+import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
@@ -26,7 +26,7 @@ public class FieldParser extends AbstractEntityParser
 {
 	private final boolean staticOnly;
 
-	public FieldParser(JavaParserContext parserContext, ObjectInfo thisInfo, boolean staticOnly) {
+	public FieldParser(ParserContext parserContext, ObjectInfo thisInfo, boolean staticOnly) {
 		super(parserContext, thisInfo);
 		this.staticOnly = staticOnly;
 	}

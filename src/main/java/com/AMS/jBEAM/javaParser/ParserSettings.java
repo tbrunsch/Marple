@@ -1,13 +1,13 @@
 package com.AMS.jBEAM.javaParser;
 
-public class JavaParserSettings
+public class ParserSettings
 {
 	private final Imports			imports;
 	private final AccessLevel		minimumAccessLevel;
 	private final EvaluationMode	evaluationModeCodeCompletion;
 	private final EvaluationMode	evaluationModeCodeEvaluation;
 
-	public JavaParserSettings(Imports imports, AccessLevel minimumAccessLevel, EvaluationMode evaluationModeCodeCompletion, EvaluationMode evaluationModeCodeEvaluation) {
+	public ParserSettings(Imports imports, AccessLevel minimumAccessLevel, EvaluationMode evaluationModeCodeCompletion, EvaluationMode evaluationModeCodeEvaluation) {
 		this.imports = imports;
 		this.minimumAccessLevel = minimumAccessLevel;
 		this.evaluationModeCodeCompletion = evaluationModeCodeCompletion;

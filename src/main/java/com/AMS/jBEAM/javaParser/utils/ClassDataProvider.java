@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.javaParser.Imports;
-import com.AMS.jBEAM.javaParser.JavaParserContext;
+import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.common.ReflectionUtils;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
@@ -24,10 +24,10 @@ public class ClassDataProvider
 		);
 	private static final List<ClassInfo>	PRIMITIVE_CLASS_INFOS		= PRIMITIVE_CLASSES_BY_NAME.keySet().stream().map(ClassInfo::new).collect(Collectors.toList());
 
-	private final JavaParserContext parserContext;
-	private final Imports 			imports;
+	private final ParserContext	parserContext;
+	private final Imports 		imports;
 
-	public ClassDataProvider(JavaParserContext parserContext, Imports imports) {
+	public ClassDataProvider(ParserContext parserContext, Imports imports) {
 		this.parserContext = parserContext;
 		this.imports = imports;
 	}

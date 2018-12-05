@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.JavaParserContext;
+import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
 import com.AMS.jBEAM.javaParser.result.ParseError;
 import com.AMS.jBEAM.javaParser.result.ParseResultIF;
@@ -20,7 +20,7 @@ public class LiteralParser extends AbstractEntityParser
 	private final AbstractEntityParser floatParser;
 	private final AbstractEntityParser doubleParser;
 
-	public LiteralParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
+	public LiteralParser(ParserContext parserContext, ObjectInfo thisInfo) {
 		super(parserContext, thisInfo);
 		intParser 		= new NumericLiteralParser<>(parserContext, thisInfo, int.class,	TokenStream::readIntegerLiteral,	Integer::parseInt,		"Invalid int literal");
 		longParser 		= new NumericLiteralParser<>(parserContext, thisInfo, long.class,	TokenStream::readLongLiteral, 		Long::parseLong,		"Invalid long literal");
@@ -129,7 +129,7 @@ public class LiteralParser extends AbstractEntityParser
 		private final NumericValueParser<T>	valueParser;
 		private final String				wrongTypeError;
 
-		NumericLiteralParser(JavaParserContext parserContext, ObjectInfo thisInfo, Class<T> numericType, NumericTokenReader tokenReader, NumericValueParser<T> valueParser, String wrongTypeError) {
+		NumericLiteralParser(ParserContext parserContext, ObjectInfo thisInfo, Class<T> numericType, NumericTokenReader tokenReader, NumericValueParser<T> valueParser, String wrongTypeError) {
 			super(parserContext, thisInfo);
 			this.numericType = numericType;
 			this.tokenReader = tokenReader;

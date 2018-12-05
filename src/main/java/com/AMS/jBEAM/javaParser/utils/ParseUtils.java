@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
-import com.AMS.jBEAM.javaParser.JavaParserContext;
+import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.parsers.AbstractEntityParser;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
@@ -103,7 +103,7 @@ public class ParseUtils
 		return new ParseError(-1, "Internal error: Failed merging parse errors", ParseError.ErrorType.INTERNAL_ERROR);
 	}
 
-	public static ParseResultIF createParseResult(JavaParserContext parserContext, ObjectInfo resultInfo, List<Class<?>> expectedResultClasses, int parsedToPosition) {
+	public static ParseResultIF createParseResult(ParserContext parserContext, ObjectInfo resultInfo, List<Class<?>> expectedResultClasses, int parsedToPosition) {
 		Class<?> resultClass = parserContext.getObjectInfoProvider().getClass(resultInfo);
 		if (expectedResultClasses != null && expectedResultClasses.stream().noneMatch(expectedResultClass -> ParseUtils.isConvertibleTo(resultClass, expectedResultClass))) {
 			String messagePrefix = "The class '" + resultClass.getSimpleName() + "' is not assignable to ";

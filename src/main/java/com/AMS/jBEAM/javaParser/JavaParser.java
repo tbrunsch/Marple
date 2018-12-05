@@ -23,7 +23,7 @@ public class JavaParser
 		}
 	};
 
-	public List<CompletionSuggestionIF> suggestCodeCompletion(String javaExpression, JavaParserSettings settings, int caret, Object thisContext) throws JavaParseException {
+	public List<CompletionSuggestionIF> suggestCodeCompletion(String javaExpression, ParserSettings settings, int caret, Object thisContext) throws ParseException {
 		ParseResultIF parseResult;
 
 		EvaluationMode evaluationMode = settings.getEvaluationModeCodeCompletion();
@@ -42,18 +42,18 @@ public class JavaParser
 			case PARSE_RESULT: {
 				ParseResult result = (ParseResult) parseResult;
 				if (result.getParsedToPosition() != javaExpression.length()) {
-					throw new JavaParseException(result.getParsedToPosition(), "Unexpected character");
+					throw new ParseException(result.getParsedToPosition(), "Unexpected character");
 				} else {
 					throw new IllegalStateException("Internal error: No completions available");
 				}
 			}
 			case PARSE_ERROR: {
 				ParseError error = (ParseError) parseResult;
-				throw new JavaParseException(error.getPosition(), error.getMessage());
+				throw new ParseException(error.getPosition(), error.getMessage());
 			}
 			case AMBIGUOUS_PARSE_RESULT: {
 				AmbiguousParseResult result = (AmbiguousParseResult) parseResult;
-				throw new JavaParseException(result.getPosition(), result.getMessage());
+				throw new ParseException(result.getPosition(), result.getMessage());
 			}
 			case COMPLETION_SUGGESTIONS: {
 				CompletionSuggestions completionSuggestions = (CompletionSuggestions) parseResult;
@@ -68,7 +68,7 @@ public class JavaParser
 		}
 	}
 
-	public Object evaluate(String javaExpression, JavaParserSettings settings, Object thisContext) throws JavaParseException {
+	public Object evaluate(String javaExpression, ParserSettings settings, Object thisContext) throws ParseException {
 		ParseResultIF parseResult;
 
 		EvaluationMode evaluationMode = settings.getEvaluationModeCodeEvaluation();
@@ -87,18 +87,18 @@ public class JavaParser
 			case PARSE_RESULT: {
 				ParseResult result = (ParseResult) parseResult;
 				if (result.getParsedToPosition() != javaExpression.length()) {
-					throw new JavaParseException(result.getParsedToPosition(), "Unexpected character");
+					throw new ParseException(result.getParsedToPosition(), "Unexpected character");
 				} else {
 					return result.getObjectInfo().getObject();
 				}
 			}
 			case PARSE_ERROR: {
 				ParseError error = (ParseError) parseResult;
-				throw new JavaParseException(error.getPosition(), error.getMessage(), error.getException());
+				throw new ParseException(error.getPosition(), error.getMessage(), error.getException());
 			}
 			case AMBIGUOUS_PARSE_RESULT: {
 				AmbiguousParseResult result = (AmbiguousParseResult) parseResult;
-				throw new JavaParseException(result.getPosition(), result.getMessage());
+				throw new ParseException(result.getPosition(), result.getMessage());
 			}
 			case COMPLETION_SUGGESTIONS: {
 				throw new IllegalStateException("Internal error: Unexpected code completion");
@@ -108,9 +108,9 @@ public class JavaParser
 		}
 	}
 
-	private ParseResultIF parse(String javaExpression, JavaParserSettings settings, EvaluationMode evaluationMode, int caret, Object thisContext) {
+	private ParseResultIF parse(String javaExpression, ParserSettings settings, EvaluationMode evaluationMode, int caret, Object thisContext) {
 		ObjectInfo thisInfo = new ObjectInfo(thisContext);
-		JavaParserContext parserPool  = new JavaParserContext(thisInfo, settings, evaluationMode);
+		ParserContext parserPool  = new ParserContext(thisInfo, settings, evaluationMode);
 		TokenStream tokenStream = new TokenStream(javaExpression, caret);
 		try {
 			return parserPool.getCompoundExpressionParser().parse(tokenStream, thisInfo, null);

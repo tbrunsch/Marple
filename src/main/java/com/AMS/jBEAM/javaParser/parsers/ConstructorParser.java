@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.JavaParserContext;
+import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class ConstructorParser extends AbstractEntityParser
 {
-	public ConstructorParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
+	public ConstructorParser(ParserContext parserContext, ObjectInfo thisInfo) {
 		super(parserContext, thisInfo);
 	}
 

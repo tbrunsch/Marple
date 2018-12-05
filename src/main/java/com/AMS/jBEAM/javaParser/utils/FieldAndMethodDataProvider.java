@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.utils;
 
-import com.AMS.jBEAM.javaParser.JavaParserContext;
+import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
@@ -14,9 +14,9 @@ import java.util.stream.IntStream;
 
 public class FieldAndMethodDataProvider
 {
-	private final JavaParserContext parserContext;
+	private final ParserContext parserContext;
 
-	public FieldAndMethodDataProvider(JavaParserContext parserContext) {
+	public FieldAndMethodDataProvider(ParserContext parserContext) {
 		this.parserContext = parserContext;
 	}
 

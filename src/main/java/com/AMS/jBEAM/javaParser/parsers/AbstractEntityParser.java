@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.JavaParserContext;
+import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
@@ -9,10 +9,10 @@ import java.util.List;
 
 public abstract class AbstractEntityParser
 {
-	final JavaParserContext parserContext;
-	final ObjectInfo		thisInfo;
+	final ParserContext	parserContext;
+	final ObjectInfo	thisInfo;
 
-	AbstractEntityParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
+	AbstractEntityParser(ParserContext parserContext, ObjectInfo thisInfo) {
 		this.parserContext = parserContext;
 		this.thisInfo = thisInfo;
 	}

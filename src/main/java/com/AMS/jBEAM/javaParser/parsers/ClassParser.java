@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.JavaParserContext;
+import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.result.ParseError;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 import com.AMS.jBEAM.javaParser.result.ParseResult;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ClassParser extends AbstractEntityParser
 {
-	public ClassParser(JavaParserContext parserContext, ObjectInfo thisInfo) {
+	public ClassParser(ParserContext parserContext, ObjectInfo thisInfo) {
 		super(parserContext, thisInfo);
 	}
 

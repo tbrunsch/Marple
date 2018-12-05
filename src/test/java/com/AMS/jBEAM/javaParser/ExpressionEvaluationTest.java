@@ -1,12 +1,11 @@
 package com.AMS.jBEAM.javaParser;
 
-import com.AMS.jBEAM.javaParser.parsers.ConstructorParser;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class JavaExpressionEvaluationTest
+public class ExpressionEvaluationTest
 {
 	@Test
 	public void testField() {
@@ -709,22 +708,22 @@ public class JavaExpressionEvaluationTest
 	public void testClass() {
 		Object testInstance = null;
 		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED, AccessLevel.PACKAGE_PRIVATE)
-			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.l", -17L)
-			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.f", 27.5f)
-			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.getInt()", 0)
-			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.getDouble()", 2.0);
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.l", -17L)
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.f", 27.5f)
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getInt()", 0)
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getDouble()", 2.0);
 
 		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED, AccessLevel.PUBLIC)
 			.test("java.lang.Math.pow(1.5, 2.5)", Math.pow(1.5, 2.5))
 			.test("java.lang.Math.PI", Math.PI);
 
 		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED, AccessLevel.PACKAGE_PRIVATE)
-			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.i")
-			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.b")
-			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.d")
-			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.getLong()")
-			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.getString()")
-			.test("com.AMS.jBEAM.javaParser.JavaExpressionEvaluationTest.ClassParserTestClass.getFloat()");
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.i")
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.b")
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.d")
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getLong()")
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getString()")
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getFloat()");
 	}
 
 	private static class ConstructorParserTestClass
@@ -905,7 +904,7 @@ public class JavaExpressionEvaluationTest
 	private static class TestExecutor
 	{
 		private final Object				testInstance;
-		private final JavaParserSettings	settings;
+		private final ParserSettings settings;
 
 		TestExecutor(Object testInstance, EvaluationMode evaluationMode) {
 			this(testInstance, evaluationMode, AccessLevel.PRIVATE);
@@ -913,7 +912,7 @@ public class JavaExpressionEvaluationTest
 
 		TestExecutor(Object testInstance, EvaluationMode evaluationMode, AccessLevel minimumAccessLevel) {
 			this.testInstance = testInstance;
-			this.settings = new JavaParserSettings(new Imports(), minimumAccessLevel, EvaluationMode.NONE, evaluationMode);
+			this.settings = new ParserSettings(new Imports(), minimumAccessLevel, EvaluationMode.NONE, evaluationMode);
 		}
 
 		TestExecutor test(String javaExpression, Object expectedValue) {
@@ -921,7 +920,7 @@ public class JavaExpressionEvaluationTest
 			try {
 				Object actualValue = parser.evaluate(javaExpression, settings, testInstance);
 				assertEquals("Expression: " + javaExpression, expectedValue, actualValue);
-			} catch (JavaParseException e) {
+			} catch (ParseException e) {
 				assertTrue("Exception during expression evaluation: " + e.getMessage(), false);
 			}
 			return this;
@@ -934,23 +933,23 @@ public class JavaExpressionEvaluationTest
 	private static class ErrorTestExecutor
 	{
 		private final Object				testInstance;
-		private final JavaParserSettings	settings;
+		private final ParserSettings settings;
 
 		ErrorTestExecutor(Object testInstance, EvaluationMode evaluationMode) {
 			this(testInstance, evaluationMode, AccessLevel.PRIVATE);
 		}
 		ErrorTestExecutor(Object testInstance, EvaluationMode evaluationMode, AccessLevel minimumAccessLevel) {
 			this.testInstance = testInstance;
-			this.settings = new JavaParserSettings(new Imports(), minimumAccessLevel, EvaluationMode.NONE, evaluationMode);
+			this.settings = new ParserSettings(new Imports(), minimumAccessLevel, EvaluationMode.NONE, evaluationMode);
 		}
 
 		ErrorTestExecutor test(String javaExpression) {
-			Class<? extends Exception> expectedExceptionClass = JavaParseException.class;
+			Class<? extends Exception> expectedExceptionClass = ParseException.class;
 			JavaParser parser = new JavaParser();
 			try {
 				parser.evaluate(javaExpression, settings, testInstance);
 				assertTrue("Expression: " + javaExpression + " - Expected an exception", false);
-			} catch (JavaParseException | IllegalStateException e) {
+			} catch (ParseException | IllegalStateException e) {
 				assertTrue("Expression: " + javaExpression + " - Expected exception of class '" + expectedExceptionClass.getSimpleName() + "', but caught an exception of class '" + e.getClass().getSimpleName() + "'", expectedExceptionClass.isInstance(e));
 			}
 			return this;
