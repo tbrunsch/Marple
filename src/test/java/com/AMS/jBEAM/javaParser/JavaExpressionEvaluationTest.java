@@ -880,14 +880,14 @@ public class JavaExpressionEvaluationTest
 				return this;
 			}
 
-			TestClass get(int dummy) {
+			TestClass get(double dummy) {
 				return this;
 			}
 		}
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
-			.test("reset().get(d = 7.0).a", 7.0)
+			.test("reset().get(d = 7.0).d", 7.0)
 			.test("reset().get(f = -1).f", -1.f)
 			.test("reset().get(i = 13).i", 13)
 			.test("reset().get(d = f = i = -3).d", -3.0)

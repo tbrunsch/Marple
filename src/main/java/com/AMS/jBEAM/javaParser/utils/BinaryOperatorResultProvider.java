@@ -207,9 +207,27 @@ public class BinaryOperatorResultProvider
 		return applyLogicalOperator(lhs, rhs, Operator.LOGICAL_OR);
 	}
 
-	public ObjectInfo getAssignmentInfo(ObjectInfo lhs, ObjectInfo rhs) {
-		// TODO
-		return null;
+	public ObjectInfo getAssignmentInfo(ObjectInfo lhs, ObjectInfo rhs) throws OperatorException {
+		ObjectInfo.ValueSetterIF lhsValueSetter = lhs.getValueSetter();
+		if (evaluationMode != EvaluationMode.NONE && lhsValueSetter == null) {
+			throw new OperatorException("Cannot assign values to non-lvalues");
+		}
+		Class<?> declaredLhsClass = lhs.getDeclaredClass();
+		Class<?> rhsClass = getClass(rhs);
+		if (ParseUtils.rateClassMatch(rhsClass, declaredLhsClass) == ParseUtils.CLASS_MATCH_NONE) {
+			throw new OperatorException("Cannot assign value of type '" + rhsClass + "' to left-hand side. Expected an instance of class '" + declaredLhsClass + "'");
+		}
+		Object resultObject = null;
+		Class<?> declaredResultClass = declaredLhsClass;
+		if (evaluationMode != EvaluationMode.NONE) {
+			try {
+				resultObject = rhs.getObject();
+				lhsValueSetter.setObject(resultObject);
+			} catch (IllegalArgumentException e) {
+				throw new OperatorException("Could assign value of type '" + rhsClass + "' to left-hand side.");
+			}
+		}
+		return new ObjectInfo(resultObject, declaredResultClass);
 	}
 
 	private Class<?> getClass(ObjectInfo objectInfo) {

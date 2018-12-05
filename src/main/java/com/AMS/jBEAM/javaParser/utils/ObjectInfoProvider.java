@@ -46,19 +46,37 @@ public class ObjectInfoProvider
 
 	public ObjectInfo getFieldInfo(ObjectInfo contextInfo, Field field) throws NullPointerException {
 		final Object fieldValue;
+		final ObjectInfo.ValueSetterIF valueSetter;
 		if (evaluationMode == EvaluationMode.NONE) {
 			fieldValue = null;
+			valueSetter = null;
 		} else {
-			Object contextObject = (field.getModifiers() & Modifier.STATIC) != 0 ? null : contextInfo.getObject();
+			int modifiers = field.getModifiers();
+			Object contextObject = (modifiers & Modifier.STATIC) != 0 ? null : contextInfo.getObject();
 			try {
 				field.setAccessible(true);
 				fieldValue = field.get(contextObject);
+				valueSetter = getFieldValueSetter(contextObject, field);
 			} catch (IllegalAccessException e) {
 				throw new IllegalStateException("Internal error: Unexpected IllegalAccessException: " + e.getMessage());
 			}
 		}
 		Class<?> fieldClass = getClass(fieldValue, field.getType());
-		return new ObjectInfo(fieldValue, fieldClass);
+		return new ObjectInfo(fieldValue, fieldClass, valueSetter);
+	}
+
+	private ObjectInfo.ValueSetterIF getFieldValueSetter(Object contextObject, Field field) {
+		int modifiers = field.getModifiers();
+		if ((modifiers & Modifier.FINAL) != 0) {
+			return null;
+		}
+		return value -> {
+			try {
+				field.set(contextObject, value);
+			} catch (IllegalAccessException e) {
+				throw new IllegalArgumentException("Could not set field value", e);
+			}
+		};
 	}
 
 	public ObjectInfo getMethodReturnInfo(ObjectInfo contextInfo, Executable method, List<ObjectInfo> argumentInfos) throws NullPointerException {
@@ -103,16 +121,19 @@ public class ObjectInfoProvider
 
 	public ObjectInfo getArrayElementInfo(ObjectInfo arrayInfo, ObjectInfo indexInfo) throws NullPointerException {
 		final Object arrayElementValue;
+		final ObjectInfo.ValueSetterIF valueSetter;
 		if (evaluationMode == EvaluationMode.NONE) {
 			arrayElementValue = null;
+			valueSetter = null;
 		} else {
 			Object arrayObject = arrayInfo.getObject();
 			Object indexObject = indexInfo.getObject();
 			int index = ReflectionUtils.convertTo(indexObject, int.class, false);
 			arrayElementValue = Array.get(arrayObject, index);
+			valueSetter = value -> Array.set(arrayObject, index, value);
 		}
 		Class<?> arrayElementClass = getClass(arrayElementValue, getClass(arrayInfo).getComponentType());
-		return new ObjectInfo(arrayElementValue, arrayElementClass);
+		return new ObjectInfo(arrayElementValue, arrayElementClass, valueSetter);
 	}
 
 	public ObjectInfo getCastInfo(ObjectInfo objectInfo, Class<?> targetClass) throws ClassCastException {
