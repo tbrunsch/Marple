@@ -68,8 +68,21 @@ public class TailParser extends AbstractEntityParser
 				return parserContext.getTailParser(false).parse(tokenStream, elementInfo, expectedResultClasses);
 			}
 		}
-		// finished parsing
-		return ParseUtils.createParseResult(parserContext, currentContextInfo, expectedResultClasses, tokenStream.getPosition());
+		/*
+		 * finished parsing
+		 *
+		 * expectedResultClasses are only evaluated for completion suggestions, not for parse results.
+		 *
+		 * The root caller (CompoundExpressionParser) is responsible for verifying that the result matches one of the expected types.
+		 * The reason for this is that CompoundExpressionParser calls the ExpressionParser for each of the operands, but it does not
+		 * know which type to expect from each of its operands. However, for completion suggestions it might be helpful to take the
+		 * expected type of the CompoundExpressionParser into consideration.
+		 *
+		 * Example: CompoundExpressionParser expects to return a String. However, the first operand might be anything because
+		 *          object + "a string" results in a String. Nevertheless, suggesting a string for the first operand before
+		 *          an arbitrary object seems to be reasonable, for example if there is no second operand.
+		 */
+		return new ParseResult(tokenStream.getPosition(), currentContextInfo);
 	}
 
 	private ParseResultIF parseDot(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {

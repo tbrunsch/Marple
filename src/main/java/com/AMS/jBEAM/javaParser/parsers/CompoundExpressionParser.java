@@ -50,7 +50,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 
 	@Override
 	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
-		ParseResultIF parseResult = parserContext.getExpressionParser().parse(tokenStream, currentContextInfo, null);
+		ParseResultIF parseResult = parserContext.getExpressionParser().parse(tokenStream, currentContextInfo, expectedResultClasses);
 
 		// propagate anything except results
 		if (parseResult.getResultType() != ParseResultType.PARSE_RESULT) {
@@ -79,7 +79,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 
 			switch (operator.getAssociativity()) {
 				case LEFT_TO_RIGHT: {
-					parseResult = parserContext.createCompoundExpressionParser(operator.getPrecedenceLevel() - 1).parse(tokenStream, currentContextInfo, null);
+					parseResult = parserContext.createCompoundExpressionParser(operator.getPrecedenceLevel() - 1).parse(tokenStream, currentContextInfo, expectedResultClasses);
 
 					// propagate anything except results
 					if (parseResult.getResultType() != ParseResultType.PARSE_RESULT) {
@@ -98,7 +98,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 					break;
 				}
 				case RIGHT_TO_LEFT: {
-					parseResult = parserContext.createCompoundExpressionParser(operator.getPrecedenceLevel()).parse(tokenStream, currentContextInfo, null);
+					parseResult = parserContext.createCompoundExpressionParser(operator.getPrecedenceLevel()).parse(tokenStream, currentContextInfo, expectedResultClasses);
 
 					// propagate anything except results
 					if (parseResult.getResultType() != ParseResultType.PARSE_RESULT) {
