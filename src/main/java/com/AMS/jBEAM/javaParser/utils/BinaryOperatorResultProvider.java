@@ -174,17 +174,23 @@ public class BinaryOperatorResultProvider
 	public ObjectInfo getEqualToInfo(ObjectInfo lhs, ObjectInfo rhs) throws OperatorException {
 		Class<?> lhsClass = getClass(lhs);
 		Class<?> rhsClass = getClass(rhs);
-		return lhsClass.isPrimitive() || rhsClass.isPrimitive()
-				? applyNumericComparisonOperator(lhs, rhs, Operator.EQUAL_TO)
-				: new ObjectInfo(lhs.getObject() == rhs.getObject(), boolean.class);
+		if (isPrimitive(lhsClass) || isPrimitive(rhsClass)) {
+			return applyNumericComparisonOperator(lhs, rhs, Operator.EQUAL_TO);
+		}
+		Object result = evaluationMode == EvaluationMode.NONE ? null : lhs.getObject() == rhs.getObject();
+		Class<?> resultClass = boolean.class;
+		return new ObjectInfo(result, resultClass);
 	}
 
 	public ObjectInfo getNotEqualToInfo(ObjectInfo lhs, ObjectInfo rhs) throws OperatorException {
 		Class<?> lhsClass = getClass(lhs);
 		Class<?> rhsClass = getClass(rhs);
-		return lhsClass.isPrimitive() || rhsClass.isPrimitive()
-				? applyNumericComparisonOperator(lhs, rhs, Operator.NOT_EQUAL_TO)
-				: new ObjectInfo(lhs.getObject() != rhs.getObject(), boolean.class);
+		if (isPrimitive(lhsClass) || isPrimitive(rhsClass)) {
+			return applyNumericComparisonOperator(lhs, rhs, Operator.NOT_EQUAL_TO);
+		}
+		Object result = evaluationMode == EvaluationMode.NONE ? null : lhs.getObject() != rhs.getObject();
+		Class<?> resultClass = boolean.class;
+		return new ObjectInfo(result, resultClass);
 	}
 
 	public ObjectInfo getBitwiseAndInfo(ObjectInfo lhs, ObjectInfo rhs) throws OperatorException {
@@ -304,7 +310,14 @@ public class BinaryOperatorResultProvider
 		return applyOperatorInfo(lhs, rhs, operatorInfo);
 	}
 
+	private static boolean isPrimitive(Class<?> clazz) {
+		return clazz != null && clazz.isPrimitive();
+	}
+
 	private static Class<?> getPrimitiveClass(Class<?> clazz) throws OperatorException {
+		if (clazz == null) {
+			throw new OperatorException("null is not a primitive");
+		}
 		if (clazz.isPrimitive()) {
 			return clazz;
 		}

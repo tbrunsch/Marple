@@ -6,11 +6,13 @@ import com.AMS.jBEAM.javaParser.utils.*;
 public class JavaParserContext
 {
 	private final ObjectInfo					thisInfo;
+	private final JavaParserSettings			settings;
+
 	private final InspectionDataProvider 		inspectionDataProvider;
 	private final ObjectInfoProvider			objectInfoProvider;
 	private final FieldAndMethodDataProvider	fieldAndMethodDataProvider;
 	private final ClassDataProvider				classDataProvider;
-	private final BinaryOperatorResultProvider binaryOperatorResultProvider;
+	private final BinaryOperatorResultProvider 	binaryOperatorResultProvider;
 
 	private final AbstractEntityParser 			expressionParser;
 	private final AbstractEntityParser			fieldParser;
@@ -26,8 +28,10 @@ public class JavaParserContext
 	private final AbstractEntityParser			constructorParser;
 	private final AbstractEntityParser			compoundExpressionParser;
 
-	JavaParserContext(ObjectInfo thisInfo, JavaParserSettings settings, EvaluationMode evaluationMode) {
+	public JavaParserContext(ObjectInfo thisInfo, JavaParserSettings settings, EvaluationMode evaluationMode) {
 		this.thisInfo = thisInfo;
+		this.settings = settings;
+
 		inspectionDataProvider 			= new InspectionDataProvider(settings);
 		objectInfoProvider				= new ObjectInfoProvider(evaluationMode);
 		fieldAndMethodDataProvider		= new FieldAndMethodDataProvider(this);
@@ -51,6 +55,10 @@ public class JavaParserContext
 
 	public ObjectInfo getThisInfo() {
 		return thisInfo;
+	}
+
+	public JavaParserSettings getSettings() {
+		return settings;
 	}
 
 	public InspectionDataProvider getInspectionDataProvider() {

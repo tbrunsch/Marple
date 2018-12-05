@@ -863,6 +863,10 @@ public class JavaExpressionEvaluationTest
 			.test("reset().getCounter(TRUE() || FALSE())", 1)
 			.test("reset().getCounter(TRUE() || TRUE())", 1)
 			.test("npeTrigger != null && npeTrigger.counter > 0", false);
+
+		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+			.test("reset().getCounter(FALSE() && 5")
+			.test("reset().getCounter(TRUE() || 'X'");
 	}
 
 	@Test

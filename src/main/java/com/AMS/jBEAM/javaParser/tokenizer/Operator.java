@@ -2,26 +2,26 @@ package com.AMS.jBEAM.javaParser.tokenizer;
 
 public enum Operator
 {
-	MUL						("*",			4,	Associativity.LEFT_TO_RIGHT, false),
-	DIV						("/",			4,	Associativity.LEFT_TO_RIGHT, false),
-	MOD						("%",			4,	Associativity.LEFT_TO_RIGHT, false),
-	ADD_OR_CONCAT			("+",			5,	Associativity.LEFT_TO_RIGHT, false),
-	SUB						("-",			5,	Associativity.LEFT_TO_RIGHT, false),
-	LEFT_SHIFT				("<<",			6,	Associativity.LEFT_TO_RIGHT, false),
-	RIGHT_SHIFT				(">>",			6,	Associativity.LEFT_TO_RIGHT, false),
-	UNSIGNED_RIGHT_SHIFT	(">>>",			6,	Associativity.LEFT_TO_RIGHT, false),
-	LESS_THAN				("<",			7,	Associativity.LEFT_TO_RIGHT, false),
-	LESS_THAN_OR_EQUAL_TO	("<=",			7,	Associativity.LEFT_TO_RIGHT, false),
-	GREATER_THAN			(">",			7,	Associativity.LEFT_TO_RIGHT, false),
-	GREATER_THAN_OR_EQUAL_TO(">=",			7,	Associativity.LEFT_TO_RIGHT, false),
-	EQUAL_TO				("==",			8,	Associativity.LEFT_TO_RIGHT, false),
-	NOT_EQUAL_TO			("!=",			8,	Associativity.LEFT_TO_RIGHT, false),
-	BITWISE_AND				("&",			9,	Associativity.LEFT_TO_RIGHT, false),
-	BITWISE_XOR				("^",			10,	Associativity.LEFT_TO_RIGHT, false),
-	BITWISE_OR				("|",			11,	Associativity.LEFT_TO_RIGHT, false),
-	LOGICAL_AND				("&&",			12,	Associativity.LEFT_TO_RIGHT, true),
-	LOGICAL_OR				("||",			13,	Associativity.LEFT_TO_RIGHT, true),
-	ASSIGNMENT				("=",			15,	Associativity.RIGHT_TO_LEFT, false);
+	MUL						("*",			4,	Associativity.LEFT_TO_RIGHT),
+	DIV						("/",			4,	Associativity.LEFT_TO_RIGHT),
+	MOD						("%",			4,	Associativity.LEFT_TO_RIGHT),
+	ADD_OR_CONCAT			("+",			5,	Associativity.LEFT_TO_RIGHT),
+	SUB						("-",			5,	Associativity.LEFT_TO_RIGHT),
+	LEFT_SHIFT				("<<",			6,	Associativity.LEFT_TO_RIGHT),
+	RIGHT_SHIFT				(">>",			6,	Associativity.LEFT_TO_RIGHT),
+	UNSIGNED_RIGHT_SHIFT	(">>>",			6,	Associativity.LEFT_TO_RIGHT),
+	LESS_THAN				("<",			7,	Associativity.LEFT_TO_RIGHT),
+	LESS_THAN_OR_EQUAL_TO	("<=",			7,	Associativity.LEFT_TO_RIGHT),
+	GREATER_THAN			(">",			7,	Associativity.LEFT_TO_RIGHT),
+	GREATER_THAN_OR_EQUAL_TO(">=",			7,	Associativity.LEFT_TO_RIGHT),
+	EQUAL_TO				("==",			8,	Associativity.LEFT_TO_RIGHT),
+	NOT_EQUAL_TO			("!=",			8,	Associativity.LEFT_TO_RIGHT),
+	BITWISE_AND				("&",			9,	Associativity.LEFT_TO_RIGHT),
+	BITWISE_XOR				("^",			10,	Associativity.LEFT_TO_RIGHT),
+	BITWISE_OR				("|",			11,	Associativity.LEFT_TO_RIGHT),
+	LOGICAL_AND				("&&",			12,	Associativity.LEFT_TO_RIGHT),
+	LOGICAL_OR				("||",			13,	Associativity.LEFT_TO_RIGHT),
+	ASSIGNMENT				("=",			15,	Associativity.RIGHT_TO_LEFT);
 
 	public static Operator getValue(String operatorString) {
 		for (Operator operator : values()) {
@@ -35,13 +35,11 @@ public enum Operator
 	private final String		operator;
 	private final int 			precedenceLevel;
 	private final Associativity associativity;
-	private final boolean		useShortCircuitEvaluation;
 
-	Operator(String operator, int precedenceLevel, Associativity associativity, boolean useShortCircuitEvaluation) {
+	Operator(String operator, int precedenceLevel, Associativity associativity) {
 		this.operator = operator;
 		this.precedenceLevel = precedenceLevel;
 		this.associativity = associativity;
-		this.useShortCircuitEvaluation = useShortCircuitEvaluation;
 	}
 
 	public String getOperator() {
@@ -54,10 +52,6 @@ public enum Operator
 
 	public Associativity getAssociativity() {
 		return associativity;
-	}
-
-	public boolean isUseShortCircuitEvaluation() {
-		return useShortCircuitEvaluation;
 	}
 
 	@Override
