@@ -1,12 +1,12 @@
 package com.AMS.jBEAM.javaParser.tokenizer;
 
-public enum Operator
+public enum BinaryOperator
 {
-	MUL						("*",			4,	Associativity.LEFT_TO_RIGHT),
-	DIV						("/",			4,	Associativity.LEFT_TO_RIGHT),
-	MOD						("%",			4,	Associativity.LEFT_TO_RIGHT),
+	MULTIPLY				("*",			4,	Associativity.LEFT_TO_RIGHT),
+	DIVIDE					("/",			4,	Associativity.LEFT_TO_RIGHT),
+	MODULO					("%",			4,	Associativity.LEFT_TO_RIGHT),
 	ADD_OR_CONCAT			("+",			5,	Associativity.LEFT_TO_RIGHT),
-	SUB						("-",			5,	Associativity.LEFT_TO_RIGHT),
+	SUBTRACT				("-",			5,	Associativity.LEFT_TO_RIGHT),
 	LEFT_SHIFT				("<<",			6,	Associativity.LEFT_TO_RIGHT),
 	RIGHT_SHIFT				(">>",			6,	Associativity.LEFT_TO_RIGHT),
 	UNSIGNED_RIGHT_SHIFT	(">>>",			6,	Associativity.LEFT_TO_RIGHT),
@@ -23,8 +23,8 @@ public enum Operator
 	LOGICAL_OR				("||",			13,	Associativity.LEFT_TO_RIGHT),
 	ASSIGNMENT				("=",			15,	Associativity.RIGHT_TO_LEFT);
 
-	public static Operator getValue(String operatorString) {
-		for (Operator operator : values()) {
+	public static BinaryOperator getValue(String operatorString) {
+		for (BinaryOperator operator : values()) {
 			if (operator.getOperator().equals(operatorString)) {
 				return operator;
 			}
@@ -36,7 +36,7 @@ public enum Operator
 	private final int 			precedenceLevel;
 	private final Associativity associativity;
 
-	Operator(String operator, int precedenceLevel, Associativity associativity) {
+	BinaryOperator(String operator, int precedenceLevel, Associativity associativity) {
 		this.operator = operator;
 		this.precedenceLevel = precedenceLevel;
 		this.associativity = associativity;

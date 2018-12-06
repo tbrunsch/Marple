@@ -22,7 +22,7 @@ public class TokenStream implements Cloneable
 	private static final Pattern		DOUBLE_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+(([eE][+-]?[0-9]+)?[dD]|[eE][+-]?[0-9]+[dD]?)|\\.[0-9]+([eE][+-]?[0-9]+)?[dD]?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?[dD]?))\\s*).*");
 
 	// Binary operators, sorted from longest to shortest to ensure that, e.g., "==" is tested before "="
-	private static final List<String> 	OPERATORS					= Arrays.stream(Operator.values()).map(Operator::getOperator).sorted(Comparator.comparingInt(String::length).reversed()).collect(Collectors.toList());
+	private static final List<String> 	BINARY_OPERATORS 			= Arrays.stream(BinaryOperator.values()).map(BinaryOperator::getOperator).sorted(Comparator.comparingInt(String::length).reversed()).collect(Collectors.toList());
 
 	private static final Map<Character, Character> INTERPRETATION_OF_ESCAPED_CHARACTERS = ImmutableMap.<Character, Character>builder()
 		.put('t', '\t')
@@ -163,14 +163,14 @@ public class TokenStream implements Cloneable
 		return readRegexUnchecked(CHARACTER_PATTERN, 2, null);
 	}
 
-	public Token readOperatorUnchecked() {
+	public Token readBinaryOperatorUnchecked() {
 		boolean containsCaret = false;
 
 		containsCaret |= readRegexUnchecked(OPTIONAL_SPACE, 1, null).isContainsCaret();
 
 		int expressionLength = javaExpression.length();
 		String detectedOperator = null;
-		for (String operator : OPERATORS) {
+		for (String operator : BINARY_OPERATORS) {
 			int endIndex = position + operator.length();
 			if (endIndex <= expressionLength && operator.equals(javaExpression.substring(position, endIndex))) {
 				detectedOperator = operator;
