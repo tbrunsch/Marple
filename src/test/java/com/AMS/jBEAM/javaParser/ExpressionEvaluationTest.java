@@ -794,6 +794,7 @@ public class ExpressionEvaluationTest
 			.test("5 + 4 + \"Test\"", 5 + 4 + "Test")
 			.test("-27 >> 2 << 2", -27 >> 2 << 2)
 			.test("-23456 >>> 3 << 1", -23456 >>> 3 << 1)
+			.test("(byte) 23 << 2", (byte) 23 << 2)
 			.test("9*3 < 4*7", 9*3 < 4*7)
 			.test("9*4 < 3.0*12", 9*4 < 3.0*12)
 			.test("9*3 <= 4*7", 9*3 <= 4*7)
@@ -896,6 +897,61 @@ public class ExpressionEvaluationTest
 			.test("reset().get(d = f = i = -3).d", -3.0)
 			.test("reset().get(d = f = i = -3).f", -3.f)
 			.test("reset().get(d = f = i = -3).i", -3);
+	}
+
+	@Test
+	public void testUnaryOperator() {
+		class TestClass
+		{
+			byte b	= 13;
+			int i	= -21;
+			float f = 2.5f;
+			final String s = "Test";
+			final int j = 123;
+
+			TestClass reset() {
+				b = 13;
+				i = -21;
+				f = 2.5f;
+				return this;
+			}
+
+			TestClass get(int dummy) { return this; }
+		}
+
+		new TestExecutor(new TestClass(), EvaluationMode.STRONGLY_TYPED)
+			.test("++reset().b", (byte) 14)
+			.test("reset().get(++b).b", (byte) 14)
+			.test("++reset().i", -20)
+			.test("reset().get(++i).i", -20)
+			.test("--reset().b", (byte) 12)
+			.test("reset().get(--b).b", (byte) 12)
+			.test("--reset().i", -22)
+			.test("reset().get(--i).i", -22)
+			.test("+reset().b", 13)
+			.test("+reset().i", -21)
+			.test("+reset().f", 2.5f)
+			.test("-reset().b", -13)
+			.test("-reset().i", 21)
+			.test("-reset().f", -2.5f)
+			.test("!false", true)
+			.test("!true", false)
+			.test("!(false || true)", false)
+			.test("!(true && false)", true)
+			.test("~12345", ~12345);
+
+		new ErrorTestExecutor(new TestClass(), EvaluationMode.STRONGLY_TYPED)
+			.test("++f")
+			.test("++j")
+			.test("++s")
+			.test("--f")
+			.test("--j")
+			.test("--s")
+			.test("+s")
+			.test("-s")
+			.test("!1")
+			.test("!null")
+			.test("~f");
 	}
 
 	/*

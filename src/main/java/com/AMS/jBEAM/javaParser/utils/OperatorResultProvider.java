@@ -3,6 +3,7 @@ package com.AMS.jBEAM.javaParser.utils;
 import com.AMS.jBEAM.common.ReflectionUtils;
 import com.AMS.jBEAM.javaParser.EvaluationMode;
 import com.AMS.jBEAM.javaParser.tokenizer.BinaryOperator;
+import com.AMS.jBEAM.javaParser.tokenizer.UnaryOperator;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Table;
@@ -11,22 +12,54 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
-public class BinaryOperatorResultProvider
+public class OperatorResultProvider
 {
 	private static final Set<Class<?>>	INTEGRAL_PRIMITIVE_CLASSES			= ImmutableSet.of(char.class, byte.class, short.class, int.class, long.class);
 	private static final Set<Class<?>>	FLOATING_POINT_PRIMITIVE_CLASSES	= ImmutableSet.of(float.class, double.class);
 	private static final Set<Class<?>>	NUMERIC_PRIMITIVE_CLASSES			= ImmutableSet.<Class<?>>builder().addAll(INTEGRAL_PRIMITIVE_CLASSES).addAll(FLOATING_POINT_PRIMITIVE_CLASSES).build();
 
-	private static final Table<BinaryOperator, Class<?>, OperatorInfo> 	NUMERIC_OPERATOR_INFO_BY_OPERATOR_AND_TYPE 				= HashBasedTable.create();
-	private static final Table<BinaryOperator, Class<?>, OperatorInfo>	SHIFT_OPERATOR_INFO_BY_OPERATOR_AND_TYPE				= HashBasedTable.create();
-	private static final Table<BinaryOperator, Class<?>, OperatorInfo>	NUMERIC_COMPARISON_OPERATOR_INFO_BY_OPERATOR_AND_TYPE	= HashBasedTable.create();
-	private static final Table<BinaryOperator, Class<?>, OperatorInfo>	BIT_OPERATOR_INFO_BY_OPERATOR_AND_TYPE					= HashBasedTable.create();
-	private static final Map<BinaryOperator, OperatorInfo> 				LOGICAL_OPERATOR_INFO_BY_OPERATOR						= new HashMap<>();
+	private static final Table<UnaryOperator, Class<?>, UnaryOperatorInfo>		UNARY_OPERATOR_WITH_ASSIGNMENT_INFO_BY_OPERATOR_AND_TYPE	= HashBasedTable.create();
+	private static final Table<UnaryOperator, Class<?>, UnaryOperatorInfo>		SIGN_OPERATOR_INFO_BY_OPERATOR_AND_TYPE						= HashBasedTable.create();
+
+	private static final Table<BinaryOperator, Class<?>, BinaryOperatorInfo> 	NUMERIC_OPERATOR_INFO_BY_OPERATOR_AND_TYPE 					= HashBasedTable.create();
+	private static final Table<BinaryOperator, Class<?>, BinaryOperatorInfo>	SHIFT_OPERATOR_INFO_BY_OPERATOR_AND_TYPE					= HashBasedTable.create();
+	private static final Table<BinaryOperator, Class<?>, BinaryOperatorInfo>	NUMERIC_COMPARISON_OPERATOR_INFO_BY_OPERATOR_AND_TYPE		= HashBasedTable.create();
+	private static final Table<BinaryOperator, Class<?>, BinaryOperatorInfo>	BIT_OPERATOR_INFO_BY_OPERATOR_AND_TYPE						= HashBasedTable.create();
+	private static final Map<BinaryOperator, BinaryOperatorInfo> 				LOGICAL_OPERATOR_INFO_BY_OPERATOR							= new HashMap<>();
+
+	private static <S> void addUnaryOperatorWithAssignmentImplementation(UnaryOperator operator, Class<S> operandClass, Function<S, S> implementation) {
+		Function<Object, Object> wrappedImplementation = o -> implementation.apply(ReflectionUtils.convertTo(o, operandClass, false));
+		Class<?> resultClass = operandClass;
+		UNARY_OPERATOR_WITH_ASSIGNMENT_INFO_BY_OPERATOR_AND_TYPE.put(operator, operandClass, new UnaryOperatorInfo(resultClass, wrappedImplementation));
+	}
+
+	private static void addUnaryOperatorWithAssignmentImplementations(UnaryOperator operator, Function<Character, Character> charImpl, Function<Byte, Byte> byteImpl, Function<Short, Short> shortImpl, Function<Integer, Integer> intImpl, Function<Long, Long> longImpl) {
+		addUnaryOperatorWithAssignmentImplementation(operator,	char.class,		charImpl);
+		addUnaryOperatorWithAssignmentImplementation(operator,	byte.class,		byteImpl);
+		addUnaryOperatorWithAssignmentImplementation(operator,	short.class,	shortImpl);
+		addUnaryOperatorWithAssignmentImplementation(operator,	int.class,		intImpl);
+		addUnaryOperatorWithAssignmentImplementation(operator,	long.class,		longImpl);
+	}
+
+	private static <S, T> void addSignOperatorImplementation(UnaryOperator operator, Class<S> operandClass, Class<T> resultClass, Function<S, T> implementation) {
+		Function<Object, Object> wrappedImplementation = o -> implementation.apply(ReflectionUtils.convertTo(o, operandClass, false));
+		SIGN_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.put(operator, operandClass, new UnaryOperatorInfo(resultClass, wrappedImplementation));
+	}
+
+	private static void addSignOperatorImplementations(UnaryOperator operator, Function<Byte, Integer> byteImpl, Function<Short, Integer> shortImpl, Function<Integer, Integer> intImpl, Function<Long, Long> longImpl, Function<Float, Float> floatImpl, Function<Double, Double> doubleImpl) {
+		addSignOperatorImplementation(operator,	byte.class,		int.class,		byteImpl);
+		addSignOperatorImplementation(operator,	short.class,	int.class,		shortImpl);
+		addSignOperatorImplementation(operator,	int.class,		int.class,		intImpl);
+		addSignOperatorImplementation(operator,	long.class,		long.class,		longImpl);
+		addSignOperatorImplementation(operator,	float.class,	float.class,	floatImpl);
+		addSignOperatorImplementation(operator,	double.class,	double.class,	doubleImpl);
+	}
 
 	private static <S, T> void addNumericOperatorImplementation(BinaryOperator operator, Class<S> operandClass, Class<T> resultClass, BiFunction<S, S, T> implementation) {
 		BiFunction<Object, Object, Object> wrappedImplementation = (o1, o2) -> implementation.apply(ReflectionUtils.convertTo(o1, operandClass, false), ReflectionUtils.convertTo(o2, operandClass, false));
-		NUMERIC_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.put(operator, operandClass, new OperatorInfo(resultClass, wrappedImplementation));
+		NUMERIC_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.put(operator, operandClass, new BinaryOperatorInfo(resultClass, wrappedImplementation));
 	}
 
 	private static <S, T> void addNumericOperatorImplementations(Class<S> operandClass, Class<T> resultClass, BiFunction<S, S, T> mulImpl, BiFunction<S, S, T> divImpl, BiFunction<S, S, T> addImpl, BiFunction<S, S, T> subImpl) {
@@ -41,20 +74,22 @@ public class BinaryOperatorResultProvider
 		addNumericOperatorImplementation(BinaryOperator.MODULO,			operandClass, resultClass, modImpl);
 	}
 
-	private static <S> void addShiftOperatorImplementation(BinaryOperator operator, Class<S> lhsClass, BiFunction<S, Long, S> implementation) {
+	private static <S, T> void addShiftOperatorImplementation(BinaryOperator operator, Class<S> lhsClass, Class<T> resultClass, BiFunction<S, Long, T> implementation) {
 		BiFunction<Object, Object, Object> wrappedImplementation = (o1, o2) -> implementation.apply(ReflectionUtils.convertTo(o1, lhsClass, false), ReflectionUtils.convertTo(o2, long.class, false));
-		Class<?> resultClass = lhsClass;
-		SHIFT_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.put(operator, lhsClass, new OperatorInfo(resultClass, wrappedImplementation));
+		SHIFT_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.put(operator, lhsClass, new BinaryOperatorInfo(resultClass, wrappedImplementation));
 	}
 
-	private static void addShiftOperatorImplementations(BinaryOperator operator, BiFunction<Integer, Long, Integer> intImpl, BiFunction<Long, Long, Long> longImpl) {
-		addShiftOperatorImplementation(operator, int.class,		intImpl);
-		addShiftOperatorImplementation(operator, long.class,	longImpl);
+	private static void addShiftOperatorImplementations(BinaryOperator operator, BiFunction<Character, Long, Integer> charImpl, BiFunction<Byte, Long, Integer> byteImpl, BiFunction<Short, Long, Integer> shortImpl, BiFunction<Integer, Long, Integer> intImpl, BiFunction<Long, Long, Long> longImpl) {
+		addShiftOperatorImplementation(operator, char.class,	int.class, 	charImpl);
+		addShiftOperatorImplementation(operator, byte.class,	int.class, 	byteImpl);
+		addShiftOperatorImplementation(operator, short.class,	int.class, 	shortImpl);
+		addShiftOperatorImplementation(operator, int.class,		int.class, 	intImpl);
+		addShiftOperatorImplementation(operator, long.class,	long.class,	longImpl);
 	}
 
 	private static <S> void addNumericComparisonImplementation(BinaryOperator operator, Class<S> operandClass, BiFunction<S, S, Boolean> implementation) {
 		BiFunction<Object, Object, Object> wrappedImplementation = (o1, o2) -> implementation.apply(ReflectionUtils.convertTo(o1, operandClass, false), ReflectionUtils.convertTo(o2, operandClass, false));
-		NUMERIC_COMPARISON_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.put(operator, operandClass, new OperatorInfo(boolean.class, wrappedImplementation));
+		NUMERIC_COMPARISON_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.put(operator, operandClass, new BinaryOperatorInfo(boolean.class, wrappedImplementation));
 	}
 
 	private static void addNumericComparisonImplementations(BinaryOperator operator, BiFunction<Character, Character, Boolean> charImpl, BiFunction<Byte, Byte, Boolean> byteImpl, BiFunction<Short, Short, Boolean> shortImpl, BiFunction<Integer, Integer, Boolean> intImpl, BiFunction<Long, Long, Boolean> longImpl, BiFunction<Float, Float, Boolean> floatImpl, BiFunction<Double, Double, Boolean> doubleImpl) {
@@ -69,7 +104,7 @@ public class BinaryOperatorResultProvider
 
 	private static <S, T> void addBitOperatorImplementation(BinaryOperator operator, Class<S> operandClass, Class<T> resultClass, BiFunction<S, S, T> implementation) {
 		BiFunction<Object, Object, Object> wrappedImplementation = (o1, o2) -> implementation.apply(ReflectionUtils.convertTo(o1, operandClass, false), ReflectionUtils.convertTo(o2, operandClass, false));
-		BIT_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.put(operator, operandClass, new OperatorInfo(resultClass, wrappedImplementation));
+		BIT_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.put(operator, operandClass, new BinaryOperatorInfo(resultClass, wrappedImplementation));
 	}
 
 	private static <S, T> void addBitOperatorImplementations(Class<S> operandClass, Class<T> resultClass, BiFunction<S, S, T> andImpl, BiFunction<S, S, T> xorImpl, BiFunction<S, S, T> orImpl) {
@@ -80,10 +115,16 @@ public class BinaryOperatorResultProvider
 
 	private static void addLogicalOperator(BinaryOperator operator, BiFunction<Boolean, Boolean, Boolean> implementation) {
 		BiFunction<Object, Object, Object> wrappedImplementation = (o1, o2) -> implementation.apply(ReflectionUtils.convertTo(o1, boolean.class, false), ReflectionUtils.convertTo(o2, boolean.class, false));
-		LOGICAL_OPERATOR_INFO_BY_OPERATOR.put(operator, new OperatorInfo(boolean.class, wrappedImplementation));
+		LOGICAL_OPERATOR_INFO_BY_OPERATOR.put(operator, new BinaryOperatorInfo(boolean.class, wrappedImplementation));
 	}
 
 	static {
+		addUnaryOperatorWithAssignmentImplementations(UnaryOperator.INCREMENT,	a -> (char) (a + 1), a -> (byte) (a + 1), a -> (short) (a + 1), a -> a + 1, a -> a + 1);
+		addUnaryOperatorWithAssignmentImplementations(UnaryOperator.DECREMENT,	a -> (char) (a - 1), a -> (byte) (a - 1), a -> (short) (a - 1), a -> a - 1, a -> a - 1);
+
+		addSignOperatorImplementations(UnaryOperator.PLUS, 	a -> +a, 	a -> +a, 	a -> +a, 	a -> +a, 	a -> +a, 	a -> +a);
+		addSignOperatorImplementations(UnaryOperator.MINUS, a -> -a, 	a -> -a, 	a -> -a, 	a -> -a, 	a -> -a, 	a -> -a);
+
 		addNumericOperatorImplementations(char.class, 	int.class,		(a, b) -> a * b,	(a, b) -> a / b,	(a, b) -> a + b,	(a, b) -> a - b,	(a, b) -> a % b);
 		addNumericOperatorImplementations(byte.class, 	int.class,		(a, b) -> a * b,	(a, b) -> a / b,	(a, b) -> a + b,	(a, b) -> a - b,	(a, b) -> a % b);
 		addNumericOperatorImplementations(short.class, 	int.class,		(a, b) -> a * b,	(a, b) -> a / b,	(a, b) -> a + b,	(a, b) -> a - b,	(a, b) -> a % b);
@@ -92,9 +133,9 @@ public class BinaryOperatorResultProvider
 		addNumericOperatorImplementations(float.class, 	float.class,	(a, b) -> a * b,	(a, b) -> a / b,	(a, b) -> a + b,	(a, b) -> a - b);
 		addNumericOperatorImplementations(double.class,	double.class,	(a, b) -> a * b,	(a, b) -> a / b,	(a, b) -> a + b,	(a, b) -> a - b);
 
-		addShiftOperatorImplementations(BinaryOperator.LEFT_SHIFT,				(a, b) -> a << b,	(a, b) -> a << b);
-		addShiftOperatorImplementations(BinaryOperator.RIGHT_SHIFT,				(a, b) -> a >> b,	(a, b) -> a >> b);
-		addShiftOperatorImplementations(BinaryOperator.UNSIGNED_RIGHT_SHIFT,	(a, b) -> a >>> b,	(a, b) -> a >>> b);
+		addShiftOperatorImplementations(BinaryOperator.LEFT_SHIFT,				(a, b) -> (int) (a << b),	(a, b) -> (int) (a << b),	(a, b) -> (int) (a << b),	(a, b) -> a << b,	(a, b) -> a << b);
+		addShiftOperatorImplementations(BinaryOperator.RIGHT_SHIFT,				(a, b) -> (int) (a >> b),	(a, b) -> (int) (a >> b),	(a, b) -> (int) (a >> b),	(a, b) -> a >> b,	(a, b) -> a >> b);
+		addShiftOperatorImplementations(BinaryOperator.UNSIGNED_RIGHT_SHIFT,	(a, b) -> (int) (a >>> b),	(a, b) -> (int) (a >>> b),	(a, b) -> (int) (a >>> b),	(a, b) -> a >>> b,	(a, b) -> a >>> b);
 
 		addNumericComparisonImplementations(BinaryOperator.LESS_THAN, 					(a, b) -> a < b,	(a, b) -> a < b,	(a, b) -> a < b,	(a, b) -> a < b,	(a, b) -> a < b,	(a, b) -> a < b,	(a, b) -> a < b);
 		addNumericComparisonImplementations(BinaryOperator.LESS_THAN_OR_EQUAL_TO, 		(a, b) -> a <= b,	(a, b) -> a <= b,	(a, b) -> a <= b,	(a, b) -> a <= b,	(a, b) -> a <= b,	(a, b) -> a <= b,	(a, b) -> a <= b);
@@ -117,10 +158,62 @@ public class BinaryOperatorResultProvider
 
 	private final EvaluationMode evaluationMode;
 
-	public BinaryOperatorResultProvider(EvaluationMode evaluationMode) {
+	public OperatorResultProvider(EvaluationMode evaluationMode) {
 		this.evaluationMode = evaluationMode;
 	}
 
+	/*
+	 * Unary Operators
+	 */
+	public ObjectInfo getIncrementInfo(ObjectInfo objectInfo) throws OperatorException {
+		return applyUnaryOperatorWithAssignment(objectInfo, UnaryOperator.INCREMENT);
+	}
+
+	public ObjectInfo getDecrementInfo(ObjectInfo objectInfo) throws OperatorException {
+		return applyUnaryOperatorWithAssignment(objectInfo, UnaryOperator.DECREMENT);
+	}
+
+	public ObjectInfo getPlusInfo(ObjectInfo objectInfo) throws OperatorException {
+		return applySignOperator(objectInfo, UnaryOperator.PLUS);
+	}
+
+	public ObjectInfo getMinusInfo(ObjectInfo objectInfo) throws OperatorException {
+		return applySignOperator(objectInfo, UnaryOperator.MINUS);
+	}
+
+	public ObjectInfo getLogicalNotInfo(ObjectInfo objectInfo) throws OperatorException {
+		Class<?> clazz = getClass(objectInfo);
+		Class<?> primitiveClass = getPrimitiveClass(clazz);
+		if (primitiveClass != boolean.class) {
+			throw new OperatorException("Operator cannot be applied to '" + clazz + "'");
+		}
+		Object result = evaluationMode == EvaluationMode.NONE ? null : !((boolean) objectInfo.getObject());
+		Class<?> resultClass = boolean.class;
+		return new ObjectInfo(result, resultClass);
+	}
+
+	public ObjectInfo getBitwiseNotInfo(ObjectInfo objectInfo) throws OperatorException {
+		Class<?> clazz = getClass(objectInfo);
+		Class<?> primitiveClass = getPrimitiveClass(clazz);
+		if (!isIntegral(primitiveClass)) {
+			throw new OperatorException("Operator cannot be applied to '" + clazz + "'");
+		}
+		Class<?> resultClass = primitiveClass == long.class ? long.class : int.class;
+		Object result = null;
+		if (evaluationMode != EvaluationMode.NONE) {
+			Object object = objectInfo.getObject();
+			if (primitiveClass == long.class) {
+				result = ~ReflectionUtils.convertTo(object, long.class, false).longValue();
+			} else {
+				result = ~ReflectionUtils.convertTo(object, int.class, false).intValue();
+			}
+		}
+		return new ObjectInfo(result, resultClass);
+	}
+
+	/*
+	 * Binary Operators
+	 */
 	public ObjectInfo getMultiplicationInfo(ObjectInfo lhs, ObjectInfo rhs) throws OperatorException {
 		return applyNumericOperator(lhs, rhs, BinaryOperator.MULTIPLY);
 	}
@@ -215,16 +308,16 @@ public class BinaryOperatorResultProvider
 
 	public ObjectInfo getAssignmentInfo(ObjectInfo lhs, ObjectInfo rhs) throws OperatorException {
 		ObjectInfo.ValueSetterIF lhsValueSetter = lhs.getValueSetter();
-		if (evaluationMode != EvaluationMode.NONE && lhsValueSetter == null) {
-			throw new OperatorException("Cannot assign values to non-lvalues");
+		if (lhsValueSetter == null) {
+			throw new OperatorException("Cannot assign values to non-lvalues or final fields");
 		}
 		Class<?> declaredLhsClass = lhs.getDeclaredClass();
 		Class<?> rhsClass = getClass(rhs);
 		if (ParseUtils.rateClassMatch(rhsClass, declaredLhsClass) == ParseUtils.CLASS_MATCH_NONE) {
 			throw new OperatorException("Cannot assign value of type '" + rhsClass + "' to left-hand side. Expected an instance of class '" + declaredLhsClass + "'");
 		}
-		Object resultObject = null;
 		Class<?> declaredResultClass = declaredLhsClass;
+		Object resultObject = null;
 		if (evaluationMode != EvaluationMode.NONE) {
 			try {
 				resultObject = rhs.getObject();
@@ -236,78 +329,19 @@ public class BinaryOperatorResultProvider
 		return new ObjectInfo(resultObject, declaredResultClass);
 	}
 
+	/*
+	 * Utility Methods
+	 */
 	private Class<?> getClass(ObjectInfo objectInfo) {
 		return ObjectInfoProvider.getClass(objectInfo, evaluationMode);
 	}
 
-	private ObjectInfo applyOperatorInfo(ObjectInfo lhs, ObjectInfo rhs, OperatorInfo operatorInfo) throws OperatorException {
-		if (operatorInfo == null) {
-			throw new OperatorException("BinaryOperator not defined on '" + getClass(lhs) + "' and '" + getClass(rhs) + "'");
-		}
-		Class<?> resultClass = operatorInfo.getResultClass();
-		Object result = null;
-		if (evaluationMode != EvaluationMode.NONE) {
-			BiFunction<Object, Object, Object> operation = operatorInfo.getOperation();
-			result = operation.apply(lhs.getObject(), rhs.getObject());
-		}
-		return new ObjectInfo(result, resultClass);
+	private static boolean isIntegral(Class<?> primitiveClass) {
+		return INTEGRAL_PRIMITIVE_CLASSES.contains(primitiveClass);
 	}
 
-	private ObjectInfo applyNumericOperator(ObjectInfo lhs, ObjectInfo rhs, BinaryOperator numericOperator) throws OperatorException {
-		Class<?> commonNumericPrimitiveClass = getCommonNumericPrimitiveClass(lhs, rhs);
-		OperatorInfo operatorInfo = NUMERIC_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.get(numericOperator, commonNumericPrimitiveClass);
-		return applyOperatorInfo(lhs, rhs, operatorInfo);
-	}
-
-	private ObjectInfo concat(ObjectInfo lhs, ObjectInfo rhs) {
-		Class<?> resultClass = String.class;
-		String result = null;
-		if (evaluationMode != EvaluationMode.NONE) {
-			String lhsAsString = getStringRepresentation(lhs.getObject());
-			String rhsAsString = getStringRepresentation(rhs.getObject());
-			result = lhsAsString + rhsAsString;
-		}
-		return new ObjectInfo(result, resultClass);
-	}
-
-	private ObjectInfo applyShiftOperator(ObjectInfo lhs, ObjectInfo rhs, BinaryOperator shiftOperator) throws OperatorException {
-		Class<?> lhsClass = getClass(lhs);
-		Class<?> rhsClass = getClass(rhs);
-		Class<?> primitiveLhsClass = getPrimitiveClass(lhsClass);
-		Class<?> primitiveRhsClass = getPrimitiveClass(rhsClass);
-		if (!isIntegral(primitiveLhsClass) || !isIntegral(primitiveRhsClass)) {
-			throw new OperatorException("BinaryOperator cannot be applied to '" + lhsClass + "' and '" + rhsClass + "'");
-		}
-		lhsClass = primitiveLhsClass == long.class ? long.class : int.class;
-		OperatorInfo operatorInfo = SHIFT_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.get(shiftOperator, lhsClass);
-		return applyOperatorInfo(lhs, rhs, operatorInfo);
-	}
-
-	private ObjectInfo applyNumericComparisonOperator(ObjectInfo lhs, ObjectInfo rhs, BinaryOperator comparisonOperator) throws OperatorException {
-		Class<?> commonNumericPrimitiveClass = getCommonNumericPrimitiveClass(lhs, rhs);
-		OperatorInfo operatorInfo = NUMERIC_COMPARISON_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.get(comparisonOperator, commonNumericPrimitiveClass);
-		return applyOperatorInfo(lhs, rhs, operatorInfo);
-	}
-
-	private ObjectInfo applyBitOperator(ObjectInfo lhs, ObjectInfo rhs, BinaryOperator bitOperator) throws OperatorException {
-		Class<?> commonNumericPrimitiveClass = getCommonNumericPrimitiveClass(lhs, rhs);
-		if (!isIntegral(commonNumericPrimitiveClass)) {
-			throw new OperatorException("BinaryOperator can only be applied to integral types");
-		}
-		OperatorInfo operatorInfo = BIT_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.get(bitOperator, commonNumericPrimitiveClass);
-		return applyOperatorInfo(lhs, rhs, operatorInfo);
-	}
-
-	private ObjectInfo applyLogicalOperator(ObjectInfo lhs, ObjectInfo rhs, BinaryOperator logicalOperator) throws OperatorException {
-		Class<?> lhsClass = getClass(lhs);
-		Class<?> rhsClass = getClass(rhs);
-		Class<?> primitiveLhsClass = getPrimitiveClass(lhsClass);
-		Class<?> primitiveRhsClass = getPrimitiveClass(rhsClass);
-		if (primitiveLhsClass != boolean.class || primitiveRhsClass != boolean.class) {
-			throw new OperatorException("BinaryOperator cannot be applied to '" + lhsClass + "' and '" + rhsClass + "'");
-		}
-		OperatorInfo operatorInfo = LOGICAL_OPERATOR_INFO_BY_OPERATOR.get(logicalOperator);
-		return applyOperatorInfo(lhs, rhs, operatorInfo);
+	private static boolean isNumeric(Class<?> primitiveClass) {
+		return NUMERIC_PRIMITIVE_CLASSES.contains(primitiveClass);
 	}
 
 	private static boolean isPrimitive(Class<?> clazz) {
@@ -328,6 +362,60 @@ public class BinaryOperatorResultProvider
 		return primitiveClass;
 	}
 
+	/*
+	 * Utility Methods for Unary Operators
+	 */
+	private Class<?> getNumericPrimitiveClass(ObjectInfo objectInfo) throws OperatorException {
+		Class<?> clazz = getClass(objectInfo);
+		Class<?> primitiveClass = getPrimitiveClass(clazz);
+		if (isNumeric(primitiveClass)) {
+			return primitiveClass;
+		}
+		throw new OperatorException("Expected numeric class, but found '" + clazz + "'");
+	}
+
+	private ObjectInfo applyUnaryOperatorInfo(ObjectInfo objectInfo, UnaryOperatorInfo operatorInfo) throws OperatorException {
+		if (operatorInfo == null) {
+			throw new OperatorException("Operator not defined on '" + getClass(objectInfo) + "'");
+		}
+		Class<?> resultClass = operatorInfo.getResultClass();
+		Object result = null;
+		if (evaluationMode != EvaluationMode.NONE) {
+			Function<Object, Object> operation = operatorInfo.getOperation();
+			result = operation.apply(objectInfo.getObject());
+		}
+		return new ObjectInfo(result, resultClass);
+	}
+
+	private ObjectInfo applyUnaryOperatorWithAssignment(ObjectInfo objectInfo, UnaryOperator operator) throws OperatorException {
+		ObjectInfo.ValueSetterIF valueSetter = objectInfo.getValueSetter();
+		if (valueSetter == null) {
+			throw new OperatorException("Cannot assign values to non-lvalues or final fields");
+		}
+		Class<?> clazz = getClass(objectInfo);
+		Class<?> primitiveClass = getPrimitiveClass(clazz);
+		UnaryOperatorInfo operatorInfo = UNARY_OPERATOR_WITH_ASSIGNMENT_INFO_BY_OPERATOR_AND_TYPE.get(operator, primitiveClass);
+		ObjectInfo operatorResult = applyUnaryOperatorInfo(objectInfo, operatorInfo);
+		if (evaluationMode != EvaluationMode.NONE) {
+			try {
+				Object resultObject = operatorResult.getObject();
+				valueSetter.setObject(resultObject);
+			} catch (IllegalArgumentException e) {
+				throw new OperatorException("Illegal argument exception when applying operator: " + e.getMessage());
+			}
+		}
+		return operatorResult;
+	}
+
+	private ObjectInfo applySignOperator(ObjectInfo objectInfo, UnaryOperator signOperator) throws OperatorException {
+		Class<?> numericPrimitiveClass = getNumericPrimitiveClass(objectInfo);
+		UnaryOperatorInfo operatorInfo = SIGN_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.get(signOperator, numericPrimitiveClass);
+		return applyUnaryOperatorInfo(objectInfo, operatorInfo);
+	}
+
+	/*
+	 * Utility Methods for Binary Operators
+	 */
 	private static Class<?> getCommonPrimitiveClass(Class<?> class1, Class<?> class2) throws OperatorException {
 		Class<?> primitiveClass1 = getPrimitiveClass(class1);
 		Class<?> primitiveClass2 = getPrimitiveClass(class2);
@@ -336,7 +424,7 @@ public class BinaryOperatorResultProvider
 		} else if (ReflectionUtils.isPrimitiveConvertibleTo(primitiveClass2, primitiveClass1, false)) {
 			return primitiveClass1;
 		} else {
-			throw new OperatorException("BinaryOperator cannot be applied to '" + class1 + "' and '" + class2 + "'");
+			throw new OperatorException("Operator cannot be applied to '" + class1 + "' and '" + class2 + "'");
 		}
 	}
 
@@ -350,14 +438,6 @@ public class BinaryOperatorResultProvider
 		throw new OperatorException("Expected numeric classes, but found '" + class1 + "' and '" + class2 + "'");
 	}
 
-	private static boolean isIntegral(Class<?> primitiveClass) {
-		return INTEGRAL_PRIMITIVE_CLASSES.contains(primitiveClass);
-	}
-
-	private static boolean isNumeric(Class<?> primitiveClass) {
-		return NUMERIC_PRIMITIVE_CLASSES.contains(primitiveClass);
-	}
-
 	private static String getStringRepresentation(Object object) {
 		if (object != null) {
 			String s = object.toString();
@@ -368,12 +448,100 @@ public class BinaryOperatorResultProvider
 		return "null";
 	}
 
-	private static class OperatorInfo
+	private ObjectInfo applyBinaryOperatorInfo(ObjectInfo lhs, ObjectInfo rhs, BinaryOperatorInfo operatorInfo) throws OperatorException {
+		if (operatorInfo == null) {
+			throw new OperatorException("Operator not defined on '" + getClass(lhs) + "' and '" + getClass(rhs) + "'");
+		}
+		Class<?> resultClass = operatorInfo.getResultClass();
+		Object result = null;
+		if (evaluationMode != EvaluationMode.NONE) {
+			BiFunction<Object, Object, Object> operation = operatorInfo.getOperation();
+			result = operation.apply(lhs.getObject(), rhs.getObject());
+		}
+		return new ObjectInfo(result, resultClass);
+	}
+
+	private ObjectInfo applyNumericOperator(ObjectInfo lhs, ObjectInfo rhs, BinaryOperator numericOperator) throws OperatorException {
+		Class<?> commonNumericPrimitiveClass = getCommonNumericPrimitiveClass(lhs, rhs);
+		BinaryOperatorInfo operatorInfo = NUMERIC_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.get(numericOperator, commonNumericPrimitiveClass);
+		return applyBinaryOperatorInfo(lhs, rhs, operatorInfo);
+	}
+
+	private ObjectInfo concat(ObjectInfo lhs, ObjectInfo rhs) {
+		Class<?> resultClass = String.class;
+		String result = null;
+		if (evaluationMode != EvaluationMode.NONE) {
+			String lhsAsString = getStringRepresentation(lhs.getObject());
+			String rhsAsString = getStringRepresentation(rhs.getObject());
+			result = lhsAsString + rhsAsString;
+		}
+		return new ObjectInfo(result, resultClass);
+	}
+
+	private ObjectInfo applyShiftOperator(ObjectInfo lhs, ObjectInfo rhs, BinaryOperator shiftOperator) throws OperatorException {
+		Class<?> lhsClass = getClass(lhs);
+		Class<?> rhsClass = getClass(rhs);
+		Class<?> primitiveLhsClass = getPrimitiveClass(lhsClass);
+		Class<?> primitiveRhsClass = getPrimitiveClass(rhsClass);
+		if (!isIntegral(primitiveLhsClass) || !isIntegral(primitiveRhsClass)) {
+			throw new OperatorException("Operator cannot be applied to '" + lhsClass + "' and '" + rhsClass + "'");
+		}
+		BinaryOperatorInfo operatorInfo = SHIFT_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.get(shiftOperator, primitiveLhsClass);
+		return applyBinaryOperatorInfo(lhs, rhs, operatorInfo);
+	}
+
+	private ObjectInfo applyNumericComparisonOperator(ObjectInfo lhs, ObjectInfo rhs, BinaryOperator comparisonOperator) throws OperatorException {
+		Class<?> commonNumericPrimitiveClass = getCommonNumericPrimitiveClass(lhs, rhs);
+		BinaryOperatorInfo operatorInfo = NUMERIC_COMPARISON_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.get(comparisonOperator, commonNumericPrimitiveClass);
+		return applyBinaryOperatorInfo(lhs, rhs, operatorInfo);
+	}
+
+	private ObjectInfo applyBitOperator(ObjectInfo lhs, ObjectInfo rhs, BinaryOperator bitOperator) throws OperatorException {
+		Class<?> commonNumericPrimitiveClass = getCommonNumericPrimitiveClass(lhs, rhs);
+		if (!isIntegral(commonNumericPrimitiveClass)) {
+			throw new OperatorException("Operator can only be applied to integral types");
+		}
+		BinaryOperatorInfo operatorInfo = BIT_OPERATOR_INFO_BY_OPERATOR_AND_TYPE.get(bitOperator, commonNumericPrimitiveClass);
+		return applyBinaryOperatorInfo(lhs, rhs, operatorInfo);
+	}
+
+	private ObjectInfo applyLogicalOperator(ObjectInfo lhs, ObjectInfo rhs, BinaryOperator logicalOperator) throws OperatorException {
+		Class<?> lhsClass = getClass(lhs);
+		Class<?> rhsClass = getClass(rhs);
+		Class<?> primitiveLhsClass = getPrimitiveClass(lhsClass);
+		Class<?> primitiveRhsClass = getPrimitiveClass(rhsClass);
+		if (primitiveLhsClass != boolean.class || primitiveRhsClass != boolean.class) {
+			throw new OperatorException("Operator cannot be applied to '" + lhsClass + "' and '" + rhsClass + "'");
+		}
+		BinaryOperatorInfo operatorInfo = LOGICAL_OPERATOR_INFO_BY_OPERATOR.get(logicalOperator);
+		return applyBinaryOperatorInfo(lhs, rhs, operatorInfo);
+	}
+
+	private static class UnaryOperatorInfo
+	{
+		private final Class<?>					resultClass;
+		private final Function<Object, Object>	operation;
+
+		private UnaryOperatorInfo(Class<?> resultClass, Function<Object, Object> operation) {
+			this.resultClass = resultClass;
+			this.operation = operation;
+		}
+
+		Class<?> getResultClass() {
+			return resultClass;
+		}
+
+		Function<Object, Object> getOperation() {
+			return operation;
+		}
+	}
+
+	private static class BinaryOperatorInfo
 	{
 		private final Class<?>								resultClass;
 		private final BiFunction<Object, Object, Object>	operation;
 
-		OperatorInfo(Class<?> resultClass, BiFunction<Object, Object, Object> operation) {
+		BinaryOperatorInfo(Class<?> resultClass, BiFunction<Object, Object, Object> operation) {
 			this.resultClass = resultClass;
 			this.operation = operation;
 		}

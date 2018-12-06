@@ -8,14 +8,14 @@ import com.AMS.jBEAM.javaParser.tokenizer.BinaryOperator;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
-import com.AMS.jBEAM.javaParser.utils.BinaryOperatorResultProvider;
+import com.AMS.jBEAM.javaParser.utils.OperatorResultProvider;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.List;
 import java.util.Map;
 
-import static com.AMS.jBEAM.javaParser.utils.BinaryOperatorResultProvider.*;
+import static com.AMS.jBEAM.javaParser.utils.OperatorResultProvider.*;
 
 public class CompoundExpressionParser extends AbstractEntityParser
 {
@@ -137,7 +137,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 	}
 
 	private ObjectInfo applyOperator(ParserContext context, ObjectInfo lhs, ObjectInfo rhs, BinaryOperator operator) throws OperatorException {
-		return OPERATOR_IMPLEMENTATIONS.get(operator).apply(context.getBinaryOperatorResultProvider(), lhs, rhs);
+		return OPERATOR_IMPLEMENTATIONS.get(operator).apply(context.getOperatorResultProvider(), lhs, rhs);
 	}
 
 	private boolean stopCircuitEvaluation(ObjectInfo objectInfo, BinaryOperator operator) {
@@ -152,6 +152,6 @@ public class CompoundExpressionParser extends AbstractEntityParser
 	@FunctionalInterface
 	private interface OperatorImplementationIF
 	{
-		ObjectInfo apply(BinaryOperatorResultProvider binaryOperatorResultProvider, ObjectInfo lhs, ObjectInfo rhs) throws OperatorException;
+		ObjectInfo apply(OperatorResultProvider operatorResultProvider, ObjectInfo lhs, ObjectInfo rhs) throws OperatorException;
 	}
 }

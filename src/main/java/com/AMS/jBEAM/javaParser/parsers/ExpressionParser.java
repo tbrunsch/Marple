@@ -26,7 +26,8 @@ public class ExpressionParser extends AbstractEntityParser
 			parserContext.getParenthesizedExpressionParser(),
 			parserContext.getCastParser(),
 			parserContext.getClassParser(),
-			parserContext.getConstructorParser()
+			parserContext.getConstructorParser(),
+			parserContext.getUnaryPrefixOperatorParser()
 		);
 	}
 }

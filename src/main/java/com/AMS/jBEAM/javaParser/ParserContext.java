@@ -12,7 +12,7 @@ public class ParserContext
 	private final ObjectInfoProvider			objectInfoProvider;
 	private final FieldAndMethodDataProvider	fieldAndMethodDataProvider;
 	private final ClassDataProvider				classDataProvider;
-	private final BinaryOperatorResultProvider 	binaryOperatorResultProvider;
+	private final OperatorResultProvider 		operatorResultProvider;
 
 	private final AbstractEntityParser 			expressionParser;
 	private final AbstractEntityParser			fieldParser;
@@ -26,6 +26,7 @@ public class ParserContext
 	private final AbstractEntityParser			castParser;
 	private final AbstractEntityParser			classParser;
 	private final AbstractEntityParser			constructorParser;
+	private final AbstractEntityParser			unaryPrefixOperatorParser;
 	private final AbstractEntityParser			compoundExpressionParser;
 
 	public ParserContext(ObjectInfo thisInfo, ParserSettings settings, EvaluationMode evaluationMode) {
@@ -36,7 +37,7 @@ public class ParserContext
 		objectInfoProvider				= new ObjectInfoProvider(evaluationMode);
 		fieldAndMethodDataProvider		= new FieldAndMethodDataProvider(this);
 		classDataProvider				= new ClassDataProvider(this, settings.getImports());
-		binaryOperatorResultProvider 	= new BinaryOperatorResultProvider(evaluationMode);
+		operatorResultProvider 			= new OperatorResultProvider(evaluationMode);
 
 		expressionParser 				= new ExpressionParser(this, thisInfo);
 		fieldParser						= new FieldParser(this, thisInfo, false);
@@ -50,6 +51,7 @@ public class ParserContext
 		castParser						= new CastParser(this, thisInfo);
 		classParser						= new ClassParser(this, thisInfo);
 		constructorParser				= new ConstructorParser(this, thisInfo);
+		unaryPrefixOperatorParser		= new UnaryPrefixOperatorParser(this, thisInfo);
 		compoundExpressionParser		= createCompoundExpressionParser(Integer.MAX_VALUE);
 	}
 
@@ -77,8 +79,8 @@ public class ParserContext
 		return classDataProvider;
 	}
 
-	public BinaryOperatorResultProvider getBinaryOperatorResultProvider() {
-		return binaryOperatorResultProvider;
+	public OperatorResultProvider getOperatorResultProvider() {
+		return operatorResultProvider;
 	}
 
 	public AbstractEntityParser getExpressionParser() {
@@ -115,6 +117,10 @@ public class ParserContext
 
 	public AbstractEntityParser getCompoundExpressionParser() {
 		return compoundExpressionParser;
+	}
+
+	public AbstractEntityParser getUnaryPrefixOperatorParser() {
+		return unaryPrefixOperatorParser;
 	}
 
 	public AbstractEntityParser createCompoundExpressionParser(int maxOperatorPrecedenceLevelToConsider) {

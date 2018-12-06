@@ -16,10 +16,13 @@ public class TokenStream implements Cloneable
 	private static final Pattern		STRING_LITERAL_PATTERN		= Pattern.compile("^(\\s*\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\"\\s*).*");
 	private static final Pattern		CHARACTER_LITERAL_PATTERN	= Pattern.compile("^(\\s*'(\\\\.|[^\\\\])'\\s*).*");
 	private static final Pattern		KEYWORD_PATTERN				= IDENTIFIER_PATTERN;
-	private static final Pattern		INTEGER_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)\\s*)($|[^0-9dDeEfFL].*)");
-	private static final Pattern		LONG_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|-?[1-9][0-9]*)[lL]\\s*).*");
-	private static final Pattern		FLOAT_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+([eE][+-]?[0-9]+)?|\\.[0-9]+([eE][+-]?[0-9]+)?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?)[fF])\\s*).*");
-	private static final Pattern		DOUBLE_LITERAL_PATTERN 		= Pattern.compile("^(\\s*([+-]?([0-9]+(([eE][+-]?[0-9]+)?[dD]|[eE][+-]?[0-9]+[dD]?)|\\.[0-9]+([eE][+-]?[0-9]+)?[dD]?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?[dD]?))\\s*).*");
+	private static final Pattern		INTEGER_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|[1-9][0-9]*)\\s*)($|[^0-9dDeEfFL].*)");
+	private static final Pattern		LONG_LITERAL_PATTERN		= Pattern.compile("^(\\s*(0|[1-9][0-9]*)[lL]\\s*).*");
+	private static final Pattern		FLOAT_LITERAL_PATTERN 		= Pattern.compile("^(\\s*(([0-9]+([eE][+-]?[0-9]+)?|\\.[0-9]+([eE][+-]?[0-9]+)?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?)[fF])\\s*).*");
+	private static final Pattern		DOUBLE_LITERAL_PATTERN 		= Pattern.compile("^(\\s*(([0-9]+(([eE][+-]?[0-9]+)?[dD]|[eE][+-]?[0-9]+[dD]?)|\\.[0-9]+([eE][+-]?[0-9]+)?[dD]?|[0-9]+\\.[0-9]*([eE][+-]?[0-9]+)?[dD]?))\\s*).*");
+
+	// Unary prefix operators, sorted from longest to shortest to ensure that, e.g., "++" is tested before "+"
+	private static final List<String> 	UNARY_OPERATORS 			= Arrays.stream(UnaryOperator.values()).map(UnaryOperator::getOperator).sorted(Comparator.comparingInt(String::length).reversed()).collect(Collectors.toList());
 
 	// Binary operators, sorted from longest to shortest to ensure that, e.g., "==" is tested before "="
 	private static final List<String> 	BINARY_OPERATORS 			= Arrays.stream(BinaryOperator.values()).map(BinaryOperator::getOperator).sorted(Comparator.comparingInt(String::length).reversed()).collect(Collectors.toList());
@@ -163,14 +166,22 @@ public class TokenStream implements Cloneable
 		return readRegexUnchecked(CHARACTER_PATTERN, 2, null);
 	}
 
+	public Token readUnaryOperatorUnchecked() {
+		return readOperatorUnchecked(UNARY_OPERATORS);
+	}
+
 	public Token readBinaryOperatorUnchecked() {
+		return readOperatorUnchecked(BINARY_OPERATORS);
+	}
+
+	private Token readOperatorUnchecked(List<String> availableOperators) {
 		boolean containsCaret = false;
 
 		containsCaret |= readRegexUnchecked(OPTIONAL_SPACE, 1, null).isContainsCaret();
 
 		int expressionLength = javaExpression.length();
 		String detectedOperator = null;
-		for (String operator : BINARY_OPERATORS) {
+		for (String operator : availableOperators) {
 			int endIndex = position + operator.length();
 			if (endIndex <= expressionLength && operator.equals(javaExpression.substring(position, endIndex))) {
 				detectedOperator = operator;
@@ -190,7 +201,7 @@ public class TokenStream implements Cloneable
 	}
 
 	/**
-	 * Returns true whether the position strived the caret when moving from position to nextPosition
+	 * Returns true if the caret is encountered when moving from position to nextPosition
 	 */
 	private boolean moveForward(int numCharacters) {
 		int newPosition = position + numCharacters;

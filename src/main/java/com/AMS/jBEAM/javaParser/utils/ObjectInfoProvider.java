@@ -46,21 +46,19 @@ public class ObjectInfoProvider
 
 	public ObjectInfo getFieldInfo(ObjectInfo contextInfo, Field field) throws NullPointerException {
 		final Object fieldValue;
-		final ObjectInfo.ValueSetterIF valueSetter;
+		int modifiers = field.getModifiers();
+		Object contextObject = (modifiers & Modifier.STATIC) != 0 ? null : contextInfo.getObject();
 		if (evaluationMode == EvaluationMode.NONE) {
 			fieldValue = null;
-			valueSetter = null;
 		} else {
-			int modifiers = field.getModifiers();
-			Object contextObject = (modifiers & Modifier.STATIC) != 0 ? null : contextInfo.getObject();
 			try {
 				field.setAccessible(true);
 				fieldValue = field.get(contextObject);
-				valueSetter = getFieldValueSetter(contextObject, field);
 			} catch (IllegalAccessException e) {
 				throw new IllegalStateException("Internal error: Unexpected IllegalAccessException: " + e.getMessage());
 			}
 		}
+		ObjectInfo.ValueSetterIF valueSetter = getFieldValueSetter(contextObject, field);
 		Class<?> fieldClass = getClass(fieldValue, field.getType());
 		return new ObjectInfo(fieldValue, fieldClass, valueSetter);
 	}
