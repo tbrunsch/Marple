@@ -10,8 +10,10 @@ public class ParserContext
 
 	private final InspectionDataProvider 		inspectionDataProvider;
 	private final ObjectInfoProvider			objectInfoProvider;
-	private final FieldAndMethodDataProvider	fieldAndMethodDataProvider;
+	private final FieldDataProvider				fieldDataProvider;
+	private final MethodDataProvider			methodDataProvider;
 	private final ClassDataProvider				classDataProvider;
+	private final VariableDataProvider			variableDataProvider;
 	private final OperatorResultProvider 		operatorResultProvider;
 
 	private final AbstractEntityParser 			expressionParser;
@@ -25,6 +27,7 @@ public class ParserContext
 	private final AbstractEntityParser			parenthesizedExpressionParser;
 	private final AbstractEntityParser			castParser;
 	private final AbstractEntityParser			classParser;
+	private final AbstractEntityParser			variableParser;
 	private final AbstractEntityParser			constructorParser;
 	private final AbstractEntityParser			unaryPrefixOperatorParser;
 	private final AbstractEntityParser			compoundExpressionParser;
@@ -35,8 +38,10 @@ public class ParserContext
 
 		inspectionDataProvider 			= new InspectionDataProvider(settings);
 		objectInfoProvider				= new ObjectInfoProvider(evaluationMode);
-		fieldAndMethodDataProvider		= new FieldAndMethodDataProvider(this);
+		fieldDataProvider				= new FieldDataProvider(this);
+		methodDataProvider				= new MethodDataProvider(this);
 		classDataProvider				= new ClassDataProvider(this, settings.getImports());
+		variableDataProvider			= new VariableDataProvider(settings.getVariablePool());
 		operatorResultProvider 			= new OperatorResultProvider(evaluationMode);
 
 		expressionParser 				= new ExpressionParser(this, thisInfo);
@@ -50,6 +55,7 @@ public class ParserContext
 		parenthesizedExpressionParser	= new ParenthesizedExpressionParser(this, thisInfo);
 		castParser						= new CastParser(this, thisInfo);
 		classParser						= new ClassParser(this, thisInfo);
+		variableParser					= new VariableParser(this, thisInfo);
 		constructorParser				= new ConstructorParser(this, thisInfo);
 		unaryPrefixOperatorParser		= new UnaryPrefixOperatorParser(this, thisInfo);
 		compoundExpressionParser		= createCompoundExpressionParser(Integer.MAX_VALUE);
@@ -71,12 +77,20 @@ public class ParserContext
 		return objectInfoProvider;
 	}
 
-	public FieldAndMethodDataProvider getFieldAndMethodDataProvider() {
-		return fieldAndMethodDataProvider;
+	public FieldDataProvider getFieldDataProvider() {
+		return fieldDataProvider;
+	}
+
+	public MethodDataProvider getMethodDataProvider() {
+		return methodDataProvider;
 	}
 
 	public ClassDataProvider getClassDataProvider() {
 		return classDataProvider;
+	}
+
+	public VariableDataProvider getVariableDataProvider() {
+		return variableDataProvider;
 	}
 
 	public OperatorResultProvider getOperatorResultProvider() {
@@ -110,6 +124,8 @@ public class ParserContext
 	public AbstractEntityParser getCastParser() { return castParser; }
 
 	public AbstractEntityParser getClassParser() { return classParser; }
+
+	public AbstractEntityParser getVariableParser() { return variableParser; }
 
 	public AbstractEntityParser getConstructorParser() {
 		return constructorParser;

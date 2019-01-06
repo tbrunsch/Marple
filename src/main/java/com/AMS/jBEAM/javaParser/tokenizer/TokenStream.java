@@ -63,9 +63,9 @@ public class TokenStream implements Cloneable
 	}
 
 	private final String	javaExpression;
-	private final int	   caret;
+	private final int		caret;
 
-	private int			 position;
+	private int				position;
 
 	public TokenStream(String javaExpression, int caret) {
 		this(javaExpression, caret, 0);
@@ -83,6 +83,10 @@ public class TokenStream implements Cloneable
 
 	public int getPosition() {
 		return position;
+	}
+
+	public boolean isCaretAtPosition() {
+		return position == caret;
 	}
 
 	public Token readIdentifier() throws JavaTokenParseException {

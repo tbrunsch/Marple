@@ -19,7 +19,7 @@ public abstract class AbstractEntityParser
 
 	abstract ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses);
 
-	public ParseResultIF parse(final TokenStream tokenStream, ObjectInfo currentContextInfo, final List<Class<?>> expectedResultClasses) {
+	public ParseResultIF parse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		return doParse(tokenStream.clone(), currentContextInfo, expectedResultClasses);
 	}
 }

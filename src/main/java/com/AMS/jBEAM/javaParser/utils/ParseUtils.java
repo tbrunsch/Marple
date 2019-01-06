@@ -2,6 +2,7 @@ package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
 import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.Variable;
 import com.AMS.jBEAM.javaParser.parsers.AbstractEntityParser;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
@@ -21,14 +22,14 @@ public class ParseUtils
 	/*
 	 * Parsing
 	 */
-	public static ParseResultIF parse(final TokenStream tokenStream, final ObjectInfo currentContextInfo, final List<Class<?>> expectedResultClasses, AbstractEntityParser... parsers) {
+	public static ParseResultIF parse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses, AbstractEntityParser... parsers) {
 		List<ParseResultIF> parseResults = Arrays.stream(parsers)
-				.map(parser -> parser.parse(tokenStream, currentContextInfo, expectedResultClasses))
-				.collect(Collectors.toList());
+			.map(parser -> parser.parse(tokenStream, currentContextInfo, expectedResultClasses))
+			.collect(Collectors.toList());
 		return mergeParseResults(parseResults);
 	}
 
-	static ParseResultIF mergeParseResults(List<ParseResultIF> parseResults) {
+	private static ParseResultIF mergeParseResults(List<ParseResultIF> parseResults) {
 		if (parseResults.isEmpty()) {
 			throw new IllegalArgumentException("Cannot merge 0 parse results");
 		}
@@ -288,6 +289,33 @@ public class ParseUtils
 
 	public static String getPackageDisplayText(Package pack) {
 		return pack.getName();
+	}
+
+	/*
+	 * Variables
+	 */
+	private static int rateVariableByName(Variable variable, String expectedVariabledName) {
+		return rateStringMatch(variable.getName(), expectedVariabledName);
+	}
+
+	static ToIntFunction<Variable> rateVariableByClassesFunc(final List<Class<?>> expectedClasses) {
+		return variable -> rateVariableByClasses(variable, expectedClasses);
+	}
+
+	private static int rateVariableByClasses(Variable variable, List<Class<?>> expectedClasses) {
+		Object value = variable.getValue();
+		return	expectedClasses == null		? CLASS_MATCH_FULL :
+				expectedClasses.isEmpty()	? CLASS_MATCH_NONE :
+				value == null				? (expectedClasses.stream().anyMatch(clazz -> !clazz.isPrimitive()) ? CLASS_MATCH_INHERITANCE : CLASS_MATCH_NONE)
+											: expectedClasses.stream().mapToInt(expectedClass -> rateClassMatch(value.getClass(), expectedClass)).min().getAsInt();
+	}
+
+	public static ToIntFunction<Variable> rateVariableByNameAndClassesFunc(final String variableName, final List<Class<?>> expectedClasses) {
+		return variable -> (CLASS_MATCH_NONE + 1)*rateVariableByName(variable, variableName) + rateVariableByClasses(variable, expectedClasses);
+	}
+
+	public static String getVariableDisplayText(Variable variable) {
+		return variable.getName();
 	}
 
 	/*

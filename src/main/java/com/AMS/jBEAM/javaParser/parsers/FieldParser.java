@@ -35,6 +35,17 @@ public class FieldParser extends AbstractEntityParser
 	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		int startPosition = tokenStream.getPosition();
 
+		if (tokenStream.isCaretAtPosition()) {
+			int insertionEnd;
+			try {
+				tokenStream.readIdentifier();
+				insertionEnd = tokenStream.getPosition();
+			} catch (TokenStream.JavaTokenParseException e) {
+				insertionEnd = startPosition;
+			}
+			return parserContext.getFieldDataProvider().suggestFields(currentContextInfo, expectedResultClasses, startPosition, insertionEnd, staticOnly);
+		}
+
 		if (thisInfo.getObject() == null && !staticOnly) {
 			return new ParseError(startPosition, "Null object does not have any fields", ErrorType.WRONG_PARSER);
 		}

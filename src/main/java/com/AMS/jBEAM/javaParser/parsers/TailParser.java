@@ -88,17 +88,6 @@ public class TailParser extends AbstractEntityParser
 	private ParseResultIF parseDot(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals(".");
-		if (characterToken.isContainsCaret()) {
-			int insertionBegin = tokenStream.getPosition();
-			int insertionEnd;
-			try {
-				tokenStream.readIdentifier();
-				insertionEnd = tokenStream.getPosition();
-			} catch (TokenStream.JavaTokenParseException e) {
-				insertionEnd = insertionBegin;
-			}
-			return parserContext.getFieldAndMethodDataProvider().suggestFieldsAndMethods(currentContextInfo, expectedResultClasses, insertionBegin, insertionEnd, staticOnly);
-		}
 
 		return ParseUtils.parse(tokenStream, currentContextInfo, expectedResultClasses,
 			parserContext.getFieldParser(staticOnly),
@@ -110,9 +99,6 @@ public class TailParser extends AbstractEntityParser
 		List<Class<?>> expectedResultClasses = Arrays.asList(int.class);
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals("[");
-		if (characterToken.isContainsCaret()) {
-			return parserContext.getFieldAndMethodDataProvider().suggestFieldsAndMethods(tokenStream, expectedResultClasses);
-		}
 
 		ParseResultIF arrayIndexParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, thisInfo, expectedResultClasses);
 

@@ -1,11 +1,8 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
-import com.AMS.jBEAM.javaParser.result.ParseError;
+import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
-import com.AMS.jBEAM.javaParser.result.ParseResult;
-import com.AMS.jBEAM.javaParser.result.ParseResultIF;
-import com.AMS.jBEAM.javaParser.result.ParseResultType;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 

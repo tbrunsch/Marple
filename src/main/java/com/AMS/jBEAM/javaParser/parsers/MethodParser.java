@@ -34,7 +34,18 @@ public class MethodParser extends AbstractEntityParser
 
 	@Override
 	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
-		final int startPosition = tokenStream.getPosition();
+		int startPosition = tokenStream.getPosition();
+
+		if (tokenStream.isCaretAtPosition()) {
+			int insertionEnd;
+			try {
+				tokenStream.readIdentifier();
+				insertionEnd = tokenStream.getPosition();
+			} catch (TokenStream.JavaTokenParseException e) {
+				insertionEnd = startPosition;
+			}
+			return parserContext.getMethodDataProvider().suggestMethods(currentContextInfo, expectedResultClasses, startPosition, insertionEnd, staticOnly);
+		}
 
 		if (thisInfo.getObject() == null && !staticOnly) {
 			return new ParseError(startPosition, "Null object does not have any methods", ErrorType.WRONG_PARSER);
@@ -72,7 +83,7 @@ public class MethodParser extends AbstractEntityParser
 			return new ParseError(startPosition, "Unknown method '" + methodName + "'", ErrorType.SEMANTIC_ERROR);
 		}
 
-		List<ParseResultIF> argumentParseResults = parserContext.getFieldAndMethodDataProvider().parseMethodArguments(tokenStream, matchingMethods);
+		List<ParseResultIF> argumentParseResults = parserContext.getMethodDataProvider().parseMethodArguments(tokenStream, matchingMethods);
 
 		if (!argumentParseResults.isEmpty()) {
 			ParseResultIF lastArgumentParseResult = argumentParseResults.get(argumentParseResults.size()-1);
@@ -86,7 +97,7 @@ public class MethodParser extends AbstractEntityParser
 			.map(ParseResult.class::cast)
 			.map(ParseResult::getObjectInfo)
 			.collect(Collectors.toList());
-		List<Method> bestMatchingMethods = parserContext.getFieldAndMethodDataProvider().getBestMatchingMethods(matchingMethods, argumentInfos);
+		List<Method> bestMatchingMethods = parserContext.getMethodDataProvider().getBestMatchingMethods(matchingMethods, argumentInfos);
 
 		switch (bestMatchingMethods.size()) {
 			case 0:

@@ -2,6 +2,8 @@ package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.javaParser.EvaluationMode;
 import com.AMS.jBEAM.common.ReflectionUtils;
+import com.AMS.jBEAM.javaParser.Variable;
+import com.AMS.jBEAM.javaParser.VariablePoolIF;
 
 import java.lang.reflect.*;
 import java.util.List;
@@ -136,5 +138,14 @@ public class ObjectInfoProvider
 
 	public ObjectInfo getCastInfo(ObjectInfo objectInfo, Class<?> targetClass) throws ClassCastException {
 		return getCastInfo(objectInfo, targetClass, evaluationMode);
+	}
+
+	public ObjectInfo getVariableInfo(Variable variable, VariablePoolIF variablePool) {
+		final String name = variable.getName();
+		final boolean useHardReference = variable.isUseHardReferenceInPool();
+		Object value = variable.getValue();
+		Class<?> clazz = value == null ? null : value.getClass();
+		ObjectInfo.ValueSetterIF valueSetter = object -> variablePool.addVariable(new Variable(name, object, useHardReference));
+		return new ObjectInfo(value, clazz, valueSetter);
 	}
 }

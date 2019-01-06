@@ -6,47 +6,26 @@ import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 
 import java.lang.reflect.Executable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class FieldAndMethodDataProvider
+public class MethodDataProvider
 {
 	private final ParserContext parserContext;
 
-	public FieldAndMethodDataProvider(ParserContext parserContext) {
+	public MethodDataProvider(ParserContext parserContext) {
 		this.parserContext = parserContext;
 	}
 
-	public CompletionSuggestions suggestFieldsAndMethods(TokenStream tokenStream, List<Class<?>> expectedClasses) {
-		ObjectInfo thisInfo = parserContext.getThisInfo();
-		if (thisInfo.getObject() == null) {
-			return CompletionSuggestions.NONE;
-		}
-		int insertionBegin, insertionEnd;
-		insertionBegin = insertionEnd = tokenStream.getPosition();
-		return suggestFieldsAndMethods(thisInfo, expectedClasses, insertionBegin, insertionEnd, false);
-	}
-
-	public CompletionSuggestions suggestFieldsAndMethods(ObjectInfo contextInfo, List<Class<?>> expectedClasses, final int insertionBegin, final int insertionEnd, boolean staticOnly) {
-		Map<CompletionSuggestionIF, Integer> ratedSuggestions = new LinkedHashMap<>();
-
+	public CompletionSuggestions suggestMethods(ObjectInfo contextInfo, List<Class<?>> expectedClasses, final int insertionBegin, final int insertionEnd, boolean staticOnly) {
 		Class<?> contextClass = parserContext.getObjectInfoProvider().getClass(contextInfo);
-
-		List<Field> fields = parserContext.getInspectionDataProvider().getFields(contextClass, staticOnly);
-		ratedSuggestions.putAll(ParseUtils.createRatedSuggestions(
-				fields,
-				field -> new CompletionSuggestionField(field, insertionBegin, insertionEnd),
-				ParseUtils.rateFieldByClassesFunc(expectedClasses))
-		);
-
 		List<Method> methods = parserContext.getInspectionDataProvider().getMethods(contextClass, staticOnly);
-		ratedSuggestions.putAll(ParseUtils.createRatedSuggestions(
-				methods,
-				method -> new CompletionSuggestionMethod(method, insertionBegin, insertionEnd),
-				ParseUtils.rateMethodByClassesFunc(expectedClasses))
+		Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
+			methods,
+			method -> new CompletionSuggestionMethod(method, insertionBegin, insertionEnd),
+			ParseUtils.rateMethodByClassesFunc(expectedClasses)
 		);
 
 		return new CompletionSuggestions(ratedSuggestions);
@@ -55,14 +34,11 @@ public class FieldAndMethodDataProvider
 	public List<ParseResultIF> parseMethodArguments(TokenStream tokenStream, List<? extends Executable> availableMethods) {
 		List<ParseResultIF> methodArguments = new ArrayList<>();
 
-		int position = tokenStream.getPosition();
+		int position;
 		Token characterToken = tokenStream.readCharacterUnchecked();
-		boolean requestedCodeCompletionBeforeNextArgument = characterToken.isContainsCaret();
+		assert characterToken != null && characterToken.getValue().charAt(0) == '(';
 
-		assert characterToken.getValue().charAt(0) == '(';
-
-		// The case requestedCodeCompletionBeforeNextArgument == true will be handled at the beginning of the first loop iteration
-		if (!requestedCodeCompletionBeforeNextArgument) {
+		if (!characterToken.isContainsCaret()) {
 			if (!tokenStream.hasMore()) {
 				methodArguments.add(new ParseError(tokenStream.getPosition(), "Expected argument or closing parenthesis ')'", ParseError.ErrorType.SYNTAX_ERROR));
 				return methodArguments;
@@ -83,17 +59,6 @@ public class FieldAndMethodDataProvider
 
 			if (expectedArgumentTypes_i.isEmpty()) {
 				methodArguments.add(new ParseError(tokenStream.getPosition(), "No further arguments expected", ParseError.ErrorType.SEMANTIC_ERROR));
-				return methodArguments;
-			}
-
-			if (requestedCodeCompletionBeforeNextArgument) {
-				// suggestions for argument i
-				if (availableMethods.isEmpty()) {
-					// no suggestions since no further arguments expected
-					methodArguments.add(CompletionSuggestions.NONE);
-				} else {
-					methodArguments.add(suggestFieldsAndMethods(tokenStream, expectedArgumentTypes_i));
-				}
 				return methodArguments;
 			}
 
@@ -134,8 +99,6 @@ public class FieldAndMethodDataProvider
 				methodArguments.add(new ParseError(position, "Expected comma ',' or closing parenthesis ')'", ParseError.ErrorType.SYNTAX_ERROR));
 				return methodArguments;
 			}
-
-			requestedCodeCompletionBeforeNextArgument = characterToken.isContainsCaret();
 		}
 	}
 
@@ -237,5 +200,4 @@ public class FieldAndMethodDataProvider
 		}
 		return filteredMethods;
 	}
-
 }

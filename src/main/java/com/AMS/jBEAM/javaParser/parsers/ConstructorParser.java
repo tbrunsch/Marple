@@ -57,7 +57,7 @@ public class ConstructorParser extends AbstractEntityParser
 		}
 		List<Constructor<?>> constructors = parserContext.getInspectionDataProvider().getConstructors(constructorClass);
 
-		List<ParseResultIF> argumentParseResults = parserContext.getFieldAndMethodDataProvider().parseMethodArguments(tokenStream, constructors);
+		List<ParseResultIF> argumentParseResults = parserContext.getMethodDataProvider().parseMethodArguments(tokenStream, constructors);
 
 		if (!argumentParseResults.isEmpty()) {
 			ParseResultIF lastArgumentParseResult = argumentParseResults.get(argumentParseResults.size()-1);
@@ -71,7 +71,7 @@ public class ConstructorParser extends AbstractEntityParser
 			.map(ParseResult.class::cast)
 			.map(ParseResult::getObjectInfo)
 			.collect(Collectors.toList());
-		List<Constructor<?>> bestMatchingConstructors = parserContext.getFieldAndMethodDataProvider().getBestMatchingMethods(constructors, argumentInfos);
+		List<Constructor<?>> bestMatchingConstructors = parserContext.getMethodDataProvider().getBestMatchingMethods(constructors, argumentInfos);
 
 		switch (bestMatchingConstructors.size()) {
 			case 0:

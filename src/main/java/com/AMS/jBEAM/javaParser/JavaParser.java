@@ -18,8 +18,10 @@ public class JavaParser
 			if (suggestionClass1 == suggestionClass2) {
 				return 0;
 			}
-			// Prefer fields over methods
-			return suggestionClass1 == CompletionSuggestionField.class ? -1 : 1;
+			// Prefer variables over fields over methods
+			return	suggestionClass1 == CompletionSuggestionVariable.class	? -1 :
+					suggestionClass1 == CompletionSuggestionField.class		? (suggestionClass2 == CompletionSuggestionVariable.class ? 1 : -1)
+																			: 1;
 		}
 	};
 

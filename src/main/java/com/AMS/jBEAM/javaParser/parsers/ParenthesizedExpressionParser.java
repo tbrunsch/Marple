@@ -22,9 +22,6 @@ public class ParenthesizedExpressionParser extends AbstractEntityParser
 		if (characterToken == null || characterToken.getValue().charAt(0) != '(') {
 			return new ParseError(position, "Expected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
-		if (characterToken.isContainsCaret()) {
-			return parserContext.getFieldAndMethodDataProvider().suggestFieldsAndMethods(tokenStream, expectedResultClasses);
-		}
 
 		ParseResultIF expressionParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, currentContextInfo, expectedResultClasses);
 

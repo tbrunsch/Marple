@@ -18,13 +18,13 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("i", 3)
 			.test("d", 2.4)
 			.test("s", "xyz")
 			.test("l", (long) 1);
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("")
 			.test("xyz")
 			.test("d,");
@@ -44,7 +44,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass2();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("tc.i", 2)
 			.test("tc.f", 1.3f);
 	}
@@ -63,11 +63,12 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass2();
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("tc.i")
 			.test("tc.f");
 
-		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance)
+			.evaluationMode(EvaluationMode.DUCK_TYPING)
 			.test("tc.i", 2)
 			.test("tc.f", 1.3f);
 	}
@@ -85,7 +86,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("array[i0]", 7)
 			.test("array[i1]", 3)
 			.test("array[i2]", 4)
@@ -103,11 +104,12 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("array[i0]")
 			.test("array[i1]");
 
-		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance)
+			.evaluationMode(EvaluationMode.DUCK_TYPING)
 			.test("array[i0]", 7)
 			.test("array[i1]", 3);
 	}
@@ -122,7 +124,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("getInt()", 3)
 			.test("getDouble()", 2.7)
 			.test("getString()", "xyz");
@@ -138,10 +140,10 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("add(i,d)", 5.5);
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("add(d,i)");
 	}
 
@@ -155,10 +157,11 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("add(i,add(i,d))");
 
-		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance)
+			.evaluationMode(EvaluationMode.DUCK_TYPING)
 			.test("add(i,add(i,d))", 8.5);
 	}
 
@@ -173,7 +176,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("getTestClass().i", 7)
 			.test("getTestClass().d", 1.2)
 			.test("getTestClass().getString()", "xyz");
@@ -190,12 +193,13 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("getTestClass().i")
 			.test("getTestClass().d")
 			.test("getTestClass().getString()");
 
-		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance)
+			.evaluationMode(EvaluationMode.DUCK_TYPING)
 			.test("getTestClass().i", 7)
 			.test("getTestClass().d", 1.2)
 			.test("getTestClass().getString()", "xyz");
@@ -219,7 +223,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass(0, 1);
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("getTestClasses()[i0].i0", 13)
 			.test("getTestClasses()[i0].i1", 7)
 			.test("getTestClasses()[i1].i0", 4)
@@ -248,13 +252,14 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass(0, 1);
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("getTestClasses()[i0].i0")
 			.test("getTestClasses()[i0].getI1()")
 			.test("getTestClasses()[getI1()].i0")
 			.test("getTestClasses()[getI1()].getI1()");
 
-		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance)
+			.evaluationMode(EvaluationMode.DUCK_TYPING)
 			.test("getTestClasses()[i0].i0", 13)
 			.test("getTestClasses()[i0].getI1()", 7)
 			.test("getTestClasses()[getI1()].i0", 4)
@@ -283,11 +288,11 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass3();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("getTestClass(myInt).i", 3)
 			.test("getTestClass(myString).d", 2.7);
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("getTestClass(myInt).d")
 			.test("getTestClass(myString).i");
 	}
@@ -316,15 +321,17 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass3();
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("getTestClass(getTestClass(i)).myInt")
 			.test("getTestClass(getTestClass(j)).myString");
 
-		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance)
+			.evaluationMode(EvaluationMode.DUCK_TYPING)
 			.test("getTestClass(getTestClass(i)).myInt", 7)
 			.test("getTestClass(getTestClass(j)).myString", "abc");
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
+		new ErrorTestExecutor(testInstance)
+			.evaluationMode(EvaluationMode.DUCK_TYPING)
 			.test("getTestClass(getTestClass(i)).myString")
 			.test("getTestClass(getTestClass(j)).myInt");
 	}
@@ -337,7 +344,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("\"xyz\"", "xyz")
 			.test("getString(\"xyz\")", "xyz")
 			.test("getString(\"\\\"\")", "\"")
@@ -345,7 +352,7 @@ public class ExpressionEvaluationTest
 			.test("getString(\"\\r\")", "\r")
 			.test("getString(\"\\t\")", "\t");
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("getString(xyz)")
 			.test("getString(\"xyz")
 			.test("getString(\"xyz)")
@@ -361,7 +368,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("'x'", 'x')
 			.test("getChar('x')", 'x')
 			.test("getChar('\\'')", '\'')
@@ -371,7 +378,7 @@ public class ExpressionEvaluationTest
 			.test("getChar('\\r')", '\r')
 			.test("getChar('\\t')", '\t');
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("getChar(x)")
 			.test("getChar('x")
 			.test("getChar('x)")
@@ -387,13 +394,13 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("true", true)
 			.test("false", false)
 			.test("getBoolean(true)", true)
 			.test("getBoolean(false)", false);
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("getBoolean(tru)")
 			.test("getBoolean(fals)")
 			.test("getBoolean(TRUE)")
@@ -408,11 +415,11 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("null", null)
 			.test("getObject(null)", null);
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("nul")
 			.test("getObject(nul)")
 			.test("getObject(null");
@@ -429,7 +436,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass(23);
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("this.value", 23)
 			.test("getValue(this)", 23);
 	}
@@ -445,7 +452,7 @@ public class ExpressionEvaluationTest
 		}
 
 		TestClass testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("120", 120)
 			.test("getByte((byte) 120)", testInstance.getByte((byte) 120))
 			.test("1234", 1234)
@@ -455,7 +462,7 @@ public class ExpressionEvaluationTest
 			.test("5000000000L", 5000000000L)
 			.test("getLong(5000000000l)", testInstance.getLong(5000000000l));
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("getByte(123)")
 			.test("getShort(1000)")
 			.test("getInt(5000000000)");
@@ -470,7 +477,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("123f", 123f)
 			.test("getFloat(123f)", 123f)
 			.test("123e0", 123e0)
@@ -523,7 +530,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass("abc", (short) 13, 'X', 123456789, -13e02f, 1L, false, 2.34e-56);
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test(" s ", "abc")
 			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d  ) . sValue ", (short) 13)
 			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d  ) .s", "abc" + "_xyz")
@@ -556,7 +563,7 @@ public class ExpressionEvaluationTest
 		}
 
 		TestClass testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("get(c)", testInstance.get(testInstance.c))
 			.test("get(b)", testInstance.get(testInstance.b))
 			.test("get(i)", testInstance.get(testInstance.i))
@@ -564,11 +571,12 @@ public class ExpressionEvaluationTest
 			.test("get(o1)", testInstance.get(testInstance.o1))
 			.test("get(o2)", testInstance.get(testInstance.o2));
 
-		new TestExecutor(testInstance, EvaluationMode.DUCK_TYPING)
+		new TestExecutor(testInstance)
+			.evaluationMode(EvaluationMode.DUCK_TYPING)
 			.test("get(o1)", testInstance.get(testInstance.o1))
 			.test("get(o2)", testInstance.get((Float) testInstance.o2));
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("get(s)");
 	}
 
@@ -591,7 +599,7 @@ public class ExpressionEvaluationTest
 		}
 
 		TestClass testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("f(getInt(), 1.0f)", 1)
 			.test("f(getInt(), \"Test\")", 2)
 			.test("f(getInt(), \"Test\")", 3)
@@ -611,7 +619,7 @@ public class ExpressionEvaluationTest
 		}
 
 		TestClass testInstance = new TestClass();
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("f(g(), s)");
 
 		assertEquals("Triggered side effect despite parse error", testInstance.sideEffectCounter, 0);
@@ -630,7 +638,7 @@ public class ExpressionEvaluationTest
 
 		final String getClass = "getClass()";
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("(getFloat(y).toString())", "1.5")
 			.test("(getFloat(y)).toString()", "1.5")
 			.test("(getFloat(y).toString()).length()", 3)
@@ -669,7 +677,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass(5, -2.0, "abc");
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("merge((TestClass) o1).i", 18)
 			.test("merge((TestClass) o1).d", -4.5)
 			.test("((TestClass) o1).merge(this).i", 18)
@@ -684,7 +692,7 @@ public class ExpressionEvaluationTest
 			.test("(int) d", -2)
 			.test("(int) 2.3", 2);
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("(TestClass) o2")
 			.test("(String) o1");
 	}
@@ -707,17 +715,20 @@ public class ExpressionEvaluationTest
 	@Test
 	public void testClass() {
 		Object testInstance = null;
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED, AccessLevel.PACKAGE_PRIVATE)
+		new TestExecutor(testInstance)
+			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
 			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.l", -17L)
 			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.f", 27.5f)
 			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getInt()", 0)
 			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getDouble()", 2.0);
 
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED, AccessLevel.PUBLIC)
+		new TestExecutor(testInstance)
+			.minimumAccessLevel(AccessLevel.PUBLIC)
 			.test("java.lang.Math.pow(1.5, 2.5)", Math.pow(1.5, 2.5))
 			.test("java.lang.Math.PI", Math.PI);
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED, AccessLevel.PACKAGE_PRIVATE)
+		new ErrorTestExecutor(testInstance)
+			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
 			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.i")
 			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.b")
 			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.d")
@@ -758,7 +769,8 @@ public class ExpressionEvaluationTest
 	@Test
 	public void testConstructor() {
 		Object testInstance = new ConstructorParserTestClass(0, 0.0f);
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED, AccessLevel.PACKAGE_PRIVATE)
+		new TestExecutor(testInstance)
+			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
 			.test("new ConstructorParserTestClass(5, 6.0f).i", 5)
 			.test("new ConstructorParserTestClass(5, 6.0f).l", 1L)
 			.test("new ConstructorParserTestClass(5, 6.0f).f", 6.0f)
@@ -777,7 +789,8 @@ public class ExpressionEvaluationTest
 			.test("new ConstructorParserTestClass(0, 0, 0, 0).d", 0.0)
 			.test("new StringBuilder(\"Test\").append('X').append(13).toString()", "TestX13");
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED, AccessLevel.PACKAGE_PRIVATE)
+		new ErrorTestExecutor(testInstance)
+			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
 			.test("new ConstructorParserTestClass(0)")
 			.test("new ConstructorParserTestClass(0, 0)")
 			.test("new ConstructorParserTestClass(0, 0, 0)")
@@ -786,7 +799,7 @@ public class ExpressionEvaluationTest
 
 	@Test
 	public void testBinaryOperator() {
-		new TestExecutor(null, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(null)
 			.test("5 *7- 8 / 3*2 + 4 * 2", 5*7 - 8/3*2 + 4*2)
 			.test("5 + 7 * 8", 5 + 7 * 8)
 			.test("(5 + 7) * 8", (5 + 7) * 8)
@@ -852,7 +865,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("reset().getCounter(FALSE())", 1)
 			.test("reset().getCounter(FALSE() && FALSE())", 1)
 			.test("reset().getCounter(FALSE() && TRUE())", 1)
@@ -864,7 +877,7 @@ public class ExpressionEvaluationTest
 			.test("reset().getCounter(TRUE() || TRUE())", 1)
 			.test("npeTrigger != null && npeTrigger.counter > 0", false);
 
-		new ErrorTestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(testInstance)
 			.test("reset().getCounter(FALSE() && 5")
 			.test("reset().getCounter(TRUE() || 'X'");
 	}
@@ -890,7 +903,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass();
-		new TestExecutor(testInstance, EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(testInstance)
 			.test("reset().get(d = 7.0).d", 7.0)
 			.test("reset().get(f = -1).f", -1.f)
 			.test("reset().get(i = 13).i", 13)
@@ -919,7 +932,7 @@ public class ExpressionEvaluationTest
 			TestClass get(int dummy) { return this; }
 		}
 
-		new TestExecutor(new TestClass(), EvaluationMode.STRONGLY_TYPED)
+		new TestExecutor(new TestClass())
 			.test("++reset().b", (byte) 14)
 			.test("reset().get(++b).b", (byte) 14)
 			.test("++reset().i", -20)
@@ -940,7 +953,7 @@ public class ExpressionEvaluationTest
 			.test("!(true && false)", true)
 			.test("~12345", ~12345);
 
-		new ErrorTestExecutor(new TestClass(), EvaluationMode.STRONGLY_TYPED)
+		new ErrorTestExecutor(new TestClass())
 			.test("++f")
 			.test("++j")
 			.test("++s")
@@ -954,24 +967,103 @@ public class ExpressionEvaluationTest
 			.test("~f");
 	}
 
+	@Test
+	public void testVariable() {
+		class TestClass
+		{
+			byte b = 3;
+			int i = -1000;
+			float f = 2.5f;
+
+			String test(Object o) { return o.toString(); }
+		}
+
+		Variable variable1 = new Variable("xyz", 15.0, true);
+		Variable variable2 = new Variable("abc", "Test", true);
+		VariablePoolIF variablePool = new VariablePool();
+		variablePool.addVariable(variable1);
+		variablePool.addVariable(variable2);
+
+		Object testInstance = new TestClass();
+		new TestExecutor(testInstance)
+			.variablePool(variablePool)
+			.test("b + xyz", 18.0)
+			.test("xyz * i", -15000.0)
+			.test("(int) xyz / f", 6.0f)
+			.test("b + abc", "3Test")
+			.test("abc + i", "Test-1000")
+			.test("abc + f", "Test2.5")
+			.test("xyz + xyz", 30.0)
+			.test("abc + abc", "TestTest")
+			.test("test(xyz)", "15.0")
+			.test("test(abc)", "Test");
+	}
+
+	/*
+	 * Base class for all TestExecutors
+	 */
+	private static class AbstractTestExecutor<T extends AbstractTestExecutor>
+	{
+		final Object			testInstance;
+
+		ParserSettings 			settings;
+		private EvaluationMode	evaluationMode		= EvaluationMode.STRONGLY_TYPED;
+		private ImportsIF		imports				= new Imports();
+		private VariablePoolIF	variablePool		= new VariablePool();
+		private AccessLevel		minimumAccessLevel	= AccessLevel.PRIVATE;
+
+		AbstractTestExecutor(Object testInstance) {
+			this.testInstance = testInstance;
+		}
+
+		T evaluationMode(EvaluationMode evaluationMode) {
+			this.evaluationMode = evaluationMode;
+			return (T) this;
+		}
+
+		T imports(ImportsIF imports) {
+			verifyBeforeTest();
+			this.imports = imports;
+			return (T) this;
+		}
+
+		T variablePool(VariablePoolIF variablePool) {
+			verifyBeforeTest();
+			this.variablePool = variablePool;
+			return (T) this;
+		}
+
+		T minimumAccessLevel(AccessLevel minimumAccessLevel) {
+			verifyBeforeTest();
+			this.minimumAccessLevel = minimumAccessLevel;
+			return (T) this;
+		}
+
+		private void verifyBeforeTest() {
+			if (settings != null) {
+				throw new IllegalStateException("Settings cannot be changed between tests");
+			}
+		}
+
+		void ensureValidSettings() {
+			if (settings == null) {
+				settings = new ParserSettings(imports, variablePool, minimumAccessLevel, EvaluationMode.NONE, evaluationMode);
+			}
+		}
+	}
+
 	/*
 	 * Class for creating tests with expected successful code completions
 	 */
-	private static class TestExecutor
+	private static class TestExecutor extends AbstractTestExecutor<TestExecutor>
 	{
-		private final Object				testInstance;
-		private final ParserSettings settings;
-
-		TestExecutor(Object testInstance, EvaluationMode evaluationMode) {
-			this(testInstance, evaluationMode, AccessLevel.PRIVATE);
-		}
-
-		TestExecutor(Object testInstance, EvaluationMode evaluationMode, AccessLevel minimumAccessLevel) {
-			this.testInstance = testInstance;
-			this.settings = new ParserSettings(new Imports(), minimumAccessLevel, EvaluationMode.NONE, evaluationMode);
+		TestExecutor(Object testInstance) {
+			super(testInstance);
 		}
 
 		TestExecutor test(String javaExpression, Object expectedValue) {
+			ensureValidSettings();
+
 			JavaParser parser = new JavaParser();
 			try {
 				Object actualValue = parser.evaluate(javaExpression, settings, testInstance);
@@ -986,20 +1078,15 @@ public class ExpressionEvaluationTest
 	/*
 	 * Class for creating tests with expected exceptions
 	 */
-	private static class ErrorTestExecutor
+	private static class ErrorTestExecutor extends AbstractTestExecutor<ErrorTestExecutor>
 	{
-		private final Object				testInstance;
-		private final ParserSettings settings;
-
-		ErrorTestExecutor(Object testInstance, EvaluationMode evaluationMode) {
-			this(testInstance, evaluationMode, AccessLevel.PRIVATE);
-		}
-		ErrorTestExecutor(Object testInstance, EvaluationMode evaluationMode, AccessLevel minimumAccessLevel) {
-			this.testInstance = testInstance;
-			this.settings = new ParserSettings(new Imports(), minimumAccessLevel, EvaluationMode.NONE, evaluationMode);
+		ErrorTestExecutor(Object testInstance) {
+			super(testInstance);
 		}
 
 		ErrorTestExecutor test(String javaExpression) {
+			ensureValidSettings();
+
 			Class<? extends Exception> expectedExceptionClass = ParseException.class;
 			JavaParser parser = new JavaParser();
 			try {
