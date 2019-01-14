@@ -8,6 +8,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -41,12 +42,22 @@ public class InspectionDataProvider
 		return ReflectionUtils.getFields(clazz, true, modifierFilter);
 	}
 
-	public List<Method> getMethods(Class<?> clazz, boolean staticOnly) {
+	public List<ExecutableInfo> getMethodInfos(Class<?> clazz, boolean staticOnly) {
 		Predicate<Integer> modifierFilter = staticOnly ? accessLevelFilter.and(STATIC_FILTER) : accessLevelFilter;
-		return ReflectionUtils.getMethods(clazz, modifierFilter);
+		List<Method> methods = ReflectionUtils.getMethods(clazz, modifierFilter);
+		List<ExecutableInfo> executableInfos = new ArrayList<>(methods.size());
+		for (Method method : methods) {
+			executableInfos.addAll(ExecutableInfo.getAvailableExecutableInfos(method));
+		}
+		return executableInfos;
 	}
 
-	public List<Constructor<?>> getConstructors(Class<?> clazz) {
-		return ReflectionUtils.getConstructors(clazz, accessLevelFilter);
+	public List<ExecutableInfo> getConstructorInfos(Class<?> clazz) {
+		List<Constructor<?>> constructors = ReflectionUtils.getConstructors(clazz, accessLevelFilter);
+		List<ExecutableInfo> executableInfos = new ArrayList<>(constructors.size());
+		for (Constructor<?> constructor : constructors) {
+			executableInfos.addAll(ExecutableInfo.getAvailableExecutableInfos(constructor));
+		}
+		return executableInfos;
 	}
 }

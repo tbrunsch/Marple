@@ -5,6 +5,7 @@ import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
+import com.AMS.jBEAM.javaParser.utils.ExecutableInfo;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 
 import java.lang.reflect.Constructor;
@@ -55,9 +56,9 @@ public class ConstructorParser extends AbstractEntityParser
 		if (constructorClass.getEnclosingClass() != null && (constructorClass.getModifiers() & Modifier.STATIC) == 0) {
 			return new ParseError(parsedToPosition, "Cannot instantiate inner class '" + constructorClass.getName() + "'", ErrorType.SEMANTIC_ERROR);
 		}
-		List<Constructor<?>> constructors = parserContext.getInspectionDataProvider().getConstructors(constructorClass);
+		List<ExecutableInfo> constructorInfos = parserContext.getInspectionDataProvider().getConstructorInfos(constructorClass);
 
-		List<ParseResultIF> argumentParseResults = parserContext.getMethodDataProvider().parseMethodArguments(tokenStream, constructors);
+		List<ParseResultIF> argumentParseResults = parserContext.getExecutableDataProvider().parseExecutableArguments(tokenStream, constructorInfos);
 
 		if (!argumentParseResults.isEmpty()) {
 			ParseResultIF lastArgumentParseResult = argumentParseResults.get(argumentParseResults.size()-1);
@@ -71,16 +72,16 @@ public class ConstructorParser extends AbstractEntityParser
 			.map(ParseResult.class::cast)
 			.map(ParseResult::getObjectInfo)
 			.collect(Collectors.toList());
-		List<Constructor<?>> bestMatchingConstructors = parserContext.getMethodDataProvider().getBestMatchingMethods(constructors, argumentInfos);
+		List<ExecutableInfo> bestMatchingConstructorInfos = parserContext.getExecutableDataProvider().getBestMatchingExecutableInfos(constructorInfos, argumentInfos);
 
-		switch (bestMatchingConstructors.size()) {
+		switch (bestMatchingConstructorInfos.size()) {
 			case 0:
 				return new ParseError(tokenStream.getPosition(), "No constructor matches the given arguments", ErrorType.SEMANTIC_ERROR);
 			case 1: {
-				Constructor<?> bestMatchingConstructor = bestMatchingConstructors.get(0);
+				ExecutableInfo bestMatchingConstructorInfo = bestMatchingConstructorInfos.get(0);
 				ObjectInfo constructorReturnInfo;
 				try {
-					constructorReturnInfo = parserContext.getObjectInfoProvider().getMethodReturnInfo(constructorObjectInfo, bestMatchingConstructor, argumentInfos);
+					constructorReturnInfo = parserContext.getObjectInfoProvider().getExecutableReturnInfo(constructorObjectInfo, bestMatchingConstructorInfo, argumentInfos);
 				} catch (Exception e) {
 					return new ParseError(startPosition, "Exception during constructor evaluation", ErrorType.EVALUATION_EXCEPTION, e);
 				}
@@ -88,16 +89,16 @@ public class ConstructorParser extends AbstractEntityParser
 			}
 			default: {
 				String error = "Ambiguous constructor call. Possible candidates are:\n"
-								+ bestMatchingConstructors.stream().map(ConstructorParser::formatConstructor).collect(Collectors.joining("\n"));
+								+ bestMatchingConstructorInfos.stream().map(ConstructorParser::formatConstructorInfo).collect(Collectors.joining("\n"));
 				return new AmbiguousParseResult(tokenStream.getPosition(), error);
 			}
 		}
 	}
 
-	private static String formatConstructor(Constructor<?> constructor) {
-		return constructor.getName()
+	private static String formatConstructorInfo(ExecutableInfo constructorInfo) {
+		return constructorInfo.getName()
 				+ "("
-				+ Arrays.stream(constructor.getParameterTypes()).map(Class::getSimpleName).collect(Collectors.joining(", "))
+				+ constructorInfo.formatArguments()
 				+ ")";
 	}
 }

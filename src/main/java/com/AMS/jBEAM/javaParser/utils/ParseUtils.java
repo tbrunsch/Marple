@@ -8,7 +8,6 @@ import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -234,26 +233,26 @@ public class ParseUtils
 	/*
 	 * Methods
 	 */
-	private static int rateMethodByName(Method method, String expectedMethodName) {
-		return rateStringMatch(method.getName(), expectedMethodName);
+	private static int rateMethodByName(ExecutableInfo methodInfo, String expectedMethodName) {
+		return rateStringMatch(methodInfo.getName(), expectedMethodName);
 	}
 
-	static ToIntFunction<Method> rateMethodByClassesFunc(final List<Class<?>> expectedClasses) {
-		return method -> rateMethodByClasses(method, expectedClasses);
+	static ToIntFunction<ExecutableInfo> rateMethodByClassesFunc(final List<Class<?>> expectedClasses) {
+		return methodInfo -> rateMethodByClasses(methodInfo, expectedClasses);
 	}
 
-	private static int rateMethodByClasses(Method method, List<Class<?>> expectedClasses) {
+	private static int rateMethodByClasses(ExecutableInfo methodInfo, List<Class<?>> expectedClasses) {
 		return	expectedClasses == null		? CLASS_MATCH_FULL :
 				expectedClasses.isEmpty()	? CLASS_MATCH_NONE
-											: expectedClasses.stream().mapToInt(expectedClass -> rateClassMatch(method.getReturnType(), expectedClass)).min().getAsInt();
+											: expectedClasses.stream().mapToInt(expectedClass -> rateClassMatch(methodInfo.getReturnType(), expectedClass)).min().getAsInt();
 	}
 
-	public static ToIntFunction<Method> rateMethodByNameAndClassesFunc(final String methodName, final List<Class<?>> expectedClasses) {
-		return method -> (CLASS_MATCH_NONE + 1)*rateMethodByName(method, methodName) + rateMethodByClasses(method, expectedClasses);
+	public static ToIntFunction<ExecutableInfo> rateMethodByNameAndClassesFunc(final String methodName, final List<Class<?>> expectedClasses) {
+		return methodInfo -> (CLASS_MATCH_NONE + 1)* rateMethodByName(methodInfo, methodName) + rateMethodByClasses(methodInfo, expectedClasses);
 	}
 
-	public static String getMethodDisplayText(Method method) {
-		return method.getName() + " (" + method.getDeclaringClass().getSimpleName() + ")";
+	public static String getMethodDisplayText(ExecutableInfo executableInfo) {
+		return executableInfo.getName() + " (" + executableInfo.getDeclaringClass().getSimpleName() + ")";
 	}
 
 	/*

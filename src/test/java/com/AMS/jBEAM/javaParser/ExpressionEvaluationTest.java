@@ -2,6 +2,8 @@ package com.AMS.jBEAM.javaParser;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -623,6 +625,40 @@ public class ExpressionEvaluationTest
 			.test("f(g(), s)");
 
 		assertEquals("Triggered side effect despite parse error", testInstance.sideEffectCounter, 0);
+	}
+
+	@Test
+	public void testVarArgs() {
+		class TestClass
+		{
+			int i1 = 3;
+			int i2 = -5;
+			int i3 = 11;
+
+			int[] i123 = { 1, 2, 4 };
+
+			double d = 3.5;
+
+			double sum(double offset, int... ints) {
+				return offset + Arrays.stream(ints).sum();
+			}
+		}
+
+		TestClass testInstance = new TestClass();
+		new TestExecutor(testInstance)
+			.test("sum(d)", 3.5)
+			.test("sum(d, i1)", 6.5)
+			.test("sum(d, i1, i2)", 1.5)
+			.test("sum(d, i1, i2, i3)", 12.5)
+			.test("sum(d, i123)", 10.5)
+			.test("sum(i1, i123)", 10.0);
+
+		new ErrorTestExecutor(testInstance)
+			.test("sum()")
+			.test("sum(i1, d)")
+			.test("sum(d, i123, i1)")
+			.test("sum(d, i1, i123)")
+			.test("sum(d, i123, i123)");
 	}
 
 	@Test

@@ -11,7 +11,7 @@ public class ParserContext
 	private final InspectionDataProvider 		inspectionDataProvider;
 	private final ObjectInfoProvider			objectInfoProvider;
 	private final FieldDataProvider				fieldDataProvider;
-	private final MethodDataProvider			methodDataProvider;
+	private final ExecutableDataProvider		executableDataProvider;
 	private final ClassDataProvider				classDataProvider;
 	private final VariableDataProvider			variableDataProvider;
 	private final OperatorResultProvider 		operatorResultProvider;
@@ -39,7 +39,7 @@ public class ParserContext
 		inspectionDataProvider 			= new InspectionDataProvider(settings);
 		objectInfoProvider				= new ObjectInfoProvider(evaluationMode);
 		fieldDataProvider				= new FieldDataProvider(this);
-		methodDataProvider				= new MethodDataProvider(this);
+		executableDataProvider			= new ExecutableDataProvider(this);
 		classDataProvider				= new ClassDataProvider(this, settings.getImports());
 		variableDataProvider			= new VariableDataProvider(settings.getVariablePool());
 		operatorResultProvider 			= new OperatorResultProvider(evaluationMode);
@@ -81,8 +81,8 @@ public class ParserContext
 		return fieldDataProvider;
 	}
 
-	public MethodDataProvider getMethodDataProvider() {
-		return methodDataProvider;
+	public ExecutableDataProvider getExecutableDataProvider() {
+		return executableDataProvider;
 	}
 
 	public ClassDataProvider getClassDataProvider() {

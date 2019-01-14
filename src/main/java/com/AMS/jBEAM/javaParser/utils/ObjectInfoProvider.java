@@ -8,6 +8,8 @@ import com.AMS.jBEAM.javaParser.VariablePoolIF;
 import java.lang.reflect.*;
 import java.util.List;
 
+import static com.AMS.jBEAM.javaParser.utils.ParseUtils.CLASS_MATCH_NONE;
+
 public class ObjectInfoProvider
 {
 	private static Class<?> getClass(Object object, Class<?> declaredClass, EvaluationMode evaluationMode) {
@@ -79,43 +81,20 @@ public class ObjectInfoProvider
 		};
 	}
 
-	public ObjectInfo getMethodReturnInfo(ObjectInfo contextInfo, Executable method, List<ObjectInfo> argumentInfos) throws NullPointerException {
+	public ObjectInfo getExecutableReturnInfo(ObjectInfo contextInfo, ExecutableInfo executableInfo, List<ObjectInfo> argumentInfos) throws NullPointerException {
 		final Object methodReturnValue;
 		if (evaluationMode == EvaluationMode.NONE) {
 			methodReturnValue = null;
 		} else {
-			Object contextObject = (method.getModifiers() & Modifier.STATIC) != 0 ? null : contextInfo.getObject();
-			Object[] arguments = new Object[argumentInfos.size()];
-			Class<?>[] argumentTypes = method.getParameterTypes();
-			for (int i = 0; i < argumentTypes.length; i++) {
-				Object argument = argumentInfos.get(i).getObject();
-				arguments[i] = ReflectionUtils.convertTo(argument, argumentTypes[i], false);
-			}
+			Object contextObject = executableInfo.isStatic() ? null : contextInfo.getObject();
+			Object[] arguments = executableInfo.createArgumentArray(argumentInfos);
 			try {
-				method.setAccessible(true);
-				if (method instanceof Method) {
-					methodReturnValue = ((Method) method).invoke(contextObject, arguments);
-				} else if (method instanceof Constructor<?>) {
-					methodReturnValue = ((Constructor<?>) method).newInstance(arguments);
-				} else {
-					throw new IllegalArgumentException("Method '" + method.getName() + "' is neither a method nor a constructor");
-				}
-			} catch (IllegalAccessException e) {
-				throw new IllegalStateException("Internal error: Unexpected IllegalAccessException: " + e.getMessage(), e);
-			} catch (InvocationTargetException e) {
-				throw new IllegalStateException("Internal error: Unexpected InvocationTargetException: " + e.getMessage(), e);
-			} catch (InstantiationException e) {
-				throw new IllegalStateException("Internal error: Unexpected InstantiationException: " + e.getMessage(), e);
+				methodReturnValue = executableInfo.invoke(contextObject, arguments);
+			} catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+				throw new IllegalStateException("Internal error: Unexpected " + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
 			}
 		}
-		Class<?> methodReturnClass;
-		if (method instanceof Method) {
-			methodReturnClass = getClass(methodReturnValue, ((Method) method).getReturnType());
-		} else if (method instanceof Constructor<?>) {
-			methodReturnClass = method.getDeclaringClass();
-		} else {
-			throw new IllegalArgumentException("Method '" + method.getName() + "' is neither a method nor a constructor");
-		}
+		Class<?> methodReturnClass = getClass(methodReturnValue, executableInfo.getReturnType());
 		return new ObjectInfo(methodReturnValue, methodReturnClass);
 	}
 
