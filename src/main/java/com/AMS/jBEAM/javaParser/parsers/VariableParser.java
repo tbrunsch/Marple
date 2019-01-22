@@ -3,6 +3,7 @@ package com.AMS.jBEAM.javaParser.parsers;
 import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.Variable;
 import com.AMS.jBEAM.javaParser.VariablePool;
+import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
@@ -36,6 +37,7 @@ public class VariableParser extends AbstractEntityParser
 			} catch (TokenStream.JavaTokenParseException e) {
 				insertionEnd = startPosition;
 			}
+			log(LogLevel.INFO, "suggesting variables for completion...");
 			return parserContext.getVariableDataProvider().suggestVariables(expectedResultTypes, startPosition, insertionEnd);
 		}
 
@@ -43,6 +45,7 @@ public class VariableParser extends AbstractEntityParser
 		try {
 			variableToken = tokenStream.readIdentifier();
 		} catch (TokenStream.JavaTokenParseException e) {
+			log(LogLevel.ERROR, "missing variable name at " + tokenStream);
 			return new ParseError(startPosition, "Expected a variable name", ErrorType.WRONG_PARSER);
 		}
 		String variableName = variableToken.getValue();
@@ -53,6 +56,7 @@ public class VariableParser extends AbstractEntityParser
 
 		// check for code completion
 		if (variableToken.isContainsCaret()) {
+			log(LogLevel.SUCCESS, "suggesting variables matching '" + variableName + "'");
 			Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 				variables,
 				variable -> new CompletionSuggestionVariable(variable, startPosition, endPosition),
@@ -62,14 +66,17 @@ public class VariableParser extends AbstractEntityParser
 		}
 
 		if (tokenStream.hasMore() && tokenStream.peekCharacter() == '(') {
+			log(LogLevel.ERROR, "unexpected '(' at " + tokenStream);
 			return new ParseError(tokenStream.getPosition() + 1, "Unexpected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
 
 		// no code completion requested => variable name must exist
 		Optional<Variable> firstVariableMatch = variables.stream().filter(variable -> variable.getName().equals(variableName)).findFirst();
 		if (!firstVariableMatch.isPresent()) {
+			log(LogLevel.ERROR, "unknown variable '" + variableName + "'");
 			return new ParseError(startPosition, "Unknown variable '" + variableName + "'", ErrorType.SEMANTIC_ERROR);
 		}
+		log(LogLevel.SUCCESS, "detected variable '" + variableName + "'");
 
 		Variable matchingVariable = firstVariableMatch.get();
 		ObjectInfo matchingVariableInfo = parserContext.getObjectInfoProvider().getVariableInfo(matchingVariable, variablePool);

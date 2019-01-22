@@ -1,6 +1,7 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
 import com.AMS.jBEAM.javaParser.result.ParseError;
 import com.AMS.jBEAM.javaParser.result.ParseResultIF;
@@ -62,13 +63,16 @@ public class LiteralParser extends AbstractEntityParser
 		try {
 			stringLiteralToken = tokenStream.readStringLiteral();
 		} catch (TokenStream.JavaTokenParseException e) {
+			log(LogLevel.ERROR, "expected a string literal at " + tokenStream);
 			return new ParseError(startPosition, "Expected a string literal", ErrorType.SYNTAX_ERROR);
 		}
 		if (stringLiteralToken.isContainsCaret()) {
-			// No suggestions possible
+			log(LogLevel.INFO, "no completion suggestions available for string literals");
 			return CompletionSuggestions.NONE;
 		}
 		String stringLiteralValue = stringLiteralToken.getValue();
+		log(LogLevel.SUCCESS, "detected string literal '" + stringLiteralValue + "'");
+
 		ObjectInfo stringLiteralInfo = new ObjectInfo(stringLiteralValue, TypeToken.of(String.class));
 		return parserContext.getTailParser(false).parse(tokenStream, stringLiteralInfo, expectedResultTypes);
 	}
@@ -79,16 +83,19 @@ public class LiteralParser extends AbstractEntityParser
 		try {
 			characterLiteralToken = tokenStream.readCharacterLiteral();
 		} catch (TokenStream.JavaTokenParseException e) {
+			log(LogLevel.ERROR, "expected a character literal at " + tokenStream);
 			return new ParseError(startPosition, "Expected a character literal", ErrorType.SYNTAX_ERROR);
 		}
 		if (characterLiteralToken.isContainsCaret()) {
-			// No suggestions possible
+			log(LogLevel.INFO, "no completion suggestions available for character literals");
 			return CompletionSuggestions.NONE;
 		}
 		String characterLiteralValue = characterLiteralToken.getValue();
 		if (characterLiteralValue.length() != 1) {
 			throw new IllegalStateException("Internal error parsing character literals. It should represent exactly 1 character, but it represents " + characterLiteralValue.length());
 		}
+		log(LogLevel.SUCCESS, "detected character literal '" + characterLiteralValue + "'");
+
 		ObjectInfo stringLiteralInfo = new ObjectInfo(characterLiteralValue.charAt(0), TypeToken.of(char.class));
 		return parserContext.getTailParser(false).parse(tokenStream, stringLiteralInfo, expectedResultTypes);
 	}
@@ -97,15 +104,18 @@ public class LiteralParser extends AbstractEntityParser
 		int startPosition = tokenStream.getPosition();
 		Token literalToken = tokenStream.readKeyWordUnchecked();
 		if (literalToken == null) {
+			log(LogLevel.ERROR, "expected literal '" + literalName + "'");
 			return new ParseError(startPosition, "Expected '" + literalName + "'", ErrorType.WRONG_PARSER);
 		}
 		if (literalToken.isContainsCaret()) {
-			// No suggestions possible
+			log(LogLevel.INFO, "no completion suggestions available");
 			return CompletionSuggestions.NONE;
 		}
 		if (!literalToken.getValue().equals(literalName)) {
+			log(LogLevel.ERROR, "expected literal '" + literalName + "'");
 			return new ParseError(startPosition, "Expected '" + literalName + "'", ErrorType.WRONG_PARSER);
 		}
+		log(LogLevel.SUCCESS, "detected literal '" + literalName + "'");
 		return parserContext.getTailParser(false).parse(tokenStream, literalInfo, expectedResultTypes);
 	}
 
@@ -113,6 +123,7 @@ public class LiteralParser extends AbstractEntityParser
 		int startPosition = tokenStream.getPosition();
 		char c = tokenStream.peekCharacter();
 		if (!"+-.0123456789".contains(String.valueOf(c))) {
+			log(LogLevel.ERROR, "expected a numeric literal");
 			return new ParseError(startPosition, "Expected a literal", ErrorType.WRONG_PARSER);
 		}
 
@@ -123,6 +134,7 @@ public class LiteralParser extends AbstractEntityParser
 				return parseResult;
 			}
 		}
+		log(LogLevel.ERROR, "expected a numeric literal");
 		return new ParseError(startPosition, "Expected a numeric literal", ErrorType.WRONG_PARSER);
 	}
 
@@ -151,14 +163,16 @@ public class LiteralParser extends AbstractEntityParser
 				return new ParseError(startPosition, wrongTypeError, ErrorType.WRONG_PARSER);
 			}
 			if (token.isContainsCaret()) {
-				// No suggestions possible
+				log(LogLevel.INFO, "no completion suggestions available");
 				return CompletionSuggestions.NONE;
 			}
 
 			T literalValue;
 			try {
 				literalValue = valueParser.parse(token.getValue());
+				log(LogLevel.SUCCESS, "detected numeric literal '" + token.getValue() + "'");
 			} catch (NumberFormatException e) {
+				log(LogLevel.ERROR, "number format exception: " + e.getMessage());
 				return new ParseError(startPosition, wrongTypeError, ErrorType.SEMANTIC_ERROR);
 			}
 

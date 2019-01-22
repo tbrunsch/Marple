@@ -1,6 +1,7 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
@@ -21,14 +22,17 @@ public class CastParser extends AbstractEntityParser
 		int position = tokenStream.getPosition();
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		if (characterToken == null || characterToken.getValue().charAt(0) != '(') {
+			log(LogLevel.ERROR, "expected '('");
 			return new ParseError(position, "Expected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
 		if (characterToken.isContainsCaret()) {
-			// nothing we can suggest after '('
+			log(LogLevel.INFO, "potential cast operator; no completion suggestions available");
 			return CompletionSuggestions.NONE;
 		}
 
-		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream, expectedResultTypes, true, false);
+		log(LogLevel.INFO, "parsing class at " + tokenStream);
+		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream.clone(), expectedResultTypes, true, false);
+		log(LogLevel.INFO, "parse result: " + classParseResult.getResultType());
 
 		// propagate anything except results
 		if (classParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
@@ -44,10 +48,14 @@ public class CastParser extends AbstractEntityParser
 
 		characterToken = tokenStream.readCharacterUnchecked();
 		if (characterToken == null || characterToken.getValue().charAt(0) != ')') {
+			log(LogLevel.ERROR, "missing ')' at " + tokenStream);
 			return new ParseError(position, "Expected closing parenthesis ')'", ErrorType.SYNTAX_ERROR);
 		}
+		log(LogLevel.SUCCESS, "detected cast operator at " + tokenStream);
+
 		if (characterToken.isContainsCaret()) {
 			// nothing we can suggest after ')'
+			log(LogLevel.INFO, "no completion suggestions available for position " + tokenStream);
 			return CompletionSuggestions.NONE;
 		}
 
@@ -55,6 +63,7 @@ public class CastParser extends AbstractEntityParser
 	}
 
 	private ParseResultIF parseAndCast(TokenStream tokenStream, TypeToken<?> targetType) {
+		log(LogLevel.INFO, "parsing object to cast at " + tokenStream);
 		ParseResultIF objectParseResult = parserContext.getExpressionParser().parse(tokenStream, thisInfo, null);
 
 		// propagate anything except results
@@ -69,8 +78,10 @@ public class CastParser extends AbstractEntityParser
 
 		try {
 			ObjectInfo castInfo = parserContext.getObjectInfoProvider().getCastInfo(objectInfo, targetType);
+			log(LogLevel.SUCCESS, "successfully casted object");
 			return new ParseResult(parsedToPosition, castInfo);
 		} catch (ClassCastException e) {
+			log(LogLevel.ERROR, "class cast exception: " + e.getMessage());
 			return new ParseError(tokenStream.getPosition(), "Cannot cast expression to '" + targetType + "'", ErrorType.SEMANTIC_ERROR, e);
 		}
 	}

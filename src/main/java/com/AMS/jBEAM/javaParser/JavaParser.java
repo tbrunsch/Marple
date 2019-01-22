@@ -1,5 +1,7 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.AMS.jBEAM.javaParser.debug.LogLevel;
+import com.AMS.jBEAM.javaParser.debug.ParserLogEntry;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
@@ -118,10 +120,22 @@ public class JavaParser
 		try {
 			return parserPool.getCompoundExpressionParser().parse(tokenStream, thisInfo, null);
 		} catch (Exception e) {
-			String message = e.getClass().getSimpleName();
-			String error = e.getMessage();
-			if (error != null) {
-				message += ("\n" + error);
+			String exceptionClassName = e.getClass().getSimpleName();
+			String exceptionMessage = e.getMessage();
+
+			StringBuilder logMessageBuilder = new StringBuilder();
+			logMessageBuilder.append(exceptionClassName);
+			if (exceptionMessage != null) {
+				logMessageBuilder.append(": ").append(exceptionMessage);
+			}
+			for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+				logMessageBuilder.append("\n").append(element);
+			}
+			settings.getLogger().log(new ParserLogEntry(LogLevel.ERROR, getClass().getSimpleName(), logMessageBuilder.toString()));
+
+			String message = exceptionClassName;
+			if (exceptionMessage != null) {
+				message += ("\n" + exceptionMessage);
 			}
 			return new ParseError(-1, message, ErrorType.EVALUATION_EXCEPTION, e);
 		}

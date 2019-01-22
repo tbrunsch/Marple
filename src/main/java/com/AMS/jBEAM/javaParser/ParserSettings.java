@@ -1,5 +1,7 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
+
 public class ParserSettings
 {
 	private final Imports			imports;
@@ -8,12 +10,15 @@ public class ParserSettings
 	private final EvaluationMode	evaluationModeCodeCompletion;
 	private final EvaluationMode	evaluationModeCodeEvaluation;
 
-	public ParserSettings(Imports imports, VariablePool variablePool, AccessLevel minimumAccessLevel, EvaluationMode evaluationModeCodeCompletion, EvaluationMode evaluationModeCodeEvaluation) {
+	private final ParserLoggerIF	logger;
+
+	ParserSettings(Imports imports, VariablePool variablePool, AccessLevel minimumAccessLevel, EvaluationMode evaluationModeCodeCompletion, EvaluationMode evaluationModeCodeEvaluation, ParserLoggerIF logger) {
 		this.imports = imports;
 		this.variablePool = variablePool;
 		this.minimumAccessLevel = minimumAccessLevel;
 		this.evaluationModeCodeCompletion = evaluationModeCodeCompletion;
 		this.evaluationModeCodeEvaluation = evaluationModeCodeEvaluation;
+		this.logger = logger;
 	}
 
 	public Imports getImports() {
@@ -34,5 +39,9 @@ public class ParserSettings
 
 	public EvaluationMode getEvaluationModeCodeEvaluation() {
 		return evaluationModeCodeEvaluation;
+	}
+
+	public ParserLoggerIF getLogger() {
+		return logger;
 	}
 }

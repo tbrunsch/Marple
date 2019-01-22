@@ -1,5 +1,8 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.AMS.jBEAM.javaParser.debug.LogLevel;
+import com.AMS.jBEAM.javaParser.debug.ParserLogEntry;
+import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -1066,6 +1069,12 @@ public class ExpressionEvaluationTest
 			return (T) this;
 		}
 
+		 T logger(ParserLoggerIF logger) {
+			verifyBeforeTest();
+			settingsBuilder.logger(logger);
+			return (T) this;
+		 }
+
 		private void verifyBeforeTest() {
 			if (settings != null) {
 				throw new IllegalStateException("Settings cannot be changed between tests");
@@ -1091,11 +1100,18 @@ public class ExpressionEvaluationTest
 		TestExecutor test(String javaExpression, Object expectedValue) {
 			ensureValidSettings();
 
+			ParserLoggerIF logger = settings.getLogger();
+			logger.log(new ParserLogEntry(LogLevel.INFO, "Test", "Testing expression '" + javaExpression + "'...\n"));
+
 			JavaParser parser = new JavaParser();
 			try {
 				Object actualValue = parser.evaluate(javaExpression, settings, testInstance);
 				assertEquals("Expression: " + javaExpression, expectedValue, actualValue);
 			} catch (ParseException e) {
+				int numLoggedEntries = logger.getNumberOfLoggedEntries();
+				if (numLoggedEntries > 0) {
+					System.out.println("Exception after " + numLoggedEntries + " logged entries.");
+				}
 				assertTrue("Exception during expression evaluation: " + e.getMessage(), false);
 			}
 			return this;

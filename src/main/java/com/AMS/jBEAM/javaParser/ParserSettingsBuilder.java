@@ -1,5 +1,7 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
+import com.AMS.jBEAM.javaParser.debug.ParserNullLogger;
 import com.AMS.jBEAM.javaParser.utils.ClassInfo;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -15,6 +17,8 @@ public class ParserSettingsBuilder
 
 	private EvaluationMode												evaluationModeCodeCompletion	= EvaluationMode.NONE;
 	private EvaluationMode												evaluationModeCodeEvaluation	= EvaluationMode.STRONGLY_TYPED;
+
+	private ParserLoggerIF												logger							= new ParserNullLogger();
 
 	public ParserSettingsBuilder importClass(ClassInfo classInfo) {
 		importClassesBuilder.add(classInfo);
@@ -46,9 +50,14 @@ public class ParserSettingsBuilder
 		return this;
 	}
 
+	public ParserSettingsBuilder logger(ParserLoggerIF logger) {
+		this.logger = logger;
+		return this;
+	}
+
 	public ParserSettings build() {
 		Imports imports = new Imports(importClassesBuilder.build(), importPackagesBuilder.build());
 		VariablePool variablePool = new VariablePool(variablesBuilder.build());
-		return new ParserSettings(imports, variablePool, minimumAccessLevel, evaluationModeCodeCompletion, evaluationModeCodeEvaluation);
+		return new ParserSettings(imports, variablePool, minimumAccessLevel, evaluationModeCodeCompletion, evaluationModeCodeEvaluation, logger);
 	}
 }

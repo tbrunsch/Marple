@@ -1,6 +1,7 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
@@ -45,17 +46,20 @@ public class FieldParser extends AbstractEntityParser
 			} catch (TokenStream.JavaTokenParseException e) {
 				insertionEnd = startPosition;
 			}
+			log(LogLevel.INFO, "suggesting fields for completion...");
 			return parserContext.getFieldDataProvider().suggestFields(currentContextInfo, expectedResultTypes, startPosition, insertionEnd, staticOnly);
 		}
 
-		if (thisInfo.getObject() == null && !staticOnly) {
-			return new ParseError(startPosition, "Null object does not have any fields", ErrorType.WRONG_PARSER);
+		if (currentContextInfo.getDeclaredType() == null && !staticOnly) {
+			log(LogLevel.ERROR, "null pointer exception");
+			return new ParseError(startPosition, "Null pointer exception", ErrorType.WRONG_PARSER);
 		}
 
 		Token fieldNameToken;
 		try {
 			fieldNameToken = tokenStream.readIdentifier();
 		} catch (TokenStream.JavaTokenParseException e) {
+			log(LogLevel.ERROR, "missing field name at " + tokenStream);
 			return new ParseError(startPosition, "Expected an identifier", ErrorType.WRONG_PARSER);
 		}
 		String fieldName = fieldNameToken.getValue();
@@ -66,6 +70,7 @@ public class FieldParser extends AbstractEntityParser
 
 		// check for code completion
 		if (fieldNameToken.isContainsCaret()) {
+			log(LogLevel.SUCCESS, "suggesting fields matching '" + fieldName + "'");
 			Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 				fieldInfos,
 				fieldInfo -> new CompletionSuggestionField(fieldInfo, startPosition, endPosition),
@@ -75,14 +80,17 @@ public class FieldParser extends AbstractEntityParser
 		}
 
 		if (tokenStream.hasMore() && tokenStream.peekCharacter() == '(') {
+			log(LogLevel.ERROR, "unexpected '(' at " + tokenStream);
 			return new ParseError(tokenStream.getPosition() + 1, "Unexpected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
 
 		// no code completion requested => field name must exist
 		Optional<FieldInfo> firstFieldInfoMatch = fieldInfos.stream().filter(fieldInfo -> fieldInfo.getName().equals(fieldName)).findFirst();
 		if (!firstFieldInfoMatch.isPresent()) {
+			log(LogLevel.ERROR, "unknown field '" + fieldName + "'");
 			return new ParseError(startPosition, "Unknown field '" + fieldName + "'", ErrorType.SEMANTIC_ERROR);
 		}
+		log(LogLevel.SUCCESS, "detected field '" + fieldName + "'");
 
 		FieldInfo fieldInfo = firstFieldInfoMatch.get();
 		ObjectInfo matchingFieldInfo = parserContext.getObjectInfoProvider().getFieldInfo(currentContextInfo, fieldInfo);

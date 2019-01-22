@@ -1,6 +1,7 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
@@ -36,16 +37,18 @@ public class TailParser extends AbstractEntityParser
 		if (tokenStream.hasMore()) {
 			char nextChar = tokenStream.peekCharacter();
 			if (nextChar == '.') {
+				log(LogLevel.INFO, "detected '.'");
 				return parseDot(tokenStream, currentContextInfo, expectedResultTypes);
 			} else if (nextChar == '[') {
 				if (staticOnly) {
+					log(LogLevel.ERROR, "cannot apply operator [] for classes");
 					return new ParseError(tokenStream.getPosition(), "Cannot apply [] to classes", ErrorType.SYNTAX_ERROR);
 				}
 
 				TypeToken<?> currentContextType = parserContext.getObjectInfoProvider().getType(currentContextInfo);
 				TypeToken<?> elementType = currentContextType.getComponentType();
 				if (elementType == null) {
-					// no array type
+					log(LogLevel.ERROR, "cannot apply operator [] for non-array types");
 					return new ParseError(tokenStream.getPosition(), "Cannot apply [] to non-array types", ErrorType.SEMANTIC_ERROR);
 				}
 
@@ -62,7 +65,9 @@ public class TailParser extends AbstractEntityParser
 				ObjectInfo elementInfo;
 				try {
 					elementInfo = parserContext.getObjectInfoProvider().getArrayElementInfo(currentContextInfo, indexInfo);
+					log(LogLevel.SUCCESS, "detected valid array access");
 				} catch (ClassCastException | ArrayIndexOutOfBoundsException e) {
+					log(LogLevel.ERROR, "caught exception: " + e.getMessage());
 					return new ParseError(startPosition, e.getClass().getSimpleName() + " during array index evaluation", ErrorType.EVALUATION_EXCEPTION, e);
 				}
 				tokenStream.moveTo(parsedToPosition);
@@ -97,6 +102,8 @@ public class TailParser extends AbstractEntityParser
 	}
 
 	private ParseResultIF parseArrayIndex(TokenStream tokenStream) {
+		log(LogLevel.INFO, "parsing array index");
+
 		List<TypeToken<?>> expectedResultTypes = Collections.singletonList(TypeToken.of(int.class));
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals("[");
@@ -115,11 +122,12 @@ public class TailParser extends AbstractEntityParser
 		characterToken = tokenStream.readCharacterUnchecked();
 
 		if (characterToken == null || characterToken.getValue().charAt(0) != ']') {
+			log(LogLevel.ERROR, "missing ']' at " + tokenStream);
 			return new ParseError(parsedToPosition, "Expected closing bracket ']'", ErrorType.SYNTAX_ERROR);
 		}
 
 		if (characterToken.isContainsCaret()) {
-			// nothing we can suggest after ']'
+			log(LogLevel.INFO, "no completion suggestions available at " + tokenStream);
 			return CompletionSuggestions.NONE;
 		}
 

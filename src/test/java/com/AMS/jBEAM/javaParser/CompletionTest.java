@@ -1,5 +1,9 @@
 package com.AMS.jBEAM.javaParser;
 
+import com.AMS.jBEAM.javaParser.debug.LogLevel;
+import com.AMS.jBEAM.javaParser.debug.ParserConsoleLogger;
+import com.AMS.jBEAM.javaParser.debug.ParserLogEntry;
+import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionIF;
 import com.google.common.base.Joiner;
 import org.junit.Test;
@@ -676,6 +680,12 @@ public class CompletionTest
 			return (T) this;
 		}
 
+		T logger(ParserLoggerIF logger) {
+			verifyBeforeTest();
+			settingsBuilder.logger(logger);
+			return (T) this;
+		}
+
 		private void verifyBeforeTest() {
 			if (settings != null) {
 				throw new IllegalStateException("Settings cannot be changed between tests");
@@ -701,12 +711,19 @@ public class CompletionTest
 		TestExecutor test(String javaExpression, String... expectedSuggestions) {
 			ensureValidSettings();
 
+			ParserLoggerIF logger = settings.getLogger();
+			logger.log(new ParserLogEntry(LogLevel.INFO, "Test", "Testing expression '" + javaExpression + "'...\n"));
+
 			JavaParser parser = new JavaParser();
 			int caret = javaExpression.length();
 			List<String> suggestions = null;
 			try {
 				suggestions = extractSuggestions(parser.suggestCodeCompletion(javaExpression, settings, caret, testInstance));
 			} catch (ParseException e) {
+				int numLoggedEntries = logger.getNumberOfLoggedEntries();
+				if (numLoggedEntries > 0) {
+					System.out.println("Exception after " + numLoggedEntries + " logged entries.");
+				}
 				assertTrue("Exception during code completion: " + e.getMessage(), false);
 			}
 			assertTrue(MessageFormat.format("Expression: {0}, expected completions: {1}, actual completions: {2}",

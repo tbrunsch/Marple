@@ -2,6 +2,7 @@ package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.EvaluationMode;
 import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 import com.AMS.jBEAM.javaParser.tokenizer.BinaryOperator;
@@ -52,6 +53,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 
 	@Override
 	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
+		log(LogLevel.INFO, "parsing first expression");
 		ParseResultIF parseResult = parserContext.getExpressionParser().parse(tokenStream, currentContextInfo, expectedResultTypes);
 
 		// propagate anything except results
@@ -75,8 +77,10 @@ public class CompoundExpressionParser extends AbstractEntityParser
 			if (operatorToken == null) {
 				return ParseUtils.createParseResult(context, lhsInfo, expectedResultTypes, parsedToPosition);
 			}
+			log(LogLevel.SUCCESS, "detected binary operator '" + operatorToken.getValue() + "' at " + tokenStream);
+
 			if (operatorToken.isContainsCaret()) {
-				// No suggestions possible
+				log(LogLevel.INFO, "no completion suggestions available");
 				return CompletionSuggestions.NONE;
 			}
 
@@ -108,7 +112,9 @@ public class CompoundExpressionParser extends AbstractEntityParser
 						if (considerOperatorResult) {
 							lhsInfo = operatorResult;
 						}
+						log(LogLevel.SUCCESS, "applied operator successfully");
 					} catch (OperatorException e) {
+						log(LogLevel.ERROR, "applying operator failed: " + e.getMessage());
 						return new ParseError(parsedToPosition, e.getMessage(), ErrorType.SEMANTIC_ERROR);
 					}
 					break;
@@ -126,7 +132,9 @@ public class CompoundExpressionParser extends AbstractEntityParser
 					ObjectInfo operatorResultInfo;
 					try {
 						operatorResultInfo = applyOperator(context, lhsInfo, rhsInfo, operator);
+						log(LogLevel.SUCCESS, "applied operator successfully");
 					} catch (OperatorException e) {
+						log(LogLevel.ERROR, "applying operator failed: " + e.getMessage());
 						return new ParseError(rhsParseResult.getParsedToPosition(), e.getMessage(), ErrorType.SEMANTIC_ERROR);
 					}
 					return ParseUtils.createParseResult(context, operatorResultInfo, expectedResultTypes, rhsParseResult.getParsedToPosition());

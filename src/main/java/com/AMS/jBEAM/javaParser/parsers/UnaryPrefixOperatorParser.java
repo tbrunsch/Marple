@@ -1,6 +1,7 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
@@ -34,9 +35,10 @@ public class UnaryPrefixOperatorParser extends AbstractEntityParser
 	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
 		Token operatorToken = tokenStream.readUnaryOperatorUnchecked();
 		if (operatorToken == null) {
+			log(LogLevel.ERROR, "expected unary operator");
 			return new ParseError(tokenStream.getPosition(), "Expression does not start with an unary operator", ErrorType.WRONG_PARSER);
 		} else if (operatorToken.isContainsCaret()) {
-			// No suggestions possible
+			log(LogLevel.INFO, "no completion suggestions available");
 			return CompletionSuggestions.NONE;
 		}
 		UnaryOperator operator = UnaryOperator.getValue(operatorToken.getValue());
@@ -55,7 +57,9 @@ public class UnaryPrefixOperatorParser extends AbstractEntityParser
 		ObjectInfo operatorResult;
 		try {
 			operatorResult = applyOperator(expressionInfo, operator);
+			log(LogLevel.SUCCESS, "applied operator successfully");
 		} catch (OperatorException e) {
+			log(LogLevel.ERROR, "applying operator failed: " + e.getMessage());
 			return new ParseError(parsedToPosition, e.getMessage(), ErrorType.SEMANTIC_ERROR);
 		}
 		return new ParseResult(parsedToPosition, operatorResult);

@@ -1,6 +1,7 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
@@ -17,7 +18,9 @@ public class ClassParser extends AbstractEntityParser
 
 	@Override
 	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
+		log(LogLevel.INFO, "parsing class");
 		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream, expectedResultTypes, false, true);
+		log(LogLevel.INFO, "parse result: " + classParseResult.getResultType());
 
 		// propagate anything except results
 		if (classParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
@@ -31,6 +34,7 @@ public class ClassParser extends AbstractEntityParser
 		tokenStream.moveTo(parsedToPosition);
 
 		if (!tokenStream.hasMore() || tokenStream.peekCharacter() != '.') {
+			log(LogLevel.ERROR, "missing '.' at " + tokenStream);
 			return new ParseError(tokenStream.getPosition(), "Expected a dot '.'", ErrorType.WRONG_PARSER);
 		}
 		return parserContext.getTailParser(true).parse(tokenStream, classInfo, expectedResultTypes);
