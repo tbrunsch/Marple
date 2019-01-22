@@ -2,13 +2,13 @@ package com.AMS.jBEAM.javaParser;
 
 public class ParserSettings
 {
-	private final ImportsIF			imports;
-	private final VariablePoolIF	variablePool;
+	private final Imports			imports;
+	private final VariablePool		variablePool;
 	private final AccessLevel		minimumAccessLevel;
 	private final EvaluationMode	evaluationModeCodeCompletion;
 	private final EvaluationMode	evaluationModeCodeEvaluation;
 
-	public ParserSettings(ImportsIF imports, VariablePoolIF variablePool, AccessLevel minimumAccessLevel, EvaluationMode evaluationModeCodeCompletion, EvaluationMode evaluationModeCodeEvaluation) {
+	public ParserSettings(Imports imports, VariablePool variablePool, AccessLevel minimumAccessLevel, EvaluationMode evaluationModeCodeCompletion, EvaluationMode evaluationModeCodeEvaluation) {
 		this.imports = imports;
 		this.variablePool = variablePool;
 		this.minimumAccessLevel = minimumAccessLevel;
@@ -16,11 +16,11 @@ public class ParserSettings
 		this.evaluationModeCodeEvaluation = evaluationModeCodeEvaluation;
 	}
 
-	public ImportsIF getImports() {
+	public Imports getImports() {
 		return imports;
 	}
 
-	public VariablePoolIF getVariablePool() {
+	public VariablePool getVariablePool() {
 		return variablePool;
 	}
 

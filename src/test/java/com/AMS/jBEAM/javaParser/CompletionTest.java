@@ -619,13 +619,11 @@ public class CompletionTest
 
 		Variable variable1 = new Variable("xyz", 13.0, true);
 		Variable variable2 = new Variable("abc", "Test", true);
-		VariablePoolIF variablePool = new VariablePool();
-		variablePool.addVariable(variable1);
-		variablePool.addVariable(variable2);
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.variablePool(variablePool)
+			.addVariable(variable1)
+			.addVariable(variable2)
 			.test("x",			"x", "xyz", "xy", "xyzw", "abc")
 			.test("xy",		"xy", "xyz", "xyzw", "x", "abc")
 			.test("xyz",		"xyz", "xyzw", "x", "xy", "abc")
@@ -653,35 +651,28 @@ public class CompletionTest
 		final Object			testInstance;
 
 		ParserSettings 			settings;
-		private EvaluationMode	evaluationMode		= EvaluationMode.NONE;
-		private ImportsIF		imports				= new Imports();
-		private VariablePoolIF	variablePool		= new VariablePool();
-		private AccessLevel		minimumAccessLevel	= AccessLevel.PRIVATE;
+		ParserSettingsBuilder	settingsBuilder	= new ParserSettingsBuilder()
+													.minimumAccessLevel(AccessLevel.PRIVATE);
 
 		AbstractTestExecutor(Object testInstance) {
 			this.testInstance = testInstance;
 		}
 
 		T evaluationMode(EvaluationMode evaluationMode) {
-			this.evaluationMode = evaluationMode;
+			verifyBeforeTest();
+			settingsBuilder.evaluationModeCodeCompletion(evaluationMode);
 			return (T) this;
 		}
 
-		T imports(ImportsIF imports) {
+		T addVariable(Variable variable) {
 			verifyBeforeTest();
-			this.imports = imports;
-			return (T) this;
-		}
-
-		T variablePool(VariablePoolIF variablePool) {
-			verifyBeforeTest();
-			this.variablePool = variablePool;
+			settingsBuilder.addVariable(variable);
 			return (T) this;
 		}
 
 		T minimumAccessLevel(AccessLevel minimumAccessLevel) {
 			verifyBeforeTest();
-			this.minimumAccessLevel = minimumAccessLevel;
+			settingsBuilder.minimumAccessLevel(minimumAccessLevel);
 			return (T) this;
 		}
 
@@ -693,7 +684,7 @@ public class CompletionTest
 
 		void ensureValidSettings() {
 			if (settings == null) {
-				settings = new ParserSettings(imports, variablePool, minimumAccessLevel, evaluationMode, EvaluationMode.STRONGLY_TYPED);
+				settings = settingsBuilder.build();
 			}
 		}
 	}

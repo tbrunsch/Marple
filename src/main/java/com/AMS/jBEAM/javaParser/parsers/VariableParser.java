@@ -2,7 +2,7 @@ package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.Variable;
-import com.AMS.jBEAM.javaParser.VariablePoolIF;
+import com.AMS.jBEAM.javaParser.VariablePool;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
@@ -48,7 +48,7 @@ public class VariableParser extends AbstractEntityParser
 		String variableName = variableToken.getValue();
 		int endPosition = tokenStream.getPosition();
 
-		VariablePoolIF variablePool = parserContext.getSettings().getVariablePool();
+		VariablePool variablePool = parserContext.getSettings().getVariablePool();
 		List<Variable> variables = variablePool.getVariables().stream().sorted(Comparator.comparing(Variable::getName)).collect(Collectors.toList());
 
 		// check for code completion

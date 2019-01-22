@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
-import com.AMS.jBEAM.javaParser.ImportsIF;
+import com.AMS.jBEAM.javaParser.Imports;
 import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
@@ -26,9 +26,9 @@ public class ClassDataProvider
 	private static final List<ClassInfo>	PRIMITIVE_CLASS_INFOS		= PRIMITIVE_CLASSES_BY_NAME.keySet().stream().map(ClassInfo::new).collect(Collectors.toList());
 
 	private final ParserContext	parserContext;
-	private final ImportsIF		imports;
+	private final Imports		imports;
 
-	public ClassDataProvider(ParserContext parserContext, ImportsIF imports) {
+	public ClassDataProvider(ParserContext parserContext, Imports imports) {
 		this.parserContext = parserContext;
 		this.imports = imports;
 	}
@@ -41,7 +41,7 @@ public class ClassDataProvider
 	private static class ClassReader
 	{
 		private final ParserContext	parserContext;
-		private final ImportsIF		imports;
+		private final Imports 		imports;
 		private final TokenStream	tokenStream;
 
 		private String				className				= "";
@@ -49,7 +49,7 @@ public class ClassDataProvider
 		private int					lastParsedToPosition	= -1;
 		private int					identifierStartPosition	= -1;
 
-		ClassReader(ParserContext parserContext, ImportsIF imports, TokenStream tokenStream) {
+		ClassReader(ParserContext parserContext, Imports imports, TokenStream tokenStream) {
 			this.parserContext = parserContext;
 			this.imports = imports;
 			this.tokenStream = tokenStream;

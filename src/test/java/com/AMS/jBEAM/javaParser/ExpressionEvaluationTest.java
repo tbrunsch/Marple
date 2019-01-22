@@ -127,9 +127,9 @@ public class ExpressionEvaluationTest
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("getInt()", 3)
-			.test("getDouble()", 2.7)
-			.test("getString()", "xyz");
+			.test("getInt()",		3)
+			.test("getDouble()",	2.7)
+			.test("getString()",	"xyz");
 	}
 
 	@Test
@@ -179,9 +179,9 @@ public class ExpressionEvaluationTest
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("getTestClass().i", 7)
-			.test("getTestClass().d", 1.2)
-			.test("getTestClass().getString()", "xyz");
+			.test("getTestClass().i",				7)
+			.test("getTestClass().d",				1.2)
+			.test("getTestClass().getString()",	"xyz");
 	}
 
 	@Test
@@ -202,9 +202,9 @@ public class ExpressionEvaluationTest
 
 		new TestExecutor(testInstance)
 			.evaluationMode(EvaluationMode.DUCK_TYPING)
-			.test("getTestClass().i", 7)
-			.test("getTestClass().d", 1.2)
-			.test("getTestClass().getString()", "xyz");
+			.test("getTestClass().i",				7)
+			.test("getTestClass().d",				1.2)
+			.test("getTestClass().getString()",	"xyz");
 	}
 
 	@Test
@@ -262,10 +262,10 @@ public class ExpressionEvaluationTest
 
 		new TestExecutor(testInstance)
 			.evaluationMode(EvaluationMode.DUCK_TYPING)
-			.test("getTestClasses()[i0].i0", 13)
-			.test("getTestClasses()[i0].getI1()", 7)
-			.test("getTestClasses()[getI1()].i0", 4)
-			.test("getTestClasses()[getI1()].getI1()", 9);
+			.test("getTestClasses()[i0].i0",			13)
+			.test("getTestClasses()[i0].getI1()",		7)
+			.test("getTestClasses()[getI1()].i0",		4)
+			.test("getTestClasses()[getI1()].getI1()",	9);
 	}
 
 	@Test
@@ -291,8 +291,8 @@ public class ExpressionEvaluationTest
 
 		Object testInstance = new TestClass3();
 		new TestExecutor(testInstance)
-			.test("getTestClass(myInt).i", 3)
-			.test("getTestClass(myString).d", 2.7);
+			.test("getTestClass(myInt).i",		3)
+			.test("getTestClass(myString).d",	2.7);
 
 		new ErrorTestExecutor(testInstance)
 			.test("getTestClass(myInt).d")
@@ -329,8 +329,8 @@ public class ExpressionEvaluationTest
 
 		new TestExecutor(testInstance)
 			.evaluationMode(EvaluationMode.DUCK_TYPING)
-			.test("getTestClass(getTestClass(i)).myInt", 7)
-			.test("getTestClass(getTestClass(j)).myString", "abc");
+			.test("getTestClass(getTestClass(i)).myInt",		7)
+			.test("getTestClass(getTestClass(j)).myString",	"abc");
 
 		new ErrorTestExecutor(testInstance)
 			.evaluationMode(EvaluationMode.DUCK_TYPING)
@@ -348,11 +348,11 @@ public class ExpressionEvaluationTest
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
 			.test("\"xyz\"", "xyz")
-			.test("getString(\"xyz\")", "xyz")
-			.test("getString(\"\\\"\")", "\"")
-			.test("getString(\"\\n\")", "\n")
-			.test("getString(\"\\r\")", "\r")
-			.test("getString(\"\\t\")", "\t");
+			.test("getString(\"xyz\")",	"xyz")
+			.test("getString(\"\\\"\")",	"\"")
+			.test("getString(\"\\n\")",	"\n")
+			.test("getString(\"\\r\")",	"\r")
+			.test("getString(\"\\t\")",	"\t");
 
 		new ErrorTestExecutor(testInstance)
 			.test("getString(xyz)")
@@ -372,13 +372,13 @@ public class ExpressionEvaluationTest
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
 			.test("'x'", 'x')
-			.test("getChar('x')", 'x')
-			.test("getChar('\\'')", '\'')
-			.test("getChar('\"')", '"')
-			.test("getChar('\\\"')", '\"')
-			.test("getChar('\\n')", '\n')
-			.test("getChar('\\r')", '\r')
-			.test("getChar('\\t')", '\t');
+			.test("getChar('x')",		'x')
+			.test("getChar('\\'')",	'\'')
+			.test("getChar('\"')",		'"')
+			.test("getChar('\\\"')",	'\"')
+			.test("getChar('\\n')",	'\n')
+			.test("getChar('\\r')",	'\r')
+			.test("getChar('\\t')",	'\t');
 
 		new ErrorTestExecutor(testInstance)
 			.test("getChar(x)")
@@ -397,10 +397,10 @@ public class ExpressionEvaluationTest
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("true", true)
-			.test("false", false)
-			.test("getBoolean(true)", true)
-			.test("getBoolean(false)", false);
+			.test("true",				true)
+			.test("false",				false)
+			.test("getBoolean(true)",	true)
+			.test("getBoolean(false)",	false);
 
 		new ErrorTestExecutor(testInstance)
 			.test("getBoolean(tru)")
@@ -418,8 +418,8 @@ public class ExpressionEvaluationTest
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("null", null)
-			.test("getObject(null)", null);
+			.test("null",				null)
+			.test("getObject(null)",	null);
 
 		new ErrorTestExecutor(testInstance)
 			.test("nul")
@@ -439,8 +439,8 @@ public class ExpressionEvaluationTest
 
 		Object testInstance = new TestClass(23);
 		new TestExecutor(testInstance)
-			.test("this.value", 23)
-			.test("getValue(this)", 23);
+			.test("this.value",		23)
+			.test("getValue(this)",	23);
 	}
 
 	@Test
@@ -455,14 +455,14 @@ public class ExpressionEvaluationTest
 
 		TestClass testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("120", 120)
-			.test("getByte((byte) 120)", testInstance.getByte((byte) 120))
-			.test("1234", 1234)
-			.test("getShort((short) 1234)", testInstance.getShort((short) 1234))
-			.test("100000", 100000)
-			.test("getInt(100000)", testInstance.getInt(100000))
-			.test("5000000000L", 5000000000L)
-			.test("getLong(5000000000l)", testInstance.getLong(5000000000l));
+			.test("120",						120)
+			.test("getByte((byte) 120)",		testInstance.getByte((byte) 120))
+			.test("1234",						1234)
+			.test("getShort((short) 1234)",	testInstance.getShort((short) 1234))
+			.test("100000",					100000)
+			.test("getInt(100000)",			testInstance.getInt(100000))
+			.test("5000000000L",				5000000000L)
+			.test("getLong(5000000000l)",		testInstance.getLong(5000000000l));
 
 		new ErrorTestExecutor(testInstance)
 			.test("getByte(123)")
@@ -480,26 +480,26 @@ public class ExpressionEvaluationTest
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("123f", 123f)
-			.test("getFloat(123f)", 123f)
-			.test("123e0", 123e0)
-			.test("getDouble(123e0)", 123e0)
-			.test("-123e+07", -123e+07)
-			.test("getDouble(-123e+07)", -123e+07)
-			.test("+123e-13F", +123e-13F)
-			.test("getFloat(+123e-13F)", +123e-13F)
-			.test("-123.456E1d", -123.456E1d)
-			.test("getDouble(-123.456E1d)", -123.456E1d)
-			.test("123.d", 123.d)
-			.test("getDouble(123.d)", 123.d)
-			.test("123.e2D", 123.e2D)
-			.test("getDouble(123.e2D)", 123.e2D)
-			.test("123.456f", 123.456f)
-			.test("getFloat(123.456f)", 123.456f)
-			.test("+.1e-1d", +.1e-1d)
-			.test("getDouble(+.1e-1d)", +.1e-1d)
-			.test("-.2e3f", -.2e3f)
-			.test("getFloat(-.2e3f)", -.2e3f);
+			.test("123f",						123f)
+			.test("getFloat(123f)",			123f)
+			.test("123e0",						123e0)
+			.test("getDouble(123e0)",			123e0)
+			.test("-123e+07",					-123e+07)
+			.test("getDouble(-123e+07)",		-123e+07)
+			.test("+123e-13F",					+123e-13F)
+			.test("getFloat(+123e-13F)",		+123e-13F)
+			.test("-123.456E1d",				-123.456E1d)
+			.test("getDouble(-123.456E1d)",	-123.456E1d)
+			.test("123.d",						123.d)
+			.test("getDouble(123.d)",			123.d)
+			.test("123.e2D",					123.e2D)
+			.test("getDouble(123.e2D)",		123.e2D)
+			.test("123.456f",					123.456f)
+			.test("getFloat(123.456f)",		123.456f)
+			.test("+.1e-1d",					+.1e-1d)
+			.test("getDouble(+.1e-1d)",		+.1e-1d)
+			.test("-.2e3f",					-.2e3f)
+			.test("getFloat(-.2e3f)",			-.2e3f);
 	}
 
 	@Test
@@ -534,14 +534,14 @@ public class ExpressionEvaluationTest
 		Object testInstance = new TestClass("abc", (short) 13, 'X', 123456789, -13e02f, 1L, false, 2.34e-56);
 		new TestExecutor(testInstance)
 			.test(" s ", "abc")
-			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d  ) . sValue ", (short) 13)
-			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d  ) .s", "abc" + "_xyz")
-			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d  ). c", 'X')
-			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d  ).i ", 123456789 + 1)
-			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d) .f", -13e02f / 2.f)
-			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d ). l", 1L * 3)
-			.test("  getTestClass (s,sValue,  c,i  ,  f,l,b,d ).b", !false)
-			.test("  getTestClass( s, sValue, c, i, f, l, b, d  ) . d", 3 - 2.34e-56);
+			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d  ) . sValue ",	(short) 13)
+			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d  ) .s",			"abc" + "_xyz")
+			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d  ). c",			'X')
+			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d  ).i ",			123456789 + 1)
+			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d) .f",				-13e02f / 2.f)
+			.test("  getTestClass (  s , sValue,  c ,i  ,  f , l,b,d ). l",			1L * 3)
+			.test("  getTestClass (s,sValue,  c,i  ,  f,l,b,d ).b",					!false)
+			.test("  getTestClass( s, sValue, c, i, f, l, b, d  ) . d",				3 - 2.34e-56);
 	}
 
 	@Test
@@ -566,12 +566,12 @@ public class ExpressionEvaluationTest
 
 		TestClass testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("get(c)", testInstance.get(testInstance.c))
-			.test("get(b)", testInstance.get(testInstance.b))
-			.test("get(i)", testInstance.get(testInstance.i))
-			.test("get(l)", testInstance.get(testInstance.l))
-			.test("get(o1)", testInstance.get(testInstance.o1))
-			.test("get(o2)", testInstance.get(testInstance.o2));
+			.test("get(c)",	testInstance.get(testInstance.c))
+			.test("get(b)",	testInstance.get(testInstance.b))
+			.test("get(i)",	testInstance.get(testInstance.i))
+			.test("get(l)",	testInstance.get(testInstance.l))
+			.test("get(o1)",	testInstance.get(testInstance.o1))
+			.test("get(o2)",	testInstance.get(testInstance.o2));
 
 		new TestExecutor(testInstance)
 			.evaluationMode(EvaluationMode.DUCK_TYPING)
@@ -602,10 +602,10 @@ public class ExpressionEvaluationTest
 
 		TestClass testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("f(getInt(), 1.0f)", 1)
-			.test("f(getInt(), \"Test\")", 2)
-			.test("f(getInt(), \"Test\")", 3)
-			.test("f(getInt(), 1.0f)", 4);
+			.test("f(getInt(), 1.0f)",		1)
+			.test("f(getInt(), \"Test\")",	2)
+			.test("f(getInt(), \"Test\")",	3)
+			.test("f(getInt(), 1.0f)",		4);
 	}
 
 	@Test
@@ -646,12 +646,12 @@ public class ExpressionEvaluationTest
 
 		TestClass testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("sum(d)", 3.5)
-			.test("sum(d, i1)", 6.5)
-			.test("sum(d, i1, i2)", 1.5)
-			.test("sum(d, i1, i2, i3)", 12.5)
-			.test("sum(d, i123)", 10.5)
-			.test("sum(i1, i123)", 10.0);
+			.test("sum(d)",				3.5)
+			.test("sum(d, i1)",			6.5)
+			.test("sum(d, i1, i2)",		1.5)
+			.test("sum(d, i1, i2, i3)",	12.5)
+			.test("sum(d, i123)",			10.5)
+			.test("sum(i1, i123)",			10.0);
 
 		new ErrorTestExecutor(testInstance)
 			.test("sum()")
@@ -675,11 +675,11 @@ public class ExpressionEvaluationTest
 		final String getClass = "getClass()";
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("(getFloat(y).toString())", "1.5")
-			.test("(getFloat(y)).toString()", "1.5")
-			.test("(getFloat(y).toString()).length()", 3)
-			.test("((x))", 2.0)
-			.test("(((1.3e-7)))", 1.3e-7);
+			.test("(getFloat(y).toString())",			"1.5")
+			.test("(getFloat(y)).toString()",			"1.5")
+			.test("(getFloat(y).toString()).length()",	3)
+			.test("((x))",								2.0)
+			.test("(((1.3e-7)))",						1.3e-7);
 	}
 
 	@Test
@@ -714,19 +714,19 @@ public class ExpressionEvaluationTest
 
 		Object testInstance = new TestClass(5, -2.0, "abc");
 		new TestExecutor(testInstance)
-			.test("merge((TestClass) o1).i", 18)
-			.test("merge((TestClass) o1).d", -4.5)
-			.test("((TestClass) o1).merge(this).i", 18)
-			.test("((TestClass) o1).merge(this).d", 4.5)
-			.test("getId(o1)", 1)
-			.test("getId((TestClass) o1)", 3)
-			.test("getId(o2)", 1)
-			.test("getId((java.lang.String) o2)", 2)
-			.test("getId((String) o2)", 2)
-			.test("(int) i", 5)
-			.test("(double) d", -2.0)
-			.test("(int) d", -2)
-			.test("(int) 2.3", 2);
+			.test("merge((TestClass) o1).i",			18)
+			.test("merge((TestClass) o1).d",			-4.5)
+			.test("((TestClass) o1).merge(this).i",	18)
+			.test("((TestClass) o1).merge(this).d",	4.5)
+			.test("getId(o1)",							1)
+			.test("getId((TestClass) o1)",				3)
+			.test("getId(o2)",							1)
+			.test("getId((java.lang.String) o2)",		2)
+			.test("getId((String) o2)",				2)
+			.test("(int) i",							5)
+			.test("(double) d",						-2.0)
+			.test("(int) d",							-2)
+			.test("(int) 2.3",							2);
 
 		new ErrorTestExecutor(testInstance)
 			.test("(TestClass) o2")
@@ -753,10 +753,10 @@ public class ExpressionEvaluationTest
 		Object testInstance = null;
 		new TestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.l", -17L)
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.f", 27.5f)
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getInt()", 0)
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getDouble()", 2.0);
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.l",				-17L)
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.f",				27.5f)
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getInt()",		0)
+			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getDouble()",	2.0);
 
 		new TestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PUBLIC)
@@ -807,23 +807,23 @@ public class ExpressionEvaluationTest
 		Object testInstance = new ConstructorParserTestClass(0, 0.0f);
 		new TestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
-			.test("new ConstructorParserTestClass(5, 6.0f).i", 5)
-			.test("new ConstructorParserTestClass(5, 6.0f).l", 1L)
-			.test("new ConstructorParserTestClass(5, 6.0f).f", 6.0f)
-			.test("new ConstructorParserTestClass(5, 6.0f).d", 2.0)
-			.test("new ConstructorParserTestClass(7.0, 8L).i", 3)
-			.test("new ConstructorParserTestClass(7.0, 8L).l", 8L)
-			.test("new ConstructorParserTestClass(7.0, 8L).f", 4.0f)
-			.test("new ConstructorParserTestClass(7.0, 8L).d", 7.0)
-			.test("new ConstructorParserTestClass(9, 10L, 11.f, 12.0).i", 9)
-			.test("new ConstructorParserTestClass(9, 10L, 11.f, 12.0).l", 10L)
-			.test("new ConstructorParserTestClass(9, 10L, 11.f, 12.0).f", 11.f)
-			.test("new ConstructorParserTestClass(9, 10L, 11.f, 12.0).d", 12.0)
-			.test("new ConstructorParserTestClass(0, 0, 0, 0).i", 0)
-			.test("new ConstructorParserTestClass(0, 0, 0, 0).l", 0L)
-			.test("new ConstructorParserTestClass(0, 0, 0, 0).f", 0.f)
-			.test("new ConstructorParserTestClass(0, 0, 0, 0).d", 0.0)
-			.test("new StringBuilder(\"Test\").append('X').append(13).toString()", "TestX13");
+			.test("new ConstructorParserTestClass(5, 6.0f).i",						5)
+			.test("new ConstructorParserTestClass(5, 6.0f).l",						1L)
+			.test("new ConstructorParserTestClass(5, 6.0f).f",						6.0f)
+			.test("new ConstructorParserTestClass(5, 6.0f).d",						2.0)
+			.test("new ConstructorParserTestClass(7.0, 8L).i",						3)
+			.test("new ConstructorParserTestClass(7.0, 8L).l",						8L)
+			.test("new ConstructorParserTestClass(7.0, 8L).f",						4.0f)
+			.test("new ConstructorParserTestClass(7.0, 8L).d",						7.0)
+			.test("new ConstructorParserTestClass(9, 10L, 11.f, 12.0).i",			9)
+			.test("new ConstructorParserTestClass(9, 10L, 11.f, 12.0).l",			10L)
+			.test("new ConstructorParserTestClass(9, 10L, 11.f, 12.0).f",			11.f)
+			.test("new ConstructorParserTestClass(9, 10L, 11.f, 12.0).d",			12.0)
+			.test("new ConstructorParserTestClass(0, 0, 0, 0).i",					0)
+			.test("new ConstructorParserTestClass(0, 0, 0, 0).l",					0L)
+			.test("new ConstructorParserTestClass(0, 0, 0, 0).f",					0.f)
+			.test("new ConstructorParserTestClass(0, 0, 0, 0).d",					0.0)
+			.test("new StringBuilder(\"Test\").append('X').append(13).toString()",	"TestX13");
 
 		new ErrorTestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
@@ -836,41 +836,41 @@ public class ExpressionEvaluationTest
 	@Test
 	public void testBinaryOperator() {
 		new TestExecutor(null)
-			.test("5 *7- 8 / 3*2 + 4 * 2", 5*7 - 8/3*2 + 4*2)
-			.test("5 + 7 * 8", 5 + 7 * 8)
-			.test("(5 + 7) * 8", (5 + 7) * 8)
-			.test(" 5%3 -7 / 2.0", 5 % 3 - 7/2.0)
-			.test("5 + 4 + \"Test\"", 5 + 4 + "Test")
-			.test("-27 >> 2 << 2", -27 >> 2 << 2)
-			.test("-23456 >>> 3 << 1", -23456 >>> 3 << 1)
-			.test("(byte) 23 << 2", (byte) 23 << 2)
-			.test("9*3 < 4*7", 9*3 < 4*7)
-			.test("9*4 < 3.0*12", 9*4 < 3.0*12)
-			.test("9*3 <= 4*7", 9*3 <= 4*7)
-			.test("9*4 <= 3.0*12", 9*4 <= 3.0*12)
-			.test("5*5 <= 4*6", 5*5 <= 4*6)
-			.test("4*7 > 9*3", 4*7 > 9*3)
-			.test("3.0*12 > 9*4", 3.0*12 > 9*4)
-			.test("4*7 >= 9*3", 4*7 >= 9*3)
-			.test("3.0*12 >= 9*4", 3.0*12 >= 9*4)
-			.test("4*6 >= 5*5", 4*6 >= 5*5)
-			.test("9*3 == 4*7", 9*3 == 4*7)
-			.test("9*4 == 3.0*12", 9*4 == 3.0*12)
-			.test("5*5 == 4*6", 5*5 == 4*6)
-			.test("9*3 != 4*7", 9*3 != 4*7)
-			.test("9*4 != 3.0*12", 9*4 != 3.0*12)
-			.test("5*5 != 4*6", 5*5 != 4*6)
-			.test("123 & 234", 123 & 234)
-			.test("123 ^ 234", 123 ^ 234)
-			.test("123 | 234", 123 | 234)
-			.test("false && false", false && false)
-			.test("false && true", false && true)
-			.test("true && false", true && false)
-			.test("true && true", true && true)
-			.test("false || false", false || false)
-			.test("false || true", false || true)
-			.test("true || false", true || false)
-			.test("true || true", true || true);
+			.test("5 *7- 8 / 3*2 + 4 * 2",	5*7 - 8/3*2 + 4*2)
+			.test("5 + 7 * 8",				5 + 7 * 8)
+			.test("(5 + 7) * 8",			(5 + 7) * 8)
+			.test(" 5%3 -7 / 2.0",			5 % 3 - 7/2.0)
+			.test("5 + 4 + \"Test\"",		5 + 4 + "Test")
+			.test("-27 >> 2 << 2",			-27 >> 2 << 2)
+			.test("-23456 >>> 3 << 1",		-23456 >>> 3 << 1)
+			.test("(byte) 23 << 2",		(byte) 23 << 2)
+			.test("9*3 < 4*7",				9*3 < 4*7)
+			.test("9*4 < 3.0*12",			9*4 < 3.0*12)
+			.test("9*3 <= 4*7",			9*3 <= 4*7)
+			.test("9*4 <= 3.0*12",			9*4 <= 3.0*12)
+			.test("5*5 <= 4*6",			5*5 <= 4*6)
+			.test("4*7 > 9*3",				4*7 > 9*3)
+			.test("3.0*12 > 9*4",			3.0*12 > 9*4)
+			.test("4*7 >= 9*3",			4*7 >= 9*3)
+			.test("3.0*12 >= 9*4",			3.0*12 >= 9*4)
+			.test("4*6 >= 5*5",			4*6 >= 5*5)
+			.test("9*3 == 4*7",			9*3 == 4*7)
+			.test("9*4 == 3.0*12",			9*4 == 3.0*12)
+			.test("5*5 == 4*6",			5*5 == 4*6)
+			.test("9*3 != 4*7",			9*3 != 4*7)
+			.test("9*4 != 3.0*12",			9*4 != 3.0*12)
+			.test("5*5 != 4*6",			5*5 != 4*6)
+			.test("123 & 234",				123 & 234)
+			.test("123 ^ 234",				123 ^ 234)
+			.test("123 | 234",				123 | 234)
+			.test("false && false",		false && false)
+			.test("false && true",			false && true)
+			.test("true && false",			true && false)
+			.test("true && true",			true && true)
+			.test("false || false",		false || false)
+			.test("false || true",			false || true)
+			.test("true || false",			true || false)
+			.test("true || true",			true || true);
 	}
 
 	@Test
@@ -902,16 +902,16 @@ public class ExpressionEvaluationTest
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("reset().getCounter(FALSE())", 1)
-			.test("reset().getCounter(FALSE() && FALSE())", 1)
-			.test("reset().getCounter(FALSE() && TRUE())", 1)
-			.test("reset().getCounter(TRUE() && FALSE())", 2)
-			.test("reset().getCounter(TRUE() && TRUE())", 2)
-			.test("reset().getCounter(FALSE() || FALSE())", 2)
-			.test("reset().getCounter(FALSE() || TRUE())", 2)
-			.test("reset().getCounter(TRUE() || FALSE())", 1)
-			.test("reset().getCounter(TRUE() || TRUE())", 1)
-			.test("npeTrigger != null && npeTrigger.counter > 0", false);
+			.test("reset().getCounter(FALSE())",					1)
+			.test("reset().getCounter(FALSE() && FALSE())",		1)
+			.test("reset().getCounter(FALSE() && TRUE())",			1)
+			.test("reset().getCounter(TRUE() && FALSE())",			2)
+			.test("reset().getCounter(TRUE() && TRUE())",			2)
+			.test("reset().getCounter(FALSE() || FALSE())",		2)
+			.test("reset().getCounter(FALSE() || TRUE())",			2)
+			.test("reset().getCounter(TRUE() || FALSE())",			1)
+			.test("reset().getCounter(TRUE() || TRUE())",			1)
+			.test("npeTrigger != null && npeTrigger.counter > 0",	false);
 
 		new ErrorTestExecutor(testInstance)
 			.test("reset().getCounter(FALSE() && 5")
@@ -940,12 +940,12 @@ public class ExpressionEvaluationTest
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("reset().get(d = 7.0).d", 7.0)
-			.test("reset().get(f = -1).f", -1.f)
-			.test("reset().get(i = 13).i", 13)
-			.test("reset().get(d = f = i = -3).d", -3.0)
-			.test("reset().get(d = f = i = -3).f", -3.f)
-			.test("reset().get(d = f = i = -3).i", -3);
+			.test("reset().get(d = 7.0).d",		7.0)
+			.test("reset().get(f = -1).f",			-1.f)
+			.test("reset().get(i = 13).i",			13)
+			.test("reset().get(d = f = i = -3).d",	-3.0)
+			.test("reset().get(d = f = i = -3).f",	-3.f)
+			.test("reset().get(d = f = i = -3).i",	-3);
 	}
 
 	@Test
@@ -969,24 +969,24 @@ public class ExpressionEvaluationTest
 		}
 
 		new TestExecutor(new TestClass())
-			.test("++reset().b", (byte) 14)
-			.test("reset().get(++b).b", (byte) 14)
-			.test("++reset().i", -20)
-			.test("reset().get(++i).i", -20)
-			.test("--reset().b", (byte) 12)
-			.test("reset().get(--b).b", (byte) 12)
-			.test("--reset().i", -22)
-			.test("reset().get(--i).i", -22)
-			.test("+reset().b", 13)
-			.test("+reset().i", -21)
-			.test("+reset().f", 2.5f)
-			.test("-reset().b", -13)
-			.test("-reset().i", 21)
-			.test("-reset().f", -2.5f)
-			.test("!false", true)
-			.test("!true", false)
-			.test("!(false || true)", false)
-			.test("!(true && false)", true)
+			.test("++reset().b",			(byte) 14)
+			.test("reset().get(++b).b",	(byte) 14)
+			.test("++reset().i",			-20)
+			.test("reset().get(++i).i",	-20)
+			.test("--reset().b",			(byte) 12)
+			.test("reset().get(--b).b",	(byte) 12)
+			.test("--reset().i",			-22)
+			.test("reset().get(--i).i",	-22)
+			.test("+reset().b",			13)
+			.test("+reset().i",			-21)
+			.test("+reset().f",			2.5f)
+			.test("-reset().b",			-13)
+			.test("-reset().i",			21)
+			.test("-reset().f",			-2.5f)
+			.test("!false",				true)
+			.test("!true",					false)
+			.test("!(false || true)",		false)
+			.test("!(true && false)",		true)
 			.test("~12345", ~12345);
 
 		new ErrorTestExecutor(new TestClass())
@@ -1016,23 +1016,21 @@ public class ExpressionEvaluationTest
 
 		Variable variable1 = new Variable("xyz", 15.0, true);
 		Variable variable2 = new Variable("abc", "Test", true);
-		VariablePoolIF variablePool = new VariablePool();
-		variablePool.addVariable(variable1);
-		variablePool.addVariable(variable2);
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.variablePool(variablePool)
-			.test("b + xyz", 18.0)
-			.test("xyz * i", -15000.0)
-			.test("(int) xyz / f", 6.0f)
-			.test("b + abc", "3Test")
-			.test("abc + i", "Test-1000")
-			.test("abc + f", "Test2.5")
-			.test("xyz + xyz", 30.0)
-			.test("abc + abc", "TestTest")
-			.test("test(xyz)", "15.0")
-			.test("test(abc)", "Test");
+			.addVariable(variable1)
+			.addVariable(variable2)
+			.test("b + xyz",		18.0)
+			.test("xyz * i",		-15000.0)
+			.test("(int) xyz / f",	6.0f)
+			.test("b + abc",		"3Test")
+			.test("abc + i",		"Test-1000")
+			.test("abc + f",		"Test2.5")
+			.test("xyz + xyz",		30.0)
+			.test("abc + abc",		"TestTest")
+			.test("test(xyz)",		"15.0")
+			.test("test(abc)",		"Test");
 	}
 
 	/*
@@ -1043,35 +1041,28 @@ public class ExpressionEvaluationTest
 		final Object			testInstance;
 
 		ParserSettings 			settings;
-		private EvaluationMode	evaluationMode		= EvaluationMode.STRONGLY_TYPED;
-		private ImportsIF		imports				= new Imports();
-		private VariablePoolIF	variablePool		= new VariablePool();
-		private AccessLevel		minimumAccessLevel	= AccessLevel.PRIVATE;
+		ParserSettingsBuilder	settingsBuilder	= new ParserSettingsBuilder()
+													.minimumAccessLevel(AccessLevel.PRIVATE);
 
 		AbstractTestExecutor(Object testInstance) {
 			this.testInstance = testInstance;
 		}
 
 		T evaluationMode(EvaluationMode evaluationMode) {
-			this.evaluationMode = evaluationMode;
+			verifyBeforeTest();
+			settingsBuilder.evaluationModeCodeEvaluation(evaluationMode);
 			return (T) this;
 		}
 
-		T imports(ImportsIF imports) {
+		T addVariable(Variable variable) {
 			verifyBeforeTest();
-			this.imports = imports;
-			return (T) this;
-		}
-
-		T variablePool(VariablePoolIF variablePool) {
-			verifyBeforeTest();
-			this.variablePool = variablePool;
+			settingsBuilder.addVariable(variable);
 			return (T) this;
 		}
 
 		T minimumAccessLevel(AccessLevel minimumAccessLevel) {
 			verifyBeforeTest();
-			this.minimumAccessLevel = minimumAccessLevel;
+			settingsBuilder.minimumAccessLevel(minimumAccessLevel);
 			return (T) this;
 		}
 
@@ -1083,7 +1074,7 @@ public class ExpressionEvaluationTest
 
 		void ensureValidSettings() {
 			if (settings == null) {
-				settings = new ParserSettings(imports, variablePool, minimumAccessLevel, EvaluationMode.NONE, evaluationMode);
+				settings = settingsBuilder.build();
 			}
 		}
 	}

@@ -3,7 +3,7 @@ package com.AMS.jBEAM.javaParser.utils;
 import com.AMS.jBEAM.javaParser.EvaluationMode;
 import com.AMS.jBEAM.common.ReflectionUtils;
 import com.AMS.jBEAM.javaParser.Variable;
-import com.AMS.jBEAM.javaParser.VariablePoolIF;
+import com.AMS.jBEAM.javaParser.VariablePool;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.*;
@@ -115,11 +115,9 @@ public class ObjectInfoProvider
 		return getCastInfo(objectInfo, targetType, evaluationMode);
 	}
 
-	public ObjectInfo getVariableInfo(Variable variable, VariablePoolIF variablePool) {
-		final String name = variable.getName();
-		final boolean useHardReference = variable.isUseHardReferenceInPool();
+	public ObjectInfo getVariableInfo(Variable variable, VariablePool variablePool) {
 		Object value = variable.getValue();
-		ObjectInfo.ValueSetterIF valueSetter = object -> variablePool.addVariable(new Variable(name, object, useHardReference));
+		ObjectInfo.ValueSetterIF valueSetter = newValue -> variable.setValue(newValue);
 		return new ObjectInfo(value, null, valueSetter);
 	}
 }

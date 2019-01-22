@@ -1,30 +1,25 @@
 package com.AMS.jBEAM.javaParser;
 
 import com.AMS.jBEAM.javaParser.utils.ClassInfo;
+import com.google.common.collect.ImmutableSet;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class Imports implements ImportsIF
+public class Imports
 {
-	private final Set<ClassInfo>	classes		= new LinkedHashSet<>();
-	private final Set<Package> 		packages	= new LinkedHashSet<>();
+	private final ImmutableSet<ClassInfo>	importClasses;
+	private final ImmutableSet<Package>		importPackages;
 
-	void importClass(ClassInfo classInfo) {
-		classes.add(classInfo);
+	public Imports(ImmutableSet<ClassInfo> importClasses, ImmutableSet<Package> importPackages) {
+		this.importClasses = importClasses;
+		this.importPackages = importPackages;
 	}
 
-	void importPackage(Package pack) {
-		packages.add(pack);
-	}
-
-	@Override
 	public Set<ClassInfo> getImportedClasses() {
-		return classes;
+		return importClasses;
 	}
 
-	@Override
 	public Set<Package> getImportedPackages() {
-		return packages;
+		return importPackages;
 	}
 }

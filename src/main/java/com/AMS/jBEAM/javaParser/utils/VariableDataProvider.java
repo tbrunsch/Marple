@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.javaParser.Variable;
-import com.AMS.jBEAM.javaParser.VariablePoolIF;
+import com.AMS.jBEAM.javaParser.VariablePool;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionIF;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionVariable;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 
 public class VariableDataProvider
 {
-	private final VariablePoolIF	variablePool;
+	private final VariablePool variablePool;
 
-	public VariableDataProvider(VariablePoolIF variablePool) {
+	public VariableDataProvider(VariablePool variablePool) {
 		this.variablePool = variablePool;
 	}
 

@@ -1,22 +1,21 @@
 package com.AMS.jBEAM.javaParser;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import java.lang.ref.WeakReference;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class VariablePool implements VariablePoolIF
+public class VariablePool
 {
-	private final Map<String, ValueData> variables = new LinkedHashMap<>();
+	private final ImmutableMap<String, ValueData> variables;
 
-	@Override
-	public void addVariable(Variable variable) {
-		variables.put(variable.getName(), new ValueData(variable.getValue(), variable.isUseHardReferenceInPool()));
+	VariablePool(ImmutableMap<String, ValueData> variables) {
+		this.variables = variables;
 	}
 
-	@Override
 	public List<Variable> getVariables() {
 		ImmutableList.Builder<Variable> builder = ImmutableList.builder();
 		for (String name : variables.keySet()) {
@@ -29,7 +28,7 @@ public class VariablePool implements VariablePoolIF
 		return builder.build();
 	}
 
-	private static class ValueData
+	static class ValueData
 	{
 		private final WeakReference<Object> weakValueReference;	// always set
 		private final Object				hardValueReference;	// only set if user wants to save variables from being garbage collected
