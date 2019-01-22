@@ -4,6 +4,7 @@ import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionField;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionIF;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
+import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -17,13 +18,13 @@ public class FieldDataProvider
 		this.parserContext = parserContext;
 	}
 
-	public CompletionSuggestions suggestFields(ObjectInfo contextInfo, List<Class<?>> expectedClasses, final int insertionBegin, final int insertionEnd, boolean staticOnly) {
-		Class<?> contextClass = parserContext.getObjectInfoProvider().getClass(contextInfo);
-		List<Field> fields = parserContext.getInspectionDataProvider().getFields(contextClass, staticOnly);
+	public CompletionSuggestions suggestFields(ObjectInfo contextInfo, List<TypeToken<?>> expectedTypes, final int insertionBegin, final int insertionEnd, boolean staticOnly) {
+		TypeToken<?> contextType = parserContext.getObjectInfoProvider().getType(contextInfo);
+		List<FieldInfo> fieldInfos = parserContext.getInspectionDataProvider().getFieldInfos(contextType, staticOnly);
 		Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
-			fields,
-			field -> new CompletionSuggestionField(field, insertionBegin, insertionEnd),
-			ParseUtils.rateFieldByClassesFunc(expectedClasses)
+			fieldInfos,
+			fieldInfo -> new CompletionSuggestionField(fieldInfo, insertionBegin, insertionEnd),
+			ParseUtils.rateFieldByTypesFunc(expectedTypes)
 		);
 		return new CompletionSuggestions(ratedSuggestions);
 	}

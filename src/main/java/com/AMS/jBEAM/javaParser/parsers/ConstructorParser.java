@@ -7,6 +7,7 @@ import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ExecutableInfo;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
+import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -21,7 +22,7 @@ public class ConstructorParser extends AbstractEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
 		int startPosition = tokenStream.getPosition();
 		Token operatorToken = tokenStream.readKeyWordUnchecked();
 		if (operatorToken == null) {
@@ -35,7 +36,7 @@ public class ConstructorParser extends AbstractEntityParser
 			return new ParseError(startPosition, "Expected operator 'new'", ErrorType.WRONG_PARSER);
 		}
 
-		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream, expectedResultClasses, false, false);
+		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream, expectedResultTypes, false, false);
 
 		// propagate anything except results
 		if (classParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
@@ -52,11 +53,12 @@ public class ConstructorParser extends AbstractEntityParser
 			return new ParseError(tokenStream.getPosition(), "Expected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
 
-		Class<?> constructorClass = constructorObjectInfo.getDeclaredClass();
+		TypeToken<?> constructorType = constructorObjectInfo.getDeclaredType();
+		Class<?> constructorClass = constructorType.getClass();
 		if (constructorClass.getEnclosingClass() != null && (constructorClass.getModifiers() & Modifier.STATIC) == 0) {
 			return new ParseError(parsedToPosition, "Cannot instantiate inner class '" + constructorClass.getName() + "'", ErrorType.SEMANTIC_ERROR);
 		}
-		List<ExecutableInfo> constructorInfos = parserContext.getInspectionDataProvider().getConstructorInfos(constructorClass);
+		List<ExecutableInfo> constructorInfos = parserContext.getInspectionDataProvider().getConstructorInfos(constructorType);
 
 		List<ParseResultIF> argumentParseResults = parserContext.getExecutableDataProvider().parseExecutableArguments(tokenStream, constructorInfos);
 
@@ -85,7 +87,7 @@ public class ConstructorParser extends AbstractEntityParser
 				} catch (Exception e) {
 					return new ParseError(startPosition, "Exception during constructor evaluation", ErrorType.EVALUATION_EXCEPTION, e);
 				}
-				return parserContext.getTailParser(false).parse(tokenStream, constructorReturnInfo, expectedResultClasses);
+				return parserContext.getTailParser(false).parse(tokenStream, constructorReturnInfo, expectedResultTypes);
 			}
 			default: {
 				String error = "Ambiguous constructor call. Possible candidates are:\n"

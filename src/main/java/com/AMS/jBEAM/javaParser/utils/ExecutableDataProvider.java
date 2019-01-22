@@ -4,6 +4,7 @@ import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
+import com.google.common.reflect.TypeToken;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,13 +18,13 @@ public class ExecutableDataProvider
 		this.parserContext = parserContext;
 	}
 
-	public CompletionSuggestions suggestMethods(ObjectInfo contextInfo, List<Class<?>> expectedClasses, final int insertionBegin, final int insertionEnd, boolean staticOnly) {
-		Class<?> contextClass = parserContext.getObjectInfoProvider().getClass(contextInfo);
-		List<ExecutableInfo> methodInfos = parserContext.getInspectionDataProvider().getMethodInfos(contextClass, staticOnly);
+	public CompletionSuggestions suggestMethods(ObjectInfo contextInfo, List<TypeToken<?>> expectedTypes, final int insertionBegin, final int insertionEnd, boolean staticOnly) {
+		TypeToken<?> contextType = parserContext.getObjectInfoProvider().getType(contextInfo);
+		List<ExecutableInfo> methodInfos = parserContext.getInspectionDataProvider().getMethodInfos(contextType, staticOnly);
 		Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 			methodInfos,
 			methodInfo -> new CompletionSuggestionMethod(methodInfo, insertionBegin, insertionEnd),
-			ParseUtils.rateMethodByClassesFunc(expectedClasses)
+			ParseUtils.rateMethodByTypesFunc(expectedTypes)
 		);
 
 		return new CompletionSuggestions(ratedSuggestions);
@@ -53,7 +54,7 @@ public class ExecutableDataProvider
 			final int i = argIndex;
 
 			availableExecutableInfos = availableExecutableInfos.stream().filter(executableInfo -> executableInfo.isArgumentIndexValid(i)).collect(Collectors.toList());
-			List<Class<?>> expectedArgumentTypes_i = getExpectedArgumentTypes(availableExecutableInfos, i);
+			List<TypeToken<?>> expectedArgumentTypes_i = getExpectedArgumentTypes(availableExecutableInfos, i);
 
 			if (expectedArgumentTypes_i.isEmpty()) {
 				arguments.add(new ParseError(tokenStream.getPosition(), "No further arguments expected", ParseError.ErrorType.SEMANTIC_ERROR));
@@ -101,7 +102,7 @@ public class ExecutableDataProvider
 	}
 
 	// assumes that each of the executableInfos accepts an argument for index argIndex
-	private List<Class<?>> getExpectedArgumentTypes(List<ExecutableInfo> executableInfos, int argIndex) {
+	private List<TypeToken<?>> getExpectedArgumentTypes(List<ExecutableInfo> executableInfos, int argIndex) {
 		return executableInfos.stream()
 				.map(executableInfo -> executableInfo.getExpectedArgumentType(argIndex))
 				.distinct()
@@ -109,14 +110,14 @@ public class ExecutableDataProvider
 	}
 
 	private boolean acceptsArgumentInfo(ExecutableInfo executableInfo, int argIndex, ObjectInfo argInfo) {
-		Class<?> expectedArgumentType = executableInfo.getExpectedArgumentType(argIndex);
-		Class<?> argClass = parserContext.getObjectInfoProvider().getClass(argInfo);
-		return ParseUtils.isConvertibleTo(argClass, expectedArgumentType);
+		TypeToken<?> expectedArgumentType = executableInfo.getExpectedArgumentType(argIndex);
+		TypeToken<?> argumentType = parserContext.getObjectInfoProvider().getType(argInfo);
+		return ParseUtils.isConvertibleTo(argumentType, expectedArgumentType);
 	}
 
 	public List<ExecutableInfo> getBestMatchingExecutableInfos(List<ExecutableInfo> availableExecutableInfos, List<ObjectInfo> argumentInfos) {
 		ObjectInfoProvider objectInfoProvider = parserContext.getObjectInfoProvider();
-		List<Class<?>> argumentTypes = argumentInfos.stream().map(objectInfoProvider::getClass).collect(Collectors.toList());
+		List<TypeToken<?>> argumentTypes = argumentInfos.stream().map(objectInfoProvider::getType).collect(Collectors.toList());
 		int[] ratings = availableExecutableInfos.stream()
 				.mapToInt(executableInfo -> executableInfo.rateArgumentMatch(argumentTypes))
 				.toArray();
@@ -124,9 +125,9 @@ public class ExecutableDataProvider
 		List<ExecutableInfo> executableInfos;
 
 		int[][] allowedRatingsByPhase = {
-				{ ParseUtils.CLASS_MATCH_FULL },
-				{ ParseUtils.CLASS_MATCH_INHERITANCE,	ParseUtils.CLASS_MATCH_PRIMITIVE_CONVERSION},
-				{ ParseUtils.CLASS_MATCH_BOXED,			ParseUtils.CLASS_MATCH_BOXED_AND_CONVERSION,	ParseUtils.CLASS_MATCH_BOXED_AND_INHERITANCE }
+				{ ParseUtils.TYPE_MATCH_FULL},
+				{ ParseUtils.TYPE_MATCH_INHERITANCE,	ParseUtils.TYPE_MATCH_PRIMITIVE_CONVERSION},
+				{ ParseUtils.TYPE_MATCH_BOXED,			ParseUtils.TYPE_MATCH_BOXED_AND_CONVERSION,	ParseUtils.TYPE_MATCH_BOXED_AND_INHERITANCE}
 		};
 
 		for (boolean allowVariadicExecutables : Arrays.asList(false, true)) {

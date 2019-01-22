@@ -8,6 +8,7 @@ import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
+import com.google.common.reflect.TypeToken;
 
 import java.util.Comparator;
 import java.util.List;
@@ -24,7 +25,7 @@ public class VariableParser extends AbstractEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
 		int startPosition = tokenStream.getPosition();
 
 		if (tokenStream.isCaretAtPosition()) {
@@ -35,7 +36,7 @@ public class VariableParser extends AbstractEntityParser
 			} catch (TokenStream.JavaTokenParseException e) {
 				insertionEnd = startPosition;
 			}
-			return parserContext.getVariableDataProvider().suggestVariables(expectedResultClasses, startPosition, insertionEnd);
+			return parserContext.getVariableDataProvider().suggestVariables(expectedResultTypes, startPosition, insertionEnd);
 		}
 
 		Token variableToken;
@@ -55,7 +56,7 @@ public class VariableParser extends AbstractEntityParser
 			Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 				variables,
 				variable -> new CompletionSuggestionVariable(variable, startPosition, endPosition),
-				ParseUtils.rateVariableByNameAndClassesFunc(variableName, expectedResultClasses)
+				ParseUtils.rateVariableByNameAndTypesFunc(variableName, expectedResultTypes)
 			);
 			return new CompletionSuggestions(ratedSuggestions);
 		}
@@ -73,6 +74,6 @@ public class VariableParser extends AbstractEntityParser
 		Variable matchingVariable = firstVariableMatch.get();
 		ObjectInfo matchingVariableInfo = parserContext.getObjectInfoProvider().getVariableInfo(matchingVariable, variablePool);
 
-		return parserContext.getTailParser(false).parse(tokenStream, matchingVariableInfo, expectedResultClasses);
+		return parserContext.getTailParser(false).parse(tokenStream, matchingVariableInfo, expectedResultTypes);
 	}
 }

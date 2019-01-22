@@ -5,6 +5,7 @@ import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
+import com.google.common.reflect.TypeToken;
 
 import java.util.List;
 
@@ -18,8 +19,8 @@ public class ExpressionParser extends AbstractEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
-		return ParseUtils.parse(tokenStream, thisInfo, expectedResultClasses,
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
+		return ParseUtils.parse(tokenStream, thisInfo, expectedResultTypes,
 			parserContext.getLiteralParser(),
 			parserContext.getFieldParser(false),
 			parserContext.getMethodParser(false),

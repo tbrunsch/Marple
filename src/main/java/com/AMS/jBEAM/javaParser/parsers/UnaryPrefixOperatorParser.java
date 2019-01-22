@@ -10,6 +10,7 @@ import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 import com.AMS.jBEAM.javaParser.utils.OperatorResultProvider;
 import com.AMS.jBEAM.javaParser.utils.OperatorResultProvider.OperatorException;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.reflect.TypeToken;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class UnaryPrefixOperatorParser extends AbstractEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
 		Token operatorToken = tokenStream.readUnaryOperatorUnchecked();
 		if (operatorToken == null) {
 			return new ParseError(tokenStream.getPosition(), "Expression does not start with an unary operator", ErrorType.WRONG_PARSER);
@@ -40,7 +41,7 @@ public class UnaryPrefixOperatorParser extends AbstractEntityParser
 		}
 		UnaryOperator operator = UnaryOperator.getValue(operatorToken.getValue());
 
-		ParseResultIF parseResult = parserContext.getExpressionParser().parse(tokenStream, currentContextInfo, expectedResultClasses);
+		ParseResultIF parseResult = parserContext.getExpressionParser().parse(tokenStream, currentContextInfo, expectedResultTypes);
 
 		// propagate anything except results
 		if (parseResult.getResultType() != ParseResultType.PARSE_RESULT) {

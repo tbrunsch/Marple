@@ -6,6 +6,7 @@ import com.AMS.jBEAM.javaParser.Variable;
 import com.AMS.jBEAM.javaParser.parsers.AbstractEntityParser;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
+import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -21,9 +22,9 @@ public class ParseUtils
 	/*
 	 * Parsing
 	 */
-	public static ParseResultIF parse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses, AbstractEntityParser... parsers) {
+	public static ParseResultIF parse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes, AbstractEntityParser... parsers) {
 		List<ParseResultIF> parseResults = Arrays.stream(parsers)
-			.map(parser -> parser.parse(tokenStream, currentContextInfo, expectedResultClasses))
+			.map(parser -> parser.parse(tokenStream, currentContextInfo, expectedResultTypes))
 			.collect(Collectors.toList());
 		return mergeParseResults(parseResults);
 	}
@@ -61,7 +62,7 @@ public class ParseUtils
 			String message = "Ambiguous expression:\n"
 					+ ambiguousResults.stream().map(AmbiguousParseResult::getMessage).collect(Collectors.joining("\n"))
 					+ (ambiguousResults.size() > 0 && results.size() > 0 ? "\n" : "")
-					+ results.stream().map(result -> "Expression can be evaluated to object of type " + result.getObjectInfo().getDeclaredClass().getSimpleName()).collect(Collectors.joining("\n"));
+					+ results.stream().map(result -> "Expression can be evaluated to object of type " + result.getObjectInfo().getDeclaredType()).collect(Collectors.joining("\n"));
 			return new AmbiguousParseResult(position, message);
 		}
 
@@ -103,14 +104,14 @@ public class ParseUtils
 		return new ParseError(-1, "Internal error: Failed merging parse errors", ParseError.ErrorType.INTERNAL_ERROR);
 	}
 
-	public static ParseResultIF createParseResult(ParserContext parserContext, ObjectInfo resultInfo, List<Class<?>> expectedResultClasses, int parsedToPosition) {
-		Class<?> resultClass = parserContext.getObjectInfoProvider().getClass(resultInfo);
-		if (expectedResultClasses != null && expectedResultClasses.stream().noneMatch(expectedResultClass -> ParseUtils.isConvertibleTo(resultClass, expectedResultClass))) {
-			String messagePrefix = "The class '" + resultClass.getSimpleName() + "' is not assignable to ";
-			String messageMiddle = expectedResultClasses.size() > 1
+	public static ParseResultIF createParseResult(ParserContext parserContext, ObjectInfo resultInfo, List<TypeToken<?>> expectedResultTypes, int parsedToPosition) {
+		TypeToken<?> resultType = parserContext.getObjectInfoProvider().getType(resultInfo);
+		if (expectedResultTypes != null && expectedResultTypes.stream().noneMatch(expectedResultType -> ParseUtils.isConvertibleTo(resultType, expectedResultType))) {
+			String messagePrefix = "The class '" + resultType + "' is not assignable to ";
+			String messageMiddle = expectedResultTypes.size() > 1
 					? "any of the expected classes "
 					: "the expected class ";
-			String messageSuffix = "'" + expectedResultClasses.stream().map(clazz -> clazz.getSimpleName()).collect(Collectors.joining("', '")) + "'";
+			String messageSuffix = "'" + expectedResultTypes.stream().map(Object::toString).collect(Collectors.joining("', '")) + "'";
 
 			return new ParseError(parsedToPosition, messagePrefix + messageMiddle + messageSuffix, ParseError.ErrorType.SEMANTIC_ERROR);
 		}
@@ -152,82 +153,87 @@ public class ParseUtils
 		}
 	}
 
-	static final int CLASS_MATCH_FULL					= 0;
-	static final int CLASS_MATCH_INHERITANCE			= 1;
-	static final int CLASS_MATCH_PRIMITIVE_CONVERSION	= 2;
-	static final int CLASS_MATCH_BOXED					= 3;
-	static final int CLASS_MATCH_BOXED_AND_CONVERSION	= 4;
-	static final int CLASS_MATCH_BOXED_AND_INHERITANCE	= 5;
-	static final int CLASS_MATCH_NONE					= 6;
+	/*
+	 * Type Comparison
+	 */
+	static final int TYPE_MATCH_FULL					= 0;
+	static final int TYPE_MATCH_INHERITANCE				= 1;
+	static final int TYPE_MATCH_PRIMITIVE_CONVERSION	= 2;
+	static final int TYPE_MATCH_BOXED					= 3;
+	static final int TYPE_MATCH_BOXED_AND_CONVERSION	= 4;
+	static final int TYPE_MATCH_BOXED_AND_INHERITANCE	= 5;
+	static final int TYPE_MATCH_NONE					= 6;
 
-	static int rateClassMatch(Class<?> actual, Class<?> expected) {
+	static int rateTypeMatch(TypeToken<?> actual, TypeToken<?> expected) {
 		if (expected == null) {
 			// no expectations
-			return CLASS_MATCH_FULL;
+			return TYPE_MATCH_FULL;
 		}
 
 		if (actual == null) {
 			// null object (only object without class) is convertible to any non-primitive class
-			return expected.isPrimitive() ? CLASS_MATCH_NONE : CLASS_MATCH_FULL;
+			return expected.isPrimitive() ? TYPE_MATCH_NONE : TYPE_MATCH_FULL;
 		}
 
-		if (actual == expected) {
-			return CLASS_MATCH_FULL;
+		if (actual.equals(expected)) {
+			return TYPE_MATCH_FULL;
 		}
 
-		boolean primitiveConvertible = ReflectionUtils.isPrimitiveConvertibleTo(actual, expected, false);
+		Class<?> actualClass = actual.getRawType();
+		Class<?> expectedClass = expected.getRawType();
+		boolean primitiveConvertible = ReflectionUtils.isPrimitiveConvertibleTo(actualClass, expectedClass, false);
 		if (expected.isPrimitive()) {
 			if (actual.isPrimitive()) {
 				return primitiveConvertible
-						? CLASS_MATCH_PRIMITIVE_CONVERSION	// int -> double
-						: CLASS_MATCH_NONE;					// int -> boolean
+						? TYPE_MATCH_PRIMITIVE_CONVERSION    // int -> double
+						: TYPE_MATCH_NONE;					// int -> boolean
 			} else {
-				Class<?> actualUnboxed = ReflectionUtils.getPrimitiveClass(actual);
-				return	actualUnboxed == expected	? CLASS_MATCH_BOXED :				// Integer -> int
-						primitiveConvertible		? CLASS_MATCH_BOXED_AND_CONVERSION	// Integer -> double
-													: CLASS_MATCH_NONE;					// Integer -> boolean
+				Class<?> actualUnboxedClass = ReflectionUtils.getPrimitiveClass(actualClass);
+				return	actualUnboxedClass == expectedClass	? TYPE_MATCH_BOXED :				// Integer -> int
+						primitiveConvertible				? TYPE_MATCH_BOXED_AND_CONVERSION   // Integer -> double
+															: TYPE_MATCH_NONE;					// Integer -> boolean
 			}
 		} else {
 			if (actual.isPrimitive()) {
-				Class<?> actualBoxed = ReflectionUtils.getBoxedClass(actual);
-				return	actualBoxed == expected					? CLASS_MATCH_BOXED :					// int -> Integer
-						primitiveConvertible					? CLASS_MATCH_BOXED_AND_CONVERSION :	// int -> Double
-						expected.isAssignableFrom(actualBoxed)	? CLASS_MATCH_BOXED_AND_INHERITANCE		// int -> Number
-																: CLASS_MATCH_NONE;						// int -> String
+				Class<?> actualBoxedClass = ReflectionUtils.getBoxedClass(actualClass);
+				return	actualBoxedClass == expectedClass					? TYPE_MATCH_BOXED :				// int -> Integer
+						primitiveConvertible								? TYPE_MATCH_BOXED_AND_CONVERSION :	// int -> Double
+						expectedClass.isAssignableFrom(actualBoxedClass)	? TYPE_MATCH_BOXED_AND_INHERITANCE 	// int -> Number
+																			: TYPE_MATCH_NONE;					// int -> String
 			} else {
-				return	expected.isAssignableFrom(actual)	? CLASS_MATCH_INHERITANCE	// Integer -> Number
-															: CLASS_MATCH_NONE;			// Integer -> Double
+				return	expected.isSupertypeOf(actual)	? TYPE_MATCH_INHERITANCE    // Integer -> Number
+														: TYPE_MATCH_NONE;			// Integer -> Double
 			}
 		}
 	}
 
-	public static boolean isConvertibleTo(Class<?> source, Class<?> target) {
-		return rateClassMatch(source, target) != CLASS_MATCH_NONE;
+	public static boolean isConvertibleTo(TypeToken<?> source, TypeToken<?> target) {
+		return rateTypeMatch(source, target) != TYPE_MATCH_NONE;
 	}
 
 	/*
 	 * Fields
 	 */
-	private static int rateFieldByName(Field field, String expectedFieldName) {
-		return rateStringMatch(field.getName(), expectedFieldName);
+	private static int rateFieldByName(FieldInfo fieldInfo, String expectedFieldName) {
+		return rateStringMatch(fieldInfo.getName(), expectedFieldName);
 	}
 
-	static ToIntFunction<Field> rateFieldByClassesFunc(final List<Class<?>> expectedClasses) {
-		return field -> rateFieldByClasses(field, expectedClasses);
+	static ToIntFunction<FieldInfo> rateFieldByTypesFunc(List<TypeToken<?>> expectedTypes) {
+		return fieldInfo -> rateFieldByTypes(fieldInfo, expectedTypes);
 	}
 
-	private static int rateFieldByClasses(Field field, List<Class<?>> expectedClasses) {
-		return	expectedClasses == null		? CLASS_MATCH_FULL :
-				expectedClasses.isEmpty()	? CLASS_MATCH_NONE
-											: expectedClasses.stream().mapToInt(expectedClass -> rateClassMatch(field.getType(), expectedClass)).min().getAsInt();
+	private static int rateFieldByTypes(FieldInfo fieldInfo, List<TypeToken<?>> expectedTypes) {
+		return	expectedTypes == null	? TYPE_MATCH_FULL :
+				expectedTypes.isEmpty()	? TYPE_MATCH_NONE
+										: expectedTypes.stream().mapToInt(expectedType -> rateTypeMatch(fieldInfo.getType(), expectedType)).min().getAsInt();
 	}
 
-	public static ToIntFunction<Field> rateFieldByNameAndClassesFunc(final String fieldName, final List<Class<?>> expectedClasses) {
-		return field -> (CLASS_MATCH_NONE + 1)*rateFieldByName(field, fieldName) + rateFieldByClasses(field, expectedClasses);
+	public static ToIntFunction<FieldInfo> rateFieldByNameAndTypesFunc(String fieldName, List<TypeToken<?>> expectedTypes) {
+		return fieldInfo -> (TYPE_MATCH_NONE + 1)*rateFieldByName(fieldInfo, fieldName) + rateFieldByTypes(fieldInfo, expectedTypes);
 	}
 
-	public static String getFieldDisplayText(Field field) {
-		return field.getName() + " (" + field.getDeclaringClass().getSimpleName() + ")";
+	public static String getFieldDisplayText(FieldInfo fieldInfo) {
+		return fieldInfo.getName() + " (" + fieldInfo.getDeclaringType() + ")";
 	}
 
 	/*
@@ -237,22 +243,22 @@ public class ParseUtils
 		return rateStringMatch(methodInfo.getName(), expectedMethodName);
 	}
 
-	static ToIntFunction<ExecutableInfo> rateMethodByClassesFunc(final List<Class<?>> expectedClasses) {
-		return methodInfo -> rateMethodByClasses(methodInfo, expectedClasses);
+	static ToIntFunction<ExecutableInfo> rateMethodByTypesFunc(List<TypeToken<?>> expectedTypes) {
+		return methodInfo -> rateMethodByTypes(methodInfo, expectedTypes);
 	}
 
-	private static int rateMethodByClasses(ExecutableInfo methodInfo, List<Class<?>> expectedClasses) {
-		return	expectedClasses == null		? CLASS_MATCH_FULL :
-				expectedClasses.isEmpty()	? CLASS_MATCH_NONE
-											: expectedClasses.stream().mapToInt(expectedClass -> rateClassMatch(methodInfo.getReturnType(), expectedClass)).min().getAsInt();
+	private static int rateMethodByTypes(ExecutableInfo methodInfo, List<TypeToken<?>> expectedTypes) {
+		return	expectedTypes == null	? TYPE_MATCH_FULL :
+				expectedTypes.isEmpty()	? TYPE_MATCH_NONE
+										: expectedTypes.stream().mapToInt(expectedType -> rateTypeMatch(methodInfo.getReturnType(), expectedType)).min().getAsInt();
 	}
 
-	public static ToIntFunction<ExecutableInfo> rateMethodByNameAndClassesFunc(final String methodName, final List<Class<?>> expectedClasses) {
-		return methodInfo -> (CLASS_MATCH_NONE + 1)* rateMethodByName(methodInfo, methodName) + rateMethodByClasses(methodInfo, expectedClasses);
+	public static ToIntFunction<ExecutableInfo> rateMethodByNameAndTypesFunc(String methodName, List<TypeToken<?>> expectedTypes) {
+		return methodInfo -> (TYPE_MATCH_NONE + 1)* rateMethodByName(methodInfo, methodName) + rateMethodByTypes(methodInfo, expectedTypes);
 	}
 
-	public static String getMethodDisplayText(ExecutableInfo executableInfo) {
-		return executableInfo.getName() + " (" + executableInfo.getDeclaringClass().getSimpleName() + ")";
+	public static String getMethodDisplayText(ExecutableInfo methodInfo) {
+		return methodInfo.getName() + " (" + methodInfo.getDeclaringType() + ")";
 	}
 
 	/*
@@ -260,7 +266,7 @@ public class ParseUtils
 	 */
 	private static int rateClassByName(ClassInfo classInfo, String expectedSimpleClassName) {
 		// transformation required to make it comparable to rated fields and methods
-		return (CLASS_MATCH_NONE + 1)*rateStringMatch(classInfo.getSimpleNameWithoutLeadingDigits(), expectedSimpleClassName) + CLASS_MATCH_NONE;
+		return (TYPE_MATCH_NONE + 1)*rateStringMatch(classInfo.getSimpleNameWithoutLeadingDigits(), expectedSimpleClassName) + TYPE_MATCH_NONE;
 	}
 
 	static ToIntFunction<ClassInfo> rateClassByNameFunc(final String simpleClassName) {
@@ -279,7 +285,7 @@ public class ParseUtils
 		int lastDotIndex = packageName.lastIndexOf('.');
 		String subpackageName = packageName.substring(lastDotIndex + 1);
 		// transformation required to make it comparable to rated fields and methods
-		return (CLASS_MATCH_NONE + 1)*rateStringMatch(subpackageName, expectedPackageName) + CLASS_MATCH_NONE;
+		return (TYPE_MATCH_NONE + 1)*rateStringMatch(subpackageName, expectedPackageName) + TYPE_MATCH_NONE;
 	}
 
 	static ToIntFunction<Package> ratePackageByNameFunc(final String packageName) {
@@ -297,20 +303,20 @@ public class ParseUtils
 		return rateStringMatch(variable.getName(), expectedVariabledName);
 	}
 
-	static ToIntFunction<Variable> rateVariableByClassesFunc(final List<Class<?>> expectedClasses) {
-		return variable -> rateVariableByClasses(variable, expectedClasses);
+	static ToIntFunction<Variable> rateVariableByTypesFunc(List<TypeToken<?>> expectedTypes) {
+		return variable -> rateVariableByTypes(variable, expectedTypes);
 	}
 
-	private static int rateVariableByClasses(Variable variable, List<Class<?>> expectedClasses) {
+	private static int rateVariableByTypes(Variable variable, List<TypeToken<?>> expectedTypes) {
 		Object value = variable.getValue();
-		return	expectedClasses == null		? CLASS_MATCH_FULL :
-				expectedClasses.isEmpty()	? CLASS_MATCH_NONE :
-				value == null				? (expectedClasses.stream().anyMatch(clazz -> !clazz.isPrimitive()) ? CLASS_MATCH_INHERITANCE : CLASS_MATCH_NONE)
-											: expectedClasses.stream().mapToInt(expectedClass -> rateClassMatch(value.getClass(), expectedClass)).min().getAsInt();
+		return	expectedTypes == null	? TYPE_MATCH_FULL :
+				expectedTypes.isEmpty()	? TYPE_MATCH_NONE :
+				value == null			? (expectedTypes.stream().anyMatch(type -> !type.isPrimitive()) ? TYPE_MATCH_INHERITANCE : TYPE_MATCH_NONE)
+										: expectedTypes.stream().mapToInt(expectedType -> rateTypeMatch(TypeToken.of(value.getClass()), expectedType)).min().getAsInt();
 	}
 
-	public static ToIntFunction<Variable> rateVariableByNameAndClassesFunc(final String variableName, final List<Class<?>> expectedClasses) {
-		return variable -> (CLASS_MATCH_NONE + 1)*rateVariableByName(variable, variableName) + rateVariableByClasses(variable, expectedClasses);
+	public static ToIntFunction<Variable> rateVariableByNameAndTypesFunc(String variableName, List<TypeToken<?>> expectedTypes) {
+		return variable -> (TYPE_MATCH_NONE + 1)*rateVariableByName(variable, variableName) + rateVariableByTypes(variable, expectedTypes);
 	}
 
 	public static String getVariableDisplayText(Variable variable) {

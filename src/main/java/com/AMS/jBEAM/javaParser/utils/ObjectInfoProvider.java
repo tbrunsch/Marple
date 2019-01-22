@@ -4,34 +4,34 @@ import com.AMS.jBEAM.javaParser.EvaluationMode;
 import com.AMS.jBEAM.common.ReflectionUtils;
 import com.AMS.jBEAM.javaParser.Variable;
 import com.AMS.jBEAM.javaParser.VariablePoolIF;
+import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.*;
 import java.util.List;
 
-import static com.AMS.jBEAM.javaParser.utils.ParseUtils.CLASS_MATCH_NONE;
-
 public class ObjectInfoProvider
 {
-	private static Class<?> getClass(Object object, Class<?> declaredClass, EvaluationMode evaluationMode) {
+	private static TypeToken<?> getType(Object object, TypeToken<?> declaredType, EvaluationMode evaluationMode) {
 		if (evaluationMode == EvaluationMode.DUCK_TYPING && object != null) {
-			Class<?> clazz = object.getClass();
-			return declaredClass.isPrimitive()
-					? ReflectionUtils.getPrimitiveClass(clazz)
-					: clazz;
+			Class<?> runtimeClass = object.getClass();
+			TypeToken<?> runtimeType = declaredType.getSubtype(runtimeClass);
+			return declaredType.isPrimitive()
+					? TypeToken.of(ReflectionUtils.getPrimitiveClass(runtimeType.getRawType()))
+					: runtimeType;
 		} else {
-			return declaredClass;
+			return declaredType;
 		}
 	}
 
-	static Class<?> getClass(ObjectInfo objectInfo, EvaluationMode evaluationMode) {
-		return getClass(objectInfo.getObject(), objectInfo.getDeclaredClass(), evaluationMode);
+	static TypeToken<?> getType(ObjectInfo objectInfo, EvaluationMode evaluationMode) {
+		return getType(objectInfo.getObject(), objectInfo.getDeclaredType(), evaluationMode);
 	}
 
-	static ObjectInfo getCastInfo(ObjectInfo objectInfo, Class<?> targetClass, EvaluationMode evaluationMode) throws ClassCastException {
+	static ObjectInfo getCastInfo(ObjectInfo objectInfo, TypeToken<?> targetType, EvaluationMode evaluationMode) throws ClassCastException {
 		Object castedValue = evaluationMode == EvaluationMode.NONE
 				? null
-				: ReflectionUtils.convertTo(objectInfo.getObject(), targetClass, true);
-		return new ObjectInfo(castedValue, targetClass);
+				: ReflectionUtils.convertTo(objectInfo.getObject(), targetType.getRawType(), true);
+		return new ObjectInfo(castedValue, targetType);
 	}
 
 	private final EvaluationMode evaluationMode;
@@ -40,41 +40,37 @@ public class ObjectInfoProvider
 		this.evaluationMode = evaluationMode;
 	}
 
-	private Class<?> getClass(Object object, Class<?> declaredClass) {
-		return getClass(object, declaredClass, evaluationMode);
+	private TypeToken<?> getType(Object object, TypeToken<?> declaredType) {
+		return getType(object, declaredType, evaluationMode);
 	}
 
-	public Class<?> getClass(ObjectInfo objectInfo) {
-		return getClass(objectInfo, evaluationMode);
+	public TypeToken<?> getType(ObjectInfo objectInfo) {
+		return getType(objectInfo, evaluationMode);
 	}
 
-	public ObjectInfo getFieldInfo(ObjectInfo contextInfo, Field field) throws NullPointerException {
+	public ObjectInfo getFieldInfo(ObjectInfo contextInfo, FieldInfo fieldInfo) throws NullPointerException {
 		final Object fieldValue;
-		int modifiers = field.getModifiers();
-		Object contextObject = (modifiers & Modifier.STATIC) != 0 ? null : contextInfo.getObject();
+		Object contextObject = contextInfo.getObject();
 		if (evaluationMode == EvaluationMode.NONE) {
 			fieldValue = null;
 		} else {
 			try {
-				field.setAccessible(true);
-				fieldValue = field.get(contextObject);
+				fieldValue = fieldInfo.get(contextObject);
 			} catch (IllegalAccessException e) {
 				throw new IllegalStateException("Internal error: Unexpected IllegalAccessException: " + e.getMessage());
 			}
 		}
-		ObjectInfo.ValueSetterIF valueSetter = getFieldValueSetter(contextObject, field);
-		Class<?> fieldClass = getClass(fieldValue, field.getType());
-		return new ObjectInfo(fieldValue, fieldClass, valueSetter);
+		ObjectInfo.ValueSetterIF valueSetter = getFieldValueSetter(contextObject, fieldInfo);
+		return new ObjectInfo(fieldValue, fieldInfo.getType(), valueSetter);
 	}
 
-	private ObjectInfo.ValueSetterIF getFieldValueSetter(Object contextObject, Field field) {
-		int modifiers = field.getModifiers();
-		if ((modifiers & Modifier.FINAL) != 0) {
+	private ObjectInfo.ValueSetterIF getFieldValueSetter(Object contextObject, FieldInfo fieldInfo) {
+		if (fieldInfo.isFinal()) {
 			return null;
 		}
 		return value -> {
 			try {
-				field.set(contextObject, value);
+				fieldInfo.set(contextObject, value);
 			} catch (IllegalAccessException e) {
 				throw new IllegalArgumentException("Could not set field value", e);
 			}
@@ -94,8 +90,8 @@ public class ObjectInfoProvider
 				throw new IllegalStateException("Internal error: Unexpected " + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
 			}
 		}
-		Class<?> methodReturnClass = getClass(methodReturnValue, executableInfo.getReturnType());
-		return new ObjectInfo(methodReturnValue, methodReturnClass);
+		TypeToken<?> methodReturnType = getType(methodReturnValue, executableInfo.getReturnType());
+		return new ObjectInfo(methodReturnValue, methodReturnType);
 	}
 
 	public ObjectInfo getArrayElementInfo(ObjectInfo arrayInfo, ObjectInfo indexInfo) throws NullPointerException {
@@ -111,20 +107,19 @@ public class ObjectInfoProvider
 			arrayElementValue = Array.get(arrayObject, index);
 			valueSetter = value -> Array.set(arrayObject, index, value);
 		}
-		Class<?> arrayElementClass = getClass(arrayElementValue, getClass(arrayInfo).getComponentType());
-		return new ObjectInfo(arrayElementValue, arrayElementClass, valueSetter);
+		TypeToken<?> arrayElementType = getType(arrayElementValue, getType(arrayInfo).getComponentType());
+		return new ObjectInfo(arrayElementValue, arrayElementType, valueSetter);
 	}
 
-	public ObjectInfo getCastInfo(ObjectInfo objectInfo, Class<?> targetClass) throws ClassCastException {
-		return getCastInfo(objectInfo, targetClass, evaluationMode);
+	public ObjectInfo getCastInfo(ObjectInfo objectInfo, TypeToken<?> targetType) throws ClassCastException {
+		return getCastInfo(objectInfo, targetType, evaluationMode);
 	}
 
 	public ObjectInfo getVariableInfo(Variable variable, VariablePoolIF variablePool) {
 		final String name = variable.getName();
 		final boolean useHardReference = variable.isUseHardReferenceInPool();
 		Object value = variable.getValue();
-		Class<?> clazz = value == null ? null : value.getClass();
 		ObjectInfo.ValueSetterIF valueSetter = object -> variablePool.addVariable(new Variable(name, object, useHardReference));
-		return new ObjectInfo(value, clazz, valueSetter);
+		return new ObjectInfo(value, null, valueSetter);
 	}
 }

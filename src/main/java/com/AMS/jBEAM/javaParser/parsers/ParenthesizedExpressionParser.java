@@ -6,6 +6,7 @@ import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
+import com.google.common.reflect.TypeToken;
 
 import java.util.List;
 
@@ -16,14 +17,14 @@ public class ParenthesizedExpressionParser extends AbstractEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
 		int position = tokenStream.getPosition();
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		if (characterToken == null || characterToken.getValue().charAt(0) != '(') {
 			return new ParseError(position, "Expected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
 
-		ParseResultIF expressionParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, currentContextInfo, expectedResultClasses);
+		ParseResultIF expressionParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, currentContextInfo, expectedResultTypes);
 
 		// propagate anything except results
 		if (expressionParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
@@ -44,6 +45,6 @@ public class ParenthesizedExpressionParser extends AbstractEntityParser
 			return CompletionSuggestions.NONE;
 		}
 
-		return parserContext.getTailParser(false).parse(tokenStream, objectInfo, expectedResultClasses);
+		return parserContext.getTailParser(false).parse(tokenStream, objectInfo, expectedResultTypes);
 	}
 }

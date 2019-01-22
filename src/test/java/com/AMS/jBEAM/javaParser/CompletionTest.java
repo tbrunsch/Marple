@@ -36,13 +36,13 @@ public class CompletionTest
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("xy",   "xy", "XY", "xy_z", "XYZ", "x", "X")
-			.test("XYZ",  "XYZ", "XY", "X", "x", "xy")
-			.test("X", "X", "x", "XY", "XYZ", "xy_z", "xy")
-			.test("XY", "XY", "xy", "XYZ", "xy_z", "X", "x")
-			.test("xy_z", "xy_z", "x", "xy", "XY", "X")
-			.test("x", "x", "X", "xy_z", "xy", "XY", "XYZ")
-			.test("XYW", "XY", "X", "x", "xy");
+			.test("xy",	"xy", "XY", "xy_z", "XYZ", "x", "X")
+			.test("XYZ",	"XYZ", "XY", "X", "x", "xy")
+			.test("X",		"X", "x", "XY", "XYZ", "xy_z", "xy")
+			.test("XY",	"XY", "xy", "XYZ", "xy_z", "X", "x")
+			.test("xy_z",	"xy_z", "x", "xy", "XY", "X")
+			.test("x",		"x", "X", "xy_z", "xy", "XY", "XYZ")
+			.test("XYW",	"XY", "X", "x", "xy");
 
 		new ErrorTestExecutor(testInstance)
 			.test("xy", -1, IllegalStateException.class)
@@ -63,17 +63,17 @@ public class CompletionTest
 
 		TestClass testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("member.", "member", "X", "xy", "XYZ")
-			.test("member.x", "X", "xy", "XYZ", "member")
-			.test("member.xy", "xy", "XYZ", "X", "member")
-			.test("member.xyz", "XYZ", "xy", "X", "member")
-			.test("member.mem", "member", "X", "xy", "XYZ");
+			.test("member.",		"member", "X", "xy", "XYZ")
+			.test("member.x",		"X", "xy", "XYZ", "member")
+			.test("member.xy",		"xy", "XYZ", "X", "member")
+			.test("member.xyz",	"XYZ", "xy", "X", "member")
+			.test("member.mem",	"member", "X", "xy", "XYZ");
 
 		new ErrorTestExecutor(testInstance)
-			.test("membeR.", -1, ParseException.class)
-			.test("MEMBER.xy", -1, ParseException.class)
-			.test("member.xy.XY", -1, ParseException.class)
-			.test("member.xy", -1, IllegalStateException.class);
+			.test("membeR.",		-1, ParseException.class)
+			.test("MEMBER.xy",		-1, ParseException.class)
+			.test("member.xy.XY",	-1, ParseException.class)
+			.test("member.xy",		-1, IllegalStateException.class);
 	}
 
 	@Test
@@ -96,17 +96,17 @@ public class CompletionTest
 
 		TestClass testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("member.", "x", "xyz")
-			.test("member.x", "x", "xyz")
-			.test("member.xy", "xyz", "x")
-			.test("member.xyz", "xyz", "x");
+			.test("member.",		"x", "xyz")
+			.test("member.x",		"x", "xyz")
+			.test("member.xy",		"xyz", "x")
+			.test("member.xyz",	"xyz", "x");
 
 		new TestExecutor(testInstance)
 			.evaluationMode(EvaluationMode.DUCK_TYPING)
-			.test("member.", "xy", "x", "xyz")
-			.test("member.x", "x", "xy", "xyz")
-			.test("member.xy", "xy", "xyz", "x")
-			.test("member.xyz", "xyz", "xy", "x");
+			.test("member.",		"xy", "x", "xyz")
+			.test("member.x",		"x", "xy", "xyz")
+			.test("member.xy",		"xy", "xyz", "x")
+			.test("member.xyz",	"xyz", "xy", "x");
 	}
 
 	@Test
@@ -123,22 +123,22 @@ public class CompletionTest
 		final String hashCode = "hashCode()";
 		TestClass testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("member[", "xyz", hashCode, "xyzw", "member", "xy")
-			.test("member[x", "xyz", "xyzw", "xy", hashCode, "member")
-			.test("member[xy", "xy", "xyz", "xyzw", hashCode, "member")
-			.test("member[xyz", "xyz", "xyzw", "xy", hashCode, "member")
-			.test("member[xyzw", "xyzw", "xyz", "xy", hashCode, "member")
-			.test("member[m", "member", "xyz", hashCode, "xyzw", "xy")
-			.test("member[xyz].", "member", "xy", "xyz", "xyzw")
-			.test("member[xyzw].x", "xy", "xyz", "xyzw", "member");
+			.test("member[",			"xyz", hashCode, "xyzw", "member", "xy")
+			.test("member[x",			"xyz", "xyzw", "xy", hashCode, "member")
+			.test("member[xy",			"xy", "xyz", "xyzw", hashCode, "member")
+			.test("member[xyz",		"xyz", "xyzw", "xy", hashCode, "member")
+			.test("member[xyzw",		"xyzw", "xyz", "xy", hashCode, "member")
+			.test("member[m",			"member", "xyz", hashCode, "xyzw", "xy")
+			.test("member[xyz].",		"member", "xy", "xyz", "xyzw")
+			.test("member[xyzw].x",	"xy", "xyz", "xyzw", "member");
 
 		new ErrorTestExecutor(testInstance)
-			.test("xy[", 3, ParseException.class)
-			.test("xyz[", 4, ParseException.class)
-			.test("xyzw[", 5, ParseException.class)
-			.test("member[xy].", 11, ParseException.class)
-			.test("member[xyz]", -1, IllegalStateException.class)
-			.test("member[xyz)", 11, ParseException.class);
+			.test("xy[",			3, ParseException.class)
+			.test("xyz[",			4, ParseException.class)
+			.test("xyzw[",			5, ParseException.class)
+			.test("member[xy].",	11, ParseException.class)
+			.test("member[xyz]",	-1, IllegalStateException.class)
+			.test("member[xyz)",	11, ParseException.class);
 	}
 
 	@Test
@@ -168,14 +168,14 @@ public class CompletionTest
 
 		new TestExecutor(testInstance)
 			.evaluationMode(EvaluationMode.DUCK_TYPING)
-			.test("array[", "i0", "i1", "i2")
-			.test("array[i0].", "value")
-			.test("array[i1].", "index");
+			.test("array[",		"i0", "i1", "i2")
+			.test("array[i0].",	"value")
+			.test("array[i1].",	"index");
 
 		new ErrorTestExecutor(testInstance)
 			.evaluationMode(EvaluationMode.DUCK_TYPING)
-			.test("array[i2].", 10, ParseException.class)
-			.test("array[array[i1].index].", 23, ParseException.class);
+			.test("array[i2].",				10, ParseException.class)
+			.test("array[array[i1].index].",	23, ParseException.class);
 	}
 
 	@Test
@@ -233,18 +233,18 @@ public class CompletionTest
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("xy",		methodsFormatter.apply(new String[]{"xy", "XY", "xy_z", "XYZ", "XYZ", "x", "X"}))
+			.test("xy",	methodsFormatter.apply(new String[]{"xy", "XY", "xy_z", "XYZ", "XYZ", "x", "X"}))
 			.test("XYZ",	methodsFormatter.apply(new String[]{"XYZ", "XYZ", "XY", "X", "x", "xy"}))
 			.test("X",		methodsFormatter.apply(new String[]{"X", "x", "XY", "XYZ", "XYZ", "xy_z", "xy"}))
-			.test("XY",		methodsFormatter.apply(new String[]{"XY", "xy", "XYZ", "XYZ", "xy_z", "X", "x"}))
+			.test("XY",	methodsFormatter.apply(new String[]{"XY", "xy", "XYZ", "XYZ", "xy_z", "X", "x"}))
 			.test("xy_z",	methodsFormatter.apply(new String[]{"xy_z", "x", "xy", "XY", "X"}))
 			.test("x",		methodsFormatter.apply(new String[]{"x", "X", "xy_z", "xy", "XY", "XYZ", "XYZ"}))
 			.test("XYW",	methodsFormatter.apply(new String[]{"XY", "X", "x", "xy"}));
 
 		new ErrorTestExecutor(testInstance)
-			.test("other()", -1, IllegalStateException.class)
-			.test("bla", -1, ParseException.class)
-			.test("other(),", 8, ParseException.class);
+			.test("other()",	-1, IllegalStateException.class)
+			.test("bla",		-1, ParseException.class)
+			.test("other(),",	8, ParseException.class);
 	}
 
 	@Test
@@ -262,19 +262,19 @@ public class CompletionTest
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("prefix", "prefixC", "prefixD", "prefixI", "prefixC()", "prefixD()", "prefixI()")
-			.test("prefixI", "prefixI", "prefixI()", "prefixC", "prefixD")
-			.test("prefixD", "prefixD", "prefixD()", "prefixC", "prefixI")
-			.test("prefixC", "prefixC", "prefixC()", "prefixD", "prefixI")
-			.test("prefixI(", "prefixD", "prefixD()", "prefixC", "prefixI", "prefixC()", "prefixI()")
-			.test("prefixD(", "prefixC", "prefixC()", "prefixD", "prefixI", "prefixD()", "prefixI()")
-			.test("prefixC(", "prefixI", "prefixI()", "hashCode()", "prefixC", "prefixC()", "prefixD", "prefixD()");
+			.test("prefix",	"prefixC", "prefixD", "prefixI", "prefixC()", "prefixD()", "prefixI()")
+			.test("prefixI",	"prefixI", "prefixI()", "prefixC", "prefixD")
+			.test("prefixD",	"prefixD", "prefixD()", "prefixC", "prefixI")
+			.test("prefixC",	"prefixC", "prefixC()", "prefixD", "prefixI")
+			.test("prefixI(",	"prefixD", "prefixD()", "prefixC", "prefixI", "prefixC()", "prefixI()")
+			.test("prefixD(",	"prefixC", "prefixC()", "prefixD", "prefixI", "prefixD()", "prefixI()")
+			.test("prefixC(",	"prefixI", "prefixI()", "hashCode()", "prefixC", "prefixC()", "prefixD", "prefixD()");
 
 		new ErrorTestExecutor(testInstance)
-			.test("prefixI(prefixD)", -1, IllegalStateException.class)
-			.test("prefixD(prefixI)", 16, ParseException.class)
-			.test("prefixC(prefixI,", 16, ParseException.class)
-			.test("prefixI(prefixD))", -1, ParseException.class);
+			.test("prefixI(prefixD)",	-1, IllegalStateException.class)
+			.test("prefixD(prefixI)",	16, ParseException.class)
+			.test("prefixC(prefixI,",	16, ParseException.class)
+			.test("prefixI(prefixD))",	-1, ParseException.class);
 	}
 
 	@Test
@@ -314,17 +314,17 @@ public class CompletionTest
 
 		Object testInstance = new TestClass2();
 		new TestExecutor(testInstance)
-			.test("getTestClass", "getTestClass()")
-			.test("getTestClass(c).", "d", "i", "getObject()")
-			.test("getTestClass(c).get", "getObject()")
-			.test("getTestClass(c).getObject(", "c", "s")
-			.test("getTestClass(c).getObject(getTestClass(c).d).", "clone()", "equals()");
+			.test("getTestClass",									"getTestClass()")
+			.test("getTestClass(c).",								"d", "i", "getObject()")
+			.test("getTestClass(c).get",							"getObject()")
+			.test("getTestClass(c).getObject(",					"c", "s")
+			.test("getTestClass(c).getObject(getTestClass(c).d).",	"clone()", "equals()");
 
 		new ErrorTestExecutor(testInstance)
-			.test("getTestClazz().", -1, ParseException.class)
-			.test("getTestClazz().i", -1, ParseException.class)
-			.test("getTestClass().i.d", -1, ParseException.class)
-			.test("getTestClass(c).getObject(getTestClass(c).d)", -1, IllegalStateException.class);
+			.test("getTestClazz().",								-1, ParseException.class)
+			.test("getTestClazz().i",								-1, ParseException.class)
+			.test("getTestClass().i.d",							-1, ParseException.class)
+			.test("getTestClass(c).getObject(getTestClass(c).d)",	-1, IllegalStateException.class);
 	}
 
 	@Test
@@ -352,19 +352,19 @@ public class CompletionTest
 		final String getClass = "getClass()";
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("getObject().", "x", "xyz", "getInt()")
-			.test("getObject().x", "x", "xyz", "getInt()")
-			.test("getObject().xy", "xyz", "x", "getInt()")
-			.test("getObject().xyz", "xyz", "x", "getInt()")
-			.test("getObject().get", "getInt()", getClass, "x", "xyz");
+			.test("getObject().",		"x", "xyz", "getInt()")
+			.test("getObject().x",		"x", "xyz", "getInt()")
+			.test("getObject().xy",	"xyz", "x", "getInt()")
+			.test("getObject().xyz",	"xyz", "x", "getInt()")
+			.test("getObject().get",	"getInt()", getClass, "x", "xyz");
 
 		new TestExecutor(testInstance)
 			.evaluationMode(EvaluationMode.DUCK_TYPING)
-			.test("getObject().", "xy", "x", "xyz", "getDouble()", "getInt()")
-			.test("getObject().x", "x", "xy", "xyz", "getDouble()", "getInt()")
-			.test("getObject().xy", "xy", "xyz", "x", "getDouble()", "getInt()")
-			.test("getObject().xyz", "xyz", "xy", "x", "getDouble()", "getInt()")
-			.test("getObject().get", "getDouble()", "getInt()", getClass, "xy", "x", "xyz");
+			.test("getObject().",		"xy", "x", "xyz", "getDouble()", "getInt()")
+			.test("getObject().x",		"x", "xy", "xyz", "getDouble()", "getInt()")
+			.test("getObject().xy",	"xy", "xyz", "x", "getDouble()", "getInt()")
+			.test("getObject().xyz",	"xyz", "xy", "x", "getDouble()", "getInt()")
+			.test("getObject().get",	"getDouble()", "getInt()", getClass, "xy", "x", "xyz");
 	}
 
 	@Test
@@ -382,14 +382,14 @@ public class CompletionTest
 		final String getClass = "getClass()";
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("getTestClasses()[", "xyz", hashCode, "xyzw", "xy")
-			.test("getTestClasses()[x", "xyz", "xyzw", "xy", hashCode)
-			.test("getTestClasses()[xy", "xy", "xyz", "xyzw", hashCode)
-			.test("getTestClasses()[xyz", "xyz", "xyzw", "xy", hashCode)
-			.test("getTestClasses()[xyzw", "xyzw", "xyz", "xy", hashCode)
-			.test("getTestClasses()[g", "getTestClasses()", getClass, "xyz", hashCode, "xyzw", "xy")
-			.test("getTestClasses()[xyz].", "xy", "xyz", "xyzw")
-			.test("getTestClasses()[xyzw].x", "xy", "xyz", "xyzw");
+			.test("getTestClasses()[",			"xyz", hashCode, "xyzw", "xy")
+			.test("getTestClasses()[x",		"xyz", "xyzw", "xy", hashCode)
+			.test("getTestClasses()[xy",		"xy", "xyz", "xyzw", hashCode)
+			.test("getTestClasses()[xyz",		"xyz", "xyzw", "xy", hashCode)
+			.test("getTestClasses()[xyzw",		"xyzw", "xyz", "xy", hashCode)
+			.test("getTestClasses()[g",		"getTestClasses()", getClass, "xyz", hashCode, "xyzw", "xy")
+			.test("getTestClasses()[xyz].",	"xy", "xyz", "xyzw")
+			.test("getTestClasses()[xyzw].x",	"xy", "xyz", "xyzw");
 
 		new ErrorTestExecutor(testInstance)
 			.test("xy[", 3, ParseException.class)
@@ -416,8 +416,8 @@ public class CompletionTest
 
 		new TestExecutor(testInstance)
 			.evaluationMode(EvaluationMode.DUCK_TYPING)
-			.test("getArray(size)[", "index", "size")
-			.test("getArray(size)[index].", "index", "size");
+			.test("getArray(size)[",			"index", "size")
+			.test("getArray(size)[index].",	"index", "size");
 	}
 
 	@Test
@@ -445,13 +445,13 @@ public class CompletionTest
 		final String toString = "toString()";
 		Object testInstance = new TestClass3();
 		new TestExecutor(testInstance)
-			.test("getTestClass(", "intValue", "stringValue")
-			.test("getTestClass(i", "intValue", "stringValue", hashCode)
-			.test("getTestClass(s", "stringValue", "intValue")
-			.test("getTestClass(intValue,", "stringValue", toString, "intValue")
-			.test("getTestClass(stringValue,", "intValue", hashCode, "stringValue")
-			.test("getTestClass(intValue,stringValue).", "myInt")
-			.test("getTestClass(stringValue,intValue).", "myString");
+			.test("getTestClass(",							"intValue", "stringValue")
+			.test("getTestClass(i",						"intValue", "stringValue", hashCode)
+			.test("getTestClass(s",						"stringValue", "intValue")
+			.test("getTestClass(intValue,",				"stringValue", toString, "intValue")
+			.test("getTestClass(stringValue,",				"intValue", hashCode, "stringValue")
+			.test("getTestClass(intValue,stringValue).",	"myInt")
+			.test("getTestClass(stringValue,intValue).",	"myString");
 	}
 
 	@Test
@@ -501,9 +501,9 @@ public class CompletionTest
 		final String getClass = "getClass()";
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.test("(", "x", "y", "getFloat()", "goDoNothing()")
-			.test("(g", "getFloat()", "goDoNothing()", getClass)
-			.test("(getFloat(y).toString()).le", "length()");
+			.test("(",								"x", "y", "getFloat()", "goDoNothing()")
+			.test("(g",							"getFloat()", "goDoNothing()", getClass)
+			.test("(getFloat(y).toString()).le",	"length()");
 	}
 
 	@Test
@@ -525,11 +525,11 @@ public class CompletionTest
 
 		Object testInstance = new TestClass(5, -2.0);
 		new TestExecutor(testInstance)
-			.test("get((TestClass) o).", "d", "i", "o")
-			.test("get((TestClass) this).", "d", "i", "o")
-			.test("get(this).", "d", "i", "o")				// no cast required for this
-			.test("(com.AMS.jBEAM.javaPars", "javaParser")
-			.test("(com.AMS.jBEAM.javaParser.JavaCo", "CompletionTest");
+			.test("get((TestClass) o).",				"d", "i", "o")
+			.test("get((TestClass) this).",			"d", "i", "o")
+			.test("get(this).",						"d", "i", "o")				// no cast required for this
+			.test("(com.AMS.jBEAM.javaPars",			"javaParser")
+			.test("(com.AMS.jBEAM.javaParser.JavaCo",	"CompletionTest");
 
 		new ErrorTestExecutor(testInstance)
 			.test("get(o).", 7, ParseException.class);
@@ -555,15 +555,15 @@ public class CompletionTest
 		Object testInstance = null;
 		new TestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
-			.test("com.AMS.jBEAM.javaParser.CompletionTest.ClassParserTestClass.", "f", "l", "getDouble()", "getInt()")
-			.test("String.CASE_I", "CASE_INSENSITIVE_ORDER")
-			.test("String.val", "valueOf()");
+			.test("com.AMS.jBEAM.javaParser.CompletionTest.ClassParserTestClass.",	"f", "l", "getDouble()", "getInt()")
+			.test("String.CASE_I",													"CASE_INSENSITIVE_ORDER")
+			.test("String.val",													"valueOf()");
 
 		new TestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PUBLIC)
-			.test("java.lang.Ma", "Math")
-			.test("java.lang.Math.p", "pow(, )", "PI")
-			.test("java.lang.Math.P", "PI", "pow(, )");
+			.test("java.lang.Ma",		"Math")
+			.test("java.lang.Math.p",	"pow(, )", "PI")
+			.test("java.lang.Math.P",	"PI", "pow(, )");
 	}
 
 	private static class ConstructorParserTestClass
@@ -595,15 +595,15 @@ public class CompletionTest
 	public void testConstructor() {
 		Object testInstance = new ConstructorParserTestClass(5, -2.0f);
 		new TestExecutor(testInstance)
-			.test("new ConstructorParserTestC", "ConstructorParserTestClass")
-			.test("new ConstructorParserTestClass(", "i", "o")
-			.test("new ConstructorParserTestClass(i, ", "i")
-			.test("new ConstructorParserTestClass(o, ", "i")
-			.test("new ConstructorParserTestClass(\"bla\", ","d", "i")
-			.test("new ConstructorParserTestClass(\"bla\", i, ", "i")
-			.test("new ConstructorParserTestClass(\"bla\", d, i).", "d", "i", "o")
-			.test("new com.AMS.jBEAM.javaPars", "javaParser")
-			.test("new com.AMS.jBEAM.javaParser.JavaCo", "CompletionTest");
+			.test("new ConstructorParserTestC",						"ConstructorParserTestClass")
+			.test("new ConstructorParserTestClass(",					"i", "o")
+			.test("new ConstructorParserTestClass(i, ",				"i")
+			.test("new ConstructorParserTestClass(o, ",				"i")
+			.test("new ConstructorParserTestClass(\"bla\", ",			"d", "i")
+			.test("new ConstructorParserTestClass(\"bla\", i, ",		"i")
+			.test("new ConstructorParserTestClass(\"bla\", d, i).",	"d", "i", "o")
+			.test("new com.AMS.jBEAM.javaPars",						"javaParser")
+			.test("new com.AMS.jBEAM.javaParser.JavaCo",				"CompletionTest");
 	}
 
 	@Test
@@ -626,17 +626,17 @@ public class CompletionTest
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
 			.variablePool(variablePool)
-			.test("x", "x", "xyz", "xy", "xyzw", "abc")
-			.test("xy", "xy", "xyz", "xyzw", "x", "abc")
-			.test("xyz", "xyz", "xyzw", "x", "xy", "abc")
-			.test("xyzw", "xyzw", "xyz", "x", "xy", "abc")
-			.test("abc", "abc", "xyz", "x", "xy", "xyzw")
-			.test("test(", "xyzw", "abc", "xyz", "x", "xy")
-			.test("test(x", "x", "xyzw", "xyz", "xy", "abc")
-			.test("test(xy", "xy", "xyzw", "xyz", "x", "abc")
-			.test("test(xyz", "xyz", "xyzw", "x", "xy", "abc")
-			.test("test(xyzw", "xyzw", "xyz", "x", "xy", "abc")
-			.test("test(abc", "abc", "xyzw", "xyz", "x", "xy");
+			.test("x",			"x", "xyz", "xy", "xyzw", "abc")
+			.test("xy",		"xy", "xyz", "xyzw", "x", "abc")
+			.test("xyz",		"xyz", "xyzw", "x", "xy", "abc")
+			.test("xyzw",		"xyzw", "xyz", "x", "xy", "abc")
+			.test("abc",		"abc", "xyz", "x", "xy", "xyzw")
+			.test("test(",		"xyzw", "abc", "xyz", "x", "xy")
+			.test("test(x",	"x", "xyzw", "xyz", "xy", "abc")
+			.test("test(xy",	"xy", "xyzw", "xyz", "x", "abc")
+			.test("test(xyz",	"xyz", "xyzw", "x", "xy", "abc")
+			.test("test(xyzw",	"xyzw", "xyz", "x", "xy", "abc")
+			.test("test(abc",	"abc", "xyzw", "xyz", "x", "xy");
 	}
 
 	private static List<String> extractSuggestions(List<CompletionSuggestionIF> completions) {

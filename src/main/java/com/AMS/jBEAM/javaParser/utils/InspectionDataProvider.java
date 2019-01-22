@@ -1,8 +1,9 @@
 package com.AMS.jBEAM.javaParser.utils;
 
+import com.AMS.jBEAM.common.ReflectionUtils;
 import com.AMS.jBEAM.javaParser.AccessLevel;
 import com.AMS.jBEAM.javaParser.ParserSettings;
-import com.AMS.jBEAM.common.ReflectionUtils;
+import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -11,6 +12,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class InspectionDataProvider
 {
@@ -37,26 +39,29 @@ public class InspectionDataProvider
 		}
 	}
 
-	public List<Field> getFields(Class<?> clazz, boolean staticOnly) {
+	public List<FieldInfo> getFieldInfos(TypeToken<?> type, boolean staticOnly) {
 		Predicate<Integer> modifierFilter = staticOnly ? accessLevelFilter.and(STATIC_FILTER) : accessLevelFilter;
-		return ReflectionUtils.getFields(clazz, true, modifierFilter);
+		List<Field> fields = ReflectionUtils.getFields(type.getRawType(), true, modifierFilter);
+		return fields.stream()
+				.map(field -> new FieldInfo(field, type))
+				.collect(Collectors.toList());
 	}
 
-	public List<ExecutableInfo> getMethodInfos(Class<?> clazz, boolean staticOnly) {
+	public List<ExecutableInfo> getMethodInfos(TypeToken<?> type, boolean staticOnly) {
 		Predicate<Integer> modifierFilter = staticOnly ? accessLevelFilter.and(STATIC_FILTER) : accessLevelFilter;
-		List<Method> methods = ReflectionUtils.getMethods(clazz, modifierFilter);
+		List<Method> methods = ReflectionUtils.getMethods(type.getRawType(), modifierFilter);
 		List<ExecutableInfo> executableInfos = new ArrayList<>(methods.size());
 		for (Method method : methods) {
-			executableInfos.addAll(ExecutableInfo.getAvailableExecutableInfos(method));
+			executableInfos.addAll(ExecutableInfo.getAvailableExecutableInfos(method, type));
 		}
 		return executableInfos;
 	}
 
-	public List<ExecutableInfo> getConstructorInfos(Class<?> clazz) {
-		List<Constructor<?>> constructors = ReflectionUtils.getConstructors(clazz, accessLevelFilter);
+	public List<ExecutableInfo> getConstructorInfos(TypeToken<?> type) {
+		List<Constructor<?>> constructors = ReflectionUtils.getConstructors(type.getRawType(), accessLevelFilter);
 		List<ExecutableInfo> executableInfos = new ArrayList<>(constructors.size());
 		for (Constructor<?> constructor : constructors) {
-			executableInfos.addAll(ExecutableInfo.getAvailableExecutableInfos(constructor));
+			executableInfos.addAll(ExecutableInfo.getAvailableExecutableInfos(constructor, type));
 		}
 		return executableInfos;
 	}

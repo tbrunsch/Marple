@@ -1,22 +1,24 @@
 package com.AMS.jBEAM.javaParser.utils;
 
+import com.google.common.reflect.TypeToken;
+
 public class ObjectInfo
 {
 	private final Object			object;
-	private final Class<?>			declaredClass;
+	private final TypeToken<?>		declaredType;
 	private final ValueSetterIF		valueSetter;
 
 	public ObjectInfo(Object object) {
-		this(object, object == null ? null : object.getClass());
+		this(object, TypeToken.of(Object.class));
 	}
 
-	public ObjectInfo(Object object, Class<?> declaredClass) {
-		this(object, declaredClass, null);
+	public ObjectInfo(Object object, TypeToken<?> declaredType) {
+		this(object, declaredType, null);
 	}
 
-	public ObjectInfo(Object object, Class<?> declaredClass, ValueSetterIF valueSetter) {
+	public ObjectInfo(Object object, TypeToken<?> declaredType, ValueSetterIF valueSetter) {
 		this.object = object;
-		this.declaredClass = declaredClass;
+		this.declaredType = declaredType;
 		this.valueSetter = valueSetter;
 	}
 
@@ -24,8 +26,8 @@ public class ObjectInfo
 		return object;
 	}
 
-	public Class<?> getDeclaredClass() {
-		return declaredClass;
+	public TypeToken<?> getDeclaredType() {
+		return declaredType;
 	}
 
 	public ValueSetterIF getValueSetter() {

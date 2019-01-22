@@ -7,6 +7,7 @@ import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ExecutableInfo;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
+import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -34,7 +35,7 @@ public class MethodParser extends AbstractEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
 		int startPosition = tokenStream.getPosition();
 
 		if (tokenStream.isCaretAtPosition()) {
@@ -45,7 +46,7 @@ public class MethodParser extends AbstractEntityParser
 			} catch (TokenStream.JavaTokenParseException e) {
 				insertionEnd = startPosition;
 			}
-			return parserContext.getExecutableDataProvider().suggestMethods(currentContextInfo, expectedResultClasses, startPosition, insertionEnd, staticOnly);
+			return parserContext.getExecutableDataProvider().suggestMethods(currentContextInfo, expectedResultTypes, startPosition, insertionEnd, staticOnly);
 		}
 
 		if (thisInfo.getObject() == null && !staticOnly) {
@@ -61,15 +62,15 @@ public class MethodParser extends AbstractEntityParser
 		String methodName = methodNameToken.getValue();
 		final int endPosition = tokenStream.getPosition();
 
-		Class<?> currentContextClass = parserContext.getObjectInfoProvider().getClass(currentContextInfo);
-		List<ExecutableInfo> methodInfos = parserContext.getInspectionDataProvider().getMethodInfos(currentContextClass, staticOnly);
+		TypeToken<?> currentContextType = parserContext.getObjectInfoProvider().getType(currentContextInfo);
+		List<ExecutableInfo> methodInfos = parserContext.getInspectionDataProvider().getMethodInfos(currentContextType, staticOnly);
 
 		// check for code completion
 		if (methodNameToken.isContainsCaret()) {
 			Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 				methodInfos,
 				methodInfo -> new CompletionSuggestionMethod(methodInfo, startPosition, endPosition),
-				ParseUtils.rateMethodByNameAndClassesFunc(methodName, expectedResultClasses)
+				ParseUtils.rateMethodByNameAndTypesFunc(methodName, expectedResultTypes)
 			);
 			return new CompletionSuggestions(ratedSuggestions);
 		}
@@ -111,7 +112,7 @@ public class MethodParser extends AbstractEntityParser
 				} catch (Exception e) {
 					return new ParseError(startPosition, "Exception during method evaluation", ErrorType.EVALUATION_EXCEPTION, e);
 				}
-				return parserContext.getTailParser(false).parse(tokenStream, methodReturnInfo, expectedResultClasses);
+				return parserContext.getTailParser(false).parse(tokenStream, methodReturnInfo, expectedResultTypes);
 			}
 			default: {
 				String error = "Ambiguous method call. Possible candidates are:\n"

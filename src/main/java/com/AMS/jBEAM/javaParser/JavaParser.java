@@ -3,6 +3,7 @@ package com.AMS.jBEAM.javaParser;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
+import com.google.common.reflect.TypeToken;
 
 import java.util.*;
 
@@ -111,7 +112,7 @@ public class JavaParser
 	}
 
 	private ParseResultIF parse(String javaExpression, ParserSettings settings, EvaluationMode evaluationMode, int caret, Object thisContext) {
-		ObjectInfo thisInfo = new ObjectInfo(thisContext);
+		ObjectInfo thisInfo = new ObjectInfo(thisContext, thisContext == null ? null : TypeToken.of(thisContext.getClass()));
 		ParserContext parserPool  = new ParserContext(thisInfo, settings, evaluationMode);
 		TokenStream tokenStream = new TokenStream(javaExpression, caret);
 		try {

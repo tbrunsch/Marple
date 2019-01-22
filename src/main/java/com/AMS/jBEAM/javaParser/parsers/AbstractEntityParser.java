@@ -4,6 +4,7 @@ import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
+import com.google.common.reflect.TypeToken;
 
 import java.util.List;
 
@@ -17,9 +18,9 @@ public abstract class AbstractEntityParser
 		this.thisInfo = thisInfo;
 	}
 
-	abstract ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses);
+	abstract ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes);
 
-	public ParseResultIF parse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
-		return doParse(tokenStream.clone(), currentContextInfo, expectedResultClasses);
+	public ParseResultIF parse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
+		return doParse(tokenStream.clone(), currentContextInfo, expectedResultTypes);
 	}
 }

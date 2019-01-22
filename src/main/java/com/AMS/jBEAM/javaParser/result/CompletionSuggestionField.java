@@ -1,5 +1,6 @@
 package com.AMS.jBEAM.javaParser.result;
 
+import com.AMS.jBEAM.javaParser.utils.FieldInfo;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 
 import java.lang.reflect.Field;
@@ -7,12 +8,12 @@ import java.util.Objects;
 
 public class CompletionSuggestionField implements CompletionSuggestionIF
 {
-	private final Field field;
-	private final int 	insertionBegin;
-	private final int 	insertionEnd;
+	private final FieldInfo	fieldInfo;
+	private final int 		insertionBegin;
+	private final int 		insertionEnd;
 
-	public CompletionSuggestionField(Field field, int insertionBegin, int insertionEnd) {
-		this.field = field;
+	public CompletionSuggestionField(FieldInfo fieldInfo, int insertionBegin, int insertionEnd) {
+		this.fieldInfo = fieldInfo;
 		this.insertionBegin = insertionBegin;
 		this.insertionEnd = insertionEnd;
 	}
@@ -29,12 +30,12 @@ public class CompletionSuggestionField implements CompletionSuggestionIF
 
 	@Override
 	public String getTextToInsert() {
-		return field.getName();
+		return fieldInfo.getName();
 	}
 
 	@Override
 	public String toString() {
-		return ParseUtils.getFieldDisplayText(field);
+		return ParseUtils.getFieldDisplayText(fieldInfo);
 	}
 
 	@Override
@@ -44,11 +45,11 @@ public class CompletionSuggestionField implements CompletionSuggestionIF
 		CompletionSuggestionField that = (CompletionSuggestionField) o;
 		return insertionBegin == that.insertionBegin &&
 				insertionEnd == that.insertionEnd &&
-				Objects.equals(field, that.field);
+				Objects.equals(fieldInfo, that.fieldInfo);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(field, insertionBegin, insertionEnd);
+		return Objects.hash(fieldInfo, insertionBegin, insertionEnd);
 	}
 }

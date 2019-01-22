@@ -11,6 +11,7 @@ import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 import com.AMS.jBEAM.javaParser.utils.OperatorResultProvider;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.reflect.TypeToken;
 
 import java.util.List;
 import java.util.Map;
@@ -50,8 +51,8 @@ public class CompoundExpressionParser extends AbstractEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
-		ParseResultIF parseResult = parserContext.getExpressionParser().parse(tokenStream, currentContextInfo, expectedResultClasses);
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
+		ParseResultIF parseResult = parserContext.getExpressionParser().parse(tokenStream, currentContextInfo, expectedResultTypes);
 
 		// propagate anything except results
 		if (parseResult.getResultType() != ParseResultType.PARSE_RESULT) {
@@ -72,7 +73,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 		while (true) {
 			Token operatorToken = tokenStream.readBinaryOperatorUnchecked();
 			if (operatorToken == null) {
-				return ParseUtils.createParseResult(context, lhsInfo, expectedResultClasses, parsedToPosition);
+				return ParseUtils.createParseResult(context, lhsInfo, expectedResultTypes, parsedToPosition);
 			}
 			if (operatorToken.isContainsCaret()) {
 				// No suggestions possible
@@ -81,7 +82,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 
 			BinaryOperator operator = BinaryOperator.getValue(operatorToken.getValue());
 			if (operator.getPrecedenceLevel() > maxOperatorPrecedenceLevelToConsider) {
-				return ParseUtils.createParseResult(context, lhsInfo, expectedResultClasses, parsedToPosition);
+				return ParseUtils.createParseResult(context, lhsInfo, expectedResultTypes, parsedToPosition);
 			}
 
 			switch (operator.getAssociativity()) {
@@ -90,7 +91,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 						context = createContextWithoutEvaluation();
 						considerOperatorResult = false;
 					}
-					parseResult = context.createCompoundExpressionParser(operator.getPrecedenceLevel() - 1).parse(tokenStream, currentContextInfo, expectedResultClasses);
+					parseResult = context.createCompoundExpressionParser(operator.getPrecedenceLevel() - 1).parse(tokenStream, currentContextInfo, expectedResultTypes);
 
 					// propagate anything except results
 					if (parseResult.getResultType() != ParseResultType.PARSE_RESULT) {
@@ -113,7 +114,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 					break;
 				}
 				case RIGHT_TO_LEFT: {
-					parseResult = context.createCompoundExpressionParser(operator.getPrecedenceLevel()).parse(tokenStream, currentContextInfo, expectedResultClasses);
+					parseResult = context.createCompoundExpressionParser(operator.getPrecedenceLevel()).parse(tokenStream, currentContextInfo, expectedResultTypes);
 
 					// propagate anything except results
 					if (parseResult.getResultType() != ParseResultType.PARSE_RESULT) {
@@ -128,7 +129,7 @@ public class CompoundExpressionParser extends AbstractEntityParser
 					} catch (OperatorException e) {
 						return new ParseError(rhsParseResult.getParsedToPosition(), e.getMessage(), ErrorType.SEMANTIC_ERROR);
 					}
-					return ParseUtils.createParseResult(context, operatorResultInfo, expectedResultClasses, rhsParseResult.getParsedToPosition());
+					return ParseUtils.createParseResult(context, operatorResultInfo, expectedResultTypes, rhsParseResult.getParsedToPosition());
 				}
 				default:
 					return new ParseError(tokenStream.getPosition(), "Internal error: Unknown operator associativity: " + operator.getAssociativity(), ErrorType.INTERNAL_ERROR);

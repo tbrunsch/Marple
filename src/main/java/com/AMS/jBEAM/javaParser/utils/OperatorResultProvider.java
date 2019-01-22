@@ -7,6 +7,7 @@ import com.AMS.jBEAM.javaParser.tokenizer.UnaryOperator;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Table;
+import com.google.common.reflect.TypeToken;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -188,8 +189,8 @@ public class OperatorResultProvider
 			throw new OperatorException("Operator cannot be applied to '" + clazz + "'");
 		}
 		Object result = evaluationMode == EvaluationMode.NONE ? null : !((boolean) objectInfo.getObject());
-		Class<?> resultClass = boolean.class;
-		return new ObjectInfo(result, resultClass);
+		TypeToken<?> resultType = TypeToken.of(boolean.class);
+		return new ObjectInfo(result, resultType);
 	}
 
 	public ObjectInfo getBitwiseNotInfo(ObjectInfo objectInfo) throws OperatorException {
@@ -198,7 +199,7 @@ public class OperatorResultProvider
 		if (!isIntegral(primitiveClass)) {
 			throw new OperatorException("Operator cannot be applied to '" + clazz + "'");
 		}
-		Class<?> resultClass = primitiveClass == long.class ? long.class : int.class;
+		TypeToken<?> resultType = primitiveClass == long.class ? TypeToken.of(long.class) : TypeToken.of(int.class);
 		Object result = null;
 		if (evaluationMode != EvaluationMode.NONE) {
 			Object object = objectInfo.getObject();
@@ -208,7 +209,7 @@ public class OperatorResultProvider
 				result = ~ReflectionUtils.convertTo(object, int.class, false).intValue();
 			}
 		}
-		return new ObjectInfo(result, resultClass);
+		return new ObjectInfo(result, resultType);
 	}
 
 	/*
@@ -271,8 +272,8 @@ public class OperatorResultProvider
 			return applyNumericComparisonOperator(lhs, rhs, BinaryOperator.EQUAL_TO);
 		}
 		Object result = evaluationMode == EvaluationMode.NONE ? null : lhs.getObject() == rhs.getObject();
-		Class<?> resultClass = boolean.class;
-		return new ObjectInfo(result, resultClass);
+		TypeToken<?> resultType = TypeToken.of(boolean.class);
+		return new ObjectInfo(result, resultType);
 	}
 
 	public ObjectInfo getNotEqualToInfo(ObjectInfo lhs, ObjectInfo rhs) throws OperatorException {
@@ -282,8 +283,8 @@ public class OperatorResultProvider
 			return applyNumericComparisonOperator(lhs, rhs, BinaryOperator.NOT_EQUAL_TO);
 		}
 		Object result = evaluationMode == EvaluationMode.NONE ? null : lhs.getObject() != rhs.getObject();
-		Class<?> resultClass = boolean.class;
-		return new ObjectInfo(result, resultClass);
+		TypeToken<?> resultType = TypeToken.of(boolean.class);
+		return new ObjectInfo(result, resultType);
 	}
 
 	public ObjectInfo getBitwiseAndInfo(ObjectInfo lhs, ObjectInfo rhs) throws OperatorException {
@@ -311,29 +312,33 @@ public class OperatorResultProvider
 		if (lhsValueSetter == null) {
 			throw new OperatorException("Cannot assign values to non-lvalues or final fields");
 		}
-		Class<?> declaredLhsClass = lhs.getDeclaredClass();
-		Class<?> rhsClass = getClass(rhs);
-		if (ParseUtils.rateClassMatch(rhsClass, declaredLhsClass) == ParseUtils.CLASS_MATCH_NONE) {
-			throw new OperatorException("Cannot assign value of type '" + rhsClass + "' to left-hand side. Expected an instance of class '" + declaredLhsClass + "'");
+		TypeToken<?> declaredLhsType = lhs.getDeclaredType();
+		TypeToken<?> rhsType = getType(rhs);
+		if (ParseUtils.rateTypeMatch(rhsType, declaredLhsType) == ParseUtils.TYPE_MATCH_NONE) {
+			throw new OperatorException("Cannot assign value of type '" + rhsType + "' to left-hand side. Expected an instance of class '" + declaredLhsType + "'");
 		}
-		Class<?> declaredResultClass = declaredLhsClass;
+		TypeToken<?> declaredResultType = declaredLhsType;
 		Object resultObject = null;
 		if (evaluationMode != EvaluationMode.NONE) {
 			try {
 				resultObject = rhs.getObject();
 				lhsValueSetter.setObject(resultObject);
 			} catch (IllegalArgumentException e) {
-				throw new OperatorException("Could assign value of type '" + rhsClass + "' to left-hand side.");
+				throw new OperatorException("Could assign value of type '" + rhsType + "' to left-hand side.");
 			}
 		}
-		return new ObjectInfo(resultObject, declaredResultClass);
+		return new ObjectInfo(resultObject, declaredResultType);
 	}
 
 	/*
 	 * Utility Methods
 	 */
+	private TypeToken<?> getType(ObjectInfo objectInfo) {
+		return ObjectInfoProvider.getType(objectInfo, evaluationMode);
+	}
+
 	private Class<?> getClass(ObjectInfo objectInfo) {
-		return ObjectInfoProvider.getClass(objectInfo, evaluationMode);
+		return getType(objectInfo).getRawType();
 	}
 
 	private static boolean isIntegral(Class<?> primitiveClass) {
@@ -378,13 +383,13 @@ public class OperatorResultProvider
 		if (operatorInfo == null) {
 			throw new OperatorException("Operator not defined on '" + getClass(objectInfo) + "'");
 		}
-		Class<?> resultClass = operatorInfo.getResultClass();
+		TypeToken<?> resultType = TypeToken.of(operatorInfo.getResultClass());
 		Object result = null;
 		if (evaluationMode != EvaluationMode.NONE) {
 			Function<Object, Object> operation = operatorInfo.getOperation();
 			result = operation.apply(objectInfo.getObject());
 		}
-		return new ObjectInfo(result, resultClass);
+		return new ObjectInfo(result, resultType);
 	}
 
 	private ObjectInfo applyUnaryOperatorWithAssignment(ObjectInfo objectInfo, UnaryOperator operator) throws OperatorException {
@@ -452,13 +457,13 @@ public class OperatorResultProvider
 		if (operatorInfo == null) {
 			throw new OperatorException("Operator not defined on '" + getClass(lhs) + "' and '" + getClass(rhs) + "'");
 		}
-		Class<?> resultClass = operatorInfo.getResultClass();
+		TypeToken<?> resultType = TypeToken.of(operatorInfo.getResultClass());
 		Object result = null;
 		if (evaluationMode != EvaluationMode.NONE) {
 			BiFunction<Object, Object, Object> operation = operatorInfo.getOperation();
 			result = operation.apply(lhs.getObject(), rhs.getObject());
 		}
-		return new ObjectInfo(result, resultClass);
+		return new ObjectInfo(result, resultType);
 	}
 
 	private ObjectInfo applyNumericOperator(ObjectInfo lhs, ObjectInfo rhs, BinaryOperator numericOperator) throws OperatorException {
@@ -468,14 +473,14 @@ public class OperatorResultProvider
 	}
 
 	private ObjectInfo concat(ObjectInfo lhs, ObjectInfo rhs) {
-		Class<?> resultClass = String.class;
+		TypeToken<?> resultType = TypeToken.of(String.class);
 		String result = null;
 		if (evaluationMode != EvaluationMode.NONE) {
 			String lhsAsString = getStringRepresentation(lhs.getObject());
 			String rhsAsString = getStringRepresentation(rhs.getObject());
 			result = lhsAsString + rhsAsString;
 		}
-		return new ObjectInfo(result, resultClass);
+		return new ObjectInfo(result, resultType);
 	}
 
 	private ObjectInfo applyShiftOperator(ObjectInfo lhs, ObjectInfo rhs, BinaryOperator shiftOperator) throws OperatorException {

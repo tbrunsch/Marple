@@ -6,8 +6,9 @@ import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
+import com.google.common.reflect.TypeToken;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
@@ -30,20 +31,20 @@ public class TailParser extends AbstractEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
 		int startPosition = tokenStream.getPosition();
 		if (tokenStream.hasMore()) {
 			char nextChar = tokenStream.peekCharacter();
 			if (nextChar == '.') {
-				return parseDot(tokenStream, currentContextInfo, expectedResultClasses);
+				return parseDot(tokenStream, currentContextInfo, expectedResultTypes);
 			} else if (nextChar == '[') {
 				if (staticOnly) {
 					return new ParseError(tokenStream.getPosition(), "Cannot apply [] to classes", ErrorType.SYNTAX_ERROR);
 				}
 
-				Class<?> currentContextClass = parserContext.getObjectInfoProvider().getClass(currentContextInfo);
-				Class<?> elementClass = currentContextClass.getComponentType();
-				if (elementClass == null) {
+				TypeToken<?> currentContextType = parserContext.getObjectInfoProvider().getType(currentContextInfo);
+				TypeToken<?> elementType = currentContextType.getComponentType();
+				if (elementType == null) {
 					// no array type
 					return new ParseError(tokenStream.getPosition(), "Cannot apply [] to non-array types", ErrorType.SEMANTIC_ERROR);
 				}
@@ -65,13 +66,13 @@ public class TailParser extends AbstractEntityParser
 					return new ParseError(startPosition, e.getClass().getSimpleName() + " during array index evaluation", ErrorType.EVALUATION_EXCEPTION, e);
 				}
 				tokenStream.moveTo(parsedToPosition);
-				return parserContext.getTailParser(false).parse(tokenStream, elementInfo, expectedResultClasses);
+				return parserContext.getTailParser(false).parse(tokenStream, elementInfo, expectedResultTypes);
 			}
 		}
 		/*
 		 * finished parsing
 		 *
-		 * expectedResultClasses are only evaluated for completion suggestions, not for parse results.
+		 * expectedResultTypes are only evaluated for completion suggestions, not for parse results.
 		 *
 		 * The root caller (CompoundExpressionParser) is responsible for verifying that the result matches one of the expected types.
 		 * The reason for this is that CompoundExpressionParser calls the ExpressionParser for each of the operands, but it does not
@@ -85,22 +86,22 @@ public class TailParser extends AbstractEntityParser
 		return new ParseResult(tokenStream.getPosition(), currentContextInfo);
 	}
 
-	private ParseResultIF parseDot(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	private ParseResultIF parseDot(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals(".");
 
-		return ParseUtils.parse(tokenStream, currentContextInfo, expectedResultClasses,
+		return ParseUtils.parse(tokenStream, currentContextInfo, expectedResultTypes,
 			parserContext.getFieldParser(staticOnly),
 			parserContext.getMethodParser(staticOnly)
 		);
 	}
 
 	private ParseResultIF parseArrayIndex(TokenStream tokenStream) {
-		List<Class<?>> expectedResultClasses = Arrays.asList(int.class);
+		List<TypeToken<?>> expectedResultTypes = Collections.singletonList(TypeToken.of(int.class));
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals("[");
 
-		ParseResultIF arrayIndexParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, thisInfo, expectedResultClasses);
+		ParseResultIF arrayIndexParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, thisInfo, expectedResultTypes);
 
 		// propagate anything except results
 		if (arrayIndexParseResult.getResultType() != ParseResultType.PARSE_RESULT) {

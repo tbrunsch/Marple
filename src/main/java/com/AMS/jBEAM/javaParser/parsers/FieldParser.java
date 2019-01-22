@@ -4,8 +4,10 @@ import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
+import com.AMS.jBEAM.javaParser.utils.FieldInfo;
 import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
+import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -32,7 +34,7 @@ public class FieldParser extends AbstractEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<Class<?>> expectedResultClasses) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
 		int startPosition = tokenStream.getPosition();
 
 		if (tokenStream.isCaretAtPosition()) {
@@ -43,7 +45,7 @@ public class FieldParser extends AbstractEntityParser
 			} catch (TokenStream.JavaTokenParseException e) {
 				insertionEnd = startPosition;
 			}
-			return parserContext.getFieldDataProvider().suggestFields(currentContextInfo, expectedResultClasses, startPosition, insertionEnd, staticOnly);
+			return parserContext.getFieldDataProvider().suggestFields(currentContextInfo, expectedResultTypes, startPosition, insertionEnd, staticOnly);
 		}
 
 		if (thisInfo.getObject() == null && !staticOnly) {
@@ -59,15 +61,15 @@ public class FieldParser extends AbstractEntityParser
 		String fieldName = fieldNameToken.getValue();
 		int endPosition = tokenStream.getPosition();
 
-		Class<?> currentContextClass = parserContext.getObjectInfoProvider().getClass(currentContextInfo);
-		List<Field> fields = parserContext.getInspectionDataProvider().getFields(currentContextClass, staticOnly);
+		TypeToken<?> currentContextType = parserContext.getObjectInfoProvider().getType(currentContextInfo);
+		List<FieldInfo> fieldInfos = parserContext.getInspectionDataProvider().getFieldInfos(currentContextType, staticOnly);
 
 		// check for code completion
 		if (fieldNameToken.isContainsCaret()) {
 			Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
-				fields,
-				field -> new CompletionSuggestionField(field, startPosition, endPosition),
-				ParseUtils.rateFieldByNameAndClassesFunc(fieldName, expectedResultClasses)
+				fieldInfos,
+				fieldInfo -> new CompletionSuggestionField(fieldInfo, startPosition, endPosition),
+				ParseUtils.rateFieldByNameAndTypesFunc(fieldName, expectedResultTypes)
 			);
 			return new CompletionSuggestions(ratedSuggestions);
 		}
@@ -77,14 +79,14 @@ public class FieldParser extends AbstractEntityParser
 		}
 
 		// no code completion requested => field name must exist
-		Optional<Field> firstFieldMatch = fields.stream().filter(field -> field.getName().equals(fieldName)).findFirst();
-		if (!firstFieldMatch.isPresent()) {
+		Optional<FieldInfo> firstFieldInfoMatch = fieldInfos.stream().filter(fieldInfo -> fieldInfo.getName().equals(fieldName)).findFirst();
+		if (!firstFieldInfoMatch.isPresent()) {
 			return new ParseError(startPosition, "Unknown field '" + fieldName + "'", ErrorType.SEMANTIC_ERROR);
 		}
 
-		Field matchingField = firstFieldMatch.get();
-		ObjectInfo matchingFieldInfo = parserContext.getObjectInfoProvider().getFieldInfo(currentContextInfo, matchingField);
+		FieldInfo fieldInfo = firstFieldInfoMatch.get();
+		ObjectInfo matchingFieldInfo = parserContext.getObjectInfoProvider().getFieldInfo(currentContextInfo, fieldInfo);
 
-		return parserContext.getTailParser(false).parse(tokenStream, matchingFieldInfo, expectedResultClasses);
+		return parserContext.getTailParser(false).parse(tokenStream, matchingFieldInfo, expectedResultTypes);
 	}
 }

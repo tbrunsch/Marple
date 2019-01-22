@@ -1,40 +1,40 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
+import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
+import java.lang.reflect.Type;
 import java.util.List;
-
-import static com.AMS.jBEAM.javaParser.utils.ParseUtils.CLASS_MATCH_NONE;
 
 public class VariadicExecutableInfo extends ExecutableInfo
 {
-	VariadicExecutableInfo(Executable executable) {
-		super(executable);
+	VariadicExecutableInfo(Executable executable, TypeToken<?> declaringType) {
+		super(executable, declaringType);
 
 		assert isVariadic() : "Cannot create VariadicExecutableInfo for non-variadic methods";
 	}
 
 	@Override
-	public boolean isArgumentIndexValid(int argIndex) {
+	boolean doIsArgumentIndexValid(int argIndex) {
 		return true;
 	}
 
 	@Override
-	public Class<?> getExpectedArgumentType(int argIndex) {
+	Type doGetExpectedArgumentType(int argIndex) {
 		int lastIndex = getNumberOfArguments() - 1;
 		return argIndex < lastIndex
-				? executable.getParameterTypes()[argIndex]
-				: executable.getParameterTypes()[lastIndex].getComponentType();
+				? executable.getGenericParameterTypes()[argIndex]
+				: TypeToken.of(executable.getGenericParameterTypes()[lastIndex]).getComponentType().getType();
 	}
 
 	@Override
-	public int rateArgumentMatch(List<Class<?>> argumentTypes) {
+	int doRateArgumentMatch(List<TypeToken<?>> argumentTypes) {
 		if (argumentTypes.size() < getNumberOfArguments() - 1) {
-			return ParseUtils.CLASS_MATCH_NONE;
+			return ParseUtils.TYPE_MATCH_NONE;
 		}
-		int worstArgumentClassMatchRating = ParseUtils.CLASS_MATCH_FULL;
+		int worstArgumentClassMatchRating = ParseUtils.TYPE_MATCH_FULL;
 		for (int i = 0; i < argumentTypes.size(); i++) {
 			int argumentClassMatchRating = rateArgumentTypeMatch(i, argumentTypes.get(i));
 			worstArgumentClassMatchRating = Math.max(worstArgumentClassMatchRating, argumentClassMatchRating);
@@ -42,21 +42,21 @@ public class VariadicExecutableInfo extends ExecutableInfo
 		return worstArgumentClassMatchRating;
 	}
 
-	private int rateArgumentTypeMatch(int argIndex, Class<?> argumentType) {
+	private int rateArgumentTypeMatch(int argIndex, TypeToken<?> argumentType) {
 		int lastArgIndex = getNumberOfArguments() - 1;
 		if (argIndex == lastArgIndex && argumentType == null) {
 			/*
 			 * If the last argument in a variadic method is null, then the regular array type
 			 * (the one returned in RegularExecutableInfo) is assumed and not its component type.
 			 */
-			return ParseUtils.CLASS_MATCH_NONE;
+			return ParseUtils.TYPE_MATCH_NONE;
 		}
-		Class<?> expectedArgumentType = getExpectedArgumentType(argIndex);
-		return ParseUtils.rateClassMatch(argumentType, expectedArgumentType);
+		TypeToken<?> expectedArgumentType = getExpectedArgumentType(argIndex);
+		return ParseUtils.rateTypeMatch(argumentType, expectedArgumentType);
 	}
 
 	@Override
-	public Object[] createArgumentArray(List<ObjectInfo> argumentInfos) {
+	Object[] doCreateArgumentArray(List<ObjectInfo> argumentInfos) {
 		int numArguments = getNumberOfArguments();
 		int realNumArguments = argumentInfos.size();
 		if (realNumArguments < numArguments - 1) {

@@ -1,38 +1,37 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
+import com.google.common.reflect.TypeToken;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
+import java.lang.reflect.Type;
 import java.util.List;
-
-import static com.AMS.jBEAM.javaParser.utils.ParseUtils.CLASS_MATCH_NONE;
 
 public class RegularExecutableInfo extends ExecutableInfo
 {
-	RegularExecutableInfo(Executable executable) {
-		super(executable);
+	RegularExecutableInfo(Executable executable, TypeToken<?> declaringType) {
+		super(executable, declaringType);
 	}
 
 	@Override
-	public boolean isArgumentIndexValid(int argIndex) {
+	boolean doIsArgumentIndexValid(int argIndex) {
 		return argIndex < getNumberOfArguments();
 	}
 
 	@Override
-	public Class<?> getExpectedArgumentType(int argIndex) {
+	Type doGetExpectedArgumentType(int argIndex) {
 		if (argIndex >= getNumberOfArguments()) {
 			throw new IndexOutOfBoundsException("Argument index " + argIndex + " is not in the range [0, " + getNumberOfArguments() + ")");
 		}
-		return executable.getParameterTypes()[argIndex];
+		return executable.getGenericParameterTypes()[argIndex];
 	}
 
 	@Override
-	public int rateArgumentMatch(List<Class<?>> argumentTypes) {
+	int doRateArgumentMatch(List<TypeToken<?>> argumentTypes) {
 		if (argumentTypes.size() != getNumberOfArguments()) {
-			return ParseUtils.CLASS_MATCH_NONE;
+			return ParseUtils.TYPE_MATCH_NONE;
 		}
-		int worstArgumentClassMatchRating = ParseUtils.CLASS_MATCH_FULL;
+		int worstArgumentClassMatchRating = ParseUtils.TYPE_MATCH_FULL;
 		for (int i = 0; i < argumentTypes.size(); i++) {
 			int argumentClassMatchRating = rateArgumentTypeMatch(i, argumentTypes.get(i));
 			worstArgumentClassMatchRating = Math.max(worstArgumentClassMatchRating, argumentClassMatchRating);
@@ -40,13 +39,13 @@ public class RegularExecutableInfo extends ExecutableInfo
 		return worstArgumentClassMatchRating;
 	}
 
-	private int rateArgumentTypeMatch(int argIndex, Class<?> argumentType) {
-		Class<?> expectedArgumentType = getExpectedArgumentType(argIndex);
-		return ParseUtils.rateClassMatch(argumentType, expectedArgumentType);
+	private int rateArgumentTypeMatch(int argIndex, TypeToken<?> argumentType) {
+		TypeToken<?> expectedArgumentType = getExpectedArgumentType(argIndex);
+		return ParseUtils.rateTypeMatch(argumentType, expectedArgumentType);
 	}
 
 	@Override
-	public Object[] createArgumentArray(List<ObjectInfo> argumentInfos) {
+	Object[] doCreateArgumentArray(List<ObjectInfo> argumentInfos) {
 		int numArguments = getNumberOfArguments();
 		if (argumentInfos.size() != numArguments) {
 			throw new IllegalArgumentException("Expected " + numArguments + " arguments, but number is " + argumentInfos.size());
@@ -55,7 +54,7 @@ public class RegularExecutableInfo extends ExecutableInfo
 		Object[] arguments = new Object[numArguments];
 		for (int i = 0; i < numArguments; i++) {
 			Object argument = argumentInfos.get(i).getObject();
-			arguments[i] = ReflectionUtils.convertTo(argument, executable.getParameterTypes()[i], false);
+			arguments[i] = ReflectionUtils.convertTo(argument, getExpectedArgumentType(i).getRawType(), false);
 		}
 		return arguments;
 	}
