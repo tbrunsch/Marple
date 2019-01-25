@@ -25,7 +25,7 @@ public abstract class AbstractEntityParser
 
 	abstract ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes);
 
-	public ParseResultIF parse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
+	public final ParseResultIF parse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
 		logger.beginChildScope();
 		log(LogLevel.INFO, "parsing at " + tokenStream);
 		try {
