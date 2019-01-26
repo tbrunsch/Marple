@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ObjectInfoProvider
 {
-	private static TypeToken<?> getType(Object object, TypeToken<?> declaredType, EvaluationMode evaluationMode) {
+	static TypeToken<?> getType(Object object, TypeToken<?> declaredType, EvaluationMode evaluationMode) {
 		if (evaluationMode == EvaluationMode.DUCK_TYPING && object != null) {
 			if (declaredType.isPrimitive()) {
 				return declaredType;

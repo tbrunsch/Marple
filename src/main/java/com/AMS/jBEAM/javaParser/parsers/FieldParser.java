@@ -74,7 +74,7 @@ public class FieldParser extends AbstractEntityParser
 			Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 				fieldInfos,
 				fieldInfo -> new CompletionSuggestionField(fieldInfo, startPosition, endPosition),
-				ParseUtils.rateFieldByNameAndTypesFunc(fieldName, expectedResultTypes)
+				ParseUtils.rateFieldByNameAndTypesFunc(fieldName, currentContextInfo.getObject(), parserContext.getSettings().getEvaluationModeCodeCompletion(), expectedResultTypes)
 			);
 			return new CompletionSuggestions(ratedSuggestions);
 		}

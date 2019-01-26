@@ -1,6 +1,7 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
+import com.AMS.jBEAM.javaParser.EvaluationMode;
 import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.Variable;
 import com.AMS.jBEAM.javaParser.parsers.AbstractEntityParser;
@@ -218,18 +219,28 @@ public class ParseUtils
 		return rateStringMatch(fieldInfo.getName(), expectedFieldName);
 	}
 
-	static ToIntFunction<FieldInfo> rateFieldByTypesFunc(List<TypeToken<?>> expectedTypes) {
-		return fieldInfo -> rateFieldByTypes(fieldInfo, expectedTypes);
+	static ToIntFunction<FieldInfo> rateFieldByTypesFunc(Object instance, EvaluationMode evaluationMode, List<TypeToken<?>> expectedTypes) {
+		return fieldInfo -> rateFieldByTypes(fieldInfo, instance, evaluationMode, expectedTypes);
 	}
 
-	private static int rateFieldByTypes(FieldInfo fieldInfo, List<TypeToken<?>> expectedTypes) {
-		return	expectedTypes == null	? TYPE_MATCH_FULL :
-				expectedTypes.isEmpty()	? TYPE_MATCH_NONE
-										: expectedTypes.stream().mapToInt(expectedType -> rateTypeMatch(fieldInfo.getType(), expectedType)).min().getAsInt();
+	private static int rateFieldByTypes(FieldInfo fieldInfo, Object instance, EvaluationMode evaluationMode, List<TypeToken<?>> expectedTypes) {
+		if (expectedTypes == null) {
+			return TYPE_MATCH_FULL;
+		}
+		if (expectedTypes.isEmpty()) {
+			return TYPE_MATCH_NONE;
+		}
+		try {
+			TypeToken<?> type = ObjectInfoProvider.getType(fieldInfo.get(instance), fieldInfo.getType(), evaluationMode);
+			return	expectedTypes.stream().mapToInt(expectedType -> rateTypeMatch(type, expectedType)).min().getAsInt();
+		} catch (IllegalAccessException e) {
+			// TODO: Swallowed exception
+			return TYPE_MATCH_NONE;
+		}
 	}
 
-	public static ToIntFunction<FieldInfo> rateFieldByNameAndTypesFunc(String fieldName, List<TypeToken<?>> expectedTypes) {
-		return fieldInfo -> (TYPE_MATCH_NONE + 1)*rateFieldByName(fieldInfo, fieldName) + rateFieldByTypes(fieldInfo, expectedTypes);
+	public static ToIntFunction<FieldInfo> rateFieldByNameAndTypesFunc(String fieldName, Object instance, EvaluationMode evaluationMode, List<TypeToken<?>> expectedTypes) {
+		return fieldInfo -> (TYPE_MATCH_NONE + 1)*rateFieldByName(fieldInfo, fieldName) + rateFieldByTypes(fieldInfo, instance, evaluationMode, expectedTypes);
 	}
 
 	public static String getFieldDisplayText(FieldInfo fieldInfo) {
@@ -248,6 +259,11 @@ public class ParseUtils
 	}
 
 	private static int rateMethodByTypes(ExecutableInfo methodInfo, List<TypeToken<?>> expectedTypes) {
+		/*
+		 * Even for EvaluationMode.DUCK_TYPING we only consider the declared return type of the method instead
+		 * of the runtime type of the returned object. Otherwise, we would have to invoke the method for code
+		 * completion, possibly causing undesired side effects.
+		 */
 		return	expectedTypes == null	? TYPE_MATCH_FULL :
 				expectedTypes.isEmpty()	? TYPE_MATCH_NONE
 										: expectedTypes.stream().mapToInt(expectedType -> rateTypeMatch(methodInfo.getReturnType(), expectedType)).min().getAsInt();

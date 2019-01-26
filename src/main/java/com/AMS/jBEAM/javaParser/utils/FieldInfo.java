@@ -38,6 +38,7 @@ public class FieldInfo
 	}
 
 	public void set(Object instance, Object value) throws IllegalAccessException {
+		field.setAccessible(true);
 		field.set(instance, value);
 	}
 

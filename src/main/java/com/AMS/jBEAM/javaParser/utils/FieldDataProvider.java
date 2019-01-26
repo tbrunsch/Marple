@@ -6,7 +6,6 @@ import com.AMS.jBEAM.javaParser.result.CompletionSuggestionIF;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
 import com.google.common.reflect.TypeToken;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +23,7 @@ public class FieldDataProvider
 		Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 			fieldInfos,
 			fieldInfo -> new CompletionSuggestionField(fieldInfo, insertionBegin, insertionEnd),
-			ParseUtils.rateFieldByTypesFunc(expectedTypes)
+			ParseUtils.rateFieldByTypesFunc(contextInfo.getObject(), parserContext.getSettings().getEvaluationModeCodeCompletion(), expectedTypes)
 		);
 		return new CompletionSuggestions(ratedSuggestions);
 	}
