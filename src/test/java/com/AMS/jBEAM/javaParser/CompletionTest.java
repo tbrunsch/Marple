@@ -9,8 +9,7 @@ import com.google.common.base.Joiner;
 import org.junit.Test;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -639,6 +638,44 @@ public class CompletionTest
 			.test("test(xyz",	"xyz", "xyzw", "x", "xy", "abc")
 			.test("test(xyzw",	"xyzw", "xyz", "x", "xy", "abc")
 			.test("test(abc",	"abc", "xyzw", "xyz", "x", "xy");
+	}
+
+	@Test
+	public void testGenerics() {
+		class TestClass
+		{
+			Collection<Integer> collListInt = new ArrayList<>();
+			Collection<String> collListString = new ArrayList<>();
+			Collection<Integer> collSetInt = new HashSet<>();
+			Collection<String> collSetString = new HashSet<>();
+			List<Integer> listInt = new ArrayList<>();
+			List<String> listString = new ArrayList<>();
+
+			void testCollInt(Collection<Integer> c) {}
+			void testCollString(Collection<String> c) {}
+			void testListInt(List<Integer> l) {}
+			void testListString(List<String> l) {}
+			void testSetInt(Set<Integer> s) {}
+			void testSetString(Set<String> s) {}
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecutor(testInstance)
+			.test("testCollInt(",		"collListInt", "collSetInt", "listInt")
+			.test("testCollString(",	"collListString", "collSetString", "listString")
+			.test("testListInt(",		"listInt")
+			.test("testListString(",	"listString")
+			.test("testSetInt(",		"collListInt", "collListString", "collSetInt", "collSetString", "listInt", "listString")		// no class match, so fields ordered lexicographically
+			.test("testSetString(",	"collListInt", "collListString", "collSetInt", "collSetString", "listInt", "listString");	// no class match, so fields ordered lexicographically
+
+		new TestExecutor(testInstance)
+			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.test("testCollInt(",		"collListInt", "collSetInt", "listInt")
+			.test("testCollString(",	"collListString", "collSetString", "listString")
+			.test("testListInt(",		"collListInt", "listInt")
+			.test("testListString(",	"collListString", "listString")
+			.test("testSetInt(",		"collSetInt")
+			.test("testSetString(",	"collSetString");
 	}
 
 	private static List<String> extractSuggestions(List<CompletionSuggestionIF> completions) {
