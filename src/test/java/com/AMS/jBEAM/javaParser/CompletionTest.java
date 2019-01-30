@@ -532,7 +532,7 @@ public class CompletionTest
 			.test("get((TestClass) this).",			"d", "i", "o")
 			.test("get(this).",						"d", "i", "o")				// no cast required for this
 			.test("(com.AMS.jBEAM.javaPars",			"javaParser")
-			.test("(com.AMS.jBEAM.javaParser.JavaCo",	"CompletionTest");
+			.test("(com.AMS.jBEAM.javaParser.Co",		"CompletionTest");
 
 		new ErrorTestExecutor(testInstance)
 			.test("get(o).", 7, ParseException.class);
@@ -606,7 +606,7 @@ public class CompletionTest
 			.test("new ConstructorParserTestClass(\"bla\", i, ",		"i")
 			.test("new ConstructorParserTestClass(\"bla\", d, i).",	"d", "i", "o")
 			.test("new com.AMS.jBEAM.javaPars",						"javaParser")
-			.test("new com.AMS.jBEAM.javaParser.JavaCo",				"CompletionTest");
+			.test("new com.AMS.jBEAM.javaParser.Co",					"CompletionTest");
 	}
 
 	@Test
