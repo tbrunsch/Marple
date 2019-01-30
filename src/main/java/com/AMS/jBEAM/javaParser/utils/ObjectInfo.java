@@ -4,13 +4,11 @@ import com.google.common.reflect.TypeToken;
 
 public class ObjectInfo
 {
+	public static final	Object		INDETERMINATE	= new Object();
+
 	private final Object			object;
 	private final TypeToken<?>		declaredType;
 	private final ValueSetterIF		valueSetter;
-
-	public ObjectInfo(Object object) {
-		this(object, TypeToken.of(Object.class));
-	}
 
 	public ObjectInfo(Object object, TypeToken<?> declaredType) {
 		this(object, declaredType, null);

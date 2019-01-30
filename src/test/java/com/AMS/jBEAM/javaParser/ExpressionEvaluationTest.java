@@ -1109,6 +1109,41 @@ public class ExpressionEvaluationTest
 			.test("testSetString(collSetString)",		testInstance.collSetString);
 	}
 
+	@Test
+	public void testNull() {
+		class TestClass
+		{
+			String sNull = null;
+			Object oNull = null;
+			Integer iNull = null;
+			double[] daNull = null;
+
+			int f(String s) { return 0; }
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecutor(testInstance)
+			.addVariable(new Variable("myNull", null, true))
+			.printLogEntriesAtError()
+			.test("f(null)",				0)
+			.test("f(myNull)",				0)
+			.test("f(sNull)",				0)
+			.test("f((String) oNull)",		0)
+			.test("(String) null",			null)
+			.test("myNull = null",			null);
+
+		new ErrorTestExecutor(testInstance)
+			.addVariable(new Variable("myNull", null, true))
+			.test("f(oNull)")
+			.test("null + 0")
+			.test("0 + iNull")
+			.test("!null")
+			.test("null.toString()")
+			.test("sNull.length()")
+			.test("((TestClass) null).sNull")
+			.test("daNull[0]");
+	}
+	
 	/*
 	 * Class for creating tests with expected successful code completions
 	 */

@@ -325,9 +325,8 @@ public class ParseUtils
 	private static int rateVariableByTypes(Variable variable, List<TypeToken<?>> expectedTypes) {
 		Object value = variable.getValue();
 		return	expectedTypes == null	? TYPE_MATCH_FULL :
-				expectedTypes.isEmpty()	? TYPE_MATCH_NONE :
-				value == null			? (expectedTypes.stream().anyMatch(type -> !type.isPrimitive()) ? TYPE_MATCH_INHERITANCE : TYPE_MATCH_NONE)
-										: expectedTypes.stream().mapToInt(expectedType -> rateTypeMatch(TypeToken.of(value.getClass()), expectedType)).min().getAsInt();
+				expectedTypes.isEmpty()	? TYPE_MATCH_NONE
+										: expectedTypes.stream().mapToInt(expectedType -> rateTypeMatch(value == null ? null : TypeToken.of(value.getClass()), expectedType)).min().getAsInt();
 	}
 
 	public static ToIntFunction<Variable> rateVariableByNameAndTypesFunc(String variableName, List<TypeToken<?>> expectedTypes) {

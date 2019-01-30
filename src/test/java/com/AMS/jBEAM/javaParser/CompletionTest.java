@@ -678,6 +678,32 @@ public class CompletionTest
 			.test("testSetString(",	"collSetString");
 	}
 
+	@Test
+	public void testNull() {
+		class TestClass
+		{
+			String sNull = null;
+			Object oNull = null;
+			Integer iNull = null;
+			double[] daNull = null;
+
+			int f(String s) { return 0; }
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecutor(testInstance)
+			.addVariable(new Variable("myNull", null, true))
+			.printLogEntriesAtError()
+			.test("f(",			"myNull", "sNull")
+			.test("f((String) oN",	"oNull")
+			.test("sNull.le",		"length()");
+
+		new ErrorTestExecutor(testInstance)
+			.addVariable(new Variable("myNull", null, true))
+			.test("myNull.",	7, ParseException.class)
+			.test("null.",		5, ParseException.class);
+	}
+
 	private static List<String> extractSuggestions(List<CompletionSuggestionIF> completions) {
 		return completions.stream()
 			.map(completion -> completion.getTextToInsert())

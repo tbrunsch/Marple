@@ -19,7 +19,7 @@ public class LiteralParser extends AbstractEntityParser
 {
 	private static final ObjectInfo	TRUE_INFO	= new ObjectInfo(true, TypeToken.of(boolean.class));
 	private static final ObjectInfo	FALSE_INFO	= new ObjectInfo(false, TypeToken.of(boolean.class));
-	private static final ObjectInfo	NULL_INFO	= new ObjectInfo(null);
+	private static final ObjectInfo	NULL_INFO	= new ObjectInfo(null, null);
 
 	private final AbstractEntityParser intParser;
 	private final AbstractEntityParser longParser;

@@ -223,8 +223,8 @@ public class ClassDataProvider
 			if (includePrimitiveClasses) {
 				importedClasses.addAll(PRIMITIVE_CLASS_INFOS);
 			}
-			TypeToken<?> declaredType = parserContext.getThisInfo().getDeclaredType();
-			Class<?> thisClass = declaredType == null ? null : declaredType.getRawType();
+			TypeToken<?> thisType = parserContext.getObjectInfoProvider().getType(parserContext.getThisInfo());
+			Class<?> thisClass = thisType == null ? null : thisType.getRawType();
 			if (thisClass != null) {
 				importedClasses.add(new ClassInfo(thisClass.getName()));
 			}
@@ -234,8 +234,8 @@ public class ClassDataProvider
 
 		private Set<Package> getImportedPackages() {
 			Set<Package> importedPackages = new LinkedHashSet<>();
-			TypeToken<?> declaredType = parserContext.getThisInfo().getDeclaredType();
-			Class<?> thisClass = declaredType == null ? null : declaredType.getRawType();
+			TypeToken<?> thisType = parserContext.getObjectInfoProvider().getType(parserContext.getThisInfo());
+			Class<?> thisClass = thisType == null ? null : thisType.getRawType();
 			if (thisClass != null) {
 				importedPackages.add(thisClass.getPackage());
 			}

@@ -50,7 +50,7 @@ public class FieldParser extends AbstractEntityParser
 			return parserContext.getFieldDataProvider().suggestFields(currentContextInfo, expectedResultTypes, startPosition, insertionEnd, staticOnly);
 		}
 
-		if (currentContextInfo.getDeclaredType() == null && !staticOnly) {
+		if (currentContextInfo.getObject() == null && !staticOnly) {
 			log(LogLevel.ERROR, "null pointer exception");
 			return new ParseError(startPosition, "Null pointer exception", ErrorType.WRONG_PARSER);
 		}

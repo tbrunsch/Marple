@@ -12,11 +12,19 @@ import java.util.List;
 public class ObjectInfoProvider
 {
 	static TypeToken<?> getType(Object object, TypeToken<?> declaredType, EvaluationMode evaluationMode) {
-		if (evaluationMode == EvaluationMode.DUCK_TYPING && object != null) {
+		if (object == null) {
+			return declaredType;
+		}
+
+		Class<?> runtimeClass = object.getClass();
+		if (declaredType == null) {
+			return TypeToken.of(runtimeClass);
+		}
+
+		if (evaluationMode == EvaluationMode.DUCK_TYPING) {
 			if (declaredType.isPrimitive()) {
 				return declaredType;
 			}
-			Class<?> runtimeClass = object.getClass();
 			TypeToken<?> runtimeType = declaredType.getSubtype(runtimeClass);
 			return declaredType.isPrimitive()
 					? TypeToken.of(ReflectionUtils.getPrimitiveClass(runtimeType.getRawType()))
@@ -32,7 +40,7 @@ public class ObjectInfoProvider
 
 	static ObjectInfo getCastInfo(ObjectInfo objectInfo, TypeToken<?> targetType, EvaluationMode evaluationMode) throws ClassCastException {
 		Object castedValue = evaluationMode == EvaluationMode.NONE
-				? null
+				? ObjectInfo.INDETERMINATE
 				: ReflectionUtils.convertTo(objectInfo.getObject(), targetType.getRawType(), true);
 		return new ObjectInfo(castedValue, targetType);
 	}
@@ -52,11 +60,9 @@ public class ObjectInfoProvider
 	}
 
 	public ObjectInfo getFieldInfo(ObjectInfo contextInfo, FieldInfo fieldInfo) throws NullPointerException {
-		final Object fieldValue;
 		Object contextObject = contextInfo.getObject();
-		if (evaluationMode == EvaluationMode.NONE) {
-			fieldValue = null;
-		} else {
+		Object fieldValue = ObjectInfo.INDETERMINATE;
+		if (evaluationMode != EvaluationMode.NONE) {
 			try {
 				fieldValue = fieldInfo.get(contextObject);
 			} catch (IllegalAccessException e) {
@@ -83,7 +89,7 @@ public class ObjectInfoProvider
 	public ObjectInfo getExecutableReturnInfo(ObjectInfo contextInfo, ExecutableInfo executableInfo, List<ObjectInfo> argumentInfos) throws NullPointerException {
 		final Object methodReturnValue;
 		if (evaluationMode == EvaluationMode.NONE) {
-			methodReturnValue = null;
+			methodReturnValue = ObjectInfo.INDETERMINATE;
 		} else {
 			Object contextObject = executableInfo.isStatic() ? null : contextInfo.getObject();
 			Object[] arguments = executableInfo.createArgumentArray(argumentInfos);
@@ -101,7 +107,7 @@ public class ObjectInfoProvider
 		final Object arrayElementValue;
 		final ObjectInfo.ValueSetterIF valueSetter;
 		if (evaluationMode == EvaluationMode.NONE) {
-			arrayElementValue = null;
+			arrayElementValue = ObjectInfo.INDETERMINATE;
 			valueSetter = null;
 		} else {
 			Object arrayObject = arrayInfo.getObject();
@@ -120,8 +126,7 @@ public class ObjectInfoProvider
 
 	public ObjectInfo getVariableInfo(Variable variable, VariablePool variablePool) {
 		Object value = variable.getValue();
-		TypeToken<?> declaredType = value == null ? null : TypeToken.of(value.getClass());
 		ObjectInfo.ValueSetterIF valueSetter = newValue -> variable.setValue(newValue);
-		return new ObjectInfo(value, declaredType, valueSetter);
+		return new ObjectInfo(value, null, valueSetter);
 	}
 }

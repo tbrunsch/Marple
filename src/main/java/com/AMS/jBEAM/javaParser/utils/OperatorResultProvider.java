@@ -188,7 +188,7 @@ public class OperatorResultProvider
 		if (primitiveClass != boolean.class) {
 			throw new OperatorException("Operator cannot be applied to '" + clazz + "'");
 		}
-		Object result = evaluationMode == EvaluationMode.NONE ? null : !((boolean) objectInfo.getObject());
+		Object result = evaluationMode == EvaluationMode.NONE ? ObjectInfo.INDETERMINATE : !((boolean) objectInfo.getObject());
 		TypeToken<?> resultType = TypeToken.of(boolean.class);
 		return new ObjectInfo(result, resultType);
 	}
@@ -200,7 +200,7 @@ public class OperatorResultProvider
 			throw new OperatorException("Operator cannot be applied to '" + clazz + "'");
 		}
 		TypeToken<?> resultType = primitiveClass == long.class ? TypeToken.of(long.class) : TypeToken.of(int.class);
-		Object result = null;
+		Object result = ObjectInfo.INDETERMINATE;
 		if (evaluationMode != EvaluationMode.NONE) {
 			Object object = objectInfo.getObject();
 			if (primitiveClass == long.class) {
@@ -271,7 +271,7 @@ public class OperatorResultProvider
 		if (isPrimitive(lhsClass) || isPrimitive(rhsClass)) {
 			return applyNumericComparisonOperator(lhs, rhs, BinaryOperator.EQUAL_TO);
 		}
-		Object result = evaluationMode == EvaluationMode.NONE ? null : lhs.getObject() == rhs.getObject();
+		Object result = evaluationMode == EvaluationMode.NONE ? ObjectInfo.INDETERMINATE : lhs.getObject() == rhs.getObject();
 		TypeToken<?> resultType = TypeToken.of(boolean.class);
 		return new ObjectInfo(result, resultType);
 	}
@@ -282,7 +282,7 @@ public class OperatorResultProvider
 		if (isPrimitive(lhsClass) || isPrimitive(rhsClass)) {
 			return applyNumericComparisonOperator(lhs, rhs, BinaryOperator.NOT_EQUAL_TO);
 		}
-		Object result = evaluationMode == EvaluationMode.NONE ? null : lhs.getObject() != rhs.getObject();
+		Object result = evaluationMode == EvaluationMode.NONE ? ObjectInfo.INDETERMINATE : lhs.getObject() != rhs.getObject();
 		TypeToken<?> resultType = TypeToken.of(boolean.class);
 		return new ObjectInfo(result, resultType);
 	}
@@ -318,7 +318,7 @@ public class OperatorResultProvider
 			throw new OperatorException("Cannot assign value of type '" + rhsType + "' to left-hand side. Expected an instance of class '" + declaredLhsType + "'");
 		}
 		TypeToken<?> declaredResultType = declaredLhsType;
-		Object resultObject = null;
+		Object resultObject = ObjectInfo.INDETERMINATE;
 		if (evaluationMode != EvaluationMode.NONE) {
 			try {
 				resultObject = rhs.getObject();
@@ -338,7 +338,8 @@ public class OperatorResultProvider
 	}
 
 	private Class<?> getClass(ObjectInfo objectInfo) {
-		return getType(objectInfo).getRawType();
+		TypeToken<?> type = getType(objectInfo);
+		return type == null ? null : type.getRawType();
 	}
 
 	private static boolean isIntegral(Class<?> primitiveClass) {
@@ -384,7 +385,7 @@ public class OperatorResultProvider
 			throw new OperatorException("Operator not defined on '" + getClass(objectInfo) + "'");
 		}
 		TypeToken<?> resultType = TypeToken.of(operatorInfo.getResultClass());
-		Object result = null;
+		Object result = ObjectInfo.INDETERMINATE;
 		if (evaluationMode != EvaluationMode.NONE) {
 			Function<Object, Object> operation = operatorInfo.getOperation();
 			result = operation.apply(objectInfo.getObject());
@@ -458,7 +459,7 @@ public class OperatorResultProvider
 			throw new OperatorException("Operator not defined on '" + getClass(lhs) + "' and '" + getClass(rhs) + "'");
 		}
 		TypeToken<?> resultType = TypeToken.of(operatorInfo.getResultClass());
-		Object result = null;
+		Object result = ObjectInfo.INDETERMINATE;
 		if (evaluationMode != EvaluationMode.NONE) {
 			BiFunction<Object, Object, Object> operation = operatorInfo.getOperation();
 			result = operation.apply(lhs.getObject(), rhs.getObject());
@@ -474,7 +475,7 @@ public class OperatorResultProvider
 
 	private ObjectInfo concat(ObjectInfo lhs, ObjectInfo rhs) {
 		TypeToken<?> resultType = TypeToken.of(String.class);
-		String result = null;
+		Object result = ObjectInfo.INDETERMINATE;
 		if (evaluationMode != EvaluationMode.NONE) {
 			String lhsAsString = getStringRepresentation(lhs.getObject());
 			String rhsAsString = getStringRepresentation(rhs.getObject());
