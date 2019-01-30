@@ -2,52 +2,23 @@ package com.AMS.jBEAM.javaParser.debug;
 
 import com.google.common.base.Strings;
 
-public class ParserConsoleLogger implements ParserLoggerIF
+public class ParserConsoleLogger extends AbstractParserLogger
 {
-	private static final int 	SCOPE_INDENT_SIZE	= 2;
+	private static final int INDENT_SIZE	= 2;
 
-	private int		indentSize					= 0;
-	private int		numLoggedEntries			= 0;
-	private int		getNumLoggedEntriesToStopAt	= -1;
-	private boolean	printNumLoggedEntries		= false;
+	private boolean	printNumLoggedEntries	= false;
 
 	@Override
-	public void beginChildScope() {
-		indentSize += SCOPE_INDENT_SIZE;
-	}
-
-	@Override
-	public void endChildScope() {
-		indentSize -= SCOPE_INDENT_SIZE;
-	}
-
-	@Override
-	public void log(ParserLogEntry entry) {
-		numLoggedEntries++;
-
+	void doLog(ParserLogEntry entry, int indent) {
 		StringBuilder builder = new StringBuilder();
 		if (printNumLoggedEntries) {
-			builder.append(Strings.padStart(String.valueOf(numLoggedEntries), 5, ' ')).append(" ");
+			builder.append(Strings.padStart(String.valueOf(getNumberOfLoggedEntries()), 5, ' ')).append(" ");
 		}
-		for (int i = 0; i < indentSize; i++) {
+		for (int i = 0; i < indent * INDENT_SIZE; i++) {
 			builder.append(" ");
 		}
 		builder.append(formatLogEntry(entry, builder));
 		System.out.println(builder.toString());
-
-		if (numLoggedEntries == getNumLoggedEntriesToStopAt) {
-			stop();
-		}
-	}
-
-	@Override
-	public int getNumberOfLoggedEntries() {
-		return numLoggedEntries;
-	}
-
-	public ParserConsoleLogger stopAt(int getNumLoggedEntriesToStopAt) {
-		this.getNumLoggedEntriesToStopAt = getNumLoggedEntriesToStopAt;
-		return this;
 	}
 
 	public ParserConsoleLogger printNumberOfLoggedEntries(boolean print) {
@@ -55,9 +26,10 @@ public class ParserConsoleLogger implements ParserLoggerIF
 		return this;
 	}
 
-	private void stop() {
+	@Override
+	void doStop() {
 		// set a break point here to stop at the desired point in time
-		System.out.println("Stopping after " + getNumLoggedEntriesToStopAt + " entries");
+		System.out.println("Stopping after " + getNumberOfLoggedEntries() + " entries");
 	}
 
 	private String formatLogEntry(ParserLogEntry entry, StringBuilder builder) {

@@ -685,58 +685,6 @@ public class CompletionTest
 	}
 
 	/*
-	 * Base class for all TestExecutors
-	 */
-	private static class AbstractTestExecutor<T extends AbstractTestExecutor>
-	{
-		final Object			testInstance;
-
-		ParserSettings 			settings;
-		ParserSettingsBuilder	settingsBuilder	= new ParserSettingsBuilder()
-													.minimumAccessLevel(AccessLevel.PRIVATE);
-
-		AbstractTestExecutor(Object testInstance) {
-			this.testInstance = testInstance;
-		}
-
-		T evaluationMode(EvaluationMode evaluationMode) {
-			verifyBeforeTest();
-			settingsBuilder.evaluationModeCodeCompletion(evaluationMode);
-			return (T) this;
-		}
-
-		T addVariable(Variable variable) {
-			verifyBeforeTest();
-			settingsBuilder.addVariable(variable);
-			return (T) this;
-		}
-
-		T minimumAccessLevel(AccessLevel minimumAccessLevel) {
-			verifyBeforeTest();
-			settingsBuilder.minimumAccessLevel(minimumAccessLevel);
-			return (T) this;
-		}
-
-		T logger(ParserLoggerIF logger) {
-			verifyBeforeTest();
-			settingsBuilder.logger(logger);
-			return (T) this;
-		}
-
-		private void verifyBeforeTest() {
-			if (settings != null) {
-				throw new IllegalStateException("Settings cannot be changed between tests");
-			}
-		}
-
-		void ensureValidSettings() {
-			if (settings == null) {
-				settings = settingsBuilder.build();
-			}
-		}
-	}
-
-	/*
 	 * Class for creating tests with expected successful code completions
 	 */
 	private static class TestExecutor extends AbstractTestExecutor<TestExecutor>
@@ -745,10 +693,28 @@ public class CompletionTest
 			super(testInstance);
 		}
 
-		TestExecutor test(String javaExpression, String... expectedSuggestions) {
-			ensureValidSettings();
+		TestExecutor evaluationMode(EvaluationMode evaluationMode) {
+			settingsBuilder.evaluationModeCodeCompletion(evaluationMode);
+			return this;
+		}
 
+		TestExecutor test(String javaExpression, String... expectedSuggestions) {
+			ParserLoggerIF logger = prepareLogger(false, -1);
+
+			boolean repeatTestAtError = stopAtError || printLogEntriesAtError;
+			if (!runTest(javaExpression, !repeatTestAtError, expectedSuggestions) && repeatTestAtError) {
+				int numLoggedEntries = logger.getNumberOfLoggedEntries();
+				prepareLogger(printLogEntriesAtError, stopAtError ? numLoggedEntries : -1);
+				runTest(javaExpression, true, expectedSuggestions);
+			}
+
+			return this;
+		}
+
+		private boolean runTest(String javaExpression, boolean executeAssertions, String... expectedSuggestions) {
+			ParserSettings settings = settingsBuilder.build();
 			ParserLoggerIF logger = settings.getLogger();
+
 			logger.log(new ParserLogEntry(LogLevel.INFO, "Test", "Testing expression '" + javaExpression + "'...\n"));
 
 			JavaParser parser = new JavaParser();
@@ -757,21 +723,31 @@ public class CompletionTest
 			try {
 				suggestions = extractSuggestions(parser.suggestCodeCompletion(javaExpression, settings, caret, testInstance));
 			} catch (ParseException e) {
-				int numLoggedEntries = logger.getNumberOfLoggedEntries();
-				if (numLoggedEntries > 0) {
-					System.out.println("Exception after " + numLoggedEntries + " logged entries.");
+				if (executeAssertions) {
+					assertTrue("Exception during code completion: " + e.getMessage(), false);
 				}
-				assertTrue("Exception during code completion: " + e.getMessage(), false);
+				return false;
 			}
-			assertTrue(MessageFormat.format("Expression: {0}, expected completions: {1}, actual completions: {2}",
-					javaExpression,
-					expectedSuggestions,
-					suggestions),
-					suggestions.size() >= expectedSuggestions.length);
+			if (executeAssertions) {
+				assertTrue(MessageFormat.format("Expression: {0}, expected completions: {1}, actual completions: {2}",
+							javaExpression,
+							expectedSuggestions,
+							suggestions),
+							suggestions.size() >= expectedSuggestions.length);
+			}
+			if (suggestions.size() < expectedSuggestions.length) {
+				return false;
+			}
+
 			for (int i = 0; i < expectedSuggestions.length; i++) {
-				assertEquals("Expression: " + javaExpression, expectedSuggestions[i], suggestions.get(i));
+				if (executeAssertions) {
+					assertEquals("Expression: " + javaExpression, expectedSuggestions[i], suggestions.get(i));
+				}
+				if (!Objects.equals(expectedSuggestions[i], suggestions.get(i))) {
+					return false;
+				}
 			}
-			return this;
+			return true;
 		}
 	}
 
@@ -784,8 +760,13 @@ public class CompletionTest
 			super(testInstance);
 		}
 
+		ErrorTestExecutor evaluationMode(EvaluationMode evaluationMode) {
+			settingsBuilder.evaluationModeCodeCompletion(evaluationMode);
+			return this;
+		}
+
 		ErrorTestExecutor test(String javaExpression, int caret, Class<? extends Exception> expectedExceptionClass) {
-			ensureValidSettings();
+			ParserSettings settings = settingsBuilder.build();
 
 			JavaParser parser = new JavaParser();
 			try {

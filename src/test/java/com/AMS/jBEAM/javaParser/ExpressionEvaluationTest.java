@@ -1,8 +1,6 @@
 package com.AMS.jBEAM.javaParser;
 
-import com.AMS.jBEAM.javaParser.debug.LogLevel;
-import com.AMS.jBEAM.javaParser.debug.ParserLogEntry;
-import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
+import com.AMS.jBEAM.javaParser.debug.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.junit.Test;
@@ -1112,58 +1110,6 @@ public class ExpressionEvaluationTest
 	}
 
 	/*
-	 * Base class for all TestExecutors
-	 */
-	private static class AbstractTestExecutor<T extends AbstractTestExecutor>
-	{
-		final Object			testInstance;
-
-		ParserSettings 			settings;
-		ParserSettingsBuilder	settingsBuilder	= new ParserSettingsBuilder()
-													.minimumAccessLevel(AccessLevel.PRIVATE);
-
-		AbstractTestExecutor(Object testInstance) {
-			this.testInstance = testInstance;
-		}
-
-		T evaluationMode(EvaluationMode evaluationMode) {
-			verifyBeforeTest();
-			settingsBuilder.evaluationModeCodeEvaluation(evaluationMode);
-			return (T) this;
-		}
-
-		T addVariable(Variable variable) {
-			verifyBeforeTest();
-			settingsBuilder.addVariable(variable);
-			return (T) this;
-		}
-
-		T minimumAccessLevel(AccessLevel minimumAccessLevel) {
-			verifyBeforeTest();
-			settingsBuilder.minimumAccessLevel(minimumAccessLevel);
-			return (T) this;
-		}
-
-		 T logger(ParserLoggerIF logger) {
-			verifyBeforeTest();
-			settingsBuilder.logger(logger);
-			return (T) this;
-		 }
-
-		private void verifyBeforeTest() {
-			if (settings != null) {
-				throw new IllegalStateException("Settings cannot be changed between tests");
-			}
-		}
-
-		void ensureValidSettings() {
-			if (settings == null) {
-				settings = settingsBuilder.build();
-			}
-		}
-	}
-
-	/*
 	 * Class for creating tests with expected successful code completions
 	 */
 	private static class TestExecutor extends AbstractTestExecutor<TestExecutor>
@@ -1172,24 +1118,43 @@ public class ExpressionEvaluationTest
 			super(testInstance);
 		}
 
-		TestExecutor test(String javaExpression, Object expectedValue) {
-			ensureValidSettings();
+		TestExecutor evaluationMode(EvaluationMode evaluationMode) {
+			settingsBuilder.evaluationModeCodeEvaluation(evaluationMode);
+			return this;
+		}
 
+		TestExecutor test(String javaExpression, Object expectedValue) {
+			ParserLoggerIF logger = prepareLogger(false, -1);
+
+			boolean repeatTestAtError = stopAtError || printLogEntriesAtError;
+			if (!runTest(javaExpression, !repeatTestAtError, expectedValue) && repeatTestAtError) {
+				int numLoggedEntries = logger.getNumberOfLoggedEntries();
+				prepareLogger(printLogEntriesAtError, stopAtError ? numLoggedEntries : -1);
+				runTest(javaExpression, true, expectedValue);
+			}
+
+			return this;
+		}
+
+		private boolean runTest(String javaExpression, boolean executeAssertions, Object expectedValue) {
+			ParserSettings settings = settingsBuilder.build();
 			ParserLoggerIF logger = settings.getLogger();
+
 			logger.log(new ParserLogEntry(LogLevel.INFO, "Test", "Testing expression '" + javaExpression + "'...\n"));
 
 			JavaParser parser = new JavaParser();
 			try {
 				Object actualValue = parser.evaluate(javaExpression, settings, testInstance);
-				assertEquals("Expression: " + javaExpression, expectedValue, actualValue);
-			} catch (ParseException e) {
-				int numLoggedEntries = logger.getNumberOfLoggedEntries();
-				if (numLoggedEntries > 0) {
-					System.out.println("Exception after " + numLoggedEntries + " logged entries.");
+				if (executeAssertions) {
+					assertEquals("Expression: " + javaExpression, expectedValue, actualValue);
 				}
-				assertTrue("Exception during expression evaluation: " + e.getMessage(), false);
+				return Objects.equals(expectedValue, actualValue);
+			} catch (ParseException e) {
+				if (executeAssertions) {
+					assertTrue("Exception during expression evaluation: " + e.getMessage(), false);
+				}
+				return false;
 			}
-			return this;
 		}
 	}
 
@@ -1202,8 +1167,13 @@ public class ExpressionEvaluationTest
 			super(testInstance);
 		}
 
+		ErrorTestExecutor evaluationMode(EvaluationMode evaluationMode) {
+			settingsBuilder.evaluationModeCodeEvaluation(evaluationMode);
+			return this;
+		}
+
 		ErrorTestExecutor test(String javaExpression) {
-			ensureValidSettings();
+			ParserSettings settings = settingsBuilder.build();
 
 			Class<? extends Exception> expectedExceptionClass = ParseException.class;
 			JavaParser parser = new JavaParser();

@@ -1,18 +1,15 @@
 package com.AMS.jBEAM.javaParser.debug;
 
-public class ParserNullLogger implements ParserLoggerIF
+public class ParserNullLogger extends AbstractParserLogger
 {
 	@Override
-	public void beginChildScope() {}
+	void doLog(ParserLogEntry entry, int indent) {
+		/* do nothing */
+	}
 
 	@Override
-	public void endChildScope() {}
-
-	@Override
-	public void log(ParserLogEntry entry) {}
-
-	@Override
-	public int getNumberOfLoggedEntries() {
-		return 0;
+	void doStop() {
+		// set a break point here to stop at the desired point in time
+		int a = 0;
 	}
 }
