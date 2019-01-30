@@ -128,7 +128,7 @@ public class JavaParser
 			if (exceptionMessage != null) {
 				logMessageBuilder.append(": ").append(exceptionMessage);
 			}
-			for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+			for (StackTraceElement element : e.getStackTrace()) {
 				logMessageBuilder.append("\n").append(element);
 			}
 			settings.getLogger().log(new ParserLogEntry(LogLevel.ERROR, getClass().getSimpleName(), logMessageBuilder.toString()));
