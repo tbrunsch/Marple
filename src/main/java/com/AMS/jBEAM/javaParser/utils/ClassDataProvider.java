@@ -181,11 +181,11 @@ public class ClassDataProvider
 
 		private Class<?> detectClass(String className, boolean includePrimitiveClasses) {
 			return Stream.of(
-					includePrimitiveClasses ? PRIMITIVE_CLASSES_BY_NAME.get(className) : null,
-					getClassImportedViaClassName(className, includePrimitiveClasses),
-					getClassImportedViaPackage(className),
-					getClass(className)
-			).filter(Objects::nonNull)
+						includePrimitiveClasses ? PRIMITIVE_CLASSES_BY_NAME.get(className) : null,
+						getClassImportedViaClassName(className, includePrimitiveClasses),
+						getClassImportedViaPackage(className),
+						getClass(className)
+					).filter(Objects::nonNull)
 					.findFirst().orElse(null);
 		}
 
@@ -213,7 +213,7 @@ public class ClassDataProvider
 		private Class<?> getClass(String className) {
 			try {
 				return Class.forName(className);
-			} catch (ClassNotFoundException e) {
+			} catch (ClassNotFoundException | NoClassDefFoundError e) {
 				return null;
 			}
 		}
