@@ -449,8 +449,8 @@ public class CompletionTest
 		Object testInstance = new TestClass3();
 		new TestExecutor(testInstance)
 			.test("getTestClass(",							"intValue", "stringValue")
-			.test("getTestClass(i",						"intValue", "stringValue", hashCode)
-			.test("getTestClass(s",						"stringValue", "intValue")
+			.test("getTestClass(i",						"intValue", "int", "stringValue", hashCode)
+			.test("getTestClass(s",						"stringValue", "short", "intValue")
 			.test("getTestClass(intValue,",				"stringValue", toString, "intValue")
 			.test("getTestClass(stringValue,",				"intValue", hashCode, "stringValue")
 			.test("getTestClass(intValue,stringValue).",	"myInt")

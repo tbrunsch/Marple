@@ -19,7 +19,7 @@ public class ClassParser extends AbstractEntityParser
 	@Override
 	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
 		log(LogLevel.INFO, "parsing class");
-		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream, expectedResultTypes, false, true);
+		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream, expectedResultTypes, true);
 		log(LogLevel.INFO, "parse result: " + classParseResult.getResultType());
 
 		// propagate anything except results

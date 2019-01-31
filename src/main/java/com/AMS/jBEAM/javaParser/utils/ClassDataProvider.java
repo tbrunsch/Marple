@@ -33,9 +33,9 @@ public class ClassDataProvider
 		this.imports = imports;
 	}
 
-	public ParseResultIF readClass(TokenStream tokenStream, List<TypeToken<?>> expectedResultTypes, boolean includePrimitiveClasses, boolean returnClassInsteadOfCompletionsIfAvailable) {
+	public ParseResultIF readClass(TokenStream tokenStream, List<TypeToken<?>> expectedResultTypes, boolean returnClassInsteadOfCompletionsIfAvailable) {
 		ClassReader reader = new ClassReader(parserContext, imports, tokenStream);
-		return reader.read(expectedResultTypes, includePrimitiveClasses, returnClassInsteadOfCompletionsIfAvailable);
+		return reader.read(expectedResultTypes, returnClassInsteadOfCompletionsIfAvailable);
 	}
 
 	private static class ClassReader
@@ -55,7 +55,7 @@ public class ClassDataProvider
 			this.tokenStream = tokenStream;
 		}
 
-		ParseResultIF read(List<TypeToken<?>> expectedResultTypes, boolean includePrimitiveClasses, boolean returnClassInsteadOfCompletionsIfAvailable) {
+		ParseResultIF read(List<TypeToken<?>> expectedResultTypes, boolean returnClassInsteadOfCompletionsIfAvailable) {
 			while (true) {
 				identifierStartPosition = tokenStream.getPosition();
 				Token identifierToken;
@@ -70,11 +70,11 @@ public class ClassDataProvider
 				className += identifierToken.getValue();
 				if (identifierToken.isContainsCaret()) {
 					return lastDetectedClass == null || !returnClassInsteadOfCompletionsIfAvailable
-							? suggestClassesAndPackages(identifierStartPosition, tokenStream.getPosition(), className, includePrimitiveClasses)
+							? suggestClassesAndPackages(identifierStartPosition, tokenStream.getPosition(), className)
 							: createClassParseResult();
 				}
 
-				Class<?> detectedClass = detectClass(className, includePrimitiveClasses);
+				Class<?> detectedClass = detectClass(className);
 				if (detectedClass == null && lastDetectedClass != null) {
 					return createClassParseResult();
 				}
@@ -90,7 +90,7 @@ public class ClassDataProvider
 				className += (detectedClass == null ? "." : "$");
 				if (characterToken.isContainsCaret()) {
 					return lastDetectedClass == null || !returnClassInsteadOfCompletionsIfAvailable
-							? suggestClassesAndPackages(tokenStream.getPosition(), tokenStream.getPosition(), className, false)
+							? suggestClassesAndPackages(tokenStream.getPosition(), tokenStream.getPosition(), className)
 							: createClassParseResult();
 				}
 			}
@@ -146,11 +146,11 @@ public class ClassDataProvider
 			return path.substring(lastDotPosition + 1);
 		}
 
-		private CompletionSuggestions suggestClassesAndPackages(int insertionBegin, int insertionEnd, String classOrPackagePrefix, boolean includePrimitiveClasses) {
+		private CompletionSuggestions suggestClassesAndPackages(int insertionBegin, int insertionEnd, String classOrPackagePrefix) {
 			ImmutableMap.Builder<CompletionSuggestionIF, Integer> suggestionBuilder = ImmutableMap.builder();
 
 			// Imported classes
-			Set<ClassInfo> importedClasses = getImportedClasses(includePrimitiveClasses);
+			Set<ClassInfo> importedClasses = getImportedClasses();
 			suggestionBuilder.putAll(suggestClasses(importedClasses, insertionBegin, insertionEnd, classOrPackagePrefix, true));
 
 			// Imported packages
@@ -179,18 +179,18 @@ public class ClassDataProvider
 			return new CompletionSuggestions(suggestionBuilder.build());
 		}
 
-		private Class<?> detectClass(String className, boolean includePrimitiveClasses) {
+		private Class<?> detectClass(String className) {
 			return Stream.of(
-						includePrimitiveClasses ? PRIMITIVE_CLASSES_BY_NAME.get(className) : null,
-						getClassImportedViaClassName(className, includePrimitiveClasses),
+						PRIMITIVE_CLASSES_BY_NAME.get(className),
+						getClassImportedViaClassName(className),
 						getClassImportedViaPackage(className),
 						getClass(className)
 					).filter(Objects::nonNull)
 					.findFirst().orElse(null);
 		}
 
-		private Class<?> getClassImportedViaClassName(String className, boolean includePrimitiveClasses) {
-			for (ClassInfo importedClass : getImportedClasses(includePrimitiveClasses)) {
+		private Class<?> getClassImportedViaClassName(String className) {
+			for (ClassInfo importedClass : getImportedClasses()) {
 				String simpleName = importedClass.getSimpleNameWithoutLeadingDigits();
 				if (className.equals(simpleName) || className.startsWith(simpleName + ".")) {
 					// Replace simpleName by fully qualified imported name and replace '.' by '$' when separating inner classes
@@ -218,11 +218,9 @@ public class ClassDataProvider
 			}
 		}
 
-		private Set<ClassInfo> getImportedClasses(boolean includePrimitiveClasses) {
+		private Set<ClassInfo> getImportedClasses() {
 			Set<ClassInfo> importedClasses = new LinkedHashSet<>();
-			if (includePrimitiveClasses) {
-				importedClasses.addAll(PRIMITIVE_CLASS_INFOS);
-			}
+			importedClasses.addAll(PRIMITIVE_CLASS_INFOS);
 			TypeToken<?> thisType = parserContext.getObjectInfoProvider().getType(parserContext.getThisInfo());
 			Class<?> thisClass = thisType == null ? null : thisType.getRawType();
 			if (thisClass != null) {

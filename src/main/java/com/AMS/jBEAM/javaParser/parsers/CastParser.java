@@ -31,7 +31,7 @@ public class CastParser extends AbstractEntityParser
 		}
 
 		log(LogLevel.INFO, "parsing class at " + tokenStream);
-		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream.clone(), expectedResultTypes, true, false);
+		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream.clone(), expectedResultTypes, false);
 		log(LogLevel.INFO, "parse result: " + classParseResult.getResultType());
 
 		// propagate anything except results
