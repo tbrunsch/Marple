@@ -17,8 +17,7 @@ public class ParserConsoleLogger extends AbstractParserLogger
 		for (int i = 0; i < indent * INDENT_SIZE; i++) {
 			builder.append(" ");
 		}
-		builder.append(formatLogEntry(entry, builder));
-		System.out.println(builder.toString());
+		System.out.println(formatLogEntry(entry, builder));
 	}
 
 	public ParserConsoleLogger printNumberOfLoggedEntries(boolean print) {
