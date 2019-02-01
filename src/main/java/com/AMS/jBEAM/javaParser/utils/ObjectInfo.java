@@ -32,6 +32,16 @@ public class ObjectInfo
 		return valueSetter;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(object == null ? "NULL" : object.toString());
+		if (declaredType != null) {
+			builder.append(" (").append(declaredType.toString()).append(")");
+		}
+		return builder.toString();
+	}
+
 	@FunctionalInterface
 	public interface ValueSetterIF
 	{

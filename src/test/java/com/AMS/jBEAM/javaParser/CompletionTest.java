@@ -720,12 +720,6 @@ public class CompletionTest
 			.test("new String[]{ ",	"s");
 	}
 
-	private static List<String> extractSuggestions(List<CompletionSuggestionIF> completions) {
-		return completions.stream()
-			.map(completion -> completion.getTextToInsert())
-			.collect(Collectors.toList());
-	}
-
 	/*
 	 * Class for creating tests with expected successful code completions
 	 */
@@ -790,6 +784,12 @@ public class CompletionTest
 				}
 			}
 			return true;
+		}
+
+		private static List<String> extractSuggestions(List<CompletionSuggestionIF> completions) {
+			return completions.stream()
+					.map(completion -> completion.getTextToInsert())
+					.collect(Collectors.toList());
 		}
 	}
 

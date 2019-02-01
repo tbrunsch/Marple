@@ -50,4 +50,9 @@ public class ParseError implements ParseResultIF
 	public Exception getException() {
 		return exception;
 	}
+
+	@Override
+	public String toString() {
+		return position + ": " + errorType + ": " + message + (exception == null ? "" : " (" + exception.getMessage() + ")");
+	}
 }

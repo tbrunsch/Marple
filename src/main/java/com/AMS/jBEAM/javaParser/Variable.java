@@ -27,4 +27,9 @@ public class Variable
 	public boolean isUseHardReferenceInPool() {
 		return useHardReferenceInPool;
 	}
+
+	@Override
+	public String toString() {
+		return name + ": " + (value == null ? "NULL" : value.toString());
+	}
 }

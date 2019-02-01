@@ -38,4 +38,9 @@ public class ClassInfo
 	public int hashCode() {
 		return Objects.hash(fullyQualifiedClassName);
 	}
+
+	@Override
+	public String toString() {
+		return fullyQualifiedClassName;
+	}
 }

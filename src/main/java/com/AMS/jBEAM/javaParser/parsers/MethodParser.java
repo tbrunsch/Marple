@@ -130,17 +130,10 @@ public class MethodParser extends AbstractEntityParser
 			}
 			default: {
 				String error = "Ambiguous method call. Possible candidates are:\n"
-								+ bestMatchingMethodInfos.stream().map(MethodParser::formatMethodInfo).collect(Collectors.joining("\n"));
+								+ bestMatchingMethodInfos.stream().map(Object::toString).collect(Collectors.joining("\n"));
 				log(LogLevel.ERROR, error);
 				return new AmbiguousParseResult(tokenStream.getPosition(), error);
 			}
 		}
-	}
-
-	private static String formatMethodInfo(ExecutableInfo methodInfo) {
-		return methodInfo.getName()
-				+ "("
-				+ methodInfo.formatArguments()
-				+ ")";
 	}
 }

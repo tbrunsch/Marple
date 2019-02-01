@@ -24,4 +24,9 @@ class IntRange
 	int getEnd() {
 		return end;
 	}
+
+	@Override
+	public String toString() {
+		return "[" + begin + ", " + end + ")";
+	}
 }

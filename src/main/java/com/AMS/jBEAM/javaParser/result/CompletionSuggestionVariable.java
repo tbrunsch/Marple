@@ -33,6 +33,11 @@ public class CompletionSuggestionVariable implements CompletionSuggestionIF
 	}
 
 	@Override
+	public String toString() {
+		return ParseUtils.getVariableDisplayText(variable);
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;

@@ -105,4 +105,12 @@ public abstract class ExecutableInfo
 	public int hashCode() {
 		return Objects.hash(executable, declaringType);
 	}
+
+	@Override
+	public String toString() {
+		return getName()
+				+ "("
+				+ formatArguments()
+				+ ")";
+	}
 }

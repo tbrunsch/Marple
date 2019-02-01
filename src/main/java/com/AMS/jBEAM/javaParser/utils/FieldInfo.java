@@ -55,4 +55,9 @@ public class FieldInfo
 	public int hashCode() {
 		return Objects.hash(field, declaringType);
 	}
+
+	@Override
+	public String toString() {
+		return getName();
+	}
 }

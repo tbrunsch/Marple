@@ -17,4 +17,9 @@ public class Token
 	public boolean isContainsCaret() {
 		return containsCaret;
 	}
+
+	@Override
+	public String toString() {
+		return value;
+	}
 }

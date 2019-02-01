@@ -5,7 +5,7 @@ import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 public class ParseResult implements ParseResultIF
 {
 	private final int			parsedToPosition; // exclusive
-	private final ObjectInfo objectInfo;
+	private final ObjectInfo 	objectInfo;
 
 	public ParseResult(int parsedToPosition, ObjectInfo objectInfo) {
 		this.parsedToPosition = parsedToPosition;
@@ -25,4 +25,8 @@ public class ParseResult implements ParseResultIF
 		return parsedToPosition;
 	}
 
+	@Override
+	public String toString() {
+		return "Parsed until " + parsedToPosition + ": " + objectInfo;
+	}
 }
