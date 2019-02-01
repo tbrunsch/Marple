@@ -120,6 +120,40 @@ public class ObjectInfoProvider
 		return new ObjectInfo(arrayElementValue, arrayElementType, valueSetter);
 	}
 
+	public ObjectInfo getArrayInfo(ObjectInfo classInfo, ObjectInfo sizeInfo) {
+		final int size;
+		if (evaluationMode == EvaluationMode.NONE) {
+			size = 0;
+		} else {
+			Object sizeObject = sizeInfo.getObject();
+			size = ReflectionUtils.convertTo(sizeObject, int.class, false);
+		}
+		return getArrayInfo(classInfo, size);
+	}
+
+	public ObjectInfo getArrayInfo(ObjectInfo classInfo, List<ObjectInfo> elementInfos) {
+		int size = elementInfos.size();
+		ObjectInfo arrayInfo = getArrayInfo(classInfo, size);
+		if (evaluationMode != EvaluationMode.NONE) {
+			Class<?> componentClass = classInfo.getDeclaredType().getRawType();
+			Object arrayObject = arrayInfo.getObject();
+			for (int i = 0; i < size; i++) {
+				Object element = elementInfos.get(i).getObject();
+				Array.set(arrayObject, i, ReflectionUtils.convertTo(element, componentClass, false));
+			}
+		}
+		return arrayInfo;
+	}
+
+	private ObjectInfo getArrayInfo(ObjectInfo classInfo, int size) {
+		Class<?> componentClass = classInfo.getDeclaredType().getRawType();
+		Object array = Array.newInstance(componentClass, size);
+		Class<?> arrayClass = array.getClass();
+		TypeToken<?> arrayType = TypeToken.of(arrayClass);
+		Object arrayObject = evaluationMode == EvaluationMode.NONE ? ObjectInfo.INDETERMINATE : array;
+		return new ObjectInfo(arrayObject, arrayType);
+	}
+
 	public ObjectInfo getCastInfo(ObjectInfo objectInfo, TypeToken<?> targetType) throws ClassCastException {
 		return getCastInfo(objectInfo, targetType, evaluationMode);
 	}

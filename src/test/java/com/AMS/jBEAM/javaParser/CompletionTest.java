@@ -704,6 +704,22 @@ public class CompletionTest
 			.test("null.",		5, ParseException.class);
 	}
 
+	@Test
+	public void testArrayCreation() {
+		class TestClass
+		{
+			int i = 3;
+			String s = "X";
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecutor(testInstance)
+			.test("new int[", 			"i")
+			.test("new int[]{ ",		"i")
+			.test("new String[",		"i")
+			.test("new String[]{ ",	"s");
+	}
+
 	private static List<String> extractSuggestions(List<CompletionSuggestionIF> completions) {
 		return completions.stream()
 			.map(completion -> completion.getTextToInsert())

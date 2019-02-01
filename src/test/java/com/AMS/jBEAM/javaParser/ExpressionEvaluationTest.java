@@ -1143,6 +1143,55 @@ public class ExpressionEvaluationTest
 			.test("((TestClass) null).sNull")
 			.test("daNull[0]");
 	}
+
+	@Test
+	public void testArrayCreation() {
+		class TestClass
+		{
+			int[] fill(int[] a) {
+				for (int i = 0; i < a.length; i++) {
+					a[i] = 2 - i;
+				}
+				return a;
+			}
+
+			String[] fill(String[] a) {
+				for (int i = 0; i < a.length; i++) {
+					a[i] = String.valueOf(2 - i);
+				}
+				return a;
+			}
+
+			int[] get(int[] a) {
+				return a;
+			}
+
+			String[] get(String[] a) {
+				return a;
+			}
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecutor(testInstance)
+			.test("fill(new int[3])[0]",			2)
+			.test("fill(new int[3])[1]",			1)
+			.test("fill(new int[3])[2]",			0)
+			.test("fill(new String[4])[0]",		"2")
+			.test("fill(new String[4])[1]",		"1")
+			.test("fill(new String[4])[2]",		"0")
+			.test("fill(new String[4])[3]",		"-1")
+			.test("get(new int[]{ 3, 1, 4 })[0]",	3)
+			.test("get(new int[]{ 3, 1, 4 })[1]",	1)
+			.test("get(new int[]{ 3, 1, 4 })[2]",	4)
+			.test("get(new String[]{ \"only\", \"a\", \"test\" })[0]",	"only")
+			.test("get(new String[]{ \"only\", \"a\", \"test\" })[1]",	"a")
+			.test("get(new String[]{ \"only\", \"a\", \"test\" })[2]",	"test");
+
+		new ErrorTestExecutor(null)
+			.test("new int[-1]")
+			.test("new int[]{ 1.3 }")
+			.test("new String[]{ 1 }");
+	}
 	
 	/*
 	 * Class for creating tests with expected successful code completions

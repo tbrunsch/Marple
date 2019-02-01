@@ -11,6 +11,8 @@ import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,20 +50,27 @@ public class ConstructorParser extends AbstractEntityParser
 
 		ParseResult parseResult = (ParseResult) classParseResult;
 		int parsedToPosition = parseResult.getParsedToPosition();
-		ObjectInfo constructorObjectInfo = parseResult.getObjectInfo();
+		ObjectInfo classInfo = parseResult.getObjectInfo();
 
 		tokenStream.moveTo(parsedToPosition);
 
-		if (!tokenStream.hasMore() || tokenStream.peekCharacter() != '(') {
+		char nextChar = tokenStream.peekCharacter();
+		if (nextChar == '(') {
+			return parseObjectConstructor(tokenStream, startPosition, classInfo, expectedResultTypes);
+		} else if (nextChar == '[') {
+			return parseArrayConstructor(tokenStream, startPosition, classInfo, expectedResultTypes);
+		} else {
 			log(LogLevel.ERROR, "missing '(' at " + tokenStream);
 			return new ParseError(tokenStream.getPosition(), "Expected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
+	}
 
-		TypeToken<?> constructorType = constructorObjectInfo.getDeclaredType();
+	private ParseResultIF parseObjectConstructor(TokenStream tokenStream, int startPosition, ObjectInfo classInfo, List<TypeToken<?>> expectedResultTypes) {
+		TypeToken<?> constructorType = classInfo.getDeclaredType();
 		Class<?> constructorClass = constructorType.getClass();
-		if (constructorClass.getEnclosingClass() != null && (constructorClass.getModifiers() & Modifier.STATIC) == 0) {
+		if (constructorClass.getEnclosingClass() != null && !Modifier.isStatic(constructorClass.getModifiers())) {
 			log(LogLevel.ERROR, "cannot instantiate non-static inner class");
-			return new ParseError(parsedToPosition, "Cannot instantiate inner class '" + constructorClass.getName() + "'", ErrorType.SEMANTIC_ERROR);
+			return new ParseError(tokenStream.getPosition(), "Cannot instantiate inner class '" + constructorClass.getName() + "'", ErrorType.SEMANTIC_ERROR);
 		}
 		List<ExecutableInfo> constructorInfos = parserContext.getInspectionDataProvider().getConstructorInfos(constructorType);
 
@@ -93,7 +102,7 @@ public class ConstructorParser extends AbstractEntityParser
 				ExecutableInfo bestMatchingConstructorInfo = bestMatchingConstructorInfos.get(0);
 				ObjectInfo constructorReturnInfo;
 				try {
-					constructorReturnInfo = parserContext.getObjectInfoProvider().getExecutableReturnInfo(constructorObjectInfo, bestMatchingConstructorInfo, argumentInfos);
+					constructorReturnInfo = parserContext.getObjectInfoProvider().getExecutableReturnInfo(classInfo, bestMatchingConstructorInfo, argumentInfos);
 					log(LogLevel.SUCCESS, "found unique matching constructor");
 				} catch (Exception e) {
 					log(LogLevel.ERROR, "caught exception: " + e.getMessage());
@@ -106,6 +115,157 @@ public class ConstructorParser extends AbstractEntityParser
 								+ bestMatchingConstructorInfos.stream().map(ConstructorParser::formatConstructorInfo).collect(Collectors.joining("\n"));
 				log(LogLevel.ERROR, error);
 				return new AmbiguousParseResult(tokenStream.getPosition(), error);
+			}
+		}
+	}
+
+	private ParseResultIF parseArrayConstructor(TokenStream tokenStream, int startPosition, ObjectInfo classInfo, List<TypeToken<?>> expectedResultTypes) {
+		// TODO: currently, only 1d arrays are supported
+		ParseResultIF arraySizeParseResult = parseArraySize(tokenStream);
+
+		if (arraySizeParseResult == null) {
+			// array constructor with initializer list (e.g., "new int[] { 1, 2, 3 }")
+			log(LogLevel.INFO, "parsing array elements at " + tokenStream);
+			List<ParseResultIF> elementParseResults = parseArrayElements(tokenStream, Collections.singletonList(classInfo.getDeclaredType()));
+
+			if (elementParseResults.isEmpty()) {
+				log(LogLevel.INFO, "detected empty array");
+			} else {
+				ParseResultIF lastArgumentParseResult = elementParseResults.get(elementParseResults.size()-1);
+				log(LogLevel.INFO, "parse result: " + lastArgumentParseResult.getResultType());
+				if (lastArgumentParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
+					// propagate anything but parse results (code completion, errors, ambiguous parse results)
+					return lastArgumentParseResult;
+				}
+			}
+
+			List<ObjectInfo> elementInfos = elementParseResults.stream().map(ParseResult.class::cast).map(ParseResult::getObjectInfo).collect(Collectors.toList());
+			ObjectInfo arrayInfo = parserContext.getObjectInfoProvider().getArrayInfo(classInfo, elementInfos);
+			log (LogLevel.SUCCESS, "detected valid array construction with initializer list");
+			return parserContext.getTailParser(false).parse(tokenStream, arrayInfo, expectedResultTypes);
+		} else {
+			// array constructor with default initialization (e.g., "new int[3]")
+
+			// propagate anything except results
+			if (arraySizeParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
+				return arraySizeParseResult;
+			}
+
+			ParseResult parseResult = (ParseResult) arraySizeParseResult;
+			int parsedToPosition = parseResult.getParsedToPosition();
+			ObjectInfo sizeInfo = parseResult.getObjectInfo();
+			ObjectInfo arrayInfo;
+			try {
+				arrayInfo = parserContext.getObjectInfoProvider().getArrayInfo(classInfo, sizeInfo);
+				log(LogLevel.SUCCESS, "detected valid array construction with null initialization");
+			} catch (ClassCastException | NegativeArraySizeException e) {
+				log(LogLevel.ERROR, "caught exception: " + e.getMessage());
+				return new ParseError(startPosition, e.getClass().getSimpleName() + " during array construction", ErrorType.EVALUATION_EXCEPTION, e);
+			}
+			tokenStream.moveTo(parsedToPosition);
+			return parserContext.getTailParser(false).parse(tokenStream, arrayInfo, expectedResultTypes);
+		}
+	}
+
+	// returns null if no size is specified (e.g. in "new int[] { 1, 2, 3 }")
+	private ParseResultIF parseArraySize(TokenStream tokenStream) {
+		log(LogLevel.INFO, "parsing array size");
+
+		Token characterToken = tokenStream.readCharacterUnchecked();
+		assert characterToken.getValue().equals("[");
+
+		if (tokenStream.peekCharacter() == ']') {
+			tokenStream.readCharacterUnchecked();
+			return null;
+		}
+
+		List<TypeToken<?>> expectedResultTypes = Collections.singletonList(TypeToken.of(int.class));
+		ParseResultIF arraySizeParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, thisInfo, expectedResultTypes);
+
+		// propagate anything except results
+		if (arraySizeParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
+			return arraySizeParseResult;
+		}
+
+		ParseResult parseResult = ((ParseResult) arraySizeParseResult);
+		int parsedToPosition = parseResult.getParsedToPosition();
+
+		tokenStream.moveTo(parsedToPosition);
+		characterToken = tokenStream.readCharacterUnchecked();
+
+		if (characterToken == null || characterToken.getValue().charAt(0) != ']') {
+			log(LogLevel.ERROR, "missing ']' at " + tokenStream);
+			return new ParseError(parsedToPosition, "Expected closing bracket ']'", ErrorType.SYNTAX_ERROR);
+		}
+
+		if (characterToken.isContainsCaret()) {
+			log(LogLevel.INFO, "no completion suggestions available at " + tokenStream);
+			return CompletionSuggestions.NONE;
+		}
+
+		// propagate parse result with corrected position (includes ']')
+		return new ParseResult(tokenStream.getPosition(), parseResult.getObjectInfo());
+	}
+
+	private List<ParseResultIF> parseArrayElements(TokenStream tokenStream, List<TypeToken<?>> expectedResultTypes) {
+		List<ParseResultIF> elements = new ArrayList<>();
+
+		int position = tokenStream.getPosition();
+		Token characterToken = tokenStream.readCharacterUnchecked();
+		if (characterToken == null || characterToken.getValue().charAt(0) != '{') {
+			log(LogLevel.ERROR, "missing '{'");
+			elements.add(new ParseError(position, "Expected opening curly bracket '{'", ErrorType.SYNTAX_ERROR));
+			return elements;
+		}
+
+		if (!characterToken.isContainsCaret()) {
+			if (!tokenStream.hasMore()) {
+				elements.add(new ParseError(tokenStream.getPosition(), "Expected element or closing curly bracket '}'", ParseError.ErrorType.SYNTAX_ERROR));
+				return elements;
+			}
+
+			char nextCharacter = tokenStream.peekCharacter();
+			if (nextCharacter == '}') {
+				tokenStream.readCharacterUnchecked();
+				return elements;
+			}
+		}
+
+		while (true) {
+			/*
+			 * Parse expression for argument i
+			 */
+			ParseResultIF element = parserContext.getCompoundExpressionParser().parse(tokenStream, parserContext.getThisInfo(), expectedResultTypes);
+			elements.add(element);
+
+			// always stop except for results
+			if (element.getResultType() != ParseResultType.PARSE_RESULT) {
+				return elements;
+			}
+
+			ParseResult parseResult = ((ParseResult) element);
+			int parsedToPosition = parseResult.getParsedToPosition();
+			tokenStream.moveTo(parsedToPosition);
+
+			position = tokenStream.getPosition();
+			characterToken = tokenStream.readCharacterUnchecked();
+
+			if (characterToken == null) {
+				elements.add(new ParseError(position, "Expected comma ',' or closing curly bracket '}'", ParseError.ErrorType.SYNTAX_ERROR));
+				return elements;
+			}
+
+			if (characterToken.getValue().charAt(0) == '}') {
+				if (characterToken.isContainsCaret()) {
+					// nothing we can suggest after '}'
+					elements.add(CompletionSuggestions.NONE);
+				}
+				return elements;
+			}
+
+			if (characterToken.getValue().charAt(0) != ',') {
+				elements.add(new ParseError(position, "Expected comma ',' or closing curly bracket '}'", ParseError.ErrorType.SYNTAX_ERROR));
+				return elements;
 			}
 		}
 	}
