@@ -72,11 +72,11 @@ public class VariadicExecutableInfo extends ExecutableInfo
 
 		// variadic arguments exist
 		int numVarArgs = realNumArguments - numArguments + 1;
-		Class<?> varArgComponentType = executable.getParameterTypes()[variadicArgumentIndex].getComponentType();
-		Object varArgArray = Array.newInstance(varArgComponentType, numVarArgs);
+		Class<?> varArgComponentClass = executable.getParameterTypes()[variadicArgumentIndex].getComponentType();
+		Object varArgArray = Array.newInstance(varArgComponentClass, numVarArgs);
 		for (int i = 0; i < numVarArgs; i++) {
 			Object argument = argumentInfos.get(variadicArgumentIndex + i).getObject();
-			Array.set(varArgArray, i, ReflectionUtils.convertTo(argument, varArgComponentType, false));
+			Array.set(varArgArray, i, ReflectionUtils.convertTo(argument, varArgComponentClass, false));
 		}
 		arguments[variadicArgumentIndex] = varArgArray;
 

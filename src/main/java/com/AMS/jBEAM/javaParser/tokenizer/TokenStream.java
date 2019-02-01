@@ -160,10 +160,7 @@ public class TokenStream implements Cloneable
 
 	public String peekCharacters() {
 		Matcher matcher = CHARACTERS_PATTERN.matcher(javaExpression.substring(position));
-		if (!matcher.matches()) {
-			return null;
-		}
-		return matcher.group(2);
+		return matcher.matches() ? matcher.group(2) : null;
 	}
 
 	public Token readCharacterUnchecked() {

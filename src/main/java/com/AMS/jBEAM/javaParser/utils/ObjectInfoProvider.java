@@ -124,7 +124,7 @@ public class ObjectInfoProvider
 		return getCastInfo(objectInfo, targetType, evaluationMode);
 	}
 
-	public ObjectInfo getVariableInfo(Variable variable, VariablePool variablePool) {
+	public ObjectInfo getVariableInfo(Variable variable) {
 		Object value = variable.getValue();
 		ObjectInfo.ValueSetterIF valueSetter = newValue -> variable.setValue(newValue);
 		return new ObjectInfo(value, null, valueSetter);

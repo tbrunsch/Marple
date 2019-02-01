@@ -79,7 +79,7 @@ public class VariableParser extends AbstractEntityParser
 		log(LogLevel.SUCCESS, "detected variable '" + variableName + "'");
 
 		Variable matchingVariable = firstVariableMatch.get();
-		ObjectInfo matchingVariableInfo = parserContext.getObjectInfoProvider().getVariableInfo(matchingVariable, variablePool);
+		ObjectInfo matchingVariableInfo = parserContext.getObjectInfoProvider().getVariableInfo(matchingVariable);
 
 		return parserContext.getTailParser(false).parse(tokenStream, matchingVariableInfo, expectedResultTypes);
 	}

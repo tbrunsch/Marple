@@ -63,7 +63,7 @@ public class ClassDataProvider
 					identifierToken = tokenStream.readIdentifier();
 				} catch (TokenStream.JavaTokenParseException e) {
 					return lastDetectedClass == null
-							? new ParseError(tokenStream.getPosition(), "Expected sub-package or class name", ParseError.ErrorType.SYNTAX_ERROR)
+							? new ParseError(identifierStartPosition, "Expected sub-package or class name", ParseError.ErrorType.SYNTAX_ERROR)
 							: createClassParseResult();
 
 				}
@@ -84,7 +84,7 @@ public class ClassDataProvider
 				Token characterToken = tokenStream.readCharacterUnchecked();
 				if (characterToken == null ||  characterToken.getValue().charAt(0) != '.') {
 					return lastDetectedClass == null
-							? new ParseError(lastParsedToPosition, "Unknown class name '" + className + "'", ParseError.ErrorType.SEMANTIC_ERROR)
+							? new ParseError(identifierStartPosition, "Unknown class name '" + className + "'", ParseError.ErrorType.SEMANTIC_ERROR)
 							: createClassParseResult();
 				}
 				className += (detectedClass == null ? "." : "$");

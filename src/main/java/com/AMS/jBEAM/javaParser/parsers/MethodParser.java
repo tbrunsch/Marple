@@ -101,7 +101,7 @@ public class MethodParser extends AbstractEntityParser
 			ParseResultIF lastArgumentParseResult = argumentParseResults.get(argumentParseResults.size()-1);
 			log(LogLevel.INFO, "parse result: " + lastArgumentParseResult.getResultType());
 			if (lastArgumentParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
-				// Immediately propagate anything but parse results (code completion, errors, ambiguous parse results)
+				// propagate anything but parse results (code completion, errors, ambiguous parse results)
 				return lastArgumentParseResult;
 			}
 		}

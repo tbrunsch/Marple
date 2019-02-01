@@ -104,10 +104,10 @@ public class TailParser extends AbstractEntityParser
 	private ParseResultIF parseArrayIndex(TokenStream tokenStream) {
 		log(LogLevel.INFO, "parsing array index");
 
-		List<TypeToken<?>> expectedResultTypes = Collections.singletonList(TypeToken.of(int.class));
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals("[");
 
+		List<TypeToken<?>> expectedResultTypes = Collections.singletonList(TypeToken.of(int.class));
 		ParseResultIF arrayIndexParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, thisInfo, expectedResultTypes);
 
 		// propagate anything except results
