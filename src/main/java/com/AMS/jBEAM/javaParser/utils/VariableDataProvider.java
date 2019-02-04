@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.utils;
 
-import com.AMS.jBEAM.javaParser.Variable;
-import com.AMS.jBEAM.javaParser.VariablePool;
+import com.AMS.jBEAM.javaParser.settings.Variable;
+import com.AMS.jBEAM.javaParser.settings.VariablePool;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionIF;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionVariable;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;

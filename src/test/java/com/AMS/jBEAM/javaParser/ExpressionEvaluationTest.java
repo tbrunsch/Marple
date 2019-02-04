@@ -1,6 +1,10 @@
 package com.AMS.jBEAM.javaParser;
 
 import com.AMS.jBEAM.javaParser.debug.*;
+import com.AMS.jBEAM.javaParser.settings.AccessLevel;
+import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
+import com.AMS.jBEAM.javaParser.settings.ParserSettings;
+import com.AMS.jBEAM.javaParser.settings.Variable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.junit.Test;

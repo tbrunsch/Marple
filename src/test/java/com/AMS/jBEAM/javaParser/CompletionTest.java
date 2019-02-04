@@ -1,10 +1,13 @@
 package com.AMS.jBEAM.javaParser;
 
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
-import com.AMS.jBEAM.javaParser.debug.ParserConsoleLogger;
 import com.AMS.jBEAM.javaParser.debug.ParserLogEntry;
 import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionIF;
+import com.AMS.jBEAM.javaParser.settings.AccessLevel;
+import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
+import com.AMS.jBEAM.javaParser.settings.ParserSettings;
+import com.AMS.jBEAM.javaParser.settings.Variable;
 import com.google.common.base.Joiner;
 import org.junit.Test;
 

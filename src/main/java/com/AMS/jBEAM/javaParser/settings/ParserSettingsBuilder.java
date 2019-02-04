@@ -1,4 +1,4 @@
-package com.AMS.jBEAM.javaParser;
+package com.AMS.jBEAM.javaParser.settings;
 
 import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
 import com.AMS.jBEAM.javaParser.debug.ParserNullLogger;

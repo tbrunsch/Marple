@@ -1,9 +1,8 @@
 package com.AMS.jBEAM.javaParser.utils;
 
-import com.AMS.jBEAM.javaParser.EvaluationMode;
+import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.common.ReflectionUtils;
-import com.AMS.jBEAM.javaParser.Variable;
-import com.AMS.jBEAM.javaParser.VariablePool;
+import com.AMS.jBEAM.javaParser.settings.Variable;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.*;

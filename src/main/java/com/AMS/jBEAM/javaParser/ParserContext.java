@@ -1,12 +1,14 @@
 package com.AMS.jBEAM.javaParser;
 
 import com.AMS.jBEAM.javaParser.parsers.*;
+import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
+import com.AMS.jBEAM.javaParser.settings.ParserSettings;
 import com.AMS.jBEAM.javaParser.utils.*;
 
 public class ParserContext
 {
 	private final ObjectInfo					thisInfo;
-	private final ParserSettings 				settings;
+	private final ParserSettings				settings;
 
 	private final InspectionDataProvider 		inspectionDataProvider;
 	private final ObjectInfoProvider			objectInfoProvider;

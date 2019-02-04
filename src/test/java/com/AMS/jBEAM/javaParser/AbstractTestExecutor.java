@@ -3,6 +3,9 @@ package com.AMS.jBEAM.javaParser;
 import com.AMS.jBEAM.javaParser.debug.ParserConsoleLogger;
 import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
 import com.AMS.jBEAM.javaParser.debug.ParserNullLogger;
+import com.AMS.jBEAM.javaParser.settings.AccessLevel;
+import com.AMS.jBEAM.javaParser.settings.ParserSettingsBuilder;
+import com.AMS.jBEAM.javaParser.settings.Variable;
 
 class AbstractTestExecutor<T extends AbstractTestExecutor>
 {

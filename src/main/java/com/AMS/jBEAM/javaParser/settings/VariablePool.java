@@ -1,12 +1,10 @@
-package com.AMS.jBEAM.javaParser;
+package com.AMS.jBEAM.javaParser.settings;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import java.lang.ref.WeakReference;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class VariablePool
 {

@@ -1,4 +1,4 @@
-package com.AMS.jBEAM.javaParser;
+package com.AMS.jBEAM.javaParser.settings;
 
 public class Variable
 {

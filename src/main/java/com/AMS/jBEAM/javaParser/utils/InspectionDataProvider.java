@@ -1,8 +1,8 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
-import com.AMS.jBEAM.javaParser.AccessLevel;
-import com.AMS.jBEAM.javaParser.ParserSettings;
+import com.AMS.jBEAM.javaParser.settings.AccessLevel;
+import com.AMS.jBEAM.javaParser.settings.ParserSettings;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Constructor;

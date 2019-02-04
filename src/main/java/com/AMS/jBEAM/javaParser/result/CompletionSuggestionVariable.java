@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.result;
 
-import com.AMS.jBEAM.javaParser.Variable;
+import com.AMS.jBEAM.javaParser.settings.Variable;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 
 import java.util.Objects;
