@@ -1,10 +1,7 @@
 package com.AMS.jBEAM.javaParser;
 
 import com.AMS.jBEAM.javaParser.debug.*;
-import com.AMS.jBEAM.javaParser.settings.AccessLevel;
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
-import com.AMS.jBEAM.javaParser.settings.ParserSettings;
-import com.AMS.jBEAM.javaParser.settings.Variable;
+import com.AMS.jBEAM.javaParser.settings.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.junit.Test;
@@ -1195,6 +1192,30 @@ public class ExpressionEvaluationTest
 			.test("new int[-1]")
 			.test("new int[]{ 1.3 }")
 			.test("new String[]{ 1 }");
+	}
+
+	@Test
+	public void testCustomHierarchy() {
+		CustomHierarchy h = new CustomHierarchy();
+
+		new TestExecutor(null)
+			.customHierarchyRoot(h.ROOT)
+			.test("{Component Manager}",											h.COMPONENT_MANAGER)
+			.test("{Component Manager}.components.get(0)",							h.COMPONENT_MANAGER.components.get(0))
+			.test("{Excel Importer}",												h.EXCEL_IMPORTER)
+			.test("{Excel Importer}.componentType",								h.EXCEL_IMPORTER.componentType)
+			.test("{Excel Importer#Activity}",										h.ACTIVITY)
+			.test("{Excel Importer#Activity}.dataType",							h.ACTIVITY.dataType)
+			.test("{Productivity Calculation}.dataItems.get(1)",					h.PRODUCTIVITY_CALCULATION.dataItems.get(1))
+			.test("{Productivity Calculation#Relative Productivity Potential}",	h.RELATIVE_PRODUCTIVITY_POTENTIAL)
+			.test("{Productivity Calculation#Total Productivity (h)}.value",		h.TOTAL_PRODUCTIVITY.value);
+
+		new ErrorTestExecutor(null)
+			.customHierarchyRoot(h.ROOT)
+			.test("Component Manager")
+			.test("{Component Manager")
+			.test("{Component Management}")
+			.test("{Excel Importer#componentType}");
 	}
 	
 	/*

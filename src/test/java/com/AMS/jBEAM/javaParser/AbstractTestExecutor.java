@@ -4,6 +4,7 @@ import com.AMS.jBEAM.javaParser.debug.ParserConsoleLogger;
 import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
 import com.AMS.jBEAM.javaParser.debug.ParserNullLogger;
 import com.AMS.jBEAM.javaParser.settings.AccessLevel;
+import com.AMS.jBEAM.javaParser.settings.ObjectTreeNodeIF;
 import com.AMS.jBEAM.javaParser.settings.ParserSettingsBuilder;
 import com.AMS.jBEAM.javaParser.settings.Variable;
 
@@ -27,6 +28,11 @@ class AbstractTestExecutor<T extends AbstractTestExecutor>
 
 	T minimumAccessLevel(AccessLevel minimumAccessLevel) {
 		settingsBuilder.minimumAccessLevel(minimumAccessLevel);
+		return (T) this;
+	}
+
+	T customHierarchyRoot(ObjectTreeNodeIF root) {
+		settingsBuilder.customHierarchyRoot(root);
 		return (T) this;
 	}
 

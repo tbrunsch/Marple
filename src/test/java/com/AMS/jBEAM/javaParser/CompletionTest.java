@@ -723,6 +723,23 @@ public class CompletionTest
 			.test("new String[]{ ",	"s");
 	}
 
+	@Test
+	public void testCustomHierarchy() {
+		CustomHierarchy h = new CustomHierarchy();
+
+		new TestExecutor(null)
+			.customHierarchyRoot(h.ROOT)
+			.test("{Component Ma",											"Component Manager")
+			.test("{Component Manager}.comp",								"components")
+			.test("{Excel Imp",											"Excel Importer")
+			.test("{Excel Importer}.comp",									"componentType")
+			.test("{Excel Importer#A",										"Activity")
+			.test("{Excel Importer#Activity}.data",						"dataType")
+			.test("{Productivity Calculation}.data",						"dataItems")
+			.test("{Productivity Calculation#Relative Prod",				"Relative Productivity", "Relative Productivity Potential")
+			.test("{Productivity Calculation#Total Productivity (h)}.val",	"value");
+	}
+
 	/*
 	 * Class for creating tests with expected successful code completions
 	 */

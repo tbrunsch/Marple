@@ -17,6 +17,7 @@ public class ParserContext
 	private final ClassDataProvider				classDataProvider;
 	private final VariableDataProvider			variableDataProvider;
 	private final OperatorResultProvider 		operatorResultProvider;
+	private final ObjectTreeNodeDataProvider	objectTreeNodeDataProvider;
 
 	private final AbstractEntityParser 			expressionParser;
 	private final AbstractEntityParser			fieldParser;
@@ -32,6 +33,7 @@ public class ParserContext
 	private final AbstractEntityParser			variableParser;
 	private final AbstractEntityParser			constructorParser;
 	private final AbstractEntityParser			unaryPrefixOperatorParser;
+	private final AbstractEntityParser			customHierarchyParser;
 	private final AbstractEntityParser			compoundExpressionParser;
 
 	public ParserContext(ObjectInfo thisInfo, ParserSettings settings, EvaluationMode evaluationMode) {
@@ -45,6 +47,7 @@ public class ParserContext
 		classDataProvider				= new ClassDataProvider(this, settings.getImports());
 		variableDataProvider			= new VariableDataProvider(settings.getVariablePool());
 		operatorResultProvider 			= new OperatorResultProvider(evaluationMode);
+		objectTreeNodeDataProvider		= new ObjectTreeNodeDataProvider();
 
 		expressionParser 				= new ExpressionParser(this, thisInfo);
 		fieldParser						= new FieldParser(this, thisInfo, false);
@@ -60,6 +63,7 @@ public class ParserContext
 		variableParser					= new VariableParser(this, thisInfo);
 		constructorParser				= new ConstructorParser(this, thisInfo);
 		unaryPrefixOperatorParser		= new UnaryPrefixOperatorParser(this, thisInfo);
+		customHierarchyParser			= new CustomHierarchyParser(this, thisInfo);
 		compoundExpressionParser		= createCompoundExpressionParser(Integer.MAX_VALUE);
 	}
 
@@ -97,6 +101,10 @@ public class ParserContext
 
 	public OperatorResultProvider getOperatorResultProvider() {
 		return operatorResultProvider;
+	}
+
+	public ObjectTreeNodeDataProvider getObjectTreeNodeDataProvider() {
+		return objectTreeNodeDataProvider;
 	}
 
 	public AbstractEntityParser getExpressionParser() {
@@ -139,6 +147,10 @@ public class ParserContext
 
 	public AbstractEntityParser getUnaryPrefixOperatorParser() {
 		return unaryPrefixOperatorParser;
+	}
+
+	public AbstractEntityParser getCustomHierarchyParser() {
+		return customHierarchyParser;
 	}
 
 	public AbstractEntityParser createCompoundExpressionParser(int maxOperatorPrecedenceLevelToConsider) {

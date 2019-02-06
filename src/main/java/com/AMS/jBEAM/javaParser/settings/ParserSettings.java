@@ -9,15 +9,17 @@ public class ParserSettings
 	private final AccessLevel		minimumAccessLevel;
 	private final EvaluationMode	evaluationModeCodeCompletion;
 	private final EvaluationMode	evaluationModeCodeEvaluation;
+	private final ObjectTreeNodeIF	customHierarchyRoot;
 
 	private final ParserLoggerIF	logger;
 
-	ParserSettings(Imports imports, VariablePool variablePool, AccessLevel minimumAccessLevel, EvaluationMode evaluationModeCodeCompletion, EvaluationMode evaluationModeCodeEvaluation, ParserLoggerIF logger) {
+	ParserSettings(Imports imports, VariablePool variablePool, AccessLevel minimumAccessLevel, EvaluationMode evaluationModeCodeCompletion, EvaluationMode evaluationModeCodeEvaluation, ObjectTreeNodeIF customHierarchyRoot, ParserLoggerIF logger) {
 		this.imports = imports;
 		this.variablePool = variablePool;
 		this.minimumAccessLevel = minimumAccessLevel;
 		this.evaluationModeCodeCompletion = evaluationModeCodeCompletion;
 		this.evaluationModeCodeEvaluation = evaluationModeCodeEvaluation;
+		this.customHierarchyRoot = customHierarchyRoot;
 		this.logger = logger;
 	}
 
@@ -39,6 +41,10 @@ public class ParserSettings
 
 	public EvaluationMode getEvaluationModeCodeEvaluation() {
 		return evaluationModeCodeEvaluation;
+	}
+
+	public ObjectTreeNodeIF getCustomHierarchyRoot() {
+		return customHierarchyRoot;
 	}
 
 	public ParserLoggerIF getLogger() {

@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.objectInspection.swing.gui.table;
 
-import com.AMS.jBEAM.objectInspection.common.WildcardRegex;
+import com.AMS.jBEAM.common.RegexUtils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 public class TableValueFilter_Wildcard extends AbstractTableValueFilter
 {
 	private String	text			= "";
-	private Pattern	filterPattern	= WildcardRegex.createRegexPattern(text);
+	private Pattern	filterPattern	= RegexUtils.createRegexForWildcardString(text);
 
 	@Override
 	public boolean isActive() {
@@ -61,7 +61,7 @@ public class TableValueFilter_Wildcard extends AbstractTableValueFilter
 
 	void setText(String text) {
 		this.text = text;
-		filterPattern = WildcardRegex.createRegexPattern(text);
+		filterPattern = RegexUtils.createRegexForWildcardString(text);
 		fireFilterChanged();
 	}
 }

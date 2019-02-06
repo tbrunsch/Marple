@@ -104,7 +104,7 @@ public class TokenStream implements Cloneable
 	}
 
 	public Token readKeyWordUnchecked() {
-		return readRegexUnchecked(KEYWORD_PATTERN, 2, "No named literal found");
+		return readRegexUnchecked(KEYWORD_PATTERN, 2);
 	}
 
 	public Token readIntegerLiteral() throws JavaTokenParseException {
@@ -145,9 +145,9 @@ public class TokenStream implements Cloneable
 		return new Token(extractedString, containsCaret);
 	}
 
-	private Token readRegexUnchecked(Pattern regex, int groupIndexToExtract, String errorMessage) {
+	public Token readRegexUnchecked(Pattern regex, int groupIndexToExtract) {
 		try {
-			return readRegex(regex, groupIndexToExtract, errorMessage);
+			return readRegex(regex, groupIndexToExtract, null);
 		} catch (JavaTokenParseException e) {
 			return null;
 		}
@@ -164,7 +164,7 @@ public class TokenStream implements Cloneable
 	}
 
 	public Token readCharacterUnchecked() {
-		return readRegexUnchecked(CHARACTER_PATTERN, 2, null);
+		return readRegexUnchecked(CHARACTER_PATTERN, 2);
 	}
 
 	public Token readUnaryOperatorUnchecked() {
@@ -178,7 +178,7 @@ public class TokenStream implements Cloneable
 	private Token readOperatorUnchecked(List<String> availableOperators) {
 		boolean containsCaret = false;
 
-		containsCaret |= readRegexUnchecked(OPTIONAL_SPACE, 1, null).isContainsCaret();
+		containsCaret |= readRegexUnchecked(OPTIONAL_SPACE, 1).isContainsCaret();
 
 		int expressionLength = javaExpression.length();
 		String detectedOperator = null;
@@ -196,7 +196,7 @@ public class TokenStream implements Cloneable
 
 		containsCaret |= moveForward(detectedOperator.length());
 
-		containsCaret |= readRegexUnchecked(OPTIONAL_SPACE, 1, null).isContainsCaret();
+		containsCaret |= readRegexUnchecked(OPTIONAL_SPACE, 1).isContainsCaret();
 
 		return new Token(detectedOperator, containsCaret);
 	}

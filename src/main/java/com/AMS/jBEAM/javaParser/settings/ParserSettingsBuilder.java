@@ -18,6 +18,8 @@ public class ParserSettingsBuilder
 	private EvaluationMode												evaluationModeCodeCompletion	= EvaluationMode.NONE;
 	private EvaluationMode												evaluationModeCodeEvaluation	= EvaluationMode.STRONGLY_TYPED;
 
+	private ObjectTreeNodeIF											customHierarchyRoot				= LeafObjectTreeNode.EMPTY;
+
 	private ParserLoggerIF												logger							= new ParserNullLogger();
 
 	public ParserSettingsBuilder importClass(ClassInfo classInfo) {
@@ -50,6 +52,11 @@ public class ParserSettingsBuilder
 		return this;
 	}
 
+	public ParserSettingsBuilder customHierarchyRoot(ObjectTreeNodeIF customHierarchyRoot) {
+		this.customHierarchyRoot = customHierarchyRoot;
+		return this;
+	}
+
 	public ParserSettingsBuilder logger(ParserLoggerIF logger) {
 		this.logger = logger;
 		return this;
@@ -58,6 +65,6 @@ public class ParserSettingsBuilder
 	public ParserSettings build() {
 		Imports imports = new Imports(importClassesBuilder.build(), importPackagesBuilder.build());
 		VariablePool variablePool = new VariablePool(variablesBuilder.build());
-		return new ParserSettings(imports, variablePool, minimumAccessLevel, evaluationModeCodeCompletion, evaluationModeCodeEvaluation, logger);
+		return new ParserSettings(imports, variablePool, minimumAccessLevel, evaluationModeCodeCompletion, evaluationModeCodeEvaluation, customHierarchyRoot, logger);
 	}
 }
