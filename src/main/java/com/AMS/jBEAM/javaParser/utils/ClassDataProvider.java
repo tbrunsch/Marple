@@ -12,6 +12,7 @@ import com.google.common.reflect.TypeToken;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,9 +34,9 @@ public class ClassDataProvider
 		this.imports = imports;
 	}
 
-	public ParseResultIF readClass(TokenStream tokenStream, List<TypeToken<?>> expectedResultTypes, boolean returnClassInsteadOfCompletionsIfAvailable) {
+	public ParseResultIF readClass(TokenStream tokenStream, boolean returnClassInsteadOfCompletionsIfAvailable) {
 		ClassReader reader = new ClassReader(parserContext, imports, tokenStream);
-		return reader.read(expectedResultTypes, returnClassInsteadOfCompletionsIfAvailable);
+		return reader.read(returnClassInsteadOfCompletionsIfAvailable);
 	}
 
 	private static class ClassReader
@@ -55,7 +56,7 @@ public class ClassDataProvider
 			this.tokenStream = tokenStream;
 		}
 
-		ParseResultIF read(List<TypeToken<?>> expectedResultTypes, boolean returnClassInsteadOfCompletionsIfAvailable) {
+		ParseResultIF read(boolean returnClassInsteadOfCompletionsIfAvailable) {
 			while (true) {
 				identifierStartPosition = tokenStream.getPosition();
 				Token identifierToken;
@@ -114,9 +115,9 @@ public class ClassDataProvider
 				classesToConsider.addAll(classes);
 			}
 			return ParseUtils.createRatedSuggestions(
-					classesToConsider,
-					classInfo -> new CompletionSuggestionClass(classInfo, insertionBegin, insertionEnd),
-					ParseUtils.rateClassByNameFunc(parentLeaf)
+				classesToConsider,
+				classInfo -> new CompletionSuggestionClass(classInfo, insertionBegin, insertionEnd),
+				rateClassByNameFunc(parentLeaf)
 			);
 		}
 
@@ -130,9 +131,9 @@ public class ClassDataProvider
 				}
 			}
 			return ParseUtils.createRatedSuggestions(
-					packagesToConsider,
-					pack -> new CompletionSuggestionPackage(pack, insertionBegin, insertionEnd),
-					ParseUtils.ratePackageByNameFunc(parentLeaf)
+				packagesToConsider,
+				pack -> new CompletionSuggestionPackage(pack, insertionBegin, insertionEnd),
+				ratePackageByNameFunc(parentLeaf)
 			);
 		}
 
@@ -241,5 +242,40 @@ public class ClassDataProvider
 			importedPackages.addAll(imports.getImportedPackages());
 			return importedPackages;
 		}
+	}
+
+	/*
+	 * Class Suggestions
+	 */
+	private static int rateClassByName(ClassInfo classInfo, String expectedSimpleClassName) {
+		// transformation required to make it comparable to rated fields and methods
+		return (ParseUtils.TYPE_MATCH_NONE + 1)*ParseUtils.rateStringMatch(classInfo.getSimpleNameWithoutLeadingDigits(), expectedSimpleClassName) + ParseUtils.TYPE_MATCH_NONE;
+	}
+
+	private static ToIntFunction<ClassInfo> rateClassByNameFunc(final String simpleClassName) {
+		return classInfo -> rateClassByName(classInfo, simpleClassName);
+	}
+
+	public static String getClassDisplayText(ClassInfo classInfo) {
+		return classInfo.getName();
+	}
+
+	/*
+	 * Package Suggestions
+	 */
+	private static int ratePackageByName(Package pack, String expectedName) {
+		String packageName = pack.getName();
+		int lastDotIndex = packageName.lastIndexOf('.');
+		String subpackageName = packageName.substring(lastDotIndex + 1);
+		// transformation required to make it comparable to rated fields and methods
+		return (ParseUtils.TYPE_MATCH_NONE + 1)*ParseUtils.rateStringMatch(subpackageName, expectedName) + ParseUtils.TYPE_MATCH_NONE;
+	}
+
+	private static ToIntFunction<Package> ratePackageByNameFunc(final String packageName) {
+		return pack -> ratePackageByName(pack, packageName);
+	}
+
+	public static String getPackageDisplayText(Package pack) {
+		return pack.getName();
 	}
 }

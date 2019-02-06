@@ -48,7 +48,7 @@ public class MethodParser extends AbstractEntityParser
 				insertionEnd = startPosition;
 			}
 			log(LogLevel.INFO, "suggesting methods for completion...");
-			return parserContext.getExecutableDataProvider().suggestMethods(currentContextInfo, expectedResultTypes, startPosition, insertionEnd, staticOnly);
+			return parserContext.getExecutableDataProvider().suggestMethods("", currentContextInfo, expectedResultTypes, startPosition, insertionEnd, staticOnly);
 		}
 
 		if (currentContextInfo.getObject() == null && !staticOnly) {
@@ -66,18 +66,10 @@ public class MethodParser extends AbstractEntityParser
 		String methodName = methodNameToken.getValue();
 		final int endPosition = tokenStream.getPosition();
 
-		TypeToken<?> currentContextType = parserContext.getObjectInfoProvider().getType(currentContextInfo);
-		List<ExecutableInfo> methodInfos = parserContext.getInspectionDataProvider().getMethodInfos(currentContextType, staticOnly);
-
 		// check for code completion
 		if (methodNameToken.isContainsCaret()) {
 			log(LogLevel.SUCCESS, "suggesting methods matching '" + methodName + "'");
-			Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
-				methodInfos,
-				methodInfo -> new CompletionSuggestionMethod(methodInfo, startPosition, endPosition),
-				ParseUtils.rateMethodByNameAndTypesFunc(methodName, expectedResultTypes)
-			);
-			return new CompletionSuggestions(ratedSuggestions);
+			return parserContext.getExecutableDataProvider().suggestMethods(methodName, currentContextInfo, expectedResultTypes, startPosition, endPosition, staticOnly);
 		}
 
 		if (!tokenStream.hasMore() || tokenStream.peekCharacter() != '(') {
@@ -86,6 +78,8 @@ public class MethodParser extends AbstractEntityParser
 		}
 
 		// no code completion requested => method name must exist
+		TypeToken<?> currentContextType = parserContext.getObjectInfoProvider().getType(currentContextInfo);
+		List<ExecutableInfo> methodInfos = parserContext.getInspectionDataProvider().getMethodInfos(currentContextType, staticOnly);
 		List<ExecutableInfo> matchingMethodInfos = methodInfos.stream().filter(methodInfo -> methodInfo.getName().equals(methodName)).collect(Collectors.toList());
 		if (matchingMethodInfos.isEmpty()) {
 			log(LogLevel.ERROR, "unknown method '" + methodName + "'");

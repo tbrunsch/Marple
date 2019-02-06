@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.result;
 
 import com.AMS.jBEAM.javaParser.settings.Variable;
-import com.AMS.jBEAM.javaParser.utils.ParseUtils;
+import com.AMS.jBEAM.javaParser.utils.VariableDataProvider;
 
 import java.util.Objects;
 
@@ -29,12 +29,12 @@ public class CompletionSuggestionVariable implements CompletionSuggestionIF
 
 	@Override
 	public String getTextToInsert() {
-		return ParseUtils.getVariableDisplayText(variable);
+		return VariableDataProvider.getVariableDisplayText(variable);
 	}
 
 	@Override
 	public String toString() {
-		return ParseUtils.getVariableDisplayText(variable);
+		return VariableDataProvider.getVariableDisplayText(variable);
 	}
 
 	@Override

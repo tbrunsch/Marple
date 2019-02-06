@@ -38,7 +38,7 @@ public class VariableParser extends AbstractEntityParser
 				insertionEnd = startPosition;
 			}
 			log(LogLevel.INFO, "suggesting variables for completion...");
-			return parserContext.getVariableDataProvider().suggestVariables(expectedResultTypes, startPosition, insertionEnd);
+			return parserContext.getVariableDataProvider().suggestVariables("", expectedResultTypes, startPosition, insertionEnd);
 		}
 
 		Token variableToken;
@@ -51,18 +51,10 @@ public class VariableParser extends AbstractEntityParser
 		String variableName = variableToken.getValue();
 		int endPosition = tokenStream.getPosition();
 
-		VariablePool variablePool = parserContext.getSettings().getVariablePool();
-		List<Variable> variables = variablePool.getVariables().stream().sorted(Comparator.comparing(Variable::getName)).collect(Collectors.toList());
-
 		// check for code completion
 		if (variableToken.isContainsCaret()) {
 			log(LogLevel.SUCCESS, "suggesting variables matching '" + variableName + "'");
-			Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
-				variables,
-				variable -> new CompletionSuggestionVariable(variable, startPosition, endPosition),
-				ParseUtils.rateVariableByNameAndTypesFunc(variableName, expectedResultTypes)
-			);
-			return new CompletionSuggestions(ratedSuggestions);
+			return parserContext.getVariableDataProvider().suggestVariables(variableName, expectedResultTypes, startPosition, endPosition);
 		}
 
 		if (tokenStream.hasMore() && tokenStream.peekCharacter() == '(') {
@@ -71,6 +63,8 @@ public class VariableParser extends AbstractEntityParser
 		}
 
 		// no code completion requested => variable name must exist
+		VariablePool variablePool = parserContext.getSettings().getVariablePool();
+		List<Variable> variables = variablePool.getVariables().stream().sorted(Comparator.comparing(Variable::getName)).collect(Collectors.toList());
 		Optional<Variable> firstVariableMatch = variables.stream().filter(variable -> variable.getName().equals(variableName)).findFirst();
 		if (!firstVariableMatch.isPresent()) {
 			log(LogLevel.ERROR, "unknown variable '" + variableName + "'");

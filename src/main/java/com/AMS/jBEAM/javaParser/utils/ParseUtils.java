@@ -1,9 +1,7 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.javaParser.ParserContext;
-import com.AMS.jBEAM.javaParser.settings.Variable;
 import com.AMS.jBEAM.javaParser.parsers.AbstractEntityParser;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
@@ -130,7 +128,7 @@ public class ParseUtils
 	private static final int STRING_MATCH_INVERSE_PREFIX_IGNORE_CASE	= 5;
 	private static final int STRING_MATCH_MIN_VALUE_OTHER				= 6;
 
-	private static int rateStringMatch(String actual, String expected) {
+	public static int rateStringMatch(String actual, String expected) {
 		if (actual.equals(expected)) {
 			return STRING_MATCH_FULL;
 		} else {
@@ -209,132 +207,6 @@ public class ParseUtils
 
 	public static boolean isConvertibleTo(TypeToken<?> source, TypeToken<?> target) {
 		return rateTypeMatch(source, target) != TYPE_MATCH_NONE;
-	}
-
-	/*
-	 * Fields
-	 */
-	private static int rateFieldByName(FieldInfo fieldInfo, String expectedFieldName) {
-		return rateStringMatch(fieldInfo.getName(), expectedFieldName);
-	}
-
-	static ToIntFunction<FieldInfo> rateFieldByTypesFunc(Object instance, EvaluationMode evaluationMode, List<TypeToken<?>> expectedTypes) {
-		return fieldInfo -> rateFieldByTypes(fieldInfo, instance, evaluationMode, expectedTypes);
-	}
-
-	private static int rateFieldByTypes(FieldInfo fieldInfo, Object instance, EvaluationMode evaluationMode, List<TypeToken<?>> expectedTypes) {
-		if (expectedTypes == null) {
-			return TYPE_MATCH_FULL;
-		}
-		if (expectedTypes.isEmpty()) {
-			return TYPE_MATCH_NONE;
-		}
-		try {
-			TypeToken<?> type = ObjectInfoProvider.getType(fieldInfo.get(instance), fieldInfo.getType(), evaluationMode);
-			return	expectedTypes.stream().mapToInt(expectedType -> rateTypeMatch(type, expectedType)).min().getAsInt();
-		} catch (IllegalAccessException e) {
-			// TODO: Swallowed exception
-			return TYPE_MATCH_NONE;
-		}
-	}
-
-	public static ToIntFunction<FieldInfo> rateFieldByNameAndTypesFunc(String fieldName, Object instance, EvaluationMode evaluationMode, List<TypeToken<?>> expectedTypes) {
-		return fieldInfo -> (TYPE_MATCH_NONE + 1)*rateFieldByName(fieldInfo, fieldName) + rateFieldByTypes(fieldInfo, instance, evaluationMode, expectedTypes);
-	}
-
-	public static String getFieldDisplayText(FieldInfo fieldInfo) {
-		return fieldInfo.getName() + " (" + fieldInfo.getDeclaringType() + ")";
-	}
-
-	/*
-	 * Methods
-	 */
-	private static int rateMethodByName(ExecutableInfo methodInfo, String expectedMethodName) {
-		return rateStringMatch(methodInfo.getName(), expectedMethodName);
-	}
-
-	static ToIntFunction<ExecutableInfo> rateMethodByTypesFunc(List<TypeToken<?>> expectedTypes) {
-		return methodInfo -> rateMethodByTypes(methodInfo, expectedTypes);
-	}
-
-	private static int rateMethodByTypes(ExecutableInfo methodInfo, List<TypeToken<?>> expectedTypes) {
-		/*
-		 * Even for EvaluationMode.DUCK_TYPING we only consider the declared return type of the method instead
-		 * of the runtime type of the returned object. Otherwise, we would have to invoke the method for code
-		 * completion, possibly causing undesired side effects.
-		 */
-		return	expectedTypes == null	? TYPE_MATCH_FULL :
-				expectedTypes.isEmpty()	? TYPE_MATCH_NONE
-										: expectedTypes.stream().mapToInt(expectedType -> rateTypeMatch(methodInfo.getReturnType(), expectedType)).min().getAsInt();
-	}
-
-	public static ToIntFunction<ExecutableInfo> rateMethodByNameAndTypesFunc(String methodName, List<TypeToken<?>> expectedTypes) {
-		return methodInfo -> (TYPE_MATCH_NONE + 1)* rateMethodByName(methodInfo, methodName) + rateMethodByTypes(methodInfo, expectedTypes);
-	}
-
-	public static String getMethodDisplayText(ExecutableInfo methodInfo) {
-		return methodInfo.getName() + " (" + methodInfo.getDeclaringType() + ")";
-	}
-
-	/*
-	 * Classes
-	 */
-	private static int rateClassByName(ClassInfo classInfo, String expectedSimpleClassName) {
-		// transformation required to make it comparable to rated fields and methods
-		return (TYPE_MATCH_NONE + 1)*rateStringMatch(classInfo.getSimpleNameWithoutLeadingDigits(), expectedSimpleClassName) + TYPE_MATCH_NONE;
-	}
-
-	static ToIntFunction<ClassInfo> rateClassByNameFunc(final String simpleClassName) {
-		return classInfo -> rateClassByName(classInfo, simpleClassName);
-	}
-
-	public static String getClassDisplayText(ClassInfo classInfo) {
-		return classInfo.getName();
-	}
-
-	/*
-	 * Packages
-	 */
-	private static int ratePackageByName(Package pack, String expectedPackageName) {
-		String packageName = pack.getName();
-		int lastDotIndex = packageName.lastIndexOf('.');
-		String subpackageName = packageName.substring(lastDotIndex + 1);
-		// transformation required to make it comparable to rated fields and methods
-		return (TYPE_MATCH_NONE + 1)*rateStringMatch(subpackageName, expectedPackageName) + TYPE_MATCH_NONE;
-	}
-
-	static ToIntFunction<Package> ratePackageByNameFunc(final String packageName) {
-		return pack -> ratePackageByName(pack, packageName);
-	}
-
-	public static String getPackageDisplayText(Package pack) {
-		return pack.getName();
-	}
-
-	/*
-	 * Variables
-	 */
-	private static int rateVariableByName(Variable variable, String expectedVariabledName) {
-		return rateStringMatch(variable.getName(), expectedVariabledName);
-	}
-
-	static ToIntFunction<Variable> rateVariableByTypesFunc(List<TypeToken<?>> expectedTypes) {
-		return variable -> rateVariableByTypes(variable, expectedTypes);
-	}
-
-	private static int rateVariableByTypes(Variable variable, List<TypeToken<?>> expectedTypes) {
-		Object value = variable.getValue();
-		return	expectedTypes == null	? TYPE_MATCH_FULL :
-				expectedTypes.isEmpty()	? TYPE_MATCH_NONE
-										: expectedTypes.stream().mapToInt(expectedType -> rateTypeMatch(value == null ? null : TypeToken.of(value.getClass()), expectedType)).min().getAsInt();
-	}
-
-	public static ToIntFunction<Variable> rateVariableByNameAndTypesFunc(String variableName, List<TypeToken<?>> expectedTypes) {
-		return variable -> (TYPE_MATCH_NONE + 1)*rateVariableByName(variable, variableName) + rateVariableByTypes(variable, expectedTypes);
-	}
-
-	public static String getVariableDisplayText(Variable variable) {
-		return variable.getName();
 	}
 
 	/*

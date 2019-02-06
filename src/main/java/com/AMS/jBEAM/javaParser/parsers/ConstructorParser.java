@@ -40,7 +40,7 @@ public class ConstructorParser extends AbstractEntityParser
 		}
 
 		log(LogLevel.INFO, "parsing class at " + tokenStream);
-		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream, expectedResultTypes, false);
+		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream, false);
 		log(LogLevel.INFO, "parse result: " + classParseResult.getResultType());
 
 		// propagate anything except results

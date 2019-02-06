@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.result;
 
+import com.AMS.jBEAM.javaParser.utils.ClassDataProvider;
 import com.AMS.jBEAM.javaParser.utils.ClassInfo;
-import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 
 import java.util.Objects;
 
@@ -34,7 +34,7 @@ public class CompletionSuggestionClass implements CompletionSuggestionIF
 
 	@Override
 	public String toString() {
-		return ParseUtils.getClassDisplayText(classInfo);
+		return ClassDataProvider.getClassDisplayText(classInfo);
 	}
 
 	@Override

@@ -1,9 +1,8 @@
 package com.AMS.jBEAM.javaParser.result;
 
+import com.AMS.jBEAM.javaParser.utils.FieldDataProvider;
 import com.AMS.jBEAM.javaParser.utils.FieldInfo;
-import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 
-import java.lang.reflect.Field;
 import java.util.Objects;
 
 public class CompletionSuggestionField implements CompletionSuggestionIF
@@ -35,7 +34,7 @@ public class CompletionSuggestionField implements CompletionSuggestionIF
 
 	@Override
 	public String toString() {
-		return ParseUtils.getFieldDisplayText(fieldInfo);
+		return FieldDataProvider.getFieldDisplayText(fieldInfo);
 	}
 
 	@Override

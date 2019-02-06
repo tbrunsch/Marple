@@ -47,7 +47,7 @@ public class FieldParser extends AbstractEntityParser
 				insertionEnd = startPosition;
 			}
 			log(LogLevel.INFO, "suggesting fields for completion...");
-			return parserContext.getFieldDataProvider().suggestFields(currentContextInfo, expectedResultTypes, startPosition, insertionEnd, staticOnly);
+			return parserContext.getFieldDataProvider().suggestFields("", currentContextInfo, expectedResultTypes, startPosition, insertionEnd, staticOnly);
 		}
 
 		if (currentContextInfo.getObject() == null && !staticOnly) {
@@ -65,18 +65,10 @@ public class FieldParser extends AbstractEntityParser
 		String fieldName = fieldNameToken.getValue();
 		int endPosition = tokenStream.getPosition();
 
-		TypeToken<?> currentContextType = parserContext.getObjectInfoProvider().getType(currentContextInfo);
-		List<FieldInfo> fieldInfos = parserContext.getInspectionDataProvider().getFieldInfos(currentContextType, staticOnly);
-
 		// check for code completion
 		if (fieldNameToken.isContainsCaret()) {
 			log(LogLevel.SUCCESS, "suggesting fields matching '" + fieldName + "'");
-			Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
-				fieldInfos,
-				fieldInfo -> new CompletionSuggestionField(fieldInfo, startPosition, endPosition),
-				ParseUtils.rateFieldByNameAndTypesFunc(fieldName, currentContextInfo.getObject(), parserContext.getSettings().getEvaluationModeCodeCompletion(), expectedResultTypes)
-			);
-			return new CompletionSuggestions(ratedSuggestions);
+			return parserContext.getFieldDataProvider().suggestFields(fieldName, currentContextInfo, expectedResultTypes, startPosition, endPosition, staticOnly);
 		}
 
 		if (tokenStream.hasMore() && tokenStream.peekCharacter() == '(') {
@@ -85,6 +77,8 @@ public class FieldParser extends AbstractEntityParser
 		}
 
 		// no code completion requested => field name must exist
+		TypeToken<?> currentContextType = parserContext.getObjectInfoProvider().getType(currentContextInfo);
+		List<FieldInfo> fieldInfos = parserContext.getInspectionDataProvider().getFieldInfos(currentContextType, staticOnly);
 		Optional<FieldInfo> firstFieldInfoMatch = fieldInfos.stream().filter(fieldInfo -> fieldInfo.getName().equals(fieldName)).findFirst();
 		if (!firstFieldInfoMatch.isPresent()) {
 			log(LogLevel.ERROR, "unknown field '" + fieldName + "'");

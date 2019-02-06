@@ -7,6 +7,7 @@ import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.google.common.reflect.TypeToken;
 
 import java.util.*;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -18,15 +19,14 @@ public class ExecutableDataProvider
 		this.parserContext = parserContext;
 	}
 
-	public CompletionSuggestions suggestMethods(ObjectInfo contextInfo, List<TypeToken<?>> expectedTypes, final int insertionBegin, final int insertionEnd, boolean staticOnly) {
+	public CompletionSuggestions suggestMethods(String expectedName, ObjectInfo contextInfo, List<TypeToken<?>> expectedTypes, int insertionBegin, final int insertionEnd, boolean staticOnly) {
 		TypeToken<?> contextType = parserContext.getObjectInfoProvider().getType(contextInfo);
 		List<ExecutableInfo> methodInfos = parserContext.getInspectionDataProvider().getMethodInfos(contextType, staticOnly);
 		Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 			methodInfos,
 			methodInfo -> new CompletionSuggestionMethod(methodInfo, insertionBegin, insertionEnd),
-			ParseUtils.rateMethodByTypesFunc(expectedTypes)
+			rateMethodByNameAndTypesFunc(expectedName, expectedTypes)
 		);
-
 		return new CompletionSuggestions(ratedSuggestions);
 	}
 
@@ -154,5 +154,31 @@ public class ExecutableDataProvider
 			}
 		}
 		return filteredExecutableInfos;
+	}
+
+	/*
+	 * Suggestions
+	 */
+	private static int rateMethodByName(ExecutableInfo methodInfo, String expectedName) {
+		return ParseUtils.rateStringMatch(methodInfo.getName(), expectedName);
+	}
+
+	private static int rateMethodByTypes(ExecutableInfo methodInfo, List<TypeToken<?>> expectedTypes) {
+		/*
+		 * Even for EvaluationMode.DUCK_TYPING we only consider the declared return type of the method instead
+		 * of the runtime type of the returned object. Otherwise, we would have to invoke the method for code
+		 * completion, possibly causing undesired side effects.
+		 */
+		return	expectedTypes == null	? ParseUtils.TYPE_MATCH_FULL :
+				expectedTypes.isEmpty()	? ParseUtils.TYPE_MATCH_NONE
+										: expectedTypes.stream().mapToInt(expectedType -> ParseUtils.rateTypeMatch(methodInfo.getReturnType(), expectedType)).min().getAsInt();
+	}
+
+	private static ToIntFunction<ExecutableInfo> rateMethodByNameAndTypesFunc(String methodName, List<TypeToken<?>> expectedTypes) {
+		return methodInfo -> (ParseUtils.TYPE_MATCH_NONE + 1)* rateMethodByName(methodInfo, methodName) + rateMethodByTypes(methodInfo, expectedTypes);
+	}
+
+	public static String getMethodDisplayText(ExecutableInfo methodInfo) {
+		return methodInfo.getName() + " (" + methodInfo.getDeclaringType() + ")";
 	}
 }
