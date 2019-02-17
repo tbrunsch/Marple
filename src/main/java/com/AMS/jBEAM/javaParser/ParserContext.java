@@ -3,68 +3,72 @@ package com.AMS.jBEAM.javaParser;
 import com.AMS.jBEAM.javaParser.parsers.*;
 import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.javaParser.settings.ParserSettings;
-import com.AMS.jBEAM.javaParser.utils.*;
+import com.AMS.jBEAM.javaParser.utils.dataProviders.*;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
+import com.google.common.reflect.TypeToken;
 
 public class ParserContext
 {
-	private final ObjectInfo					thisInfo;
-	private final ParserSettings				settings;
+	private final ObjectInfo							thisInfo;
+	private final ParserSettings						settings;
 
-	private final InspectionDataProvider 		inspectionDataProvider;
-	private final ObjectInfoProvider			objectInfoProvider;
-	private final FieldDataProvider				fieldDataProvider;
-	private final ExecutableDataProvider		executableDataProvider;
-	private final ClassDataProvider				classDataProvider;
-	private final VariableDataProvider			variableDataProvider;
-	private final OperatorResultProvider 		operatorResultProvider;
-	private final ObjectTreeNodeDataProvider	objectTreeNodeDataProvider;
+	private final ClassDataProvider						classDataProvider;
+	private final ExecutableDataProvider				executableDataProvider;
+	private final FieldDataProvider						fieldDataProvider;
+	private final InspectionDataProvider				inspectionDataProvider;
+	private final ObjectInfoProvider					objectInfoProvider;
+	private final ObjectTreeNodeDataProvider			objectTreeNodeDataProvider;
+	private final OperatorResultProvider 				operatorResultProvider;
+	private final VariableDataProvider					variableDataProvider;
 
-	private final AbstractEntityParser 			expressionParser;
-	private final AbstractEntityParser			fieldParser;
-	private final AbstractEntityParser			staticFieldParser;
-	private final AbstractEntityParser			methodParser;
-	private final AbstractEntityParser			staticMethodParser;
-	private final AbstractEntityParser			tailParser;
-	private final AbstractEntityParser			staticTailParser;
-	private final AbstractEntityParser			literalParser;
-	private final AbstractEntityParser			parenthesizedExpressionParser;
-	private final AbstractEntityParser			castParser;
-	private final AbstractEntityParser			classParser;
-	private final AbstractEntityParser			variableParser;
-	private final AbstractEntityParser			constructorParser;
-	private final AbstractEntityParser			unaryPrefixOperatorParser;
-	private final AbstractEntityParser			customHierarchyParser;
-	private final AbstractEntityParser			compoundExpressionParser;
+	private final AbstractEntityParser<ObjectInfo>		castParser;
+	private final AbstractEntityParser<TypeToken<?>>	classFieldParser;
+	private final AbstractEntityParser<TypeToken<?>>	classMethodParser;
+	private final AbstractEntityParser<TypeToken<?>>	classTailParser;
+	private final AbstractEntityParser<ObjectInfo>		compoundExpressionParser;
+	private final AbstractEntityParser<ObjectInfo>		constructorParser;
+	private final AbstractEntityParser<ObjectInfo>		customHierarchyParser;
+	private final AbstractEntityParser<ObjectInfo> 		expressionParser;
+	private final AbstractEntityParser<TypeToken<?>>	innerClassParser;
+	private final AbstractEntityParser<ObjectInfo>		literalParser;
+	private final AbstractEntityParser<ObjectInfo>		objectFieldParser;
+	private final AbstractEntityParser<ObjectInfo>		objectMethodParser;
+	private final AbstractEntityParser<ObjectInfo>		objectTailParser;
+	private final AbstractEntityParser<ObjectInfo>		parenthesizedExpressionParser;
+	private final AbstractEntityParser<ObjectInfo>		topLevelClassParser;
+	private final AbstractEntityParser<ObjectInfo>		unaryPrefixOperatorParser;
+	private final AbstractEntityParser<ObjectInfo>		variableParser;
 
 	public ParserContext(ObjectInfo thisInfo, ParserSettings settings, EvaluationMode evaluationMode) {
 		this.thisInfo = thisInfo;
 		this.settings = settings;
 
-		inspectionDataProvider 			= new InspectionDataProvider(settings);
-		objectInfoProvider				= new ObjectInfoProvider(evaluationMode);
-		fieldDataProvider				= new FieldDataProvider(this);
+		classDataProvider				= new ClassDataProvider(this);
 		executableDataProvider			= new ExecutableDataProvider(this);
-		classDataProvider				= new ClassDataProvider(this, settings.getImports());
-		variableDataProvider			= new VariableDataProvider(settings.getVariablePool());
-		operatorResultProvider 			= new OperatorResultProvider(evaluationMode);
+		fieldDataProvider				= new FieldDataProvider(this);
+		inspectionDataProvider 			= new InspectionDataProvider(this);
+		objectInfoProvider				= new ObjectInfoProvider(evaluationMode);
 		objectTreeNodeDataProvider		= new ObjectTreeNodeDataProvider();
+		operatorResultProvider 			= new OperatorResultProvider(this, evaluationMode);
+		variableDataProvider			= new VariableDataProvider(settings.getVariablePool());
 
-		expressionParser 				= new ExpressionParser(this, thisInfo);
-		fieldParser						= new FieldParser(this, thisInfo, false);
-		staticFieldParser				= new FieldParser(this, thisInfo, true);
-		methodParser					= new MethodParser(this, thisInfo, false);
-		staticMethodParser				= new MethodParser(this, thisInfo, true);
-		tailParser						= new TailParser(this, thisInfo, false);
-		staticTailParser				= new TailParser(this, thisInfo, true);
-		literalParser					= new LiteralParser(this, thisInfo);
-		parenthesizedExpressionParser	= new ParenthesizedExpressionParser(this, thisInfo);
 		castParser						= new CastParser(this, thisInfo);
-		classParser						= new ClassParser(this, thisInfo);
-		variableParser					= new VariableParser(this, thisInfo);
+		classFieldParser				= new ClassFieldParser(this, thisInfo);
+		classMethodParser				= new ClassMethodParser(this, thisInfo);
+		classTailParser					= new ClassTailParser(this, thisInfo);
+		compoundExpressionParser		= createCompoundExpressionParser(OperatorResultProvider.MAX_BINARY_OPERATOR_PRECEDENCE_LEVEL);
 		constructorParser				= new ConstructorParser(this, thisInfo);
-		unaryPrefixOperatorParser		= new UnaryPrefixOperatorParser(this, thisInfo);
 		customHierarchyParser			= new CustomHierarchyParser(this, thisInfo);
-		compoundExpressionParser		= createCompoundExpressionParser(Integer.MAX_VALUE);
+		expressionParser 				= new ExpressionParser(this, thisInfo);
+		innerClassParser				= new InnerClassParser(this, thisInfo);
+		literalParser					= new LiteralParser(this, thisInfo);
+		objectFieldParser				= new ObjectFieldParser(this, thisInfo);
+		objectMethodParser				= new ObjectMethodParser(this, thisInfo);
+		objectTailParser				= new ObjectTailParser(this, thisInfo);
+		parenthesizedExpressionParser	= new ParenthesizedExpressionParser(this, thisInfo);
+		topLevelClassParser				= new TopLevelClassParser(this, thisInfo);
+		unaryPrefixOperatorParser		= new UnaryPrefixOperatorParser(this, thisInfo);
+		variableParser					= new VariableParser(this, thisInfo);
 	}
 
 	public ObjectInfo getThisInfo() {
@@ -75,6 +79,21 @@ public class ParserContext
 		return settings;
 	}
 
+	/*
+	 * Data Providers
+	 */
+	public ClassDataProvider getClassDataProvider() {
+		return classDataProvider;
+	}
+
+	public ExecutableDataProvider getExecutableDataProvider() {
+		return executableDataProvider;
+	}
+
+	public FieldDataProvider getFieldDataProvider() {
+		return fieldDataProvider;
+	}
+
 	public InspectionDataProvider getInspectionDataProvider() {
 		return inspectionDataProvider;
 	}
@@ -83,77 +102,84 @@ public class ParserContext
 		return objectInfoProvider;
 	}
 
-	public FieldDataProvider getFieldDataProvider() {
-		return fieldDataProvider;
-	}
-
-	public ExecutableDataProvider getExecutableDataProvider() {
-		return executableDataProvider;
-	}
-
-	public ClassDataProvider getClassDataProvider() {
-		return classDataProvider;
-	}
-
-	public VariableDataProvider getVariableDataProvider() {
-		return variableDataProvider;
+	public ObjectTreeNodeDataProvider getObjectTreeNodeDataProvider() {
+		return objectTreeNodeDataProvider;
 	}
 
 	public OperatorResultProvider getOperatorResultProvider() {
 		return operatorResultProvider;
 	}
 
-	public ObjectTreeNodeDataProvider getObjectTreeNodeDataProvider() {
-		return objectTreeNodeDataProvider;
+	public VariableDataProvider getVariableDataProvider() {
+		return variableDataProvider;
 	}
 
-	public AbstractEntityParser getExpressionParser() {
-		return expressionParser;
+	/*
+	 * Parsers
+	 */
+	public AbstractEntityParser<ObjectInfo> getCastParser() { return castParser; }
+
+	public AbstractEntityParser<TypeToken<?>> getClassFieldParser() {
+		return classFieldParser;
 	}
 
-	public AbstractEntityParser getFieldParser(boolean staticOnly) {
-		return staticOnly ? staticFieldParser : fieldParser;
+	public AbstractEntityParser<TypeToken<?>> getClassMethodParser() {
+		return classMethodParser;
 	}
 
-	public AbstractEntityParser getMethodParser(boolean staticOnly) {
-		return staticOnly ? staticMethodParser : methodParser;
+	public AbstractEntityParser<TypeToken<?>> getClassTailParser() {
+		return classTailParser;
 	}
 
-	public AbstractEntityParser getTailParser(boolean staticOnly) {
-		return staticOnly ? staticTailParser : tailParser;
+	public AbstractEntityParser<ObjectInfo> createCompoundExpressionParser(int maxOperatorPrecedenceLevelToConsider) {
+		return new CompoundExpressionParser(this, thisInfo, maxOperatorPrecedenceLevelToConsider);
 	}
 
-	public AbstractEntityParser getLiteralParser() {
-		return literalParser;
-	}
-
-	public AbstractEntityParser getParenthesizedExpressionParser() {
-		return parenthesizedExpressionParser;
-	}
-
-	public AbstractEntityParser getCastParser() { return castParser; }
-
-	public AbstractEntityParser getClassParser() { return classParser; }
-
-	public AbstractEntityParser getVariableParser() { return variableParser; }
-
-	public AbstractEntityParser getConstructorParser() {
-		return constructorParser;
-	}
-
-	public AbstractEntityParser getCompoundExpressionParser() {
+	public AbstractEntityParser<ObjectInfo> getCompoundExpressionParser() {
 		return compoundExpressionParser;
 	}
 
-	public AbstractEntityParser getUnaryPrefixOperatorParser() {
-		return unaryPrefixOperatorParser;
+	public AbstractEntityParser<ObjectInfo> getConstructorParser() {
+		return constructorParser;
 	}
 
-	public AbstractEntityParser getCustomHierarchyParser() {
+	public AbstractEntityParser<ObjectInfo> getCustomHierarchyParser() {
 		return customHierarchyParser;
 	}
 
-	public AbstractEntityParser createCompoundExpressionParser(int maxOperatorPrecedenceLevelToConsider) {
-		return new CompoundExpressionParser(this, thisInfo, maxOperatorPrecedenceLevelToConsider);
+	public AbstractEntityParser<ObjectInfo> getExpressionParser() {
+		return expressionParser;
 	}
+
+	public AbstractEntityParser<TypeToken<?>> getInnerClassParser() {
+		return innerClassParser;
+	}
+
+	public AbstractEntityParser<ObjectInfo> getLiteralParser() {
+		return literalParser;
+	}
+
+	public AbstractEntityParser<ObjectInfo> getObjectFieldParser() {
+		return objectFieldParser;
+	}
+
+	public AbstractEntityParser<ObjectInfo> getObjectMethodParser() {
+		return objectMethodParser;
+	}
+
+	public AbstractEntityParser<ObjectInfo> getObjectTailParser() {
+		return objectTailParser;
+	}
+
+	public AbstractEntityParser<ObjectInfo> getParenthesizedExpressionParser() {
+		return parenthesizedExpressionParser;
+	}
+
+	public AbstractEntityParser<ObjectInfo> getTopLevelClassParser() { return topLevelClassParser; }
+
+	public AbstractEntityParser<ObjectInfo> getUnaryPrefixOperatorParser() {
+		return unaryPrefixOperatorParser;
+	}
+
+	public AbstractEntityParser<ObjectInfo> getVariableParser() { return variableParser; }
 }

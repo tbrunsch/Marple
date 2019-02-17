@@ -1,10 +1,12 @@
-package com.AMS.jBEAM.javaParser.utils;
+package com.AMS.jBEAM.javaParser.utils.dataProviders;
 
+import com.AMS.jBEAM.javaParser.parsers.ParseExpectation;
 import com.AMS.jBEAM.javaParser.settings.Variable;
 import com.AMS.jBEAM.javaParser.settings.VariablePool;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionIF;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionVariable;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
+import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.google.common.reflect.TypeToken;
 
 import java.util.Comparator;
@@ -21,33 +23,33 @@ public class VariableDataProvider
 		this.variablePool = variablePool;
 	}
 
-	public CompletionSuggestions suggestVariables(String expectedName, List<TypeToken<?>> expectedTypes, int insertionBegin, int insertionEnd) {
+	public CompletionSuggestions suggestVariables(String expectedName, ParseExpectation expectation, int insertionBegin, int insertionEnd) {
 		List<Variable> variables = variablePool.getVariables().stream().sorted(Comparator.comparing(Variable::getName)).collect(Collectors.toList());
 		Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 			variables,
 			variable -> new CompletionSuggestionVariable(variable, insertionBegin, insertionEnd),
-			rateVariableByNameAndTypesFunc(expectedName, expectedTypes)
+			rateVariableByNameAndTypesFunc(expectedName, expectation)
 		);
-		return new CompletionSuggestions(ratedSuggestions);
+		return new CompletionSuggestions(insertionBegin, ratedSuggestions);
 	}
 
-	private static int rateVariableByName(Variable variable, String expectedName) {
+	private int rateVariableByName(Variable variable, String expectedName) {
 		return ParseUtils.rateStringMatch(variable.getName(), expectedName);
 	}
 
-	private static int rateVariableByTypes(Variable variable, List<TypeToken<?>> expectedTypes) {
+	private int rateVariableByTypes(Variable variable, ParseExpectation expectation) {
+		List<TypeToken<?>> allowedTypes = expectation.getAllowedTypes();
 		Object value = variable.getValue();
-		return	expectedTypes == null	? ParseUtils.TYPE_MATCH_FULL :
-				expectedTypes.isEmpty()	? ParseUtils.TYPE_MATCH_NONE
-										: expectedTypes.stream().mapToInt(expectedType -> ParseUtils.rateTypeMatch(value == null ? null : TypeToken.of(value.getClass()), expectedType)).min().getAsInt();
+		return	allowedTypes == null	? ParseUtils.TYPE_MATCH_FULL :
+				allowedTypes.isEmpty()	? ParseUtils.TYPE_MATCH_NONE
+										: allowedTypes.stream().mapToInt(allowedType -> ParseUtils.rateTypeMatch(value == null ? null : TypeToken.of(value.getClass()), allowedType)).min().getAsInt();
 	}
 
-	private static ToIntFunction<Variable> rateVariableByNameAndTypesFunc(String variableName, List<TypeToken<?>> expectedTypes) {
-		return variable -> (ParseUtils.TYPE_MATCH_NONE + 1)*rateVariableByName(variable, variableName) + rateVariableByTypes(variable, expectedTypes);
+	private ToIntFunction<Variable> rateVariableByNameAndTypesFunc(String variableName, ParseExpectation expectation) {
+		return variable -> (ParseUtils.TYPE_MATCH_NONE + 1)*rateVariableByName(variable, variableName) + rateVariableByTypes(variable, expectation);
 	}
 
 	public static String getVariableDisplayText(Variable variable) {
 		return variable.getName();
 	}
-
 }

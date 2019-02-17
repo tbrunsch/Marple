@@ -1,6 +1,7 @@
-package com.AMS.jBEAM.javaParser.utils;
+package com.AMS.jBEAM.javaParser.utils.wrappers;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
+import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Executable;

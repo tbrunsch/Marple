@@ -1,18 +1,17 @@
 package com.AMS.jBEAM.javaParser.utils;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.common.RegexUtils;
 import com.AMS.jBEAM.javaParser.parsers.AbstractEntityParser;
+import com.AMS.jBEAM.javaParser.parsers.ParseExpectation;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.google.common.reflect.TypeToken;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ParseUtils
@@ -20,48 +19,32 @@ public class ParseUtils
 	/*
 	 * Parsing
 	 */
-	public static ParseResultIF parse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes, AbstractEntityParser... parsers) {
+	public static <C> ParseResultIF parse(TokenStream tokenStream, C context, ParseExpectation expectation, AbstractEntityParser<? super C>... parsers) {
 		List<ParseResultIF> parseResults = Arrays.stream(parsers)
-			.map(parser -> parser.parse(tokenStream, currentContextInfo, expectedResultTypes))
+			.map(parser -> parser.parse(tokenStream, context, expectation))
 			.collect(Collectors.toList());
 		return mergeParseResults(parseResults);
 	}
 
 	private static ParseResultIF mergeParseResults(List<ParseResultIF> parseResults) {
 		if (parseResults.isEmpty()) {
-			throw new IllegalArgumentException("Cannot merge 0 parse results");
+			throw new IllegalArgumentException("Internal error: Cannot merge 0 parse results");
 		}
 
 		List<AmbiguousParseResult> ambiguousResults = filterParseResults(parseResults, AmbiguousParseResult.class);
-		List<ParseResult> results = filterParseResults(parseResults, ParseResult.class);
 		List<CompletionSuggestions> completionSuggestions = filterParseResults(parseResults, CompletionSuggestions.class);
 		List<ParseError> errors = filterParseResults(parseResults, ParseError.class);
+		List<ParseResultIF> results = new ArrayList<>();
+		results.addAll(filterParseResults(parseResults, ObjectParseResult.class));
+		results.addAll(filterParseResults(parseResults, ClassParseResult.class));
 
 		if (!completionSuggestions.isEmpty()) {
-			// Merge and return suggestions
-			Map<CompletionSuggestionIF, Integer> mergedRatedSuggestions = new LinkedHashMap<>();
-			for (CompletionSuggestions suggestions : completionSuggestions) {
-				Map<CompletionSuggestionIF, Integer> ratedSuggestions = suggestions.getRatedSuggestions();
-				for (CompletionSuggestionIF suggestion : ratedSuggestions.keySet()) {
-					int currentRating = mergedRatedSuggestions.containsKey(suggestion)
-							? mergedRatedSuggestions.get(suggestion)
-							: Integer.MAX_VALUE;
-					int newRating = ratedSuggestions.get(suggestion);
-					int bestRating = Math.min(currentRating, newRating);
-					mergedRatedSuggestions.put(suggestion, bestRating);
-				}
-			}
-			return new CompletionSuggestions(mergedRatedSuggestions);
+			return mergeCompletionSuggestions(completionSuggestions);
 		}
 
 		boolean ambiguous = !ambiguousResults.isEmpty() || results.size() > 1;
 		if (ambiguous) {
-			int position = ambiguousResults.isEmpty() ? results.get(0).getParsedToPosition() : ambiguousResults.get(0).getPosition();
-			String message = "Ambiguous expression:\n"
-					+ ambiguousResults.stream().map(AmbiguousParseResult::getMessage).collect(Collectors.joining("\n"))
-					+ (ambiguousResults.size() > 0 && results.size() > 0 ? "\n" : "")
-					+ results.stream().map(result -> "Expression can be evaluated to object of type " + result.getObjectInfo().getDeclaredType()).collect(Collectors.joining("\n"));
-			return new AmbiguousParseResult(position, message);
+			return mergeResults(ambiguousResults, results);
 		}
 
 		if (results.size() == 1) {
@@ -77,6 +60,42 @@ public class ParseUtils
 
 	private static <T> List<T> filterParseResults(List<ParseResultIF> parseResults, Class<T> filterClass) {
 		return parseResults.stream().filter(filterClass::isInstance).map(filterClass::cast).collect(Collectors.toList());
+	}
+
+	private static ParseResultIF mergeCompletionSuggestions(List<CompletionSuggestions> completionSuggestions) {
+		Map<CompletionSuggestionIF, Integer> mergedRatedSuggestions = new LinkedHashMap<>();
+		int position = Integer.MAX_VALUE;
+		for (CompletionSuggestions suggestions : completionSuggestions) {
+			position = Math.min(position, suggestions.getPosition());
+			Map<CompletionSuggestionIF, Integer> ratedSuggestions = suggestions.getRatedSuggestions();
+			for (CompletionSuggestionIF suggestion : ratedSuggestions.keySet()) {
+				int currentRating = mergedRatedSuggestions.containsKey(suggestion)
+										? mergedRatedSuggestions.get(suggestion)
+										: Integer.MAX_VALUE;
+				int newRating = ratedSuggestions.get(suggestion);
+				int bestRating = Math.min(currentRating, newRating);
+				mergedRatedSuggestions.put(suggestion, bestRating);
+			}
+		}
+		return new CompletionSuggestions(position, mergedRatedSuggestions);
+	}
+
+	private static ParseResultIF mergeResults(List<AmbiguousParseResult> ambiguousResults, List<ParseResultIF> results) {
+		int position = ambiguousResults.isEmpty() ? results.get(0).getPosition() : ambiguousResults.get(0).getPosition();
+		StringBuilder builder = new StringBuilder("Ambiguous expression:");
+		for (AmbiguousParseResult ambiguousResult : ambiguousResults) {
+			builder.append("\n").append(ambiguousResult.getMessage());
+		}
+		for (ParseResultIF result : results) {
+			if (result instanceof ObjectParseResult) {
+				builder.append("Expression can be evaluated to object of type ").append(((ObjectParseResult) result).getObjectInfo().getDeclaredType());
+			} else if (result instanceof ClassParseResult) {
+				builder.append("Expression can be evaluated to type ").append(((ClassParseResult) result).getType());
+			} else {
+				throw new IllegalArgumentException("Internal error: Expected an object or a class as parse result, but found " + result.getClass().getSimpleName());
+			}
+		}
+		return new AmbiguousParseResult(position, builder.toString());
 	}
 
 	private static ParseError mergeParseErrors(List<ParseError> errors) {
@@ -102,21 +121,6 @@ public class ParseUtils
 		return new ParseError(-1, "Internal error: Failed merging parse errors", ParseError.ErrorType.INTERNAL_ERROR);
 	}
 
-	public static ParseResultIF createParseResult(ParserContext parserContext, ObjectInfo resultInfo, List<TypeToken<?>> expectedResultTypes, int parsedToPosition) {
-		TypeToken<?> resultType = parserContext.getObjectInfoProvider().getType(resultInfo);
-		if (expectedResultTypes != null && expectedResultTypes.stream().noneMatch(expectedResultType -> ParseUtils.isConvertibleTo(resultType, expectedResultType))) {
-			String messagePrefix = "The class '" + resultType + "' is not assignable to ";
-			String messageMiddle = expectedResultTypes.size() > 1
-					? "any of the expected classes "
-					: "the expected class ";
-			String messageSuffix = "'" + expectedResultTypes.stream().map(Object::toString).collect(Collectors.joining("', '")) + "'";
-
-			return new ParseError(parsedToPosition, messagePrefix + messageMiddle + messageSuffix, ParseError.ErrorType.SEMANTIC_ERROR);
-		}
-
-		return new ParseResult(parsedToPosition, resultInfo);
-	}
-
 	/*
 	 * String Comparison
 	 */
@@ -126,11 +130,14 @@ public class ParseUtils
 	private static final int STRING_MATCH_PREFIX_IGNORE_CASE			= 3;
 	private static final int STRING_MATCH_INVERSE_PREFIX				= 4;
 	private static final int STRING_MATCH_INVERSE_PREFIX_IGNORE_CASE	= 5;
-	private static final int STRING_MATCH_MIN_VALUE_OTHER				= 6;
+	private static final int STRING_MATCH_WILDCARD = 6;
+	private static final int STRING_MATCH_MIN_VALUE_OTHER				= 7;
 
 	public static int rateStringMatch(String actual, String expected) {
 		if (actual.equals(expected)) {
 			return STRING_MATCH_FULL;
+		} else if (expected.isEmpty()) {
+			return actual.isEmpty() ? STRING_MATCH_FULL : STRING_MATCH_PREFIX;
 		} else {
 			String actualLowerCase = actual.toLowerCase();
 			String expectedLowerCase = expected.toLowerCase();
@@ -144,8 +151,9 @@ public class ParseUtils
 				return STRING_MATCH_INVERSE_PREFIX;
 			} else if (expectedLowerCase.startsWith(actualLowerCase)) {
 				return STRING_MATCH_INVERSE_PREFIX_IGNORE_CASE;
+			} else if (WildcardPatternGenerator.generate(expected).matcher(actual).matches()) {
+				return STRING_MATCH_WILDCARD;
 			} else {
-				// TODO: Differentiate between Strings
 				return STRING_MATCH_MIN_VALUE_OTHER;
 			}
 		}
@@ -154,15 +162,15 @@ public class ParseUtils
 	/*
 	 * Type Comparison
 	 */
-	static final int TYPE_MATCH_FULL					= 0;
-	static final int TYPE_MATCH_INHERITANCE				= 1;
-	static final int TYPE_MATCH_PRIMITIVE_CONVERSION	= 2;
-	static final int TYPE_MATCH_BOXED					= 3;
-	static final int TYPE_MATCH_BOXED_AND_CONVERSION	= 4;
-	static final int TYPE_MATCH_BOXED_AND_INHERITANCE	= 5;
-	static final int TYPE_MATCH_NONE					= 6;
+	public static final int	TYPE_MATCH_FULL						= 0;
+	public static final int	TYPE_MATCH_INHERITANCE				= 1;
+	public static final int	TYPE_MATCH_PRIMITIVE_CONVERSION		= 2;
+	public static final int	TYPE_MATCH_BOXED					= 3;
+	public static final int	TYPE_MATCH_BOXED_AND_CONVERSION		= 4;
+	public static final int	TYPE_MATCH_BOXED_AND_INHERITANCE	= 5;
+	public static final int	TYPE_MATCH_NONE						= 6;
 
-	static int rateTypeMatch(TypeToken<?> actual, TypeToken<?> expected) {
+	public static int rateTypeMatch(TypeToken<?> actual, TypeToken<?> expected) {
 		if (expected == null) {
 			// no expectations
 			return TYPE_MATCH_FULL;
@@ -220,5 +228,38 @@ public class ParseUtils
 			ratedSuggestions.put(suggestion, rating);
 		}
 		return ratedSuggestions;
+	}
+
+	/**
+	 * Throws an IllegalArgumentException if the parse result is an object parse result when a class parse
+	 * result is expected or vice versa.
+	 *
+	 * Returns true if the parse result is not of the expected type. This is the case for completion suggestions,
+	 * errors, and ambiguous parse results.
+	 */
+	public static boolean propagateParseResult(ParseResultIF parseResult, ParseExpectation expectation) {
+		ParseResultType parseResultType = parseResult.getResultType();
+		ParseResultType expectedEvaluationType = expectation.getEvaluationType();
+		if (expectedEvaluationType == ParseResultType.OBJECT_PARSE_RESULT && parseResultType == ParseResultType.CLASS_PARSE_RESULT) {
+			throw new IllegalStateException("Internal error: Expected an object as parse result, but obtained a class");
+		}
+		if (expectedEvaluationType == ParseResultType.CLASS_PARSE_RESULT && parseResultType == ParseResultType.OBJECT_PARSE_RESULT) {
+			throw new IllegalStateException("Internal error: Expected a class as parse result, but obtained an object");
+		}
+		return parseResultType != expectedEvaluationType;
+	}
+
+	private static class WildcardPatternGenerator
+	{
+		private static String	WILDCARD_STRING;
+		private static Pattern	PATTERN;
+
+		static Pattern generate(String wildcardString) {
+			if (!Objects.equals(wildcardString, WILDCARD_STRING)) {
+				WILDCARD_STRING = wildcardString;
+				PATTERN = RegexUtils.createRegexForWildcardString(wildcardString);
+			}
+			return PATTERN;
+		}
 	}
 }

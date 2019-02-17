@@ -2,23 +2,24 @@ package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
-import com.AMS.jBEAM.javaParser.result.*;
+import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
+import com.AMS.jBEAM.javaParser.result.ObjectParseResult;
+import com.AMS.jBEAM.javaParser.result.ParseError;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
+import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
-import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.ParseUtils;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 
-import java.util.List;
-
-public class ParenthesizedExpressionParser extends AbstractEntityParser
+public class ParenthesizedExpressionParser extends AbstractEntityParser<ObjectInfo>
 {
 	public ParenthesizedExpressionParser(ParserContext parserContext, ObjectInfo thisInfo) {
 		super(parserContext, thisInfo);
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo contextInfo, ParseExpectation expectation) {
 		int position = tokenStream.getPosition();
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		if (characterToken == null || characterToken.getValue().charAt(0) != '(') {
@@ -26,15 +27,14 @@ public class ParenthesizedExpressionParser extends AbstractEntityParser
 			return new ParseError(position, "Expected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
 
-		ParseResultIF expressionParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, currentContextInfo, expectedResultTypes);
+		ParseResultIF expressionParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, contextInfo, expectation);
 
-		// propagate anything except results
-		if (expressionParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
+		if (ParseUtils.propagateParseResult(expressionParseResult, expectation)) {
 			return expressionParseResult;
 		}
 
-		ParseResult parseResult = (ParseResult) expressionParseResult;
-		int parsedToPosition = parseResult.getParsedToPosition();
+		ObjectParseResult parseResult = (ObjectParseResult) expressionParseResult;
+		int parsedToPosition = parseResult.getPosition();
 		ObjectInfo objectInfo = parseResult.getObjectInfo();
 		tokenStream.moveTo(parsedToPosition);
 
@@ -45,9 +45,9 @@ public class ParenthesizedExpressionParser extends AbstractEntityParser
 		}
 		if (characterToken.isContainsCaret()) {
 			log(LogLevel.INFO, "no completion suggestions available at " + tokenStream);
-			return CompletionSuggestions.NONE;
+			return CompletionSuggestions.none(tokenStream.getPosition());
 		}
 
-		return parserContext.getTailParser(false).parse(tokenStream, objectInfo, expectedResultTypes);
+		return parserContext.getObjectTailParser().parse(tokenStream, objectInfo, expectation);
 	}
 }

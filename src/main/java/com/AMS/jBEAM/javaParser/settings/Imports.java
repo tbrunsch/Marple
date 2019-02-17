@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.settings;
 
-import com.AMS.jBEAM.javaParser.utils.ClassInfo;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ClassInfo;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Set;

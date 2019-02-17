@@ -1,4 +1,4 @@
-package com.AMS.jBEAM.javaParser.utils;
+package com.AMS.jBEAM.javaParser.utils.wrappers;
 
 import com.google.common.reflect.TypeToken;
 

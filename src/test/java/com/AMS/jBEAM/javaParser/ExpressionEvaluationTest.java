@@ -764,8 +764,11 @@ public class ExpressionEvaluationTest
 
 		new TestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PUBLIC)
-			.test("java.lang.Math.pow(1.5, 2.5)", Math.pow(1.5, 2.5))
-			.test("java.lang.Math.PI", Math.PI);
+			.importPackage(Package.getPackage("java.lang"))
+			.importPackage(Package.getPackage("java.util"))
+			.test("Math.pow(1.5, 2.5)", Math.pow(1.5, 2.5))
+			.test("Math.PI", Math.PI)
+			.test("Collections.emptyList()", Collections.emptyList());
 
 		new ErrorTestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
@@ -1125,7 +1128,6 @@ public class ExpressionEvaluationTest
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
 			.addVariable(new Variable("myNull", null, true))
-			.printLogEntriesAtError()
 			.test("f(null)",				0)
 			.test("f(myNull)",				0)
 			.test("f(sNull)",				0)

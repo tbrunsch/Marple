@@ -1,9 +1,14 @@
-package com.AMS.jBEAM.javaParser.utils;
+package com.AMS.jBEAM.javaParser.utils.dataProviders;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.parsers.ParseExpectation;
+import com.AMS.jBEAM.javaParser.parsers.ParseExpectationBuilder;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ExecutableInfo;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
+import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.google.common.reflect.TypeToken;
 
 import java.util.*;
@@ -19,15 +24,13 @@ public class ExecutableDataProvider
 		this.parserContext = parserContext;
 	}
 
-	public CompletionSuggestions suggestMethods(String expectedName, ObjectInfo contextInfo, List<TypeToken<?>> expectedTypes, int insertionBegin, final int insertionEnd, boolean staticOnly) {
-		TypeToken<?> contextType = parserContext.getObjectInfoProvider().getType(contextInfo);
-		List<ExecutableInfo> methodInfos = parserContext.getInspectionDataProvider().getMethodInfos(contextType, staticOnly);
+	public CompletionSuggestions suggestMethods(String expectedName, List<ExecutableInfo> methodInfos, ParseExpectation expectation, int insertionBegin, int insertionEnd) {
 		Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 			methodInfos,
 			methodInfo -> new CompletionSuggestionMethod(methodInfo, insertionBegin, insertionEnd),
-			rateMethodByNameAndTypesFunc(expectedName, expectedTypes)
+			rateMethodByNameAndTypesFunc(expectedName, expectation)
 		);
-		return new CompletionSuggestions(ratedSuggestions);
+		return new CompletionSuggestions(insertionBegin, ratedSuggestions);
 	}
 
 	public List<ParseResultIF> parseExecutableArguments(TokenStream tokenStream, List<ExecutableInfo> availableExecutableInfos) {
@@ -64,16 +67,16 @@ public class ExecutableDataProvider
 			/*
 			 * Parse expression for argument i
 			 */
-			ParseResultIF argumentParseResult_i = parserContext.getCompoundExpressionParser().parse(tokenStream, parserContext.getThisInfo(), expectedArgumentTypes_i);
+			ParseExpectation argumentExpectation = ParseExpectationBuilder.expectObject().allowedTypes(expectedArgumentTypes_i).build();
+			ParseResultIF argumentParseResult_i = parserContext.getCompoundExpressionParser().parse(tokenStream, parserContext.getThisInfo(), argumentExpectation);
 			arguments.add(argumentParseResult_i);
 
-			// always stop except for results
-			if (argumentParseResult_i.getResultType() != ParseResultType.PARSE_RESULT) {
+			if (ParseUtils.propagateParseResult(argumentParseResult_i, argumentExpectation)) {
 				return arguments;
 			}
 
-			ParseResult parseResult = ((ParseResult) argumentParseResult_i);
-			int parsedToPosition = parseResult.getParsedToPosition();
+			ObjectParseResult parseResult = ((ObjectParseResult) argumentParseResult_i);
+			int parsedToPosition = parseResult.getPosition();
 			tokenStream.moveTo(parsedToPosition);
 			ObjectInfo argumentInfo = parseResult.getObjectInfo();
 			availableExecutableInfos = availableExecutableInfos.stream().filter(executableInfo -> acceptsArgumentInfo(executableInfo, i, argumentInfo)).collect(Collectors.toList());
@@ -89,7 +92,7 @@ public class ExecutableDataProvider
 			if (characterToken.getValue().charAt(0) == ')') {
 				if (characterToken.isContainsCaret()) {
 					// nothing we can suggest after ')'
-					arguments.add(CompletionSuggestions.NONE);
+					arguments.add(CompletionSuggestions.none(tokenStream.getPosition()));
 				}
 				return arguments;
 			}
@@ -159,23 +162,24 @@ public class ExecutableDataProvider
 	/*
 	 * Suggestions
 	 */
-	private static int rateMethodByName(ExecutableInfo methodInfo, String expectedName) {
+	private int rateMethodByName(ExecutableInfo methodInfo, String expectedName) {
 		return ParseUtils.rateStringMatch(methodInfo.getName(), expectedName);
 	}
 
-	private static int rateMethodByTypes(ExecutableInfo methodInfo, List<TypeToken<?>> expectedTypes) {
+	private int rateMethodByTypes(ExecutableInfo methodInfo, ParseExpectation expectation) {
 		/*
 		 * Even for EvaluationMode.DUCK_TYPING we only consider the declared return type of the method instead
 		 * of the runtime type of the returned object. Otherwise, we would have to invoke the method for code
 		 * completion, possibly causing undesired side effects.
 		 */
-		return	expectedTypes == null	? ParseUtils.TYPE_MATCH_FULL :
-				expectedTypes.isEmpty()	? ParseUtils.TYPE_MATCH_NONE
-										: expectedTypes.stream().mapToInt(expectedType -> ParseUtils.rateTypeMatch(methodInfo.getReturnType(), expectedType)).min().getAsInt();
+		List<TypeToken<?>> allowedTypes = expectation.getAllowedTypes();
+		return	allowedTypes == null	? ParseUtils.TYPE_MATCH_FULL :
+				allowedTypes.isEmpty()	? ParseUtils.TYPE_MATCH_NONE
+										: allowedTypes.stream().mapToInt(allowedType -> ParseUtils.rateTypeMatch(methodInfo.getReturnType(), allowedType)).min().getAsInt();
 	}
 
-	private static ToIntFunction<ExecutableInfo> rateMethodByNameAndTypesFunc(String methodName, List<TypeToken<?>> expectedTypes) {
-		return methodInfo -> (ParseUtils.TYPE_MATCH_NONE + 1)* rateMethodByName(methodInfo, methodName) + rateMethodByTypes(methodInfo, expectedTypes);
+	private ToIntFunction<ExecutableInfo> rateMethodByNameAndTypesFunc(String methodName, ParseExpectation expectation) {
+		return methodInfo -> (ParseUtils.TYPE_MATCH_NONE + 1)* rateMethodByName(methodInfo, methodName) + rateMethodByTypes(methodInfo, expectation);
 	}
 
 	public static String getMethodDisplayText(ExecutableInfo methodInfo) {

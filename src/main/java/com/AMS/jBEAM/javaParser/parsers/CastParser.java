@@ -6,19 +6,18 @@ import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
-import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
+import com.AMS.jBEAM.javaParser.utils.ParseUtils;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 import com.google.common.reflect.TypeToken;
 
-import java.util.List;
-
-public class CastParser extends AbstractEntityParser
+public class CastParser extends AbstractEntityParser<ObjectInfo>
 {
 	public CastParser(ParserContext parserContext, ObjectInfo thisInfo) {
 		super(parserContext, thisInfo);
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo contextInfo, ParseExpectation expectation) {
 		int position = tokenStream.getPosition();
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		if (characterToken == null || characterToken.getValue().charAt(0) != '(') {
@@ -27,22 +26,21 @@ public class CastParser extends AbstractEntityParser
 		}
 		if (characterToken.isContainsCaret()) {
 			log(LogLevel.INFO, "potential cast operator; no completion suggestions available");
-			return CompletionSuggestions.NONE;
+			return CompletionSuggestions.none(tokenStream.getPosition());
 		}
 
 		log(LogLevel.INFO, "parsing class at " + tokenStream);
-		ParseResultIF classParseResult = parserContext.getClassDataProvider().readClass(tokenStream.clone(), false);
-		log(LogLevel.INFO, "parse result: " + classParseResult.getResultType());
+		ParseResultIF classParseResult = parserContext.getTopLevelClassParser().parse(tokenStream, thisInfo, ParseExpectation.CLASS);
+		ParseResultType parseResultType = classParseResult.getResultType();
+		log(LogLevel.INFO, "parse result: " + parseResultType);
 
-		// propagate anything except results
-		if (classParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
+		if (ParseUtils.propagateParseResult(classParseResult, ParseExpectation.CLASS)) {
 			return classParseResult;
 		}
+		ClassParseResult parseResult = (ClassParseResult) classParseResult;
+		int parsedToPosition = parseResult.getPosition();
 
-		ParseResult parseResult = (ParseResult) classParseResult;
-		int parsedToPosition = parseResult.getParsedToPosition();
-		ObjectInfo classInfo = parseResult.getObjectInfo();
-		TypeToken<?> targetType = classInfo.getDeclaredType();
+		TypeToken<?> targetType = parseResult.getType();
 
 		tokenStream.moveTo(parsedToPosition);
 
@@ -56,7 +54,7 @@ public class CastParser extends AbstractEntityParser
 		if (characterToken.isContainsCaret()) {
 			// nothing we can suggest after ')'
 			log(LogLevel.INFO, "no completion suggestions available for position " + tokenStream);
-			return CompletionSuggestions.NONE;
+			return CompletionSuggestions.none(tokenStream.getPosition());
 		}
 
 		return parseAndCast(tokenStream, targetType);
@@ -64,22 +62,20 @@ public class CastParser extends AbstractEntityParser
 
 	private ParseResultIF parseAndCast(TokenStream tokenStream, TypeToken<?> targetType) {
 		log(LogLevel.INFO, "parsing object to cast at " + tokenStream);
-		ParseResultIF objectParseResult = parserContext.getExpressionParser().parse(tokenStream, thisInfo, null);
+		ParseResultIF objectParseResult = parserContext.getExpressionParser().parse(tokenStream, thisInfo, ParseExpectation.OBJECT);
 
-		// propagate anything except results
-		if (objectParseResult.getResultType() != ParseResultType.PARSE_RESULT) {
+		if (ParseUtils.propagateParseResult(objectParseResult, ParseExpectation.OBJECT)) {
 			return objectParseResult;
 		}
-
-		ParseResult parseResult = (ParseResult) objectParseResult;
-		int parsedToPosition = parseResult.getParsedToPosition();
+		ObjectParseResult parseResult = (ObjectParseResult) objectParseResult;
+		int parsedToPosition = parseResult.getPosition();
 		ObjectInfo objectInfo = parseResult.getObjectInfo();
 		tokenStream.moveTo(parsedToPosition);
 
 		try {
 			ObjectInfo castInfo = parserContext.getObjectInfoProvider().getCastInfo(objectInfo, targetType);
 			log(LogLevel.SUCCESS, "successfully casted object");
-			return new ParseResult(parsedToPosition, castInfo);
+			return new ObjectParseResult(parsedToPosition, castInfo);
 		} catch (ClassCastException e) {
 			log(LogLevel.ERROR, "class cast exception: " + e.getMessage());
 			return new ParseError(tokenStream.getPosition(), "Cannot cast expression to '" + targetType + "'", ErrorType.SEMANTIC_ERROR, e);

@@ -1,4 +1,4 @@
-package com.AMS.jBEAM.javaParser.utils;
+package com.AMS.jBEAM.javaParser.utils.wrappers;
 
 import java.util.Objects;
 
@@ -13,7 +13,7 @@ public class ClassInfo
 		this.fullyQualifiedClassName = fullyQualifiedClassName;
 	}
 
-	String getName() {
+	public String getName() {
 		return fullyQualifiedClassName;
 	}
 

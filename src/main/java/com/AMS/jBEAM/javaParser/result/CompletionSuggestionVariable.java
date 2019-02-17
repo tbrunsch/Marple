@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.result;
 
 import com.AMS.jBEAM.javaParser.settings.Variable;
-import com.AMS.jBEAM.javaParser.utils.VariableDataProvider;
+import com.AMS.jBEAM.javaParser.utils.dataProviders.VariableDataProvider;
 
 import java.util.Objects;
 

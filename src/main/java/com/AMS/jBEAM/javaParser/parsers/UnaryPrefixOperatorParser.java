@@ -7,24 +7,23 @@ import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.tokenizer.UnaryOperator;
-import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
-import com.AMS.jBEAM.javaParser.utils.OperatorResultProvider;
-import com.AMS.jBEAM.javaParser.utils.OperatorResultProvider.OperatorException;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
+import com.AMS.jBEAM.javaParser.utils.dataProviders.OperatorResultProvider;
+import com.AMS.jBEAM.javaParser.utils.dataProviders.OperatorResultProvider.OperatorException;
+import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.reflect.TypeToken;
 
-import java.util.List;
 import java.util.Map;
 
-public class UnaryPrefixOperatorParser extends AbstractEntityParser
+public class UnaryPrefixOperatorParser extends AbstractEntityParser<ObjectInfo>
 {
 	private static final Map<UnaryOperator, OperatorImplementationIF>	OPERATOR_IMPLEMENTATIONS = ImmutableMap.<UnaryOperator, OperatorImplementationIF>builder()
-		.put(UnaryOperator.INCREMENT, 	(infoProvider, objectInfo) -> infoProvider.getIncrementInfo	(objectInfo))
-		.put(UnaryOperator.DECREMENT, 	(infoProvider, objectInfo) -> infoProvider.getDecrementInfo	(objectInfo))
-		.put(UnaryOperator.PLUS, 		(infoProvider, objectInfo) -> infoProvider.getPlusInfo		(objectInfo))
-		.put(UnaryOperator.MINUS, 		(infoProvider, objectInfo) -> infoProvider.getMinusInfo		(objectInfo))
-		.put(UnaryOperator.LOGICAL_NOT,	(infoProvider, objectInfo) -> infoProvider.getLogicalNotInfo(objectInfo))
-		.put(UnaryOperator.BITWISE_NOT,	(infoProvider, objectInfo) -> infoProvider.getBitwiseNotInfo(objectInfo))
+		.put(UnaryOperator.INCREMENT, 	OperatorResultProvider::getIncrementInfo)
+		.put(UnaryOperator.DECREMENT, 	OperatorResultProvider::getDecrementInfo)
+		.put(UnaryOperator.PLUS, 		OperatorResultProvider::getPlusInfo)
+		.put(UnaryOperator.MINUS, 		OperatorResultProvider::getMinusInfo)
+		.put(UnaryOperator.LOGICAL_NOT,	OperatorResultProvider::getLogicalNotInfo)
+		.put(UnaryOperator.BITWISE_NOT,	OperatorResultProvider::getBitwiseNotInfo)
 		.build();
 
 	public UnaryPrefixOperatorParser(ParserContext parserContext, ObjectInfo thisInfo) {
@@ -32,27 +31,26 @@ public class UnaryPrefixOperatorParser extends AbstractEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo contextInfo, ParseExpectation expectation) {
 		Token operatorToken = tokenStream.readUnaryOperatorUnchecked();
 		if (operatorToken == null) {
 			log(LogLevel.ERROR, "expected unary operator");
 			return new ParseError(tokenStream.getPosition(), "Expression does not start with an unary operator", ErrorType.WRONG_PARSER);
 		} else if (operatorToken.isContainsCaret()) {
 			log(LogLevel.INFO, "no completion suggestions available");
-			return CompletionSuggestions.NONE;
+			return CompletionSuggestions.none(tokenStream.getPosition());
 		}
 		UnaryOperator operator = UnaryOperator.getValue(operatorToken.getValue());
 
-		ParseResultIF parseResult = parserContext.getExpressionParser().parse(tokenStream, currentContextInfo, expectedResultTypes);
+		ParseResultIF parseResult = parserContext.getExpressionParser().parse(tokenStream, contextInfo, expectation);
 
-		// propagate anything except results
-		if (parseResult.getResultType() != ParseResultType.PARSE_RESULT) {
+		if (ParseUtils.propagateParseResult(parseResult, expectation)) {
 			return parseResult;
 		}
 
-		ParseResult expressionParseResult = (ParseResult) parseResult;
+		ObjectParseResult expressionParseResult = (ObjectParseResult) parseResult;
+		int parsedToPosition = expressionParseResult.getPosition();
 		ObjectInfo expressionInfo = expressionParseResult.getObjectInfo();
-		int parsedToPosition = expressionParseResult.getParsedToPosition();
 
 		ObjectInfo operatorResult;
 		try {
@@ -62,7 +60,7 @@ public class UnaryPrefixOperatorParser extends AbstractEntityParser
 			log(LogLevel.ERROR, "applying operator failed: " + e.getMessage());
 			return new ParseError(parsedToPosition, e.getMessage(), ErrorType.SEMANTIC_ERROR);
 		}
-		return new ParseResult(parsedToPosition, operatorResult);
+		return new ObjectParseResult(parsedToPosition, operatorResult);
 	}
 
 	private ObjectInfo applyOperator(ObjectInfo objectInfo, UnaryOperator operator) throws OperatorException {

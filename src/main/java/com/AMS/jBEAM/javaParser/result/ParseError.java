@@ -35,6 +35,7 @@ public class ParseError implements ParseResultIF
 		return ParseResultType.PARSE_ERROR;
 	}
 
+	@Override
 	public int getPosition() {
 		return position;
 	}

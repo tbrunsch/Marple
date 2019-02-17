@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.result;
 
-import com.AMS.jBEAM.javaParser.utils.ExecutableDataProvider;
-import com.AMS.jBEAM.javaParser.utils.ExecutableInfo;
+import com.AMS.jBEAM.javaParser.utils.dataProviders.ExecutableDataProvider;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ExecutableInfo;
 
 import java.util.Objects;
 import java.util.stream.Collectors;

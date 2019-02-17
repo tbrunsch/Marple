@@ -3,18 +3,19 @@ package com.AMS.jBEAM.javaParser.parsers;
 import com.AMS.jBEAM.common.RegexUtils;
 import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
-import com.AMS.jBEAM.javaParser.result.*;
+import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
+import com.AMS.jBEAM.javaParser.result.ParseError;
+import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.settings.ObjectTreeNodeIF;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
-import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-public class CustomHierarchyParser extends AbstractEntityParser
+public class CustomHierarchyParser extends AbstractEntityParser<ObjectInfo>
 {
 	private static final char		HIERARCHY_BEGIN		= '{';
 	private static final char		HIERARCHY_SEPARATOR	= '#';
@@ -27,9 +28,9 @@ public class CustomHierarchyParser extends AbstractEntityParser
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo contextInfo, ParseExpectation expectation) {
 		if (tokenStream.isCaretAtPosition()) {
-			return CompletionSuggestions.NONE;
+			return CompletionSuggestions.none(tokenStream.getPosition());
 		}
 
 		int position = tokenStream.getPosition();
@@ -41,10 +42,10 @@ public class CustomHierarchyParser extends AbstractEntityParser
 		}
 
 		ObjectTreeNodeIF hierarchyNode = parserContext.getSettings().getCustomHierarchyRoot();
-		return parseHierarchyNode(tokenStream, hierarchyNode, expectedResultTypes);
+		return parseHierarchyNode(tokenStream, hierarchyNode, expectation);
 	}
 
-	private ParseResultIF parseHierarchyNode(TokenStream tokenStream, ObjectTreeNodeIF contextNode, List<TypeToken<?>> expectedResultTypes) {
+	private ParseResultIF parseHierarchyNode(TokenStream tokenStream, ObjectTreeNodeIF contextNode, ParseExpectation expectation) {
 		int startPosition = tokenStream.getPosition();
 		if (tokenStream.isCaretAtPosition()) {
 			log(LogLevel.INFO, "suggesting custom hierarchy nodes for completion...");
@@ -79,11 +80,11 @@ public class CustomHierarchyParser extends AbstractEntityParser
 		char character = characterToken == null ? (char) 0 : characterToken.toString().charAt(0);
 
 		if (character == HIERARCHY_SEPARATOR) {
-			return parseHierarchyNode(tokenStream, childNode, expectedResultTypes);
+			return parseHierarchyNode(tokenStream, childNode, expectation);
 		} else if (character == HIERARCHY_END) {
 			Object userObject = childNode.getUserObject();
 			ObjectInfo userObjectInfo = new ObjectInfo(userObject, null);
-			return parserContext.getTailParser(false).parse(tokenStream, userObjectInfo, expectedResultTypes);
+			return parserContext.getObjectTailParser().parse(tokenStream, userObjectInfo, expectation);
 		}
 
 		log(LogLevel.ERROR, "expected '" + HIERARCHY_SEPARATOR + "' or '" + HIERARCHY_END + "'");

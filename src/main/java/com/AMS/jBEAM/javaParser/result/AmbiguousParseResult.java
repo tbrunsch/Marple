@@ -2,8 +2,8 @@ package com.AMS.jBEAM.javaParser.result;
 
 public class AmbiguousParseResult implements ParseResultIF
 {
-	private final int position;
-	private final String message;
+	private final int		position;
+	private final String	message;
 
 	public AmbiguousParseResult(int position, String message) {
 		this.position = position;
@@ -15,6 +15,7 @@ public class AmbiguousParseResult implements ParseResultIF
 		return ParseResultType.AMBIGUOUS_PARSE_RESULT;
 	}
 
+	@Override
 	public int getPosition() {
 		return position;
 	}

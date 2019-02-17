@@ -31,6 +31,11 @@ class AbstractTestExecutor<T extends AbstractTestExecutor>
 		return (T) this;
 	}
 
+	T importPackage(Package pack) {
+		settingsBuilder.importPackage(pack);
+		return (T) this;
+	}
+
 	T customHierarchyRoot(ObjectTreeNodeIF root) {
 		settingsBuilder.customHierarchyRoot(root);
 		return (T) this;

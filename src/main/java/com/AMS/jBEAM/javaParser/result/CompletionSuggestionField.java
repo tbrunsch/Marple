@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.result;
 
-import com.AMS.jBEAM.javaParser.utils.FieldDataProvider;
-import com.AMS.jBEAM.javaParser.utils.FieldInfo;
+import com.AMS.jBEAM.javaParser.utils.dataProviders.FieldDataProvider;
+import com.AMS.jBEAM.javaParser.utils.wrappers.FieldInfo;
 
 import java.util.Objects;
 

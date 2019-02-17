@@ -2,11 +2,12 @@ package com.AMS.jBEAM.javaParser;
 
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.debug.ParserLogEntry;
+import com.AMS.jBEAM.javaParser.parsers.ParseExpectation;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.javaParser.settings.ParserSettings;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
-import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 
 import java.util.*;
 
@@ -29,29 +30,31 @@ public class JavaParser
 		}
 	};
 
-	public List<CompletionSuggestionIF> suggestCodeCompletion(String javaExpression, ParserSettings settings, int caret, Object thisContext) throws ParseException {
+	public List<CompletionSuggestionIF> suggestCodeCompletion(String javaExpression, ParserSettings settings, int caret, Object valueOfThis) throws ParseException {
 		ParseResultIF parseResult;
 
 		EvaluationMode evaluationMode = settings.getEvaluationModeCodeCompletion();
 		if (evaluationMode == EvaluationMode.STRONGLY_TYPED) {
 			// First iteration without evaluation to avoid side effects when errors occur
-			parseResult = parse(javaExpression, settings, EvaluationMode.NONE, caret, thisContext);
+			parseResult = parse(javaExpression, settings, EvaluationMode.NONE, caret, valueOfThis);
 			if (parseResult.getResultType() == ParseResultType.COMPLETION_SUGGESTIONS) {
 				// Second iteration with evaluation (side effects cannot be avoided)
-				parseResult = parse(javaExpression, settings, evaluationMode, caret, thisContext);
+				parseResult = parse(javaExpression, settings, evaluationMode, caret, valueOfThis);
 			}
 		} else {
-			parseResult = parse(javaExpression, settings, evaluationMode, caret, thisContext);
+			parseResult = parse(javaExpression, settings, evaluationMode, caret, valueOfThis);
 		}
 
 		switch (parseResult.getResultType()) {
-			case PARSE_RESULT: {
-				ParseResult result = (ParseResult) parseResult;
-				if (result.getParsedToPosition() != javaExpression.length()) {
-					throw new ParseException(result.getParsedToPosition(), "Unexpected character");
+			case OBJECT_PARSE_RESULT: {
+				if (parseResult.getPosition() != javaExpression.length()) {
+					throw new ParseException(parseResult.getPosition(), "Unexpected character");
 				} else {
 					throw new IllegalStateException("Internal error: No completions available");
 				}
+			}
+			case CLASS_PARSE_RESULT: {
+				throw new IllegalStateException("Internal error: Class parse results should have been transformed to ParseErrors in AbstractEntityParser.parse()");
 			}
 			case PARSE_ERROR: {
 				ParseError error = (ParseError) parseResult;
@@ -74,29 +77,32 @@ public class JavaParser
 		}
 	}
 
-	public Object evaluate(String javaExpression, ParserSettings settings, Object thisContext) throws ParseException {
+	public Object evaluate(String javaExpression, ParserSettings settings, Object valueOfThis) throws ParseException {
 		ParseResultIF parseResult;
 
 		EvaluationMode evaluationMode = settings.getEvaluationModeCodeEvaluation();
 		if (evaluationMode == EvaluationMode.STRONGLY_TYPED) {
 			// First iteration without evaluation to avoid side effects when errors occur
-			parseResult = parse(javaExpression, settings, EvaluationMode.NONE,-1, thisContext);
-			if (parseResult.getResultType() == ParseResultType.PARSE_RESULT) {
+			parseResult = parse(javaExpression, settings, EvaluationMode.NONE,-1, valueOfThis);
+			if (parseResult.getResultType() == ParseResultType.OBJECT_PARSE_RESULT) {
 				// Second iteration with evaluation (side effects cannot be avoided)
-				parseResult = parse(javaExpression, settings, evaluationMode,-1, thisContext);
+				parseResult = parse(javaExpression, settings, evaluationMode,-1, valueOfThis);
 			}
 		} else {
-			parseResult = parse(javaExpression, settings, evaluationMode,-1, thisContext);
+			parseResult = parse(javaExpression, settings, evaluationMode,-1, valueOfThis);
 		}
 
 		switch (parseResult.getResultType()) {
-			case PARSE_RESULT: {
-				ParseResult result = (ParseResult) parseResult;
-				if (result.getParsedToPosition() != javaExpression.length()) {
-					throw new ParseException(result.getParsedToPosition(), "Unexpected character");
+			case OBJECT_PARSE_RESULT: {
+				ObjectParseResult result = (ObjectParseResult) parseResult;
+				if (result.getPosition() != javaExpression.length()) {
+					throw new ParseException(result.getPosition(), "Unexpected character");
 				} else {
 					return result.getObjectInfo().getObject();
 				}
+			}
+			case CLASS_PARSE_RESULT: {
+				throw new IllegalStateException("Internal error: Class parse results should have been transformed to ParseErrors in AbstractEntityParser.parse()");
 			}
 			case PARSE_ERROR: {
 				ParseError error = (ParseError) parseResult;
@@ -114,12 +120,12 @@ public class JavaParser
 		}
 	}
 
-	private ParseResultIF parse(String javaExpression, ParserSettings settings, EvaluationMode evaluationMode, int caret, Object thisContext) {
-		ObjectInfo thisInfo = new ObjectInfo(thisContext, null);
+	private ParseResultIF parse(String javaExpression, ParserSettings settings, EvaluationMode evaluationMode, int caret, Object valueOfThis) {
+		ObjectInfo thisInfo = new ObjectInfo(valueOfThis, null);
 		ParserContext parserPool  = new ParserContext(thisInfo, settings, evaluationMode);
 		TokenStream tokenStream = new TokenStream(javaExpression, caret);
 		try {
-			return parserPool.getCompoundExpressionParser().parse(tokenStream, thisInfo, null);
+			return parserPool.getCompoundExpressionParser().parse(tokenStream, thisInfo, ParseExpectation.OBJECT);
 		} catch (Exception e) {
 			String exceptionClassName = e.getClass().getSimpleName();
 			String exceptionMessage = e.getMessage();

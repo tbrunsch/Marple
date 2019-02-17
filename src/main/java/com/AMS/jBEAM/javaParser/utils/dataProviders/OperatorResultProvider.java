@@ -1,14 +1,18 @@
-package com.AMS.jBEAM.javaParser.utils;
+package com.AMS.jBEAM.javaParser.utils.dataProviders;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
+import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.javaParser.tokenizer.BinaryOperator;
 import com.AMS.jBEAM.javaParser.tokenizer.UnaryOperator;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
+import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Table;
 import com.google.common.reflect.TypeToken;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +21,8 @@ import java.util.function.Function;
 
 public class OperatorResultProvider
 {
+	public static final int	MAX_BINARY_OPERATOR_PRECEDENCE_LEVEL			= Arrays.stream(BinaryOperator.values()).mapToInt(BinaryOperator::getPrecedenceLevel).max().getAsInt();
+
 	private static final Set<Class<?>>	INTEGRAL_PRIMITIVE_CLASSES			= ImmutableSet.of(char.class, byte.class, short.class, int.class, long.class);
 	private static final Set<Class<?>>	FLOATING_POINT_PRIMITIVE_CLASSES	= ImmutableSet.of(float.class, double.class);
 	private static final Set<Class<?>>	NUMERIC_PRIMITIVE_CLASSES			= ImmutableSet.<Class<?>>builder().addAll(INTEGRAL_PRIMITIVE_CLASSES).addAll(FLOATING_POINT_PRIMITIVE_CLASSES).build();
@@ -157,9 +163,11 @@ public class OperatorResultProvider
 		addLogicalOperator(BinaryOperator.LOGICAL_OR,	(a, b) -> a || b);
 	}
 
-	private final EvaluationMode evaluationMode;
+	private final ParserContext		parserContext;
+	private final EvaluationMode	evaluationMode;
 
-	public OperatorResultProvider(EvaluationMode evaluationMode) {
+	public OperatorResultProvider(ParserContext parserContext, EvaluationMode evaluationMode) {
+		this.parserContext = parserContext;
 		this.evaluationMode = evaluationMode;
 	}
 
@@ -313,7 +321,7 @@ public class OperatorResultProvider
 			throw new OperatorException("Cannot assign values to non-lvalues or final fields");
 		}
 		TypeToken<?> declaredLhsType = lhs.getDeclaredType();
-		TypeToken<?> rhsType = getType(rhs);
+		TypeToken<?> rhsType = parserContext.getObjectInfoProvider().getType(rhs);
 		if (ParseUtils.rateTypeMatch(rhsType, declaredLhsType) == ParseUtils.TYPE_MATCH_NONE) {
 			throw new OperatorException("Cannot assign value of type '" + rhsType + "' to left-hand side. Expected an instance of class '" + declaredLhsType + "'");
 		}
@@ -333,12 +341,8 @@ public class OperatorResultProvider
 	/*
 	 * Utility Methods
 	 */
-	private TypeToken<?> getType(ObjectInfo objectInfo) {
-		return ObjectInfoProvider.getType(objectInfo, evaluationMode);
-	}
-
 	private Class<?> getClass(ObjectInfo objectInfo) {
-		TypeToken<?> type = getType(objectInfo);
+		TypeToken<?> type = parserContext.getObjectInfoProvider().getType(objectInfo);
 		return type == null ? null : type.getRawType();
 	}
 

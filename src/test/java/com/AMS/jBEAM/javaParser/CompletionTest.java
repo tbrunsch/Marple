@@ -413,7 +413,9 @@ public class CompletionTest
 			private int index	= 1;
 			private int size 	= 3;
 
-			private Object getArray(int size) { return new TestClass[size]; }
+			private Object getArray(int size) {
+				return IntStream.range(0, size).mapToObj(i -> new TestClass()).toArray(n -> new TestClass[n]);
+			}
 		}
 
 		Object testInstance = new TestClass();
@@ -554,6 +556,11 @@ public class CompletionTest
 		private static String getString() { return "abc"; }
 		static double getDouble() { return 2.0; }
 		float getFloat() { return 3.0f; }
+
+		static final class InnerClass
+		{
+			static final int test = 13;
+		}
 	}
 
 	@Test
@@ -561,9 +568,11 @@ public class CompletionTest
 		Object testInstance = null;
 		new TestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
-			.test("com.AMS.jBEAM.javaParser.CompletionTest.ClassParserTestClass.",	"f", "l", "getDouble()", "getInt()")
-			.test("String.CASE_I",													"CASE_INSENSITIVE_ORDER")
-			.test("String.val",													"valueOf()");
+			.test("com.AMS.jBEAM.javaParser.CompletionTest.ClassParserTestClass.",				"f", "l", "getDouble()", "getInt()", "InnerClass")
+			.test("com.AMS.jBEAM.javaParser.CompletionTest.ClassParserTestClass.I",			"InnerClass")
+			.test("com.AMS.jBEAM.javaParser.CompletionTest.ClassParserTestClass.InnerClass.",	"test")
+			.test("String.CASE_I",																"CASE_INSENSITIVE_ORDER")
+			.test("String.val",																"valueOf()");
 
 		new TestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PUBLIC)
@@ -696,7 +705,6 @@ public class CompletionTest
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
 			.addVariable(new Variable("myNull", null, true))
-			.printLogEntriesAtError()
 			.test("f(",			"myNull", "sNull")
 			.test("f((String) oN",	"oNull")
 			.test("sNull.le",		"length()");

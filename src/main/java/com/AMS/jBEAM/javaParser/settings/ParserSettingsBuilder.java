@@ -2,7 +2,7 @@ package com.AMS.jBEAM.javaParser.settings;
 
 import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
 import com.AMS.jBEAM.javaParser.debug.ParserNullLogger;
-import com.AMS.jBEAM.javaParser.utils.ClassInfo;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ClassInfo;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 

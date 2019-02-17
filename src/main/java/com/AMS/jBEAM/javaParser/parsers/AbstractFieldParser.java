@@ -2,41 +2,37 @@ package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
-import com.AMS.jBEAM.javaParser.result.*;
+import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
+import com.AMS.jBEAM.javaParser.result.ParseError;
+import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
-import com.AMS.jBEAM.javaParser.utils.FieldInfo;
-import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
-import com.AMS.jBEAM.javaParser.utils.ParseUtils;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.FieldInfo;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 
-import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 
-/**
- * Parses a sub expression starting with a field {@code <field>}, assuming the context
- * <ul>
- *     <li>{@code <context instance>.<field>},</li>
- *     <li>{@code <context class>.<field>}, or</li>
- *     <li>{@code <field>} (like {@code <context instance>.<field>} for {@code <context instance> = this})</li>
- * </ul>
- */
-public class FieldParser extends AbstractEntityParser
+abstract class AbstractFieldParser<C> extends AbstractEntityParser<C>
 {
-	private final boolean staticOnly;
-
-	public FieldParser(ParserContext parserContext, ObjectInfo thisInfo, boolean staticOnly) {
+	AbstractFieldParser(ParserContext parserContext, ObjectInfo thisInfo) {
 		super(parserContext, thisInfo);
-		this.staticOnly = staticOnly;
 	}
 
+	abstract boolean contextCausesNullPointerException(C context);
+	abstract Object getContextObject(C context);
+	abstract List<FieldInfo> getFieldInfos(C context);
+
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
+	ParseResultIF doParse(TokenStream tokenStream, C context, ParseExpectation expectation) {
 		int startPosition = tokenStream.getPosition();
+
+		if (contextCausesNullPointerException(context)) {
+			log(LogLevel.ERROR, "null pointer exception");
+			return new ParseError(startPosition, "Null pointer exception", ErrorType.WRONG_PARSER);
+		}
 
 		if (tokenStream.isCaretAtPosition()) {
 			int insertionEnd;
@@ -47,12 +43,7 @@ public class FieldParser extends AbstractEntityParser
 				insertionEnd = startPosition;
 			}
 			log(LogLevel.INFO, "suggesting fields for completion...");
-			return parserContext.getFieldDataProvider().suggestFields("", currentContextInfo, expectedResultTypes, startPosition, insertionEnd, staticOnly);
-		}
-
-		if (currentContextInfo.getObject() == null && !staticOnly) {
-			log(LogLevel.ERROR, "null pointer exception");
-			return new ParseError(startPosition, "Null pointer exception", ErrorType.WRONG_PARSER);
+			return suggestFields("", context, expectation, startPosition, insertionEnd);
 		}
 
 		Token fieldNameToken;
@@ -68,7 +59,7 @@ public class FieldParser extends AbstractEntityParser
 		// check for code completion
 		if (fieldNameToken.isContainsCaret()) {
 			log(LogLevel.SUCCESS, "suggesting fields matching '" + fieldName + "'");
-			return parserContext.getFieldDataProvider().suggestFields(fieldName, currentContextInfo, expectedResultTypes, startPosition, endPosition, staticOnly);
+			return suggestFields(fieldName, context, expectation, startPosition, endPosition);
 		}
 
 		if (tokenStream.hasMore() && tokenStream.peekCharacter() == '(') {
@@ -77,8 +68,7 @@ public class FieldParser extends AbstractEntityParser
 		}
 
 		// no code completion requested => field name must exist
-		TypeToken<?> currentContextType = parserContext.getObjectInfoProvider().getType(currentContextInfo);
-		List<FieldInfo> fieldInfos = parserContext.getInspectionDataProvider().getFieldInfos(currentContextType, staticOnly);
+		List<FieldInfo> fieldInfos = getFieldInfos(context);
 		Optional<FieldInfo> firstFieldInfoMatch = fieldInfos.stream().filter(fieldInfo -> fieldInfo.getName().equals(fieldName)).findFirst();
 		if (!firstFieldInfoMatch.isPresent()) {
 			log(LogLevel.ERROR, "unknown field '" + fieldName + "'");
@@ -87,8 +77,14 @@ public class FieldParser extends AbstractEntityParser
 		log(LogLevel.SUCCESS, "detected field '" + fieldName + "'");
 
 		FieldInfo fieldInfo = firstFieldInfoMatch.get();
-		ObjectInfo matchingFieldInfo = parserContext.getObjectInfoProvider().getFieldInfo(currentContextInfo, fieldInfo);
+		Object contextObject = getContextObject(context);
+		ObjectInfo matchingFieldInfo = parserContext.getObjectInfoProvider().getFieldValueInfo(contextObject, fieldInfo);
 
-		return parserContext.getTailParser(false).parse(tokenStream, matchingFieldInfo, expectedResultTypes);
+		return parserContext.getObjectTailParser().parse(tokenStream, matchingFieldInfo, expectation);
+	}
+
+	private CompletionSuggestions suggestFields(String expectedName, C context, ParseExpectation expectation, int insertionBegin, int insertionEnd) {
+		Object contextObject = getContextObject(context);
+		return parserContext.getFieldDataProvider().suggestFields(expectedName, contextObject, getFieldInfos(context), expectation, insertionBegin, insertionEnd);
 	}
 }

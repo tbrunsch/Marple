@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.result;
 
-import com.AMS.jBEAM.javaParser.utils.ClassDataProvider;
-import com.AMS.jBEAM.javaParser.utils.ClassInfo;
+import com.AMS.jBEAM.javaParser.utils.dataProviders.ClassDataProvider;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ClassInfo;
 
 import java.util.Objects;
 

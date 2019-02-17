@@ -1,32 +1,30 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.debug.LogLevel;
+import com.AMS.jBEAM.javaParser.result.ParseError;
+import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.settings.Variable;
 import com.AMS.jBEAM.javaParser.settings.VariablePool;
-import com.AMS.jBEAM.javaParser.debug.LogLevel;
-import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
-import com.AMS.jBEAM.javaParser.utils.ObjectInfo;
-import com.AMS.jBEAM.javaParser.utils.ParseUtils;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.AMS.jBEAM.javaParser.result.ParseError.*;
+import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 
-public class VariableParser extends AbstractEntityParser
+public class VariableParser extends AbstractEntityParser<ObjectInfo>
 {
 	public VariableParser(ParserContext parserContext, ObjectInfo thisInfo) {
 		super(parserContext, thisInfo);
 	}
 
 	@Override
-	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo currentContextInfo, List<TypeToken<?>> expectedResultTypes) {
+	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo contextInfo, ParseExpectation expectation) {
 		int startPosition = tokenStream.getPosition();
 
 		if (tokenStream.isCaretAtPosition()) {
@@ -38,7 +36,7 @@ public class VariableParser extends AbstractEntityParser
 				insertionEnd = startPosition;
 			}
 			log(LogLevel.INFO, "suggesting variables for completion...");
-			return parserContext.getVariableDataProvider().suggestVariables("", expectedResultTypes, startPosition, insertionEnd);
+			return parserContext.getVariableDataProvider().suggestVariables("", expectation, startPosition, insertionEnd);
 		}
 
 		Token variableToken;
@@ -54,7 +52,7 @@ public class VariableParser extends AbstractEntityParser
 		// check for code completion
 		if (variableToken.isContainsCaret()) {
 			log(LogLevel.SUCCESS, "suggesting variables matching '" + variableName + "'");
-			return parserContext.getVariableDataProvider().suggestVariables(variableName, expectedResultTypes, startPosition, endPosition);
+			return parserContext.getVariableDataProvider().suggestVariables(variableName, expectation, startPosition, endPosition);
 		}
 
 		if (tokenStream.hasMore() && tokenStream.peekCharacter() == '(') {
@@ -75,6 +73,6 @@ public class VariableParser extends AbstractEntityParser
 		Variable matchingVariable = firstVariableMatch.get();
 		ObjectInfo matchingVariableInfo = parserContext.getObjectInfoProvider().getVariableInfo(matchingVariable);
 
-		return parserContext.getTailParser(false).parse(tokenStream, matchingVariableInfo, expectedResultTypes);
+		return parserContext.getObjectTailParser().parse(tokenStream, matchingVariableInfo, expectation);
 	}
 }
