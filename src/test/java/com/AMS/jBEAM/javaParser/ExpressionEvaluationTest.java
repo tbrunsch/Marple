@@ -718,7 +718,7 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass(5, -2.0, "abc");
-		String className = new ClassInfo(TestClass.class.getName()).getUnqualifiedName();
+		String className = ClassInfo.forNameUnchecked(TestClass.class.getName()).getUnqualifiedName();
 
 		new TestExecutor(testInstance)
 			.test("merge((" + className + ") o1).i",			18)
@@ -757,24 +757,37 @@ public class ExpressionEvaluationTest
 
 	@Test
 	public void testClass() {
-		Object testInstance = null;
 		String className = ClassParserTestClass.class.getName().replace('$', '.');
-		new TestExecutor(testInstance)
+		new TestExecutor(null)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
 			.test(className + ".l",			-17L)
 			.test(className + ".f",			27.5f)
 			.test(className + ".getInt()",		0)
 			.test(className + ".getDouble()",	2.0);
 
-		new TestExecutor(testInstance)
+		new TestExecutor(null)
 			.minimumAccessLevel(AccessLevel.PUBLIC)
-			.importPackage(Package.getPackage("java.lang"))
-			.importPackage(Package.getPackage("java.util"))
+			.importPackage("java.util")
 			.test("Math.pow(1.5, 2.5)", Math.pow(1.5, 2.5))
 			.test("Math.PI", Math.PI)
 			.test("Collections.emptyList()", Collections.emptyList());
 
-		new ErrorTestExecutor(testInstance)
+		String packageName = getClass().getPackage().getName() + ".classesForTest";
+		new TestExecutor(null)
+			.test(packageName + ".dummies.MyClass.VALUE", 				5)
+			.test(packageName + ".dummies.MyOtherClass.OTHER_VALUE", 	7.5)
+			.test(packageName + ".moreDummies.MyDummy.FIRST_DUMMY", 	true);
+
+		new TestExecutor(null)
+			.importPackage(packageName)
+			.test("DummyClass.FIRST_CHARACTER",	'D')
+			.test("MyDummyClass.FIRST_CHARACTER",	'M');
+
+		new TestExecutor(null)
+			.importClass(packageName + ".dummies.YetAnotherDummyClass")
+			.test("YetAnotherDummyClass.NAME",	"YetAnotherDummyClass");
+
+		new ErrorTestExecutor(null)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
 			.test(className + ".i")
 			.test(className + ".b")
@@ -782,6 +795,15 @@ public class ExpressionEvaluationTest
 			.test(className + ".getLong()")
 			.test(className + ".getString()")
 			.test(className + ".getFloat()");
+
+		new ErrorTestExecutor(null)
+			.importPackage(packageName + ".dummies")
+			.test("DummyClass.FIRST_CHARACTER")
+			.test("MyDummy2.FIRST_DUMMY");
+
+		new ErrorTestExecutor(null)
+			.importClass(packageName + ".dummies.MyClass")
+			.test("MyOtherClass.OTHER_VALUE");
 	}
 
 	private static class ConstructorParserTestClass

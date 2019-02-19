@@ -30,7 +30,7 @@ public class ClassDataProvider
 				clazz -> clazz
 				)
 		);
-	private static final List<ClassInfo>		PRIMITIVE_CLASS_INFOS		= PRIMITIVE_CLASSES_BY_NAME.keySet().stream().map(ClassInfo::new).collect(Collectors.toList());
+	private static final List<ClassInfo>		PRIMITIVE_CLASS_INFOS		= PRIMITIVE_CLASSES_BY_NAME.keySet().stream().map(ClassInfo::forNameUnchecked).collect(Collectors.toList());
 
 	private static final ClassPath				CLASS_PATH;
 	private static final Set<String>			TOP_LEVEL_CLASS_NAMES;
@@ -110,7 +110,7 @@ public class ClassDataProvider
 
 	private CompletionSuggestions suggestInnerClasses(String expectedName, Class<?> contextClass, int insertionBegin, int insertionEnd) {
 		List<ClassInfo> classesToConsider = Arrays.stream(contextClass.getDeclaredClasses())
-											.map(clazz -> new ClassInfo(clazz.getName()))
+											.map(clazz -> ClassInfo.forNameUnchecked(clazz.getName()))
 											.collect(Collectors.toList());
 		Map<CompletionSuggestionIF, Integer> ratedSuggestions = ParseUtils.createRatedSuggestions(
 				classesToConsider,
@@ -219,7 +219,7 @@ public class ClassDataProvider
 				if (!className.startsWith(prefix)) {
 					continue;
 				}
-				ClassInfo clazz = new ClassInfo(className);
+				ClassInfo clazz = ClassInfo.forNameUnchecked(className);
 				if (suggestedClasses.contains(clazz)) {
 					continue;
 				}
@@ -259,8 +259,8 @@ public class ClassDataProvider
 			ImmutableMap.Builder<CompletionSuggestionIF, Integer> suggestionBuilder = ImmutableMap.builder();
 
 			Set<ClassInfo> importedClasses = getImportedClasses();
-			Set<Package> importedPackages = getImportedPackages();
-			Set<ClassInfo> topLevelClassesInPackages = getTopLevelClassesInPackages(importedPackages);
+			Set<String> importedPackageNames = getImportedPackageNames();
+			Set<ClassInfo> topLevelClassesInPackages = getTopLevelClassesInPackages(importedPackageNames);
 
 			Set<ClassInfo> suggestedClasses = new HashSet<>();
 
@@ -296,8 +296,8 @@ public class ClassDataProvider
 		}
 
 		private Class<?> getClassImportedViaPackage(String className) {
-			return getImportedPackages().stream()
-					.map(pack -> pack.getName() + "." + className)
+			return getImportedPackageNames().stream()
+					.map(packageName -> packageName + "." + className)
 					.map(this::getClass)
 					.filter(Objects::nonNull)
 					.findFirst().orElse(null);
@@ -322,32 +322,28 @@ public class ClassDataProvider
 			importedClasses.addAll(PRIMITIVE_CLASS_INFOS);
 			Class<?> thisClass = getThisClass();
 			if (thisClass != null) {
-				importedClasses.add(new ClassInfo(thisClass.getName()));
+				importedClasses.add(ClassInfo.forNameUnchecked(thisClass.getName()));
 			}
 			importedClasses.addAll(imports.getImportedClasses());
 			return importedClasses;
 		}
 
-		private Set<Package> getImportedPackages() {
-			Set<Package> importedPackages = new LinkedHashSet<>();
+		private Set<String> getImportedPackageNames() {
+			Set<String> importedPackageNames = new LinkedHashSet<>();
 			Class<?> thisClass = getThisClass();
 			if (thisClass != null) {
-				importedPackages.add(thisClass.getPackage());
+				importedPackageNames.add(thisClass.getPackage().getName());
 			}
-			importedPackages.add(Package.getPackage("java.lang"));
-			importedPackages.addAll(imports.getImportedPackages());
-			return importedPackages;
+			importedPackageNames.add("java.lang");
+			importedPackageNames.addAll(imports.getImportedPackageNames());
+			return importedPackageNames;
 		}
 
-		private Set<ClassInfo> getTopLevelClassesInPackages(Collection<Package> packages) {
+		private Set<ClassInfo> getTopLevelClassesInPackages(Collection<String> packageNames) {
 			Set<ClassInfo> classes = new HashSet<>();
-			for (Package pack : Iterables.filter(packages, Objects::nonNull)) {
-				String packageName = pack.getName();
-				if (packageName == null) {
-					continue;
-				}
+			for (String packageName : Iterables.filter(packageNames, Objects::nonNull)) {
 				for (ClassPath.ClassInfo classInfo : CLASS_PATH.getTopLevelClasses(packageName)) {
-					classes.add(new ClassInfo(classInfo.getName()));
+					classes.add(ClassInfo.forNameUnchecked(classInfo.getName()));
 				}
 			}
 			return classes;

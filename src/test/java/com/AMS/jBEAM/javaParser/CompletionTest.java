@@ -534,7 +534,7 @@ public class CompletionTest
 
 		Object testInstance = new TestClass(5, -2.0);
 		String packageName = TestClass.class.getPackage().getName();
-		String className = new ClassInfo(TestClass.class.getName()).getUnqualifiedName();
+		String className = ClassInfo.forNameUnchecked(TestClass.class.getName()).getUnqualifiedName();
 		new TestExecutor(testInstance)
 			.test("get((" + className + ") o).",								"d", "i", "o")
 			.test("get((" + className + ") this).",							"d", "i", "o")
@@ -568,7 +568,7 @@ public class CompletionTest
 
 	@Test
 	public void testClass() {
-		String className = new ClassInfo(ClassParserTestClass.class.getName()).getQualifiedName().replace('$', '.');
+		String className = ClassInfo.forNameUnchecked(ClassParserTestClass.class.getName()).getQualifiedName().replace('$', '.');
 		new TestExecutor(null)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
 			.test(className + ".",				"f", "l", "getDouble()", "getInt()", "InnerClass")
@@ -577,9 +577,33 @@ public class CompletionTest
 			.test("String.CASE_I",				"CASE_INSENSITIVE_ORDER")
 			.test("String.val",				"valueOf()");
 
+		String packageName = getClass().getPackage().getName() + ".classesForTest";
+		new TestExecutor(null)
+			.test(packageName + ".du",						"dummies", "DummyClass", "MyDummyClass", "moreDummies")
+			.test(packageName + ".Du",						"DummyClass", "dummies", "MyDummyClass", "moreDummies")
+			.test(packageName + ".m",						"moreDummies")
+			.test(packageName + ".dummies.MyC",			"MyClass")
+			.test(packageName + ".dummies.MyO",			"MyOtherClass")
+			.test(packageName + ".dummies.Y",				"YetAnotherDummyClass")
+			.test(packageName + ".moreDummies.MyDummy",	"MyDummy", "MyDummy2")
+			.test(packageName + ".moreDummies.MyDummy2",	"MyDummy2", "MyDummy");
+
+		new TestExecutor(null)
+			.importPackage(packageName)
+			.test("Du", "DummyClass")
+			.test("My", "MyDummyClass");
+
+		new TestExecutor(null)
+			.importPackage(packageName + ".dummies")
+			.test("MyC", "MyClass")
+			.test("Y", "YetAnotherDummyClass");
+
+		new TestExecutor(null)
+			.importClass(packageName + ".moreDummies.MyDummy2")
+			.test("MyDummy", "MyDummy2");
+
 		new TestExecutor(null)
 			.minimumAccessLevel(AccessLevel.PUBLIC)
-			.importPackage(Package.getPackage("java.lang"))
 			.test("Ma",		"Math")
 			.test("Math.p",	"pow(, )", "PI")
 			.test("Math.P",	"PI", "pow(, )");
@@ -771,7 +795,7 @@ public class CompletionTest
 
 		Object testInstance = new TestClass();
 		new TestExecutor(testInstance)
-			.importPackage(Package.getPackage("java.util"))
+			.importPackage("java.util")
 			.test("xY", 	"xYZ", "xyz", "xxYyZz")
 			.test("xYZ",	"xYZ", "xyz", "xxYyZz")
 			.test("ArLi",	"ArrayList");

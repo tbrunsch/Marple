@@ -31,8 +31,13 @@ class AbstractTestExecutor<T extends AbstractTestExecutor>
 		return (T) this;
 	}
 
-	T importPackage(Package pack) {
-		settingsBuilder.importPackage(pack);
+	T importClass(String className) {
+		settingsBuilder.importClass(className);
+		return (T) this;
+	}
+
+	T importPackage(String packageName) {
+		settingsBuilder.importPackage(packageName);
 		return (T) this;
 	}
 

@@ -4,22 +4,53 @@ import java.util.Objects;
 
 public class ClassInfo
 {
-	private final String fullyQualifiedClassName;
+	public static ClassInfo forName(String qualifiedClassName) throws ClassNotFoundException {
+		return new ClassInfo(normalizeClassName(qualifiedClassName));
+	}
 
-	/**
-	 * Inner classes must be separated by "$"
-	 */
-	public ClassInfo(String fullyQualifiedClassName) {
-		this.fullyQualifiedClassName = fullyQualifiedClassName;
+	public static ClassInfo forNameUnchecked(String qualifiedClassName) {
+		return new ClassInfo(qualifiedClassName);
+	}
+
+	private static String normalizeClassName(String qualifiedClassName) throws ClassNotFoundException {
+		if (Class.forName(qualifiedClassName) != null) {
+			return qualifiedClassName;
+		}
+
+		int lastSeparatorPos = -1;
+		while (true) {
+			int nextSeparatorPos = Math.min(qualifiedClassName.indexOf('.', lastSeparatorPos + 1), qualifiedClassName.indexOf('$', lastSeparatorPos + 1));
+			if (nextSeparatorPos < 0) {
+				throw new ClassNotFoundException("Unknown class '" + qualifiedClassName + "'");
+			}
+			Class<?> clazz = Class.forName(qualifiedClassName.substring(0, nextSeparatorPos));
+			if (clazz != null) {
+				String topLevelClassName = qualifiedClassName.substring(0, nextSeparatorPos);
+				String innerClassName = qualifiedClassName.substring(nextSeparatorPos + 1);
+				String normalizedClassName = topLevelClassName + "$" + innerClassName;
+				if (Class.forName(normalizedClassName) == null) {
+					throw new ClassNotFoundException("Unknown class '" + qualifiedClassName + "'");
+				}
+				return normalizedClassName;
+			}
+			lastSeparatorPos = nextSeparatorPos;
+		}
+	}
+
+	// inner classes must be separated by "$"
+	private final String qualifiedClassName;
+
+	private ClassInfo(String qualifiedClassName) {
+		this.qualifiedClassName = qualifiedClassName;
 	}
 
 	public String getQualifiedName() {
-		return fullyQualifiedClassName;
+		return qualifiedClassName;
 	}
 
 	public String getUnqualifiedName() {
-		int lastSeparatorPos = Math.max(fullyQualifiedClassName.lastIndexOf('.'), fullyQualifiedClassName.lastIndexOf('$'));
-		return fullyQualifiedClassName.substring(lastSeparatorPos + 1);
+		int lastSeparatorPos = Math.max(qualifiedClassName.lastIndexOf('.'), qualifiedClassName.lastIndexOf('$'));
+		return qualifiedClassName.substring(lastSeparatorPos + 1);
 	}
 
 	@Override
@@ -27,16 +58,16 @@ public class ClassInfo
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ClassInfo that = (ClassInfo) o;
-		return Objects.equals(fullyQualifiedClassName, that.fullyQualifiedClassName);
+		return Objects.equals(qualifiedClassName, that.qualifiedClassName);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(fullyQualifiedClassName);
+		return Objects.hash(qualifiedClassName);
 	}
 
 	@Override
 	public String toString() {
-		return fullyQualifiedClassName;
+		return qualifiedClassName;
 	}
 }

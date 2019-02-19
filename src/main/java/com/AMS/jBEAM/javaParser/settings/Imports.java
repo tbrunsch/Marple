@@ -8,18 +8,18 @@ import java.util.Set;
 public class Imports
 {
 	private final ImmutableSet<ClassInfo>	importClasses;
-	private final ImmutableSet<Package>		importPackages;
+	private final ImmutableSet<String>		importPackageNames;
 
-	public Imports(ImmutableSet<ClassInfo> importClasses, ImmutableSet<Package> importPackages) {
-		this.importClasses = importClasses;
-		this.importPackages = importPackages;
+	public Imports(Set<ClassInfo> importClasses, Set<String> importPackageNames) {
+		this.importClasses = ImmutableSet.copyOf(importClasses);
+		this.importPackageNames = ImmutableSet.copyOf(importPackageNames);
 	}
 
 	public Set<ClassInfo> getImportedClasses() {
 		return importClasses;
 	}
 
-	public Set<Package> getImportedPackages() {
-		return importPackages;
+	public ImmutableSet<String> getImportedPackageNames() {
+		return importPackageNames;
 	}
 }

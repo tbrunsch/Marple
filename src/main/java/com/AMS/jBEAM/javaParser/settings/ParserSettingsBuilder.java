@@ -9,7 +9,7 @@ import com.google.common.collect.ImmutableSet;
 public class ParserSettingsBuilder
 {
 	private final ImmutableSet.Builder<ClassInfo> 						importClassesBuilder			= ImmutableSet.builder();
-	private final ImmutableSet.Builder<Package> 						importPackagesBuilder			= ImmutableSet.builder();
+	private final ImmutableSet.Builder<String>	 						importPackageNamesBuilder		= ImmutableSet.builder();
 
 	private final ImmutableMap.Builder<String, VariablePool.ValueData>	variablesBuilder 				= ImmutableMap.builder();
 
@@ -22,13 +22,17 @@ public class ParserSettingsBuilder
 
 	private ParserLoggerIF												logger							= new ParserNullLogger();
 
-	public ParserSettingsBuilder importClass(ClassInfo classInfo) {
-		importClassesBuilder.add(classInfo);
+	public ParserSettingsBuilder importClass(String qualifiedClassName) {
+		try {
+			importClassesBuilder.add(ClassInfo.forName(qualifiedClassName));
+		} catch (ClassNotFoundException e) {
+			throw new IllegalArgumentException(e.getMessage());
+		}
 		return this;
 	}
 
-	public ParserSettingsBuilder importPackage(Package pack) {
-		importPackagesBuilder.add(pack);
+	public ParserSettingsBuilder importPackage(String packageName) {
+		importPackageNamesBuilder.add(packageName);
 		return this;
 	}
 
@@ -63,7 +67,7 @@ public class ParserSettingsBuilder
 	}
 
 	public ParserSettings build() {
-		Imports imports = new Imports(importClassesBuilder.build(), importPackagesBuilder.build());
+		Imports imports = new Imports(importClassesBuilder.build(), importPackageNamesBuilder.build());
 		VariablePool variablePool = new VariablePool(variablesBuilder.build());
 		return new ParserSettings(imports, variablePool, minimumAccessLevel, evaluationModeCodeCompletion, evaluationModeCodeEvaluation, customHierarchyRoot, logger);
 	}
