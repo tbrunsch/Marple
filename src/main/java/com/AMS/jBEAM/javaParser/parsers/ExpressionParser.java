@@ -23,7 +23,7 @@ public class ExpressionParser extends AbstractEntityParser<ObjectInfo>
 			parserContext.getObjectMethodParser(),
 			parserContext.getParenthesizedExpressionParser(),
 			parserContext.getCastParser(),
-			parserContext.getTopLevelClassParser(),
+			parserContext.getClassParser(),
 			parserContext.getConstructorParser(),
 			parserContext.getUnaryPrefixOperatorParser(),
 			parserContext.getVariableParser(),

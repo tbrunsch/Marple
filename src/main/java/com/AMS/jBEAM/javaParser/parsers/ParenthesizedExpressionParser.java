@@ -27,7 +27,7 @@ public class ParenthesizedExpressionParser extends AbstractEntityParser<ObjectIn
 			return new ParseError(position, "Expected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
 
-		ParseResultIF expressionParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, contextInfo, expectation);
+		ParseResultIF expressionParseResult = parserContext.getRootParser().parse(tokenStream, contextInfo, expectation);
 
 		if (ParseUtils.propagateParseResult(expressionParseResult, expectation)) {
 			return expressionParseResult;

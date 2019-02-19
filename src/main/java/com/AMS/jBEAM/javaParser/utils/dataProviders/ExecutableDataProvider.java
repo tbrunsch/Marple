@@ -68,7 +68,7 @@ public class ExecutableDataProvider
 			 * Parse expression for argument i
 			 */
 			ParseExpectation argumentExpectation = ParseExpectationBuilder.expectObject().allowedTypes(expectedArgumentTypes_i).build();
-			ParseResultIF argumentParseResult_i = parserContext.getCompoundExpressionParser().parse(tokenStream, parserContext.getThisInfo(), argumentExpectation);
+			ParseResultIF argumentParseResult_i = parserContext.getRootParser().parse(tokenStream, parserContext.getThisInfo(), argumentExpectation);
 			arguments.add(argumentParseResult_i);
 
 			if (ParseUtils.propagateParseResult(argumentParseResult_i, argumentExpectation)) {

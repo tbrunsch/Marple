@@ -40,7 +40,7 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 		}
 
 		log(LogLevel.INFO, "parsing class at " + tokenStream);
-		ParseResultIF classParseResult = parserContext.getTopLevelClassParser().parse(tokenStream, thisInfo, ParseExpectation.CLASS);
+		ParseResultIF classParseResult = parserContext.getClassParser().parse(tokenStream, thisInfo, ParseExpectation.CLASS);
 		ParseResultType parseResultType = classParseResult.getResultType();
 		log(LogLevel.INFO, "parse result: " + parseResultType);
 
@@ -176,7 +176,7 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 		}
 
 		ParseExpectation expectation = ParseExpectationBuilder.expectObject().allowedType(TypeToken.of(int.class)).build();
-		ParseResultIF arraySizeParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, thisInfo, expectation);
+		ParseResultIF arraySizeParseResult = parserContext.getRootParser().parse(tokenStream, thisInfo, expectation);
 
 		if (ParseUtils.propagateParseResult(arraySizeParseResult, expectation)) {
 			return arraySizeParseResult;
@@ -230,7 +230,7 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 			/*
 			 * Parse expression for argument i
 			 */
-			ParseResultIF element = parserContext.getCompoundExpressionParser().parse(tokenStream, parserContext.getThisInfo(), expectation);
+			ParseResultIF element = parserContext.getRootParser().parse(tokenStream, parserContext.getThisInfo(), expectation);
 			elements.add(element);
 
 			if (ParseUtils.propagateParseResult(element, expectation)) {

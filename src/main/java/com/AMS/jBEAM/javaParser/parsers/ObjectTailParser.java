@@ -83,7 +83,7 @@ public class ObjectTailParser extends AbstractTailParser<ObjectInfo>
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals("[");
 
-		ParseResultIF arrayIndexParseResult = parserContext.getCompoundExpressionParser().parse(tokenStream, thisInfo, expectation);
+		ParseResultIF arrayIndexParseResult = parserContext.getRootParser().parse(tokenStream, thisInfo, expectation);
 
 		if (ParseUtils.propagateParseResult(arrayIndexParseResult, expectation)) {
 			return arrayIndexParseResult;

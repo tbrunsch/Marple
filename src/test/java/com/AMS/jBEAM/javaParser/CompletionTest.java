@@ -134,7 +134,7 @@ public class CompletionTest
 			.test("member[xy",			"xy", "xyz", "xyzw", hashCode, "member")
 			.test("member[xyz",		"xyz", "xyzw", "xy", hashCode, "member")
 			.test("member[xyzw",		"xyzw", "xyz", "xy", hashCode, "member")
-			.test("member[m",			"member", "xyz", hashCode, "xyzw", "xy")
+			.test("member[me",			"member", "xyz", hashCode, "xyzw", "xy")
 			.test("member[xyz].",		"member", "xy", "xyz", "xyzw")
 			.test("member[xyzw].x",	"xy", "xyz", "xyzw", "member");
 
@@ -454,8 +454,8 @@ public class CompletionTest
 		Object testInstance = new TestClass3();
 		new TestExecutor(testInstance)
 			.test("getTestClass(",							"intValue", "stringValue")
-			.test("getTestClass(i",						"intValue", "int", "stringValue", hashCode)
-			.test("getTestClass(s",						"stringValue", "short", "intValue")
+			.test("getTestClass(i",						"intValue", "int")
+			.test("getTestClass(s",						"stringValue", "short")
 			.test("getTestClass(intValue,",				"stringValue", toString, "intValue")
 			.test("getTestClass(stringValue,",				"intValue", hashCode, "stringValue")
 			.test("getTestClass(intValue,stringValue).",	"myInt")
@@ -565,8 +565,7 @@ public class CompletionTest
 
 	@Test
 	public void testClass() {
-		Object testInstance = null;
-		new TestExecutor(testInstance)
+		new TestExecutor(null)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
 			.test("com.AMS.jBEAM.javaParser.CompletionTest.ClassParserTestClass.",				"f", "l", "getDouble()", "getInt()", "InnerClass")
 			.test("com.AMS.jBEAM.javaParser.CompletionTest.ClassParserTestClass.I",			"InnerClass")
@@ -574,11 +573,20 @@ public class CompletionTest
 			.test("String.CASE_I",																"CASE_INSENSITIVE_ORDER")
 			.test("String.val",																"valueOf()");
 
-		new TestExecutor(testInstance)
+		new TestExecutor(null)
 			.minimumAccessLevel(AccessLevel.PUBLIC)
-			.test("java.lang.Ma",		"Math")
-			.test("java.lang.Math.p",	"pow(, )", "PI")
-			.test("java.lang.Math.P",	"PI", "pow(, )");
+			.importPackage(Package.getPackage("java.lang"))
+			.test("Ma",		"Math")
+			.test("Math.p",	"pow(, )", "PI")
+			.test("Math.P",	"PI", "pow(, )");
+	}
+
+	@Test
+	public void testPackage() {
+		new TestExecutor(null)
+			.printLogEntriesAtError()
+			.test("java.u", "util")
+			.test("com.A", "AMS");
 	}
 
 	private static class ConstructorParserTestClass
@@ -746,6 +754,24 @@ public class CompletionTest
 			.test("{Productivity Calculation}.data",						"dataItems")
 			.test("{Productivity Calculation#Relative Prod",				"Relative Productivity", "Relative Productivity Potential")
 			.test("{Productivity Calculation#Total Productivity (h)}.val",	"value");
+	}
+
+	@Test
+	public void testWildcardCompletion() {
+		class TestClass
+		{
+			int xxyyzz;
+			int xyz;
+			int xYZ;
+			int xxYyZz;
+		}
+
+		Object testInstance = new TestClass();
+		new TestExecutor(testInstance)
+			.importPackage(Package.getPackage("java.util"))
+			.test("xY", 	"xYZ", "xyz", "xxYyZz")
+			.test("xYZ",	"xYZ", "xyz", "xxYyZz")
+			.test("ArLi",	"ArrayList");
 	}
 
 	/*

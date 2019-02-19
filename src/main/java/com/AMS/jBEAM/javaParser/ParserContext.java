@@ -24,8 +24,8 @@ public class ParserContext
 	private final AbstractEntityParser<ObjectInfo>		castParser;
 	private final AbstractEntityParser<TypeToken<?>>	classFieldParser;
 	private final AbstractEntityParser<TypeToken<?>>	classMethodParser;
+	private final AbstractEntityParser<ObjectInfo>		classParser;
 	private final AbstractEntityParser<TypeToken<?>>	classTailParser;
-	private final AbstractEntityParser<ObjectInfo>		compoundExpressionParser;
 	private final AbstractEntityParser<ObjectInfo>		constructorParser;
 	private final AbstractEntityParser<ObjectInfo>		customHierarchyParser;
 	private final AbstractEntityParser<ObjectInfo> 		expressionParser;
@@ -35,7 +35,7 @@ public class ParserContext
 	private final AbstractEntityParser<ObjectInfo>		objectMethodParser;
 	private final AbstractEntityParser<ObjectInfo>		objectTailParser;
 	private final AbstractEntityParser<ObjectInfo>		parenthesizedExpressionParser;
-	private final AbstractEntityParser<ObjectInfo>		topLevelClassParser;
+	private final AbstractEntityParser<ObjectInfo>		rootParser;
 	private final AbstractEntityParser<ObjectInfo>		unaryPrefixOperatorParser;
 	private final AbstractEntityParser<ObjectInfo>		variableParser;
 
@@ -55,8 +55,8 @@ public class ParserContext
 		castParser						= new CastParser(this, thisInfo);
 		classFieldParser				= new ClassFieldParser(this, thisInfo);
 		classMethodParser				= new ClassMethodParser(this, thisInfo);
+		classParser						= new ClassParser(this, thisInfo);
 		classTailParser					= new ClassTailParser(this, thisInfo);
-		compoundExpressionParser		= createCompoundExpressionParser(OperatorResultProvider.MAX_BINARY_OPERATOR_PRECEDENCE_LEVEL);
 		constructorParser				= new ConstructorParser(this, thisInfo);
 		customHierarchyParser			= new CustomHierarchyParser(this, thisInfo);
 		expressionParser 				= new ExpressionParser(this, thisInfo);
@@ -66,7 +66,7 @@ public class ParserContext
 		objectMethodParser				= new ObjectMethodParser(this, thisInfo);
 		objectTailParser				= new ObjectTailParser(this, thisInfo);
 		parenthesizedExpressionParser	= new ParenthesizedExpressionParser(this, thisInfo);
-		topLevelClassParser				= new TopLevelClassParser(this, thisInfo);
+		rootParser						= createRootParser(OperatorResultProvider.MAX_BINARY_OPERATOR_PRECEDENCE_LEVEL);
 		unaryPrefixOperatorParser		= new UnaryPrefixOperatorParser(this, thisInfo);
 		variableParser					= new VariableParser(this, thisInfo);
 	}
@@ -127,16 +127,18 @@ public class ParserContext
 		return classMethodParser;
 	}
 
+	public AbstractEntityParser<ObjectInfo> getClassParser() { return classParser; }
+
 	public AbstractEntityParser<TypeToken<?>> getClassTailParser() {
 		return classTailParser;
 	}
 
-	public AbstractEntityParser<ObjectInfo> createCompoundExpressionParser(int maxOperatorPrecedenceLevelToConsider) {
-		return new CompoundExpressionParser(this, thisInfo, maxOperatorPrecedenceLevelToConsider);
+	public AbstractEntityParser<ObjectInfo> createRootParser(int maxOperatorPrecedenceLevelToConsider) {
+		return new RootParser(this, thisInfo, maxOperatorPrecedenceLevelToConsider);
 	}
 
-	public AbstractEntityParser<ObjectInfo> getCompoundExpressionParser() {
-		return compoundExpressionParser;
+	public AbstractEntityParser<ObjectInfo> getRootParser() {
+		return rootParser;
 	}
 
 	public AbstractEntityParser<ObjectInfo> getConstructorParser() {
@@ -174,8 +176,6 @@ public class ParserContext
 	public AbstractEntityParser<ObjectInfo> getParenthesizedExpressionParser() {
 		return parenthesizedExpressionParser;
 	}
-
-	public AbstractEntityParser<ObjectInfo> getTopLevelClassParser() { return topLevelClassParser; }
 
 	public AbstractEntityParser<ObjectInfo> getUnaryPrefixOperatorParser() {
 		return unaryPrefixOperatorParser;

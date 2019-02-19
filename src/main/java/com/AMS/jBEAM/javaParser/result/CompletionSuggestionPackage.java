@@ -6,12 +6,12 @@ import java.util.Objects;
 
 public class CompletionSuggestionPackage implements CompletionSuggestionIF
 {
-	private final Package	pack;
+	private final String	packageName;
 	private final int 		insertionBegin;
 	private final int 		insertionEnd;
 
-	public CompletionSuggestionPackage(Package pack, int insertionBegin, int insertionEnd) {
-		this.pack = pack;
+	public CompletionSuggestionPackage(String packageName, int insertionBegin, int insertionEnd) {
+		this.packageName = packageName;
 		this.insertionBegin = insertionBegin;
 		this.insertionEnd = insertionEnd;
 	}
@@ -28,14 +28,13 @@ public class CompletionSuggestionPackage implements CompletionSuggestionIF
 
 	@Override
 	public String getTextToInsert() {
-		String packageName = pack.getName();
 		int lastDotIndex = packageName.lastIndexOf('.');
 		return lastDotIndex < 0 ? packageName : packageName.substring(lastDotIndex + 1);
 	}
 
 	@Override
 	public String toString() {
-		return ClassDataProvider.getPackageDisplayText(pack);
+		return packageName;
 	}
 
 	@Override
@@ -45,11 +44,11 @@ public class CompletionSuggestionPackage implements CompletionSuggestionIF
 		CompletionSuggestionPackage that = (CompletionSuggestionPackage) o;
 		return insertionBegin == that.insertionBegin &&
 				insertionEnd == that.insertionEnd &&
-				Objects.equals(pack, that.pack);
+				Objects.equals(packageName, that.packageName);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(pack, insertionBegin, insertionEnd);
+		return Objects.hash(packageName, insertionBegin, insertionEnd);
 	}
 }

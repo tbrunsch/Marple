@@ -24,7 +24,7 @@ import static com.AMS.jBEAM.javaParser.utils.dataProviders.OperatorResultProvide
  * Parses arbitrary Java expressions including binary operators by using the
  * {@link ExpressionParser} for parsing the operands.
  */
-public class CompoundExpressionParser extends AbstractEntityParser<ObjectInfo>
+public class RootParser extends AbstractEntityParser<ObjectInfo>
 {
 	private static final Map<BinaryOperator, OperatorImplementationIF>	OPERATOR_IMPLEMENTATIONS = ImmutableMap.<BinaryOperator, OperatorImplementationIF>builder()
 		.put(BinaryOperator.MULTIPLY, 					OperatorResultProvider::getMultiplicationInfo)
@@ -51,7 +51,7 @@ public class CompoundExpressionParser extends AbstractEntityParser<ObjectInfo>
 
 	private final int maxOperatorPrecedenceLevelToConsider;
 
-	public CompoundExpressionParser(ParserContext parserContext, ObjectInfo thisInfo, int maxOperatorPrecedenceLevelToConsider) {
+	public RootParser(ParserContext parserContext, ObjectInfo thisInfo, int maxOperatorPrecedenceLevelToConsider) {
 		super(parserContext, thisInfo);
 		this.maxOperatorPrecedenceLevelToConsider = maxOperatorPrecedenceLevelToConsider;
 	}
@@ -99,7 +99,7 @@ public class CompoundExpressionParser extends AbstractEntityParser<ObjectInfo>
 						parserContext = createContextWithoutEvaluation();
 						considerOperatorResult = false;
 					}
-					parseResult = parserContext.createCompoundExpressionParser(operator.getPrecedenceLevel() - 1).parse(tokenStream, contextInfo, ParseExpectation.OBJECT);
+					parseResult = parserContext.createRootParser(operator.getPrecedenceLevel() - 1).parse(tokenStream, contextInfo, ParseExpectation.OBJECT);
 
 					if (ParseUtils.propagateParseResult(parseResult, ParseExpectation.OBJECT)) {
 						return parseResult;
@@ -123,7 +123,7 @@ public class CompoundExpressionParser extends AbstractEntityParser<ObjectInfo>
 					break;
 				}
 				case RIGHT_TO_LEFT: {
-					parseResult = parserContext.createCompoundExpressionParser(operator.getPrecedenceLevel()).parse(tokenStream, contextInfo, ParseExpectation.OBJECT);
+					parseResult = parserContext.createRootParser(operator.getPrecedenceLevel()).parse(tokenStream, contextInfo, ParseExpectation.OBJECT);
 
 					if (ParseUtils.propagateParseResult(parseResult, ParseExpectation.OBJECT)) {
 						return parseResult;

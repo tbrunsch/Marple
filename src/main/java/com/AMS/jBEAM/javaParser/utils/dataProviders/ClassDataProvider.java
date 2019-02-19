@@ -2,7 +2,6 @@ package com.AMS.jBEAM.javaParser.utils.dataProviders;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
 import com.AMS.jBEAM.javaParser.ParserContext;
-import com.AMS.jBEAM.javaParser.parsers.ParseExpectation;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.settings.Imports;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
@@ -12,6 +11,8 @@ import com.AMS.jBEAM.javaParser.utils.wrappers.ClassInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.TypeToken;
 
@@ -31,6 +32,36 @@ public class ClassDataProvider
 		);
 	private static final List<ClassInfo>		PRIMITIVE_CLASS_INFOS		= PRIMITIVE_CLASSES_BY_NAME.keySet().stream().map(ClassInfo::new).collect(Collectors.toList());
 
+	private static final ClassPath				CLASS_PATH;
+	private static final Set<String>			TOP_LEVEL_CLASS_NAMES;
+	private static final Set<String>			PACKAGE_NAMES;
+
+	static {
+		ClassPath classPath;
+		Set<String> topLevelClassNames;
+		try {
+			classPath = ClassPath.from(ClassLoader.getSystemClassLoader());
+			topLevelClassNames = classPath.getTopLevelClasses()
+				.stream()
+				.map(ClassPath.ClassInfo::getName)
+				.collect(Collectors.toSet());
+		} catch (IOException e) {
+			classPath = null;
+			topLevelClassNames = ImmutableSet.of();
+		}
+		CLASS_PATH = classPath;
+
+		TOP_LEVEL_CLASS_NAMES = topLevelClassNames;
+
+		Set<String> packageNames = new LinkedHashSet<>();
+		for (String className : TOP_LEVEL_CLASS_NAMES) {
+			for (String packageName = getParent(className); packageName != null; packageName = getParent(packageName)) {
+				packageNames.add(packageName);
+			}
+		}
+		PACKAGE_NAMES = ImmutableSet.copyOf(packageNames);
+	}
+
 	private final ParserContext	parserContext;
 	private final Imports		imports;
 
@@ -39,8 +70,8 @@ public class ClassDataProvider
 		this.imports = parserContext.getSettings().getImports();
 	}
 
-	public ParseResultIF readTopLevelClass(TokenStream tokenStream) {
-		TopLevelClassReader reader = new TopLevelClassReader(parserContext, imports, tokenStream);
+	public ParseResultIF readClass(TokenStream tokenStream) {
+		ClassReader reader = new ClassReader(parserContext, imports, tokenStream);
 		return reader.read();
 	}
 
@@ -89,7 +120,21 @@ public class ClassDataProvider
 		return new CompletionSuggestions(insertionBegin, ratedSuggestions);
 	}
 
-	private static class TopLevelClassReader
+	private static int lastIndexOfPathSeparator(String path) {
+		return Math.max(path.lastIndexOf('.'), path.lastIndexOf('$'));
+	}
+
+	private static String getParent(String path) {
+		int lastSeparatorIndex = lastIndexOfPathSeparator(path);
+		return lastSeparatorIndex < 0 ? null : path.substring(0, lastSeparatorIndex);
+	}
+
+	private static String getLeaf(String path) {
+		int lastSeparatorIndex = lastIndexOfPathSeparator(path);
+		return path.substring(lastSeparatorIndex + 1);
+	}
+
+	private static class ClassReader
 	{
 		private final ParserContext	parserContext;
 		private final Imports 		imports;
@@ -98,7 +143,7 @@ public class ClassDataProvider
 		private String				packageOrClassName		= "";
 		private int					identifierStartPosition	= -1;
 
-		TopLevelClassReader(ParserContext parserContext, Imports imports, TokenStream tokenStream) {
+		ClassReader(ParserContext parserContext, Imports imports, TokenStream tokenStream) {
 			this.parserContext = parserContext;
 			this.imports = imports;
 			this.tokenStream = tokenStream;
@@ -141,62 +186,73 @@ public class ClassDataProvider
 
 		private static boolean packageExists(String packageName) {
 			String packagePrefix = packageName + ".";
-			try {
-				ImmutableSet<ClassPath.ClassInfo> classes = ClassPath.from(ClassLoader.getSystemClassLoader()).getTopLevelClasses();
-				return classes.stream().anyMatch(classInfo -> classInfo.getName().startsWith(packagePrefix));
-			} catch (IOException e) {
-				return false;
-			}
+			return TOP_LEVEL_CLASS_NAMES.stream().anyMatch(name -> name.startsWith(packagePrefix));
 		}
 
-		private static Map<CompletionSuggestionIF, Integer> suggestClasses(Collection<ClassInfo> classes, Collection<Package> importedPackages, int insertionBegin, int insertionEnd, String classOrPackagePrefix, boolean allowUnqualifiedUsage) {
-
-
-//			TODO: importedPackages auswerten
-
-			String parentLeaf = getParentLeaf(classOrPackagePrefix);
-			String parentPath = getParentPath(classOrPackagePrefix);
-			List<ClassInfo> classesToConsider = new ArrayList<>();
-			if (parentPath != null) {
-				for (ClassInfo classInfo : classes) {
-					if (Objects.equals(getParentPath(classInfo.getName()), parentPath)) {
-						classesToConsider.add(classInfo);
-					}
-				}
-			} else if (allowUnqualifiedUsage) {
-				classesToConsider.addAll(classes);
+		private Map<CompletionSuggestionIF, Integer> suggestUnqualifiedClasses(String classPrefix, int insertionBegin, int insertionEnd, Set<ClassInfo> classes, Set<ClassInfo> suggestedClasses) {
+			if (lastIndexOfPathSeparator(classPrefix) >= 0) {
+				// class is fully qualified, so no match
+				return ImmutableMap.of();
 			}
+			Sets.SetView<ClassInfo> newSuggestedClasses = Sets.difference(classes, suggestedClasses);
+			classes.addAll(newSuggestedClasses);
 			return ParseUtils.createRatedSuggestions(
-				classesToConsider,
+				newSuggestedClasses,
 				classInfo -> new CompletionSuggestionClass(classInfo, insertionBegin, insertionEnd),
-				rateClassByNameFunc(parentLeaf)
+				rateClassByNameFunc(classPrefix)
 			);
 		}
 
-		private static Map<CompletionSuggestionIF, Integer> suggestPackages(Collection<Package> packages, int insertionBegin, int insertionEnd, String classOrPackagePrefix) {
-			String parentLeaf = getParentLeaf(classOrPackagePrefix);
-			String parentPath = getParentPath(classOrPackagePrefix);
-			List<Package> packagesToConsider = new ArrayList<>();
-			for (Package pack : packages) {
-				if (Objects.equals(getParentPath(pack.getName()), parentPath)) {
-					packagesToConsider.add(pack);
-				}
+		private static Map<CompletionSuggestionIF, Integer> suggestQualifiedClasses(String classPrefixWithPackage, int insertionBegin, int insertionEnd, Set<ClassInfo> suggestedClasses) {
+			String packageName = getParent(classPrefixWithPackage);
+			if (packageName == null) {
+				// class is not fully qualified, so no match
+				return ImmutableMap.of();
 			}
+			String prefix = packageName + ".";
+			int lastSeparatorIndex = packageName.length();
+			List<ClassInfo> newSuggestedClasses = new ArrayList<>();
+			for (String className : TOP_LEVEL_CLASS_NAMES) {
+				if (lastIndexOfPathSeparator(className) != lastSeparatorIndex) {
+					continue;
+				}
+				if (!className.startsWith(prefix)) {
+					continue;
+				}
+				ClassInfo clazz = new ClassInfo(className);
+				if (suggestedClasses.contains(clazz)) {
+					continue;
+				}
+				newSuggestedClasses.add(clazz);
+			}
+			suggestedClasses.addAll(newSuggestedClasses);
+			String classPrefix = getLeaf(classPrefixWithPackage);
 			return ParseUtils.createRatedSuggestions(
-				packagesToConsider,
-				pack -> new CompletionSuggestionPackage(pack, insertionBegin, insertionEnd),
-				ratePackageByNameFunc(parentLeaf)
+				newSuggestedClasses,
+				classInfo -> new CompletionSuggestionClass(classInfo, insertionBegin, insertionEnd),
+				rateClassByNameFunc(classPrefix)
 			);
 		}
 
-		private static String getParentPath(String path) {
-			int lastSeparatorIndex = Math.max(path.lastIndexOf('.'), path.lastIndexOf('$'));
-			return lastSeparatorIndex < 0 ? null : path.substring(0, lastSeparatorIndex);
-		}
-
-		private static String getParentLeaf(String path) {
-			int lastDotPosition = path.lastIndexOf('.');
-			return path.substring(lastDotPosition + 1);
+		private static Map<CompletionSuggestionIF, Integer> suggestPackages(String packagePrefix, int insertionBegin, int insertionEnd) {
+			String parentPackage = getParent(packagePrefix);
+			int lastSeparatorIndex = lastIndexOfPathSeparator(packagePrefix);
+			List<String> suggestedPackageNames = new ArrayList<>();
+			for (String packageName : PACKAGE_NAMES) {
+				if (lastIndexOfPathSeparator(packageName) != lastSeparatorIndex) {
+					continue;
+				}
+				if (parentPackage != null && !packageName.startsWith(parentPackage)) {
+					continue;
+				}
+				suggestedPackageNames.add(packageName);
+			}
+			String subpackagePrefix = getLeaf(packagePrefix);
+			return ParseUtils.createRatedSuggestions(
+				suggestedPackageNames,
+				packageName -> new CompletionSuggestionPackage(packageName, insertionBegin, insertionEnd),
+				ratePackageByNameFunc(subpackagePrefix)
+			);
 		}
 
 		private CompletionSuggestions suggestClassesAndPackages(int insertionBegin, int insertionEnd, String classOrPackagePrefix) {
@@ -204,31 +260,14 @@ public class ClassDataProvider
 
 			Set<ClassInfo> importedClasses = getImportedClasses();
 			Set<Package> importedPackages = getImportedPackages();
+			Set<ClassInfo> topLevelClassesInPackages = getTopLevelClassesInPackages(importedPackages);
 
-			// Imported classes
-			suggestionBuilder.putAll(suggestClasses(importedClasses, importedPackages, insertionBegin, insertionEnd, classOrPackagePrefix, true));
+			Set<ClassInfo> suggestedClasses = new HashSet<>();
 
-			// Imported packages
-			suggestionBuilder.putAll(suggestPackages(importedPackages, insertionBegin, insertionEnd, classOrPackagePrefix));
-
-			// Classes that have not been imported
-			Set<ClassPath.ClassInfo> classes;
-			try {
-				classes = ClassPath.from(ClassLoader.getSystemClassLoader()).getTopLevelClasses();
-			} catch (IOException e) {
-				classes = Collections.emptySet();
-			}
-			List<ClassInfo> knownNotImportedClasses = classes.stream()
-					.map(classInfo -> new ClassInfo(classInfo.getName()))
-					.filter(classInfo -> !importedClasses.contains(classInfo))
-					.collect(Collectors.toList());
-			suggestionBuilder.putAll(suggestClasses(knownNotImportedClasses, importedPackages, insertionBegin, insertionEnd, classOrPackagePrefix, false));
-
-			// Packages that have not been imported
-			List<Package> knownNotImportedPackages = Arrays.stream(Package.getPackages())
-					.filter(pack -> !importedPackages.contains(pack))
-					.collect(Collectors.toList());
-			suggestionBuilder.putAll(suggestPackages(knownNotImportedPackages, insertionBegin, insertionEnd, classOrPackagePrefix));
+			suggestionBuilder.putAll(suggestUnqualifiedClasses(classOrPackagePrefix, insertionBegin, insertionEnd, importedClasses, suggestedClasses));
+			suggestionBuilder.putAll(suggestUnqualifiedClasses(classOrPackagePrefix, insertionBegin, insertionBegin, topLevelClassesInPackages, suggestedClasses));
+			suggestionBuilder.putAll(suggestQualifiedClasses(classOrPackagePrefix, insertionBegin, insertionEnd, suggestedClasses));
+			suggestionBuilder.putAll(suggestPackages(classOrPackagePrefix, insertionBegin, insertionEnd));
 
 			return new CompletionSuggestions(insertionBegin, suggestionBuilder.build());
 		}
@@ -299,6 +338,20 @@ public class ClassDataProvider
 			importedPackages.addAll(imports.getImportedPackages());
 			return importedPackages;
 		}
+
+		private Set<ClassInfo> getTopLevelClassesInPackages(Collection<Package> packages) {
+			Set<ClassInfo> classes = new HashSet<>();
+			for (Package pack : Iterables.filter(packages, Objects::nonNull)) {
+				String packageName = pack.getName();
+				if (packageName == null) {
+					continue;
+				}
+				for (ClassPath.ClassInfo classInfo : CLASS_PATH.getTopLevelClasses(packageName)) {
+					classes.add(new ClassInfo(classInfo.getName()));
+				}
+			}
+			return classes;
+		}
 	}
 
 	/*
@@ -320,19 +373,14 @@ public class ClassDataProvider
 	/*
 	 * Package Suggestions
 	 */
-	private static int ratePackageByName(Package pack, String expectedName) {
-		String packageName = pack.getName();
+	private static int ratePackageByName(String packageName, String expectedName) {
 		int lastDotIndex = packageName.lastIndexOf('.');
 		String subpackageName = packageName.substring(lastDotIndex + 1);
 		// transformation required to make it comparable to rated fields and methods
 		return (ParseUtils.TYPE_MATCH_NONE + 1)*ParseUtils.rateStringMatch(subpackageName, expectedName) + ParseUtils.TYPE_MATCH_NONE;
 	}
 
-	private static ToIntFunction<Package> ratePackageByNameFunc(final String packageName) {
-		return pack -> ratePackageByName(pack, packageName);
-	}
-
-	public static String getPackageDisplayText(Package pack) {
-		return pack.getName();
+	private static ToIntFunction<String> ratePackageByNameFunc(String expectedName) {
+		return packageName -> ratePackageByName(packageName, expectedName);
 	}
 }

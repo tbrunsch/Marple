@@ -1,10 +1,9 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.ParserContext;
-import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.ClassParseResult;
-import com.AMS.jBEAM.javaParser.result.ParseError;
 import com.AMS.jBEAM.javaParser.result.ParseResultIF;
+import com.AMS.jBEAM.javaParser.result.ParseResultType;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
@@ -28,11 +27,15 @@ public class ClassTailParser extends AbstractTailParser<TypeToken<?>>
 		AbstractEntityParser<TypeToken<?>> fieldParser = parserContext.getClassFieldParser();
 		AbstractEntityParser<TypeToken<?>> methodParser = parserContext.getClassMethodParser();
 		AbstractEntityParser<TypeToken<?>> innerClassParser = parserContext.getInnerClassParser();
-		return ParseUtils.parse(tokenStream, classType, expectation,
-			fieldParser,
-			methodParser,
-			innerClassParser
-		);
+		if (expectation.getEvaluationType() == ParseResultType.CLASS_PARSE_RESULT) {
+			return innerClassParser.parse(tokenStream, classType, expectation);
+		} else {
+			return ParseUtils.parse(tokenStream, classType, expectation,
+				fieldParser,
+				methodParser,
+				innerClassParser
+			);
+		}
 	}
 
 	@Override
