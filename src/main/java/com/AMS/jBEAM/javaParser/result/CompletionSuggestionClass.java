@@ -29,7 +29,7 @@ public class CompletionSuggestionClass implements CompletionSuggestionIF
 
 	@Override
 	public String getTextToInsert() {
-		return classInfo.getSimpleNameWithoutLeadingDigits();
+		return classInfo.getUnqualifiedName();
 	}
 
 	@Override

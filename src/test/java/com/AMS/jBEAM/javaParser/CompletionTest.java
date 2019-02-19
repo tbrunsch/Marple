@@ -8,6 +8,7 @@ import com.AMS.jBEAM.javaParser.settings.AccessLevel;
 import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.javaParser.settings.ParserSettings;
 import com.AMS.jBEAM.javaParser.settings.Variable;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ClassInfo;
 import com.google.common.base.Joiner;
 import org.junit.Test;
 
@@ -532,12 +533,14 @@ public class CompletionTest
 		}
 
 		Object testInstance = new TestClass(5, -2.0);
+		String packageName = TestClass.class.getPackage().getName();
+		String className = new ClassInfo(TestClass.class.getName()).getUnqualifiedName();
 		new TestExecutor(testInstance)
-			.test("get((TestClass) o).",				"d", "i", "o")
-			.test("get((TestClass) this).",			"d", "i", "o")
-			.test("get(this).",						"d", "i", "o")				// no cast required for this
-			.test("(com.AMS.jBEAM.javaPars",			"javaParser")
-			.test("(com.AMS.jBEAM.javaParser.Co",		"CompletionTest");
+			.test("get((" + className + ") o).",								"d", "i", "o")
+			.test("get((" + className + ") this).",							"d", "i", "o")
+			.test("get(this).",												"d", "i", "o")				// no cast required for this
+			.test("(" + packageName.substring(0, packageName.length() - 2),	packageName.substring(packageName.lastIndexOf('.') + 1))
+			.test("(" + packageName + ".Co",									"CompletionTest");
 
 		new ErrorTestExecutor(testInstance)
 			.test("get(o).", 7, ParseException.class);
@@ -565,13 +568,14 @@ public class CompletionTest
 
 	@Test
 	public void testClass() {
+		String className = new ClassInfo(ClassParserTestClass.class.getName()).getQualifiedName().replace('$', '.');
 		new TestExecutor(null)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
-			.test("com.AMS.jBEAM.javaParser.CompletionTest.ClassParserTestClass.",				"f", "l", "getDouble()", "getInt()", "InnerClass")
-			.test("com.AMS.jBEAM.javaParser.CompletionTest.ClassParserTestClass.I",			"InnerClass")
-			.test("com.AMS.jBEAM.javaParser.CompletionTest.ClassParserTestClass.InnerClass.",	"test")
-			.test("String.CASE_I",																"CASE_INSENSITIVE_ORDER")
-			.test("String.val",																"valueOf()");
+			.test(className + ".",				"f", "l", "getDouble()", "getInt()", "InnerClass")
+			.test(className + ".I",			"InnerClass")
+			.test(className + ".InnerClass.",	"test")
+			.test("String.CASE_I",				"CASE_INSENSITIVE_ORDER")
+			.test("String.val",				"valueOf()");
 
 		new TestExecutor(null)
 			.minimumAccessLevel(AccessLevel.PUBLIC)
@@ -584,7 +588,6 @@ public class CompletionTest
 	@Test
 	public void testPackage() {
 		new TestExecutor(null)
-			.printLogEntriesAtError()
 			.test("java.u", "util")
 			.test("com.A", "AMS");
 	}

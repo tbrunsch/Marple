@@ -152,14 +152,14 @@ public class ClassDataProvider
 		ParseResultIF read() {
 			while (true) {
 				identifierStartPosition = tokenStream.getPosition();
-				Token identifierToken;
+				Token packageOrClassToken;
 				try {
-					identifierToken = tokenStream.readIdentifier();
+					packageOrClassToken = tokenStream.readPackageOrClass();
 				} catch (TokenStream.JavaTokenParseException e) {
 					return new ParseError(identifierStartPosition, "Expected sub-package or class name", ParseError.ErrorType.SYNTAX_ERROR);
 				}
-				packageOrClassName += identifierToken.getValue();
-				if (identifierToken.isContainsCaret()) {
+				packageOrClassName += packageOrClassToken.getValue();
+				if (packageOrClassToken.isContainsCaret()) {
 					return suggestClassesAndPackages(identifierStartPosition, tokenStream.getPosition(), packageOrClassName);
 				}
 
@@ -284,11 +284,11 @@ public class ClassDataProvider
 
 		private Class<?> getClassImportedViaClassName(String className) {
 			for (ClassInfo importedClass : getImportedClasses()) {
-				String simpleName = importedClass.getSimpleNameWithoutLeadingDigits();
-				if (className.equals(simpleName) || className.startsWith(simpleName + ".")) {
+				String unqualifiedName = importedClass.getUnqualifiedName();
+				if (className.equals(unqualifiedName) || className.startsWith(unqualifiedName + ".")) {
 					// Replace simpleName by fully qualified imported name and replace '.' by '$' when separating inner classes
-					String fullyQualifiedClassName = importedClass.getName()
-							+ className.substring(simpleName.length()).replace('.', '$');
+					String fullyQualifiedClassName = importedClass.getQualifiedName()
+							+ className.substring(unqualifiedName.length()).replace('.', '$');
 					return getClass(fullyQualifiedClassName);
 				}
 			}
@@ -359,7 +359,7 @@ public class ClassDataProvider
 	 */
 	private static int rateClassByName(ClassInfo classInfo, String expectedSimpleClassName) {
 		// transformation required to make it comparable to rated fields and methods
-		return (ParseUtils.TYPE_MATCH_NONE + 1)*ParseUtils.rateStringMatch(classInfo.getSimpleNameWithoutLeadingDigits(), expectedSimpleClassName) + ParseUtils.TYPE_MATCH_NONE;
+		return (ParseUtils.TYPE_MATCH_NONE + 1)*ParseUtils.rateStringMatch(classInfo.getUnqualifiedName(), expectedSimpleClassName) + ParseUtils.TYPE_MATCH_NONE;
 	}
 
 	private static ToIntFunction<ClassInfo> rateClassByNameFunc(final String simpleClassName) {
@@ -367,7 +367,7 @@ public class ClassDataProvider
 	}
 
 	public static String getClassDisplayText(ClassInfo classInfo) {
-		return classInfo.getName();
+		return classInfo.getQualifiedName();
 	}
 
 	/*

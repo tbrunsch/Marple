@@ -13,17 +13,13 @@ public class ClassInfo
 		this.fullyQualifiedClassName = fullyQualifiedClassName;
 	}
 
-	public String getName() {
+	public String getQualifiedName() {
 		return fullyQualifiedClassName;
 	}
 
-	/**
-	 * Simple name of inner classes might start with digits. This method returns the
-	 * simple name without leading digits.
-	 */
-	public String getSimpleNameWithoutLeadingDigits() {
+	public String getUnqualifiedName() {
 		int lastSeparatorPos = Math.max(fullyQualifiedClassName.lastIndexOf('.'), fullyQualifiedClassName.lastIndexOf('$'));
-		return fullyQualifiedClassName.substring(lastSeparatorPos + 1).replaceFirst("^\\d*(.*)$", "$1");
+		return fullyQualifiedClassName.substring(lastSeparatorPos + 1);
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package com.AMS.jBEAM.javaParser;
 
 import com.AMS.jBEAM.javaParser.debug.*;
 import com.AMS.jBEAM.javaParser.settings.*;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ClassInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.junit.Test;
@@ -717,23 +718,25 @@ public class ExpressionEvaluationTest
 		}
 
 		Object testInstance = new TestClass(5, -2.0, "abc");
+		String className = new ClassInfo(TestClass.class.getName()).getUnqualifiedName();
+
 		new TestExecutor(testInstance)
-			.test("merge((TestClass) o1).i",			18)
-			.test("merge((TestClass) o1).d",			-4.5)
-			.test("((TestClass) o1).merge(this).i",	18)
-			.test("((TestClass) o1).merge(this).d",	4.5)
-			.test("getId(o1)",							1)
-			.test("getId((TestClass) o1)",				3)
-			.test("getId(o2)",							1)
-			.test("getId((java.lang.String) o2)",		2)
-			.test("getId((String) o2)",				2)
-			.test("(int) i",							5)
-			.test("(double) d",						-2.0)
-			.test("(int) d",							-2)
-			.test("(int) 2.3",							2);
+			.test("merge((" + className + ") o1).i",			18)
+			.test("merge((" + className + ") o1).d",			-4.5)
+			.test("((" + className + ") o1).merge(this).i",	18)
+			.test("((" + className + ") o1).merge(this).d",	4.5)
+			.test("getId(o1)",									1)
+			.test("getId((" + className + ") o1)",				3)
+			.test("getId(o2)",									1)
+			.test("getId((java.lang.String) o2)",				2)
+			.test("getId((String) o2)",						2)
+			.test("(int) i",									5)
+			.test("(double) d",								-2.0)
+			.test("(int) d",									-2)
+			.test("(int) 2.3",									2);
 
 		new ErrorTestExecutor(testInstance)
-			.test("(TestClass) o2")
+			.test("(" + className + ") o2")
 			.test("(String) o1");
 	}
 
@@ -755,12 +758,13 @@ public class ExpressionEvaluationTest
 	@Test
 	public void testClass() {
 		Object testInstance = null;
+		String className = ClassParserTestClass.class.getName().replace('$', '.');
 		new TestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.l",				-17L)
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.f",				27.5f)
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getInt()",		0)
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getDouble()",	2.0);
+			.test(className + ".l",			-17L)
+			.test(className + ".f",			27.5f)
+			.test(className + ".getInt()",		0)
+			.test(className + ".getDouble()",	2.0);
 
 		new TestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PUBLIC)
@@ -772,12 +776,12 @@ public class ExpressionEvaluationTest
 
 		new ErrorTestExecutor(testInstance)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.i")
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.b")
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.d")
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getLong()")
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getString()")
-			.test("com.AMS.jBEAM.javaParser.ExpressionEvaluationTest.ClassParserTestClass.getFloat()");
+			.test(className + ".i")
+			.test(className + ".b")
+			.test(className + ".d")
+			.test(className + ".getLong()")
+			.test(className + ".getString()")
+			.test(className + ".getFloat()");
 	}
 
 	private static class ConstructorParserTestClass
@@ -1051,12 +1055,12 @@ public class ExpressionEvaluationTest
 			List<Integer>		listInt			= Lists.newArrayList(5);
 			List<String>		listString		= Lists.newArrayList("6");
 
-			Collection<Integer> testCollInt(Collection<Integer> c) { return c; }
-			Collection<String> testCollString(Collection<String> c) { return c; }
-			List<Integer> testListInt(List<Integer> l) { return l; }
-			List<String> testListString(List<String> l) { return l; }
-			Set<Integer> testSetInt(Set<Integer> s) { return s; }
-			Set<String> testSetString(Set<String> s) { return s; }
+			Collection<Integer>	testCollInt(Collection<Integer> c) { return c; }
+			Collection<String>	testCollString(Collection<String> c) { return c; }
+			List<Integer>		testListInt(List<Integer> l) { return l; }
+			List<String>		testListString(List<String> l) { return l; }
+			Set<Integer>		testSetInt(Set<Integer> s) { return s; }
+			Set<String>			testSetString(Set<String> s) { return s; }
 		}
 
 		TestClass testInstance = new TestClass();
