@@ -9,8 +9,7 @@ import org.junit.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ExpressionEvaluationTest
 {
@@ -787,6 +786,15 @@ public class ExpressionEvaluationTest
 			.importClass(packageName + ".dummies.YetAnotherDummyClass")
 			.test("YetAnotherDummyClass.NAME",	"YetAnotherDummyClass");
 
+		new TestExecutor(null)
+			.importClass(packageName + ".DummyClass.InternalClassStage1")
+			.test("InternalClassStage1.value",					5.0)
+			.test("InternalClassStage1.InternalClassStage2.i",	3);
+
+		new TestExecutor(null)
+			.importClass(packageName + ".DummyClass.InternalClassStage1.InternalClassStage2")
+			.test("InternalClassStage2.i",	3);
+
 		new ErrorTestExecutor(null)
 			.minimumAccessLevel(AccessLevel.PACKAGE_PRIVATE)
 			.test(className + ".i")
@@ -1288,7 +1296,7 @@ public class ExpressionEvaluationTest
 				return Objects.equals(expectedValue, actualValue);
 			} catch (ParseException e) {
 				if (executeAssertions) {
-					assertTrue("Exception during expression evaluation: " + e.getMessage(), false);
+					fail("Exception during expression evaluation: " + e.getMessage());
 				}
 				return false;
 			}
@@ -1316,7 +1324,7 @@ public class ExpressionEvaluationTest
 			JavaParser parser = new JavaParser();
 			try {
 				parser.evaluate(javaExpression, settings, testInstance);
-				assertTrue("Expression: " + javaExpression + " - Expected an exception", false);
+				fail("Expression: " + javaExpression + " - Expected an exception");
 			} catch (ParseException | IllegalStateException e) {
 				assertTrue("Expression: " + javaExpression + " - Expected exception of class '" + expectedExceptionClass.getSimpleName() + "', but caught an exception of class '" + e.getClass().getSimpleName() + "'", expectedExceptionClass.isInstance(e));
 			}

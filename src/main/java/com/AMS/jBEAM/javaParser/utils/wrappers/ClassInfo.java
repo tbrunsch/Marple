@@ -12,22 +12,34 @@ public class ClassInfo
 		return new ClassInfo(qualifiedClassName);
 	}
 
+	private static Class<?> getClassUnchecked(String qualifiedClassName) {
+		try {
+			return Class.forName(qualifiedClassName);
+		} catch (ClassNotFoundException e) {
+			return null;
+		}
+	}
+
 	private static String normalizeClassName(String qualifiedClassName) throws ClassNotFoundException {
-		if (Class.forName(qualifiedClassName) != null) {
+		if (getClassUnchecked(qualifiedClassName) != null) {
 			return qualifiedClassName;
 		}
 
 		int lastSeparatorPos = -1;
 		while (true) {
-			int nextSeparatorPos = Math.min(qualifiedClassName.indexOf('.', lastSeparatorPos + 1), qualifiedClassName.indexOf('$', lastSeparatorPos + 1));
+			int nextDotPos = qualifiedClassName.indexOf('.', lastSeparatorPos + 1);
+			int nextDollarPos = qualifiedClassName.indexOf('$', lastSeparatorPos + 1);
+			int nextSeparatorPos =	nextDotPos < 0		? nextDollarPos :
+									nextDollarPos < 0	? nextDotPos
+														: Math.min(nextDotPos, nextDollarPos);
 			if (nextSeparatorPos < 0) {
 				throw new ClassNotFoundException("Unknown class '" + qualifiedClassName + "'");
 			}
-			Class<?> clazz = Class.forName(qualifiedClassName.substring(0, nextSeparatorPos));
+			Class<?> clazz = getClassUnchecked(qualifiedClassName.substring(0, nextSeparatorPos));
 			if (clazz != null) {
 				String topLevelClassName = qualifiedClassName.substring(0, nextSeparatorPos);
-				String innerClassName = qualifiedClassName.substring(nextSeparatorPos + 1);
-				String normalizedClassName = topLevelClassName + "$" + innerClassName;
+				String remainderClassName = qualifiedClassName.substring(nextSeparatorPos).replace('.', '$');
+				String normalizedClassName = topLevelClassName + remainderClassName;
 				if (Class.forName(normalizedClassName) == null) {
 					throw new ClassNotFoundException("Unknown class '" + qualifiedClassName + "'");
 				}
@@ -37,7 +49,7 @@ public class ClassInfo
 		}
 	}
 
-	// inner classes must be separated by "$"
+	// inner classes must be separated by "$" from their declaring classes
 	private final String qualifiedClassName;
 
 	private ClassInfo(String qualifiedClassName) {

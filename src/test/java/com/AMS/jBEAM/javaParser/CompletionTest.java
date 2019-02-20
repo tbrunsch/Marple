@@ -18,8 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class CompletionTest
 {
@@ -603,6 +602,18 @@ public class CompletionTest
 			.test("MyDummy", "MyDummy2");
 
 		new TestExecutor(null)
+			.importClass(packageName + ".DummyClass.InternalClassStage1")
+			.test("InternalC",									"InternalClassStage1")
+			.test("InternalClassStage1.v",						"value")
+			.test("InternalClassStage1.i",						"InternalClassStage2")
+			.test("InternalClassStage1.InternalClassStage2.",	"i");
+
+		new TestExecutor(null)
+				.importClass(packageName + ".DummyClass.InternalClassStage1.InternalClassStage2")
+				.test("InternalC",				"InternalClassStage2")
+				.test("InternalClassStage2.",	"i");
+
+		new TestExecutor(null)
 			.minimumAccessLevel(AccessLevel.PUBLIC)
 			.test("Ma",		"Math")
 			.test("Math.p",	"pow(, )", "PI")
@@ -841,7 +852,7 @@ public class CompletionTest
 				suggestions = extractSuggestions(parser.suggestCodeCompletion(javaExpression, settings, caret, testInstance));
 			} catch (ParseException e) {
 				if (executeAssertions) {
-					assertTrue("Exception during code completion: " + e.getMessage(), false);
+					fail("Exception during code completion: " + e.getMessage());
 				}
 				return false;
 			}
@@ -894,7 +905,7 @@ public class CompletionTest
 			JavaParser parser = new JavaParser();
 			try {
 				parser.suggestCodeCompletion(javaExpression, settings, caret, testInstance);
-				assertTrue("Expression: " + javaExpression + " - Expected an exception", false);
+				fail("Expression: " + javaExpression + " - Expected an exception");
 			} catch (ParseException | IllegalStateException e) {
 				assertTrue("Expression: " + javaExpression + " - Expected exception of class '" + expectedExceptionClass.getSimpleName() + "', but caught an exception of class '" + e.getClass().getSimpleName() + "'", expectedExceptionClass.isInstance(e));
 			}
