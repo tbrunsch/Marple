@@ -6,6 +6,7 @@ import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.settings.Imports;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
+import com.AMS.jBEAM.javaParser.utils.ClassUtils;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ClassInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
@@ -26,7 +27,7 @@ public class ClassDataProvider
 {
 	private static final Map<String, Class<?>>	PRIMITIVE_CLASSES_BY_NAME	= ReflectionUtils.getPrimitiveClasses().stream()
 		.collect(Collectors.toMap(
-				clazz -> clazz.getName(),
+				Class::getName,
 				clazz -> clazz
 				)
 		);
@@ -55,7 +56,7 @@ public class ClassDataProvider
 
 		Set<String> packageNames = new LinkedHashSet<>();
 		for (String className : TOP_LEVEL_CLASS_NAMES) {
-			for (String packageName = getParent(className); packageName != null; packageName = getParent(packageName)) {
+			for (String packageName = ClassUtils.getParentPath(className); packageName != null; packageName = ClassUtils.getParentPath(packageName)) {
 				packageNames.add(packageName);
 			}
 		}
@@ -120,20 +121,6 @@ public class ClassDataProvider
 		return new CompletionSuggestions(insertionBegin, ratedSuggestions);
 	}
 
-	private static int lastIndexOfPathSeparator(String path) {
-		return Math.max(path.lastIndexOf('.'), path.lastIndexOf('$'));
-	}
-
-	private static String getParent(String path) {
-		int lastSeparatorIndex = lastIndexOfPathSeparator(path);
-		return lastSeparatorIndex < 0 ? null : path.substring(0, lastSeparatorIndex);
-	}
-
-	private static String getLeaf(String path) {
-		int lastSeparatorIndex = lastIndexOfPathSeparator(path);
-		return path.substring(lastSeparatorIndex + 1);
-	}
-
 	private static class ClassReader
 	{
 		private final ParserContext	parserContext;
@@ -190,7 +177,7 @@ public class ClassDataProvider
 		}
 
 		private Map<CompletionSuggestionIF, Integer> suggestUnqualifiedClasses(String classPrefix, int insertionBegin, int insertionEnd, Set<ClassInfo> classes, Set<ClassInfo> suggestedClasses) {
-			if (lastIndexOfPathSeparator(classPrefix) >= 0) {
+			if (ClassUtils.lastIndexOfPathSeparator(classPrefix) >= 0) {
 				// class is fully qualified, so no match
 				return ImmutableMap.of();
 			}
@@ -204,7 +191,7 @@ public class ClassDataProvider
 		}
 
 		private static Map<CompletionSuggestionIF, Integer> suggestQualifiedClasses(String classPrefixWithPackage, int insertionBegin, int insertionEnd, Set<ClassInfo> suggestedClasses) {
-			String packageName = getParent(classPrefixWithPackage);
+			String packageName = ClassUtils.getParentPath(classPrefixWithPackage);
 			if (packageName == null) {
 				// class is not fully qualified, so no match
 				return ImmutableMap.of();
@@ -213,7 +200,7 @@ public class ClassDataProvider
 			int lastSeparatorIndex = packageName.length();
 			List<ClassInfo> newSuggestedClasses = new ArrayList<>();
 			for (String className : TOP_LEVEL_CLASS_NAMES) {
-				if (lastIndexOfPathSeparator(className) != lastSeparatorIndex) {
+				if (ClassUtils.lastIndexOfPathSeparator(className) != lastSeparatorIndex) {
 					continue;
 				}
 				if (!className.startsWith(prefix)) {
@@ -226,7 +213,7 @@ public class ClassDataProvider
 				newSuggestedClasses.add(clazz);
 			}
 			suggestedClasses.addAll(newSuggestedClasses);
-			String classPrefix = getLeaf(classPrefixWithPackage);
+			String classPrefix = ClassUtils.getLeafOfPath(classPrefixWithPackage);
 			return ParseUtils.createRatedSuggestions(
 				newSuggestedClasses,
 				classInfo -> new CompletionSuggestionClass(classInfo, insertionBegin, insertionEnd),
@@ -235,11 +222,11 @@ public class ClassDataProvider
 		}
 
 		private static Map<CompletionSuggestionIF, Integer> suggestPackages(String packagePrefix, int insertionBegin, int insertionEnd) {
-			String parentPackage = getParent(packagePrefix);
-			int lastSeparatorIndex = lastIndexOfPathSeparator(packagePrefix);
+			String parentPackage = ClassUtils.getParentPath(packagePrefix);
+			int lastSeparatorIndex = ClassUtils.lastIndexOfPathSeparator(packagePrefix);
 			List<String> suggestedPackageNames = new ArrayList<>();
 			for (String packageName : PACKAGE_NAMES) {
-				if (lastIndexOfPathSeparator(packageName) != lastSeparatorIndex) {
+				if (ClassUtils.lastIndexOfPathSeparator(packageName) != lastSeparatorIndex) {
 					continue;
 				}
 				if (parentPackage != null && !packageName.startsWith(parentPackage)) {
@@ -247,7 +234,7 @@ public class ClassDataProvider
 				}
 				suggestedPackageNames.add(packageName);
 			}
-			String subpackagePrefix = getLeaf(packagePrefix);
+			String subpackagePrefix = ClassUtils.getLeafOfPath(packagePrefix);
 			return ParseUtils.createRatedSuggestions(
 				suggestedPackageNames,
 				packageName -> new CompletionSuggestionPackage(packageName, insertionBegin, insertionEnd),
@@ -277,7 +264,7 @@ public class ClassDataProvider
 						PRIMITIVE_CLASSES_BY_NAME.get(className),
 						getClassImportedViaClassName(className),
 						getClassImportedViaPackage(className),
-						getClass(className)
+						ClassUtils.getClassUnchecked(className)
 					).filter(Objects::nonNull)
 					.findFirst().orElse(null);
 		}
@@ -287,9 +274,9 @@ public class ClassDataProvider
 				String unqualifiedName = importedClass.getUnqualifiedName();
 				if (className.equals(unqualifiedName) || className.startsWith(unqualifiedName + ".")) {
 					// Replace simpleName by fully qualified imported name and replace '.' by '$' when separating inner classes
-					String fullyQualifiedClassName = importedClass.getQualifiedName()
+					String fullyQualifiedClassName = importedClass.getNormalizedName()
 							+ className.substring(unqualifiedName.length()).replace('.', '$');
-					return getClass(fullyQualifiedClassName);
+					return ClassUtils.getClassUnchecked(fullyQualifiedClassName);
 				}
 			}
 			return null;
@@ -298,17 +285,9 @@ public class ClassDataProvider
 		private Class<?> getClassImportedViaPackage(String className) {
 			return getImportedPackageNames().stream()
 					.map(packageName -> packageName + "." + className)
-					.map(this::getClass)
+					.map(ClassUtils::getClassUnchecked)
 					.filter(Objects::nonNull)
 					.findFirst().orElse(null);
-		}
-
-		private Class<?> getClass(String className) {
-			try {
-				return Class.forName(className);
-			} catch (ClassNotFoundException | NoClassDefFoundError e) {
-				return null;
-			}
 		}
 
 		private Class<?> getThisClass() {
@@ -363,7 +342,7 @@ public class ClassDataProvider
 	}
 
 	public static String getClassDisplayText(ClassInfo classInfo) {
-		return classInfo.getQualifiedName();
+		return classInfo.getNormalizedName();
 	}
 
 	/*
