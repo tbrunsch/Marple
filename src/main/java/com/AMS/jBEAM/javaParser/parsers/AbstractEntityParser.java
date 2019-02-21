@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.debug.ParserLogEntry;
 import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
@@ -10,14 +10,14 @@ import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 
 public abstract class AbstractEntityParser<C>
 {
-	final ParserContext				parserContext;
+	final ParserToolbox				parserToolbox;
 	final ObjectInfo				thisInfo;
 	private final ParserLoggerIF	logger;
 
-	AbstractEntityParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		this.parserContext = parserContext;
+	AbstractEntityParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		this.parserToolbox = parserToolbox;
 		this.thisInfo = thisInfo;
-		logger = parserContext.getSettings().getLogger();
+		logger = parserToolbox.getSettings().getLogger();
 	}
 
 	abstract ParseResultIF doParse(TokenStream tokenStream, C context, ParseExpectation expectation);

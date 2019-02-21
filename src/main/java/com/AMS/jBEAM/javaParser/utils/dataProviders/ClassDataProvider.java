@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.utils.dataProviders;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.settings.Imports;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
@@ -63,16 +63,16 @@ public class ClassDataProvider
 		PACKAGE_NAMES = ImmutableSet.copyOf(packageNames);
 	}
 
-	private final ParserContext	parserContext;
+	private final ParserToolbox parserToolbox;
 	private final Imports		imports;
 
-	public ClassDataProvider(ParserContext parserContext) {
-		this.parserContext = parserContext;
-		this.imports = parserContext.getSettings().getImports();
+	public ClassDataProvider(ParserToolbox parserToolbox) {
+		this.parserToolbox = parserToolbox;
+		this.imports = parserToolbox.getSettings().getImports();
 	}
 
 	public ParseResultIF readClass(TokenStream tokenStream) {
-		ClassReader reader = new ClassReader(parserContext, imports, tokenStream);
+		ClassReader reader = new ClassReader(parserToolbox, imports, tokenStream);
 		return reader.read();
 	}
 
@@ -123,15 +123,15 @@ public class ClassDataProvider
 
 	private static class ClassReader
 	{
-		private final ParserContext	parserContext;
+		private final ParserToolbox parserToolbox;
 		private final Imports 		imports;
 		private final TokenStream	tokenStream;
 
 		private String				packageOrClassName		= "";
 		private int					identifierStartPosition	= -1;
 
-		ClassReader(ParserContext parserContext, Imports imports, TokenStream tokenStream) {
-			this.parserContext = parserContext;
+		ClassReader(ParserToolbox parserToolbox, Imports imports, TokenStream tokenStream) {
+			this.parserToolbox = parserToolbox;
 			this.imports = imports;
 			this.tokenStream = tokenStream;
 		}
@@ -291,8 +291,8 @@ public class ClassDataProvider
 		}
 
 		private Class<?> getThisClass() {
-			ObjectInfo thisInfo = parserContext.getThisInfo();
-			TypeToken<?> thisType = parserContext.getObjectInfoProvider().getType(thisInfo);
+			ObjectInfo thisInfo = parserToolbox.getThisInfo();
+			TypeToken<?> thisType = parserToolbox.getObjectInfoProvider().getType(thisInfo);
 			return thisType == null ? null : thisType.getRawType();
 		}
 

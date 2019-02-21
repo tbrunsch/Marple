@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
@@ -12,8 +12,8 @@ import com.google.common.reflect.TypeToken;
 
 public class CastParser extends AbstractEntityParser<ObjectInfo>
 {
-	public CastParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
+	public CastParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class CastParser extends AbstractEntityParser<ObjectInfo>
 		}
 
 		log(LogLevel.INFO, "parsing class at " + tokenStream);
-		ParseResultIF classParseResult = parserContext.getClassParser().parse(tokenStream, thisInfo, ParseExpectation.CLASS);
+		ParseResultIF classParseResult = parserToolbox.getClassParser().parse(tokenStream, thisInfo, ParseExpectation.CLASS);
 		ParseResultType parseResultType = classParseResult.getResultType();
 		log(LogLevel.INFO, "parse result: " + parseResultType);
 
@@ -62,7 +62,7 @@ public class CastParser extends AbstractEntityParser<ObjectInfo>
 
 	private ParseResultIF parseAndCast(TokenStream tokenStream, TypeToken<?> targetType) {
 		log(LogLevel.INFO, "parsing object to cast at " + tokenStream);
-		ParseResultIF objectParseResult = parserContext.getExpressionParser().parse(tokenStream, thisInfo, ParseExpectation.OBJECT);
+		ParseResultIF objectParseResult = parserToolbox.getExpressionParser().parse(tokenStream, thisInfo, ParseExpectation.OBJECT);
 
 		if (ParseUtils.propagateParseResult(objectParseResult, ParseExpectation.OBJECT)) {
 			return objectParseResult;
@@ -73,7 +73,7 @@ public class CastParser extends AbstractEntityParser<ObjectInfo>
 		tokenStream.moveTo(parsedToPosition);
 
 		try {
-			ObjectInfo castInfo = parserContext.getObjectInfoProvider().getCastInfo(objectInfo, targetType);
+			ObjectInfo castInfo = parserToolbox.getObjectInfoProvider().getCastInfo(objectInfo, targetType);
 			log(LogLevel.SUCCESS, "successfully casted object");
 			return new ObjectParseResult(parsedToPosition, castInfo);
 		} catch (ClassCastException e) {

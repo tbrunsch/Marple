@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.utils.wrappers.FieldInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 import com.google.common.reflect.TypeToken;
@@ -12,8 +12,8 @@ import java.util.List;
  */
 public class ClassFieldParser extends AbstractFieldParser<TypeToken<?>>
 {
-	public ClassFieldParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
+	public ClassFieldParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
 	}
 
 	@Override
@@ -28,6 +28,6 @@ public class ClassFieldParser extends AbstractFieldParser<TypeToken<?>>
 
 	@Override
 	List<FieldInfo> getFieldInfos(TypeToken<?> contextType) {
-		return parserContext.getInspectionDataProvider().getFieldInfos(contextType, true);
+		return parserToolbox.getInspectionDataProvider().getFieldInfos(contextType, true);
 	}
 }

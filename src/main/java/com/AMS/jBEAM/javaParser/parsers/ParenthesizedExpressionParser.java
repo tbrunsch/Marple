@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
 import com.AMS.jBEAM.javaParser.result.ObjectParseResult;
@@ -14,8 +14,8 @@ import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 
 public class ParenthesizedExpressionParser extends AbstractEntityParser<ObjectInfo>
 {
-	public ParenthesizedExpressionParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
+	public ParenthesizedExpressionParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
 	}
 
 	@Override
@@ -27,7 +27,7 @@ public class ParenthesizedExpressionParser extends AbstractEntityParser<ObjectIn
 			return new ParseError(position, "Expected opening parenthesis '('", ErrorType.WRONG_PARSER);
 		}
 
-		ParseResultIF expressionParseResult = parserContext.getRootParser().parse(tokenStream, contextInfo, expectation);
+		ParseResultIF expressionParseResult = parserToolbox.getRootParser().parse(tokenStream, contextInfo, expectation);
 
 		if (ParseUtils.propagateParseResult(expressionParseResult, expectation)) {
 			return expressionParseResult;
@@ -48,6 +48,6 @@ public class ParenthesizedExpressionParser extends AbstractEntityParser<ObjectIn
 			return CompletionSuggestions.none(tokenStream.getPosition());
 		}
 
-		return parserContext.getObjectTailParser().parse(tokenStream, objectInfo, expectation);
+		return parserToolbox.getObjectTailParser().parse(tokenStream, objectInfo, expectation);
 	}
 }

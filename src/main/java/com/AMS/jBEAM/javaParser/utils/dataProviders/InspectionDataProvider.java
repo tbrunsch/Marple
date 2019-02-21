@@ -1,11 +1,10 @@
 package com.AMS.jBEAM.javaParser.utils.dataProviders;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.settings.AccessLevel;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ExecutableInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.FieldInfo;
-import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Constructor;
@@ -21,12 +20,12 @@ public class InspectionDataProvider
 {
 	private static final Predicate<Integer>	STATIC_FILTER = modifiers -> Modifier.isStatic(modifiers);
 
-	private final ParserContext			parserContext;
+	private final ParserToolbox parserToolbox;
 	private final Predicate<Integer>	accessLevelFilter;
 
-	public InspectionDataProvider(ParserContext parserContext) {
-		this.parserContext = parserContext;
-		AccessLevel accessLevel = parserContext.getSettings().getMinimumAccessLevel();
+	public InspectionDataProvider(ParserToolbox parserToolbox) {
+		this.parserToolbox = parserToolbox;
+		AccessLevel accessLevel = parserToolbox.getSettings().getMinimumAccessLevel();
 		this.accessLevelFilter = createAccessLevelFilter(accessLevel);
 	}
 

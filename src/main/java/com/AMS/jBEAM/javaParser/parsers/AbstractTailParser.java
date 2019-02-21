@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
@@ -8,8 +8,8 @@ import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 
 abstract class AbstractTailParser<C> extends AbstractEntityParser<C>
 {
-	AbstractTailParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
+	AbstractTailParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
 	}
 
 	abstract ParseResultIF parseDot(TokenStream tokenStream, C context, ParseExpectation expectation);

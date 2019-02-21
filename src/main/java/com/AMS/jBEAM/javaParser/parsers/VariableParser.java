@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.ParseError;
 import com.AMS.jBEAM.javaParser.result.ParseResultIF;
@@ -19,8 +19,8 @@ import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 
 public class VariableParser extends AbstractEntityParser<ObjectInfo>
 {
-	public VariableParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
+	public VariableParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class VariableParser extends AbstractEntityParser<ObjectInfo>
 				insertionEnd = startPosition;
 			}
 			log(LogLevel.INFO, "suggesting variables for completion...");
-			return parserContext.getVariableDataProvider().suggestVariables("", expectation, startPosition, insertionEnd);
+			return parserToolbox.getVariableDataProvider().suggestVariables("", expectation, startPosition, insertionEnd);
 		}
 
 		Token variableToken;
@@ -52,7 +52,7 @@ public class VariableParser extends AbstractEntityParser<ObjectInfo>
 		// check for code completion
 		if (variableToken.isContainsCaret()) {
 			log(LogLevel.SUCCESS, "suggesting variables matching '" + variableName + "'");
-			return parserContext.getVariableDataProvider().suggestVariables(variableName, expectation, startPosition, endPosition);
+			return parserToolbox.getVariableDataProvider().suggestVariables(variableName, expectation, startPosition, endPosition);
 		}
 
 		if (tokenStream.hasMore() && tokenStream.peekCharacter() == '(') {
@@ -61,7 +61,7 @@ public class VariableParser extends AbstractEntityParser<ObjectInfo>
 		}
 
 		// no code completion requested => variable name must exist
-		VariablePool variablePool = parserContext.getSettings().getVariablePool();
+		VariablePool variablePool = parserToolbox.getSettings().getVariablePool();
 		List<Variable> variables = variablePool.getVariables().stream().sorted(Comparator.comparing(Variable::getName)).collect(Collectors.toList());
 		Optional<Variable> firstVariableMatch = variables.stream().filter(variable -> variable.getName().equals(variableName)).findFirst();
 		if (!firstVariableMatch.isPresent()) {
@@ -71,8 +71,8 @@ public class VariableParser extends AbstractEntityParser<ObjectInfo>
 		log(LogLevel.SUCCESS, "detected variable '" + variableName + "'");
 
 		Variable matchingVariable = firstVariableMatch.get();
-		ObjectInfo matchingVariableInfo = parserContext.getObjectInfoProvider().getVariableInfo(matchingVariable);
+		ObjectInfo matchingVariableInfo = parserToolbox.getObjectInfoProvider().getVariableInfo(matchingVariable);
 
-		return parserContext.getObjectTailParser().parse(tokenStream, matchingVariableInfo, expectation);
+		return parserToolbox.getObjectTailParser().parse(tokenStream, matchingVariableInfo, expectation);
 	}
 }

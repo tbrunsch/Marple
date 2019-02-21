@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.utils.dataProviders;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.parsers.ParseExpectation;
 import com.AMS.jBEAM.javaParser.parsers.ParseExpectationBuilder;
 import com.AMS.jBEAM.javaParser.result.*;
@@ -18,10 +18,10 @@ import java.util.stream.IntStream;
 
 public class ExecutableDataProvider
 {
-	private final ParserContext parserContext;
+	private final ParserToolbox parserToolbox;
 
-	public ExecutableDataProvider(ParserContext parserContext) {
-		this.parserContext = parserContext;
+	public ExecutableDataProvider(ParserToolbox parserToolbox) {
+		this.parserToolbox = parserToolbox;
 	}
 
 	public CompletionSuggestions suggestMethods(String expectedName, List<ExecutableInfo> methodInfos, ParseExpectation expectation, int insertionBegin, int insertionEnd) {
@@ -68,7 +68,7 @@ public class ExecutableDataProvider
 			 * Parse expression for argument i
 			 */
 			ParseExpectation argumentExpectation = ParseExpectationBuilder.expectObject().allowedTypes(expectedArgumentTypes_i).build();
-			ParseResultIF argumentParseResult_i = parserContext.getRootParser().parse(tokenStream, parserContext.getThisInfo(), argumentExpectation);
+			ParseResultIF argumentParseResult_i = parserToolbox.getRootParser().parse(tokenStream, parserToolbox.getThisInfo(), argumentExpectation);
 			arguments.add(argumentParseResult_i);
 
 			if (ParseUtils.propagateParseResult(argumentParseResult_i, argumentExpectation)) {
@@ -114,12 +114,12 @@ public class ExecutableDataProvider
 
 	private boolean acceptsArgumentInfo(ExecutableInfo executableInfo, int argIndex, ObjectInfo argInfo) {
 		TypeToken<?> expectedArgumentType = executableInfo.getExpectedArgumentType(argIndex);
-		TypeToken<?> argumentType = parserContext.getObjectInfoProvider().getType(argInfo);
+		TypeToken<?> argumentType = parserToolbox.getObjectInfoProvider().getType(argInfo);
 		return ParseUtils.isConvertibleTo(argumentType, expectedArgumentType);
 	}
 
 	public List<ExecutableInfo> getBestMatchingExecutableInfos(List<ExecutableInfo> availableExecutableInfos, List<ObjectInfo> argumentInfos) {
-		ObjectInfoProvider objectInfoProvider = parserContext.getObjectInfoProvider();
+		ObjectInfoProvider objectInfoProvider = parserToolbox.getObjectInfoProvider();
 		List<TypeToken<?>> argumentTypes = argumentInfos.stream().map(objectInfoProvider::getType).collect(Collectors.toList());
 		int[] ratings = availableExecutableInfos.stream()
 				.mapToInt(executableInfo -> executableInfo.rateArgumentMatch(argumentTypes))

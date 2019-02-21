@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
@@ -51,15 +51,15 @@ public class RootParser extends AbstractEntityParser<ObjectInfo>
 
 	private final int maxOperatorPrecedenceLevelToConsider;
 
-	public RootParser(ParserContext parserContext, ObjectInfo thisInfo, int maxOperatorPrecedenceLevelToConsider) {
-		super(parserContext, thisInfo);
+	public RootParser(ParserToolbox parserToolbox, ObjectInfo thisInfo, int maxOperatorPrecedenceLevelToConsider) {
+		super(parserToolbox, thisInfo);
 		this.maxOperatorPrecedenceLevelToConsider = maxOperatorPrecedenceLevelToConsider;
 	}
 
 	@Override
 	ParseResultIF doParse(TokenStream tokenStream, ObjectInfo contextInfo, ParseExpectation expectation) {
 		log(LogLevel.INFO, "parsing first expression");
-		ParseResultIF parseResult = parserContext.getExpressionParser().parse(tokenStream, contextInfo, expectation);
+		ParseResultIF parseResult = parserToolbox.getExpressionParser().parse(tokenStream, contextInfo, expectation);
 
 		if (ParseUtils.propagateParseResult(parseResult, expectation)) {
 			return parseResult;
@@ -74,7 +74,7 @@ public class RootParser extends AbstractEntityParser<ObjectInfo>
 		 * but still check for syntax errors.
 		 */
 
-		ParserContext parserContext = this.parserContext;
+		ParserToolbox parserToolbox = this.parserToolbox;
 		boolean considerOperatorResult = true;
 		while (true) {
 			Token operatorToken = tokenStream.readBinaryOperatorUnchecked();
@@ -96,10 +96,10 @@ public class RootParser extends AbstractEntityParser<ObjectInfo>
 			switch (operator.getAssociativity()) {
 				case LEFT_TO_RIGHT: {
 					if (considerOperatorResult && stopCircuitEvaluation(lhsInfo, operator)) {
-						parserContext = createContextWithoutEvaluation();
+						parserToolbox = createToolboxWithoutEvaluation();
 						considerOperatorResult = false;
 					}
-					parseResult = parserContext.createRootParser(operator.getPrecedenceLevel() - 1).parse(tokenStream, contextInfo, ParseExpectation.OBJECT);
+					parseResult = parserToolbox.createRootParser(operator.getPrecedenceLevel() - 1).parse(tokenStream, contextInfo, ParseExpectation.OBJECT);
 
 					if (ParseUtils.propagateParseResult(parseResult, ParseExpectation.OBJECT)) {
 						return parseResult;
@@ -111,7 +111,7 @@ public class RootParser extends AbstractEntityParser<ObjectInfo>
 
 					try {
 						// Check syntax even if result of operator is not considered because of short circuit evaluation
-						ObjectInfo operatorResult = applyOperator(parserContext, lhsInfo, rhsInfo, operator);
+						ObjectInfo operatorResult = applyOperator(parserToolbox, lhsInfo, rhsInfo, operator);
 						if (considerOperatorResult) {
 							lhsInfo = operatorResult;
 						}
@@ -123,7 +123,7 @@ public class RootParser extends AbstractEntityParser<ObjectInfo>
 					break;
 				}
 				case RIGHT_TO_LEFT: {
-					parseResult = parserContext.createRootParser(operator.getPrecedenceLevel()).parse(tokenStream, contextInfo, ParseExpectation.OBJECT);
+					parseResult = parserToolbox.createRootParser(operator.getPrecedenceLevel()).parse(tokenStream, contextInfo, ParseExpectation.OBJECT);
 
 					if (ParseUtils.propagateParseResult(parseResult, ParseExpectation.OBJECT)) {
 						return parseResult;
@@ -133,7 +133,7 @@ public class RootParser extends AbstractEntityParser<ObjectInfo>
 
 					ObjectInfo operatorResultInfo;
 					try {
-						operatorResultInfo = applyOperator(parserContext, lhsInfo, rhsInfo, operator);
+						operatorResultInfo = applyOperator(parserToolbox, lhsInfo, rhsInfo, operator);
 						log(LogLevel.SUCCESS, "applied operator successfully");
 					} catch (OperatorException e) {
 						log(LogLevel.ERROR, "applying operator failed: " + e.getMessage());
@@ -158,7 +158,7 @@ public class RootParser extends AbstractEntityParser<ObjectInfo>
 
 		ObjectParseResult objectParseResult = (ObjectParseResult) parseResult;
 		List<TypeToken<?>> allowedTypes = expectation.getAllowedTypes();
-		TypeToken<?> resultType = parserContext.getObjectInfoProvider().getType(objectParseResult.getObjectInfo());
+		TypeToken<?> resultType = parserToolbox.getObjectInfoProvider().getType(objectParseResult.getObjectInfo());
 		if (allowedTypes != null && allowedTypes.stream().noneMatch(expectedResultType -> ParseUtils.isConvertibleTo(resultType, expectedResultType))) {
 			String messagePrefix = "The class '" + resultType + "' is not assignable to ";
 			String messageMiddle = allowedTypes.size() > 1
@@ -174,7 +174,7 @@ public class RootParser extends AbstractEntityParser<ObjectInfo>
 
 	}
 
-	private ObjectInfo applyOperator(ParserContext context, ObjectInfo lhs, ObjectInfo rhs, BinaryOperator operator) throws OperatorException {
+	private ObjectInfo applyOperator(ParserToolbox context, ObjectInfo lhs, ObjectInfo rhs, BinaryOperator operator) throws OperatorException {
 		return OPERATOR_IMPLEMENTATIONS.get(operator).apply(context.getOperatorResultProvider(), lhs, rhs);
 	}
 
@@ -183,8 +183,8 @@ public class RootParser extends AbstractEntityParser<ObjectInfo>
 			|| operator == BinaryOperator.LOGICAL_OR	&& Boolean.TRUE.equals(objectInfo.getObject());
 	}
 
-	private ParserContext createContextWithoutEvaluation() {
-		return new ParserContext(parserContext.getThisInfo(), parserContext.getSettings(), ParseMode.WITHOUT_EVALUATION);
+	private ParserToolbox createToolboxWithoutEvaluation() {
+		return new ParserToolbox(parserToolbox.getThisInfo(), parserToolbox.getSettings(), ParseMode.WITHOUT_EVALUATION);
 	}
 
 	@FunctionalInterface

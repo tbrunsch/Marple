@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
@@ -24,8 +24,8 @@ import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
  */
 abstract class AbstractMethodParser<C> extends AbstractEntityParser<C>
 {
-	public AbstractMethodParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
+	public AbstractMethodParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
 	}
 
 	abstract boolean contextCausesNullPointerException(C context);
@@ -84,7 +84,7 @@ abstract class AbstractMethodParser<C> extends AbstractEntityParser<C>
 		log(LogLevel.SUCCESS, "detected " + matchingMethodInfos.size() + " method(s) '" + methodName + "'");
 
 		log(LogLevel.INFO, "parsing method arguments");
-		List<ParseResultIF> argumentParseResults = parserContext.getExecutableDataProvider().parseExecutableArguments(tokenStream, matchingMethodInfos);
+		List<ParseResultIF> argumentParseResults = parserToolbox.getExecutableDataProvider().parseExecutableArguments(tokenStream, matchingMethodInfos);
 
 		if (argumentParseResults.isEmpty()) {
 			log(LogLevel.INFO, "no arguments found");
@@ -102,7 +102,7 @@ abstract class AbstractMethodParser<C> extends AbstractEntityParser<C>
 			.map(ObjectParseResult.class::cast)
 			.map(ObjectParseResult::getObjectInfo)
 			.collect(Collectors.toList());
-		List<ExecutableInfo> bestMatchingMethodInfos = parserContext.getExecutableDataProvider().getBestMatchingExecutableInfos(matchingMethodInfos, argumentInfos);
+		List<ExecutableInfo> bestMatchingMethodInfos = parserToolbox.getExecutableDataProvider().getBestMatchingExecutableInfos(matchingMethodInfos, argumentInfos);
 
 		switch (bestMatchingMethodInfos.size()) {
 			case 0:
@@ -112,13 +112,13 @@ abstract class AbstractMethodParser<C> extends AbstractEntityParser<C>
 				ExecutableInfo bestMatchingExecutableInfo = bestMatchingMethodInfos.get(0);
 				ObjectInfo methodReturnInfo;
 				try {
-					methodReturnInfo = parserContext.getObjectInfoProvider().getExecutableReturnInfo(getContextObject(context), bestMatchingExecutableInfo, argumentInfos);
+					methodReturnInfo = parserToolbox.getObjectInfoProvider().getExecutableReturnInfo(getContextObject(context), bestMatchingExecutableInfo, argumentInfos);
 					log(LogLevel.SUCCESS, "found unique matching method");
 				} catch (Exception e) {
 					log(LogLevel.ERROR, "caught exception: " + e.getMessage());
 					return new ParseError(startPosition, "Exception during method evaluation", ErrorType.EVALUATION_EXCEPTION, e);
 				}
-				return parserContext.getObjectTailParser().parse(tokenStream, methodReturnInfo, expectation);
+				return parserToolbox.getObjectTailParser().parse(tokenStream, methodReturnInfo, expectation);
 			}
 			default: {
 				String error = "Ambiguous method call. Possible candidates are:\n"
@@ -130,6 +130,6 @@ abstract class AbstractMethodParser<C> extends AbstractEntityParser<C>
 	}
 
 	private CompletionSuggestions suggestMethods(String expectedName, C context, ParseExpectation expectation, int insertionBegin, int insertionEnd) {
-		return parserContext.getExecutableDataProvider().suggestMethods(expectedName, getMethodInfos(context), expectation, insertionBegin, insertionEnd);
+		return parserToolbox.getExecutableDataProvider().suggestMethods(expectedName, getMethodInfos(context), expectation, insertionBegin, insertionEnd);
 	}
 }

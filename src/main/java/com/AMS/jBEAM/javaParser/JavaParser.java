@@ -109,7 +109,7 @@ public class JavaParser
 
 	private ParseResultIF parse(String javaExpression, ParserSettings settings, ParseMode parseMode, int caret, Object valueOfThis) {
 		ObjectInfo thisInfo = new ObjectInfo(valueOfThis, null);
-		ParserContext parserPool  = new ParserContext(thisInfo, settings, parseMode);
+		ParserToolbox parserPool  = new ParserToolbox(thisInfo, settings, parseMode);
 		TokenStream tokenStream = new TokenStream(javaExpression, caret);
 		try {
 			return parserPool.getRootParser().parse(tokenStream, thisInfo, ParseExpectation.OBJECT);

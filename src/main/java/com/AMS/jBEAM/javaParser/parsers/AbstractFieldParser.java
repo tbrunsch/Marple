@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
 import com.AMS.jBEAM.javaParser.result.ParseError;
@@ -17,8 +17,8 @@ import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 
 abstract class AbstractFieldParser<C> extends AbstractEntityParser<C>
 {
-	AbstractFieldParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
+	AbstractFieldParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
 	}
 
 	abstract boolean contextCausesNullPointerException(C context);
@@ -78,13 +78,13 @@ abstract class AbstractFieldParser<C> extends AbstractEntityParser<C>
 
 		FieldInfo fieldInfo = firstFieldInfoMatch.get();
 		Object contextObject = getContextObject(context);
-		ObjectInfo matchingFieldInfo = parserContext.getObjectInfoProvider().getFieldValueInfo(contextObject, fieldInfo);
+		ObjectInfo matchingFieldInfo = parserToolbox.getObjectInfoProvider().getFieldValueInfo(contextObject, fieldInfo);
 
-		return parserContext.getObjectTailParser().parse(tokenStream, matchingFieldInfo, expectation);
+		return parserToolbox.getObjectTailParser().parse(tokenStream, matchingFieldInfo, expectation);
 	}
 
 	private CompletionSuggestions suggestFields(String expectedName, C context, ParseExpectation expectation, int insertionBegin, int insertionEnd) {
 		Object contextObject = getContextObject(context);
-		return parserContext.getFieldDataProvider().suggestFields(expectedName, contextObject, getFieldInfos(context), expectation, insertionBegin, insertionEnd);
+		return parserToolbox.getFieldDataProvider().suggestFields(expectedName, contextObject, getFieldInfos(context), expectation, insertionBegin, insertionEnd);
 	}
 }

@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.utils.dataProviders;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.javaParser.tokenizer.BinaryOperator;
 import com.AMS.jBEAM.javaParser.tokenizer.UnaryOperator;
@@ -163,11 +163,11 @@ public class OperatorResultProvider
 		addLogicalOperator(BinaryOperator.LOGICAL_OR,	(a, b) -> a || b);
 	}
 
-	private final ParserContext		parserContext;
+	private final ParserToolbox parserToolbox;
 	private final EvaluationMode	evaluationMode;
 
-	public OperatorResultProvider(ParserContext parserContext, EvaluationMode evaluationMode) {
-		this.parserContext = parserContext;
+	public OperatorResultProvider(ParserToolbox parserToolbox, EvaluationMode evaluationMode) {
+		this.parserToolbox = parserToolbox;
 		this.evaluationMode = evaluationMode;
 	}
 
@@ -321,7 +321,7 @@ public class OperatorResultProvider
 			throw new OperatorException("Cannot assign values to non-lvalues or final fields");
 		}
 		TypeToken<?> declaredLhsType = lhs.getDeclaredType();
-		TypeToken<?> rhsType = parserContext.getObjectInfoProvider().getType(rhs);
+		TypeToken<?> rhsType = parserToolbox.getObjectInfoProvider().getType(rhs);
 		if (ParseUtils.rateTypeMatch(rhsType, declaredLhsType) == ParseUtils.TYPE_MATCH_NONE) {
 			throw new OperatorException("Cannot assign value of type '" + rhsType + "' to left-hand side. Expected an instance of class '" + declaredLhsType + "'");
 		}
@@ -342,7 +342,7 @@ public class OperatorResultProvider
 	 * Utility Methods
 	 */
 	private Class<?> getClass(ObjectInfo objectInfo) {
-		TypeToken<?> type = parserContext.getObjectInfoProvider().getType(objectInfo);
+		TypeToken<?> type = parserToolbox.getObjectInfoProvider().getType(objectInfo);
 		return type == null ? null : type.getRawType();
 	}
 

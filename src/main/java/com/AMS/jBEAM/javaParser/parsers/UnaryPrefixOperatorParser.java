@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
@@ -26,8 +26,8 @@ public class UnaryPrefixOperatorParser extends AbstractEntityParser<ObjectInfo>
 		.put(UnaryOperator.BITWISE_NOT,	OperatorResultProvider::getBitwiseNotInfo)
 		.build();
 
-	public UnaryPrefixOperatorParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
+	public UnaryPrefixOperatorParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class UnaryPrefixOperatorParser extends AbstractEntityParser<ObjectInfo>
 		}
 		UnaryOperator operator = UnaryOperator.getValue(operatorToken.getValue());
 
-		ParseResultIF parseResult = parserContext.getExpressionParser().parse(tokenStream, contextInfo, expectation);
+		ParseResultIF parseResult = parserToolbox.getExpressionParser().parse(tokenStream, contextInfo, expectation);
 
 		if (ParseUtils.propagateParseResult(parseResult, expectation)) {
 			return parseResult;
@@ -64,7 +64,7 @@ public class UnaryPrefixOperatorParser extends AbstractEntityParser<ObjectInfo>
 	}
 
 	private ObjectInfo applyOperator(ObjectInfo objectInfo, UnaryOperator operator) throws OperatorException {
-		return OPERATOR_IMPLEMENTATIONS.get(operator).apply(parserContext.getOperatorResultProvider(), objectInfo);
+		return OPERATOR_IMPLEMENTATIONS.get(operator).apply(parserToolbox.getOperatorResultProvider(), objectInfo);
 	}
 
 	@FunctionalInterface

@@ -8,7 +8,7 @@ import com.AMS.jBEAM.javaParser.utils.dataProviders.*;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 import com.google.common.reflect.TypeToken;
 
-public class ParserContext
+public class ParserToolbox
 {
 	private final ObjectInfo							thisInfo;
 	private final ParserSettings						settings;
@@ -40,7 +40,7 @@ public class ParserContext
 	private final AbstractEntityParser<ObjectInfo>		unaryPrefixOperatorParser;
 	private final AbstractEntityParser<ObjectInfo>		variableParser;
 
-	public ParserContext(ObjectInfo thisInfo, ParserSettings settings, ParseMode parseMode) {
+	public ParserToolbox(ObjectInfo thisInfo, ParserSettings settings, ParseMode parseMode) {
 		this.thisInfo = thisInfo;
 		this.settings = settings;
 
@@ -72,13 +72,6 @@ public class ParserContext
 		rootParser						= createRootParser(OperatorResultProvider.MAX_BINARY_OPERATOR_PRECEDENCE_LEVEL);
 		unaryPrefixOperatorParser		= new UnaryPrefixOperatorParser(this, thisInfo);
 		variableParser					= new VariableParser(this, thisInfo);
-	}
-
-	private static EvaluationMode getEvaluationMode(ParserSettings settings, ParseMode parseMode) {
-		if (settings.isEnableDynamicTyping()) {
-			return EvaluationMode.DYNAMICALLY_TYPED;
-		}
-		return parseMode == ParseMode.EVALUATION ? EvaluationMode.STATICALLY_TYPED : EvaluationMode.NONE;
 	}
 
 	public ObjectInfo getThisInfo() {
@@ -192,4 +185,11 @@ public class ParserContext
 	}
 
 	public AbstractEntityParser<ObjectInfo> getVariableParser() { return variableParser; }
+
+	private static EvaluationMode getEvaluationMode(ParserSettings settings, ParseMode parseMode) {
+		if (settings.isEnableDynamicTyping()) {
+			return EvaluationMode.DYNAMICALLY_TYPED;
+		}
+		return parseMode == ParseMode.EVALUATION ? EvaluationMode.STATICALLY_TYPED : EvaluationMode.NONE;
+	}
 }

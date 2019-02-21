@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
 import com.AMS.jBEAM.javaParser.result.ParseError;
@@ -24,12 +24,12 @@ public class LiteralParser extends AbstractEntityParser<ObjectInfo>
 	private final AbstractEntityParser<ObjectInfo> floatParser;
 	private final AbstractEntityParser<ObjectInfo> doubleParser;
 
-	public LiteralParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
-		intParser 		= new NumericLiteralParser<>(parserContext, thisInfo, TypeToken.of(int.class),		TokenStream::readIntegerLiteral,	Integer::parseInt,		"Invalid int literal");
-		longParser 		= new NumericLiteralParser<>(parserContext, thisInfo, TypeToken.of(long.class),		TokenStream::readLongLiteral, 		Long::parseLong,		"Invalid long literal");
-		floatParser 	= new NumericLiteralParser<>(parserContext, thisInfo, TypeToken.of(float.class),	TokenStream::readFloatLiteral,		Float::parseFloat,		"Invalid float literal");
-		doubleParser 	= new NumericLiteralParser<>(parserContext, thisInfo, TypeToken.of(double.class),	TokenStream::readDoubleLiteral,		Double::parseDouble,	"Invalid double literal");
+	public LiteralParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
+		intParser 		= new NumericLiteralParser<>(parserToolbox, thisInfo, TypeToken.of(int.class),		TokenStream::readIntegerLiteral,	Integer::parseInt,		"Invalid int literal");
+		longParser 		= new NumericLiteralParser<>(parserToolbox, thisInfo, TypeToken.of(long.class),		TokenStream::readLongLiteral, 		Long::parseLong,		"Invalid long literal");
+		floatParser 	= new NumericLiteralParser<>(parserToolbox, thisInfo, TypeToken.of(float.class),	TokenStream::readFloatLiteral,		Float::parseFloat,		"Invalid float literal");
+		doubleParser 	= new NumericLiteralParser<>(parserToolbox, thisInfo, TypeToken.of(double.class),	TokenStream::readDoubleLiteral,		Double::parseDouble,	"Invalid double literal");
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class LiteralParser extends AbstractEntityParser<ObjectInfo>
 		log(LogLevel.SUCCESS, "detected string literal '" + stringLiteralValue + "'");
 
 		ObjectInfo stringLiteralInfo = new ObjectInfo(stringLiteralValue, TypeToken.of(String.class));
-		return parserContext.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectation);
+		return parserToolbox.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectation);
 	}
 
 	private ParseResultIF parseCharacterLiteral(TokenStream tokenStream, ParseExpectation expectation) {
@@ -95,7 +95,7 @@ public class LiteralParser extends AbstractEntityParser<ObjectInfo>
 		log(LogLevel.SUCCESS, "detected character literal '" + characterLiteralValue + "'");
 
 		ObjectInfo stringLiteralInfo = new ObjectInfo(characterLiteralValue.charAt(0), TypeToken.of(char.class));
-		return parserContext.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectation);
+		return parserToolbox.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectation);
 	}
 
 	private ParseResultIF parseNamedLiteral(TokenStream tokenStream, String literalName, ObjectInfo literalInfo, ParseExpectation expectation) {
@@ -114,7 +114,7 @@ public class LiteralParser extends AbstractEntityParser<ObjectInfo>
 			return new ParseError(startPosition, "Expected '" + literalName + "'", ErrorType.WRONG_PARSER);
 		}
 		log(LogLevel.SUCCESS, "detected literal '" + literalName + "'");
-		return parserContext.getObjectTailParser().parse(tokenStream, literalInfo, expectation);
+		return parserToolbox.getObjectTailParser().parse(tokenStream, literalInfo, expectation);
 	}
 
 	private ParseResultIF parseNumericLiteral(TokenStream tokenStream, ObjectInfo contextInfo, ParseExpectation expectation) {
@@ -144,8 +144,8 @@ public class LiteralParser extends AbstractEntityParser<ObjectInfo>
 		private final NumericValueParser<T>	valueParser;
 		private final String				wrongTypeError;
 
-		NumericLiteralParser(ParserContext parserContext, ObjectInfo thisInfo, TypeToken<T> numericType, NumericTokenReader tokenReader, NumericValueParser<T> valueParser, String wrongTypeError) {
-			super(parserContext, thisInfo);
+		NumericLiteralParser(ParserToolbox parserToolbox, ObjectInfo thisInfo, TypeToken<T> numericType, NumericTokenReader tokenReader, NumericValueParser<T> valueParser, String wrongTypeError) {
+			super(parserToolbox, thisInfo);
 			this.numericType = numericType;
 			this.tokenReader = tokenReader;
 			this.valueParser = valueParser;
@@ -176,7 +176,7 @@ public class LiteralParser extends AbstractEntityParser<ObjectInfo>
 			}
 
 			ObjectInfo literalInfo = new ObjectInfo(literalValue, numericType);
-			return parserContext.getObjectTailParser().parse(tokenStream, literalInfo, expectation);
+			return parserToolbox.getObjectTailParser().parse(tokenStream, literalInfo, expectation);
 		}
 	}
 

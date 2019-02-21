@@ -1,7 +1,7 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.common.RegexUtils;
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
 import com.AMS.jBEAM.javaParser.result.ParseError;
@@ -23,8 +23,8 @@ public class CustomHierarchyParser extends AbstractEntityParser<ObjectInfo>
 
 	private static final Pattern	HIERARCHY_NODE_PATTERN	= Pattern.compile("^([^" + RegexUtils.escapeIfSpecial(HIERARCHY_SEPARATOR) + RegexUtils.escapeIfSpecial(HIERARCHY_END) + "]*).*");
 
-	public CustomHierarchyParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
+	public CustomHierarchyParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class CustomHierarchyParser extends AbstractEntityParser<ObjectInfo>
 			return new ParseError(position, "Expected hierarchy begin character ('" + HIERARCHY_BEGIN + "')", ParseError.ErrorType.WRONG_PARSER);
 		}
 
-		ObjectTreeNodeIF hierarchyNode = parserContext.getSettings().getCustomHierarchyRoot();
+		ObjectTreeNodeIF hierarchyNode = parserToolbox.getSettings().getCustomHierarchyRoot();
 		return parseHierarchyNode(tokenStream, hierarchyNode, expectation);
 	}
 
@@ -49,7 +49,7 @@ public class CustomHierarchyParser extends AbstractEntityParser<ObjectInfo>
 		int startPosition = tokenStream.getPosition();
 		if (tokenStream.isCaretAtPosition()) {
 			log(LogLevel.INFO, "suggesting custom hierarchy nodes for completion...");
-			return parserContext.getObjectTreeNodeDataProvider().suggestNodes("", contextNode, startPosition, startPosition);
+			return parserToolbox.getObjectTreeNodeDataProvider().suggestNodes("", contextNode, startPosition, startPosition);
 		}
 
 		Token nodeToken = tokenStream.readRegexUnchecked(HIERARCHY_NODE_PATTERN, 1);
@@ -63,7 +63,7 @@ public class CustomHierarchyParser extends AbstractEntityParser<ObjectInfo>
 		// check for code completion
 		if (nodeToken.isContainsCaret()) {
 			log(LogLevel.SUCCESS, "suggesting hierarchy nodes matching '" + nodeName + "'");
-			return parserContext.getObjectTreeNodeDataProvider().suggestNodes(nodeName, contextNode, startPosition, endPosition);
+			return parserToolbox.getObjectTreeNodeDataProvider().suggestNodes(nodeName, contextNode, startPosition, endPosition);
 		}
 
 		List<ObjectTreeNodeIF> childNodes = contextNode.getChildNodes();
@@ -84,7 +84,7 @@ public class CustomHierarchyParser extends AbstractEntityParser<ObjectInfo>
 		} else if (character == HIERARCHY_END) {
 			Object userObject = childNode.getUserObject();
 			ObjectInfo userObjectInfo = new ObjectInfo(userObject, null);
-			return parserContext.getObjectTailParser().parse(tokenStream, userObjectInfo, expectation);
+			return parserToolbox.getObjectTailParser().parse(tokenStream, userObjectInfo, expectation);
 		}
 
 		log(LogLevel.ERROR, "expected '" + HIERARCHY_SEPARATOR + "' or '" + HIERARCHY_END + "'");

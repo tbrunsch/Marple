@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.result.ClassParseResult;
 import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.result.ParseResultType;
@@ -15,8 +15,8 @@ import com.google.common.reflect.TypeToken;
  */
 public class ClassTailParser extends AbstractTailParser<TypeToken<?>>
 {
-	public ClassTailParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
+	public ClassTailParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
 	}
 
 	@Override
@@ -24,9 +24,9 @@ public class ClassTailParser extends AbstractTailParser<TypeToken<?>>
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals(".");
 
-		AbstractEntityParser<TypeToken<?>> fieldParser = parserContext.getClassFieldParser();
-		AbstractEntityParser<TypeToken<?>> methodParser = parserContext.getClassMethodParser();
-		AbstractEntityParser<TypeToken<?>> innerClassParser = parserContext.getInnerClassParser();
+		AbstractEntityParser<TypeToken<?>> fieldParser = parserToolbox.getClassFieldParser();
+		AbstractEntityParser<TypeToken<?>> methodParser = parserToolbox.getClassMethodParser();
+		AbstractEntityParser<TypeToken<?>> innerClassParser = parserToolbox.getInnerClassParser();
 		if (expectation.getEvaluationType() == ParseResultType.CLASS_PARSE_RESULT) {
 			return innerClassParser.parse(tokenStream, classType, expectation);
 		} else {

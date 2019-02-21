@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.utils.dataProviders;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.debug.ParserLogEntry;
 import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
@@ -19,10 +19,10 @@ import java.util.function.ToIntFunction;
 
 public class FieldDataProvider
 {
-	private final ParserContext parserContext;
+	private final ParserToolbox parserToolbox;
 
-	public FieldDataProvider(ParserContext parserContext) {
-		this.parserContext = parserContext;
+	public FieldDataProvider(ParserToolbox parserToolbox) {
+		this.parserToolbox = parserToolbox;
 	}
 
 	public CompletionSuggestions suggestFields(String expectedName, Object contextObject, List<FieldInfo> fieldInfos, ParseExpectation expectation, int insertionBegin, int insertionEnd) {
@@ -31,7 +31,7 @@ public class FieldDataProvider
 			fieldInfo -> new CompletionSuggestionField(fieldInfo, insertionBegin, insertionEnd),
 			rateFieldByNameAndTypesFunc(expectedName, contextObject, expectation)
 		);
-		ParserLoggerIF logger = parserContext.getSettings().getLogger();
+		ParserLoggerIF logger = parserToolbox.getSettings().getLogger();
 		for (CompletionSuggestionIF suggestion : ratedSuggestions.keySet()) {
 			String suggestionText = suggestion.toString();
 			int rating = ratedSuggestions.get(suggestion);
@@ -52,8 +52,8 @@ public class FieldDataProvider
 		if (allowedTypes.isEmpty()) {
 			return ParseUtils.TYPE_MATCH_NONE;
 		}
-		ObjectInfo fieldValueInfo = parserContext.getObjectInfoProvider().getFieldValueInfo(contextObject, fieldInfo);
-		TypeToken<?> type = parserContext.getObjectInfoProvider().getType(fieldValueInfo);
+		ObjectInfo fieldValueInfo = parserToolbox.getObjectInfoProvider().getFieldValueInfo(contextObject, fieldInfo);
+		TypeToken<?> type = parserToolbox.getObjectInfoProvider().getType(fieldValueInfo);
 		return allowedTypes.stream().mapToInt(allowedType -> ParseUtils.rateTypeMatch(type, allowedType)).min().getAsInt();
 	}
 

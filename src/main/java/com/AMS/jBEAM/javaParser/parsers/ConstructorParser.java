@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 
 public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 {
-	public ConstructorParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
+	public ConstructorParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 		}
 
 		log(LogLevel.INFO, "parsing class at " + tokenStream);
-		ParseResultIF classParseResult = parserContext.getClassParser().parse(tokenStream, thisInfo, ParseExpectation.CLASS);
+		ParseResultIF classParseResult = parserToolbox.getClassParser().parse(tokenStream, thisInfo, ParseExpectation.CLASS);
 		ParseResultType parseResultType = classParseResult.getResultType();
 		log(LogLevel.INFO, "parse result: " + parseResultType);
 
@@ -70,10 +70,10 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 			log(LogLevel.ERROR, "cannot instantiate non-static inner class");
 			return new ParseError(tokenStream.getPosition(), "Cannot instantiate inner class '" + constructorClass.getName() + "'", ErrorType.SEMANTIC_ERROR);
 		}
-		List<ExecutableInfo> constructorInfos = parserContext.getInspectionDataProvider().getConstructorInfos(constructorType);
+		List<ExecutableInfo> constructorInfos = parserToolbox.getInspectionDataProvider().getConstructorInfos(constructorType);
 
 		log(LogLevel.INFO, "parsing constructor arguments");
-		List<ParseResultIF> argumentParseResults = parserContext.getExecutableDataProvider().parseExecutableArguments(tokenStream, constructorInfos);
+		List<ParseResultIF> argumentParseResults = parserToolbox.getExecutableDataProvider().parseExecutableArguments(tokenStream, constructorInfos);
 
 		if (argumentParseResults.isEmpty()) {
 			log(LogLevel.INFO, "no arguments found");
@@ -91,7 +91,7 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 			.map(ObjectParseResult.class::cast)
 			.map(ObjectParseResult::getObjectInfo)
 			.collect(Collectors.toList());
-		List<ExecutableInfo> bestMatchingConstructorInfos = parserContext.getExecutableDataProvider().getBestMatchingExecutableInfos(constructorInfos, argumentInfos);
+		List<ExecutableInfo> bestMatchingConstructorInfos = parserToolbox.getExecutableDataProvider().getBestMatchingExecutableInfos(constructorInfos, argumentInfos);
 
 		switch (bestMatchingConstructorInfos.size()) {
 			case 0:
@@ -101,13 +101,13 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 				ExecutableInfo bestMatchingConstructorInfo = bestMatchingConstructorInfos.get(0);
 				ObjectInfo constructorReturnInfo;
 				try {
-					constructorReturnInfo = parserContext.getObjectInfoProvider().getExecutableReturnInfo(null, bestMatchingConstructorInfo, argumentInfos);
+					constructorReturnInfo = parserToolbox.getObjectInfoProvider().getExecutableReturnInfo(null, bestMatchingConstructorInfo, argumentInfos);
 					log(LogLevel.SUCCESS, "found unique matching constructor");
 				} catch (Exception e) {
 					log(LogLevel.ERROR, "caught exception: " + e.getMessage());
 					return new ParseError(startPosition, "Exception during constructor evaluation", ErrorType.EVALUATION_EXCEPTION, e);
 				}
-				return parserContext.getObjectTailParser().parse(tokenStream, constructorReturnInfo, expectation);
+				return parserToolbox.getObjectTailParser().parse(tokenStream, constructorReturnInfo, expectation);
 			}
 			default: {
 				String error = "Ambiguous constructor call. Possible candidates are:\n"
@@ -139,9 +139,9 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 			}
 
 			List<ObjectInfo> elementInfos = elementParseResults.stream().map(ObjectParseResult.class::cast).map(ObjectParseResult::getObjectInfo).collect(Collectors.toList());
-			ObjectInfo arrayInfo = parserContext.getObjectInfoProvider().getArrayInfo(componentType, elementInfos);
+			ObjectInfo arrayInfo = parserToolbox.getObjectInfoProvider().getArrayInfo(componentType, elementInfos);
 			log (LogLevel.SUCCESS, "detected valid array construction with initializer list");
-			return parserContext.getObjectTailParser().parse(tokenStream, arrayInfo, expectation);
+			return parserToolbox.getObjectTailParser().parse(tokenStream, arrayInfo, expectation);
 		} else {
 			// array constructor with default initialization (e.g., "new int[3]")
 			if (ParseUtils.propagateParseResult(arraySizeParseResult, ParseExpectation.OBJECT)) {
@@ -152,14 +152,14 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 			ObjectInfo sizeInfo = parseResult.getObjectInfo();
 			ObjectInfo arrayInfo;
 			try {
-				arrayInfo = parserContext.getObjectInfoProvider().getArrayInfo(componentType, sizeInfo);
+				arrayInfo = parserToolbox.getObjectInfoProvider().getArrayInfo(componentType, sizeInfo);
 				log(LogLevel.SUCCESS, "detected valid array construction with null initialization");
 			} catch (ClassCastException | NegativeArraySizeException e) {
 				log(LogLevel.ERROR, "caught exception: " + e.getMessage());
 				return new ParseError(startPosition, e.getClass().getSimpleName() + " during array construction", ErrorType.EVALUATION_EXCEPTION, e);
 			}
 			tokenStream.moveTo(parsedToPosition);
-			return parserContext.getObjectTailParser().parse(tokenStream, arrayInfo, expectation);
+			return parserToolbox.getObjectTailParser().parse(tokenStream, arrayInfo, expectation);
 		}
 	}
 
@@ -176,7 +176,7 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 		}
 
 		ParseExpectation expectation = ParseExpectationBuilder.expectObject().allowedType(TypeToken.of(int.class)).build();
-		ParseResultIF arraySizeParseResult = parserContext.getRootParser().parse(tokenStream, thisInfo, expectation);
+		ParseResultIF arraySizeParseResult = parserToolbox.getRootParser().parse(tokenStream, thisInfo, expectation);
 
 		if (ParseUtils.propagateParseResult(arraySizeParseResult, expectation)) {
 			return arraySizeParseResult;
@@ -230,7 +230,7 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 			/*
 			 * Parse expression for argument i
 			 */
-			ParseResultIF element = parserContext.getRootParser().parse(tokenStream, parserContext.getThisInfo(), expectation);
+			ParseResultIF element = parserToolbox.getRootParser().parse(tokenStream, parserToolbox.getThisInfo(), expectation);
 			elements.add(element);
 
 			if (ParseUtils.propagateParseResult(element, expectation)) {

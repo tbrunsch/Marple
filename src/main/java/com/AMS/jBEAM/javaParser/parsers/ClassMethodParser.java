@@ -1,6 +1,6 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
-import com.AMS.jBEAM.javaParser.ParserContext;
+import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ExecutableInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 import com.google.common.reflect.TypeToken;
@@ -9,8 +9,8 @@ import java.util.List;
 
 public class ClassMethodParser extends AbstractMethodParser<TypeToken<?>>
 {
-	public ClassMethodParser(ParserContext parserContext, ObjectInfo thisInfo) {
-		super(parserContext, thisInfo);
+	public ClassMethodParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
+		super(parserToolbox, thisInfo);
 	}
 
 	@Override
@@ -25,6 +25,6 @@ public class ClassMethodParser extends AbstractMethodParser<TypeToken<?>>
 
 	@Override
 	List<ExecutableInfo> getMethodInfos(TypeToken<?> contextType) {
-		return parserContext.getInspectionDataProvider().getMethodInfos(contextType, true);
+		return parserToolbox.getInspectionDataProvider().getMethodInfos(contextType, true);
 	}
 }
