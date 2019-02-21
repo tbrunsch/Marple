@@ -1,6 +1,5 @@
 package com.AMS.jBEAM.javaParser.evaluationTests;
 
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import org.junit.Test;
 
 public class AmbiguityTest
@@ -17,7 +16,7 @@ public class AmbiguityTest
 			.test("get(o2)",	testInstance.get(testInstance.o2));
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("get(o1)", testInstance.get(testInstance.o1))
 			.test("get(o2)", testInstance.get((Float) testInstance.o2));
 

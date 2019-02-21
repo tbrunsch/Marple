@@ -1,6 +1,5 @@
 package com.AMS.jBEAM.javaParser.evaluationTests;
 
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import org.junit.Test;
 
 public class MethodDotFieldOrMethodTest
@@ -23,7 +22,7 @@ public class MethodDotFieldOrMethodTest
 			.test("getTestClassAsObject().getString()");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("getTestClassAsObject().i",				7)
 			.test("getTestClassAsObject().d",				1.2)
 			.test("getTestClassAsObject().getString()",	"xyz");

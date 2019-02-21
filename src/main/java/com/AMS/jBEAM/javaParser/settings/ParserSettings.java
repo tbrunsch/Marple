@@ -7,18 +7,16 @@ public class ParserSettings
 	private final Imports			imports;
 	private final VariablePool		variablePool;
 	private final AccessLevel		minimumAccessLevel;
-	private final EvaluationMode	evaluationModeCodeCompletion;
-	private final EvaluationMode	evaluationModeCodeEvaluation;
+	private final boolean			enableDynamicTyping;
 	private final ObjectTreeNodeIF	customHierarchyRoot;
 
 	private final ParserLoggerIF	logger;
 
-	ParserSettings(Imports imports, VariablePool variablePool, AccessLevel minimumAccessLevel, EvaluationMode evaluationModeCodeCompletion, EvaluationMode evaluationModeCodeEvaluation, ObjectTreeNodeIF customHierarchyRoot, ParserLoggerIF logger) {
+	ParserSettings(Imports imports, VariablePool variablePool, AccessLevel minimumAccessLevel, boolean enableDynamicTyping, ObjectTreeNodeIF customHierarchyRoot, ParserLoggerIF logger) {
 		this.imports = imports;
 		this.variablePool = variablePool;
 		this.minimumAccessLevel = minimumAccessLevel;
-		this.evaluationModeCodeCompletion = evaluationModeCodeCompletion;
-		this.evaluationModeCodeEvaluation = evaluationModeCodeEvaluation;
+		this.enableDynamicTyping = enableDynamicTyping;
 		this.customHierarchyRoot = customHierarchyRoot;
 		this.logger = logger;
 	}
@@ -35,12 +33,8 @@ public class ParserSettings
 		return minimumAccessLevel;
 	}
 
-	public EvaluationMode getEvaluationModeCodeCompletion() {
-		return evaluationModeCodeCompletion;
-	}
-
-	public EvaluationMode getEvaluationModeCodeEvaluation() {
-		return evaluationModeCodeEvaluation;
+	public boolean isEnableDynamicTyping() {
+		return enableDynamicTyping;
 	}
 
 	public ObjectTreeNodeIF getCustomHierarchyRoot() {

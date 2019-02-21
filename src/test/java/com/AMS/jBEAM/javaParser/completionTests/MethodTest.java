@@ -13,16 +13,6 @@ import static org.junit.Assert.assertEquals;
 public class MethodTest
 {
 	@Test
-	public void testMethodParseErrorAndSideEffect() {
-		TestClass1 testInstance = new TestClass1();
-		new ErrorTestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.STATICALLY_TYPED)
-			.test("f(g(), s)", 9, ParseException.class);
-
-		assertEquals("Triggered side effect despite parse error", testInstance.sideEffectCounter, 0);
-	}
-
-	@Test
 	public void testMethod() {
 		/*
 		 * Convention for this test: Methods whose names consist of n characters have n arguments.

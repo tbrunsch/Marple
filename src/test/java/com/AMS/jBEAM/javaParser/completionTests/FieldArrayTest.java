@@ -1,7 +1,6 @@
 package com.AMS.jBEAM.javaParser.completionTests;
 
 import com.AMS.jBEAM.javaParser.ParseException;
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import org.junit.Test;
 
 public class FieldArrayTest
@@ -36,13 +35,13 @@ public class FieldArrayTest
 			.test("array[", 6, ParseException.class);
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("array[",		"i0", "i1", "i2")
 			.test("array[i0].",	"value")
 			.test("array[i1].",	"index");
 
 		new ErrorTestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("array[i2].",				10, ParseException.class)
 			.test("array[array[i1].index].",	23, ParseException.class);
 	}

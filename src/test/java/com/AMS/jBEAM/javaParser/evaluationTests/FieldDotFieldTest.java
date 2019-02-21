@@ -1,6 +1,5 @@
 package com.AMS.jBEAM.javaParser.evaluationTests;
 
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import org.junit.Test;
 
 public class FieldDotFieldTest
@@ -21,7 +20,7 @@ public class FieldDotFieldTest
 			.test("o.f");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("o.i", 2)
 			.test("o.f", 1.3f);
 	}

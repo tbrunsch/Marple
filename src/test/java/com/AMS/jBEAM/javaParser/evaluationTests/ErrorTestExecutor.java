@@ -3,7 +3,6 @@ package com.AMS.jBEAM.javaParser.evaluationTests;
 import com.AMS.jBEAM.javaParser.JavaParser;
 import com.AMS.jBEAM.javaParser.ParseException;
 import com.AMS.jBEAM.javaParser.common.AbstractTestExecutor;
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.javaParser.settings.ParserSettings;
 
 import static org.junit.Assert.assertTrue;
@@ -16,11 +15,6 @@ public class ErrorTestExecutor extends AbstractTestExecutor<ErrorTestExecutor>
 {
 	public ErrorTestExecutor(Object testInstance) {
 		super(testInstance);
-	}
-
-	public ErrorTestExecutor evaluationMode(EvaluationMode evaluationMode) {
-		settingsBuilder.evaluationModeCodeEvaluation(evaluationMode);
-		return this;
 	}
 
 	public ErrorTestExecutor test(String javaExpression) {

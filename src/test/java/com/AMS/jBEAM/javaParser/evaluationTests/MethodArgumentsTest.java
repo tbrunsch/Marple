@@ -1,6 +1,5 @@
 package com.AMS.jBEAM.javaParser.evaluationTests;
 
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -24,7 +23,7 @@ public class MethodArgumentsTest
 			.test("objectAdd(i,objectAdd(i,d))");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("objectAdd(i,objectAdd(i,d))", 8.5);
 	}
 

@@ -1,6 +1,5 @@
 package com.AMS.jBEAM.javaParser.evaluationTests;
 
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import org.junit.Test;
 
 public class MethodOverloadTest
@@ -25,12 +24,12 @@ public class MethodOverloadTest
 			.test("getTestClass(getTestClass(j)).myString");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("getTestClass(getTestClass(i)).myInt",		7)
 			.test("getTestClass(getTestClass(j)).myString",	"abc");
 
 		new ErrorTestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("getTestClass(getTestClass(i)).myString")
 			.test("getTestClass(getTestClass(j)).myInt");
 	}

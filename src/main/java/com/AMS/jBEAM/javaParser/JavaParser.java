@@ -4,7 +4,7 @@ import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.debug.ParserLogEntry;
 import com.AMS.jBEAM.javaParser.parsers.ParseExpectation;
 import com.AMS.jBEAM.javaParser.result.*;
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
+import com.AMS.jBEAM.javaParser.settings.ParseMode;
 import com.AMS.jBEAM.javaParser.settings.ParserSettings;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
@@ -31,19 +31,7 @@ public class JavaParser
 	};
 
 	public List<CompletionSuggestionIF> suggestCodeCompletion(String javaExpression, ParserSettings settings, int caret, Object valueOfThis) throws ParseException {
-		ParseResultIF parseResult;
-
-		EvaluationMode evaluationMode = settings.getEvaluationModeCodeCompletion();
-		if (evaluationMode == EvaluationMode.STATICALLY_TYPED) {
-			// First iteration without evaluation to avoid side effects when errors occur
-			parseResult = parse(javaExpression, settings, EvaluationMode.NONE, caret, valueOfThis);
-			if (parseResult.getResultType() == ParseResultType.COMPLETION_SUGGESTIONS) {
-				// Second iteration with evaluation (side effects cannot be avoided)
-				parseResult = parse(javaExpression, settings, evaluationMode, caret, valueOfThis);
-			}
-		} else {
-			parseResult = parse(javaExpression, settings, evaluationMode, caret, valueOfThis);
-		}
+		ParseResultIF parseResult = parse(javaExpression, settings, ParseMode.CODE_COMPLETION, caret, valueOfThis);
 
 		switch (parseResult.getResultType()) {
 			case OBJECT_PARSE_RESULT: {
@@ -80,16 +68,15 @@ public class JavaParser
 	public Object evaluate(String javaExpression, ParserSettings settings, Object valueOfThis) throws ParseException {
 		ParseResultIF parseResult;
 
-		EvaluationMode evaluationMode = settings.getEvaluationModeCodeEvaluation();
-		if (evaluationMode == EvaluationMode.STATICALLY_TYPED) {
+		if (!settings.isEnableDynamicTyping()) {
 			// First iteration without evaluation to avoid side effects when errors occur
-			parseResult = parse(javaExpression, settings, EvaluationMode.NONE,-1, valueOfThis);
+			parseResult = parse(javaExpression, settings, ParseMode.WITHOUT_EVALUATION,-1, valueOfThis);
 			if (parseResult.getResultType() == ParseResultType.OBJECT_PARSE_RESULT) {
 				// Second iteration with evaluation (side effects cannot be avoided)
-				parseResult = parse(javaExpression, settings, evaluationMode,-1, valueOfThis);
+				parseResult = parse(javaExpression, settings, ParseMode.EVALUATION,-1, valueOfThis);
 			}
 		} else {
-			parseResult = parse(javaExpression, settings, evaluationMode,-1, valueOfThis);
+			parseResult = parse(javaExpression, settings, ParseMode.EVALUATION,-1, valueOfThis);
 		}
 
 		switch (parseResult.getResultType()) {
@@ -120,9 +107,9 @@ public class JavaParser
 		}
 	}
 
-	private ParseResultIF parse(String javaExpression, ParserSettings settings, EvaluationMode evaluationMode, int caret, Object valueOfThis) {
+	private ParseResultIF parse(String javaExpression, ParserSettings settings, ParseMode parseMode, int caret, Object valueOfThis) {
 		ObjectInfo thisInfo = new ObjectInfo(valueOfThis, null);
-		ParserContext parserPool  = new ParserContext(thisInfo, settings, evaluationMode);
+		ParserContext parserPool  = new ParserContext(thisInfo, settings, parseMode);
 		TokenStream tokenStream = new TokenStream(javaExpression, caret);
 		try {
 			return parserPool.getRootParser().parse(tokenStream, thisInfo, ParseExpectation.OBJECT);

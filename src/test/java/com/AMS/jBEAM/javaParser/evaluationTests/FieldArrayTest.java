@@ -1,6 +1,5 @@
 package com.AMS.jBEAM.javaParser.evaluationTests;
 
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import org.junit.Test;
 
 public class FieldArrayTest
@@ -25,7 +24,7 @@ public class FieldArrayTest
 			.test("o[i3]");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("o[i0]", 1)
 			.test("o[i1]", 4)
 			.test("o[i2]", 3)

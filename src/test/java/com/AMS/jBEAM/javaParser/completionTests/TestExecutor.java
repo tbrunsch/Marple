@@ -7,7 +7,6 @@ import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.debug.ParserLogEntry;
 import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionIF;
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.javaParser.settings.ParserSettings;
 
 import java.text.MessageFormat;
@@ -24,11 +23,6 @@ public class TestExecutor extends AbstractTestExecutor<TestExecutor>
 {
 	public TestExecutor(Object testInstance) {
 		super(testInstance);
-	}
-
-	public TestExecutor evaluationMode(EvaluationMode evaluationMode) {
-		settingsBuilder.evaluationModeCodeCompletion(evaluationMode);
-		return this;
 	}
 
 	public TestExecutor test(String javaExpression, String... expectedSuggestions) {

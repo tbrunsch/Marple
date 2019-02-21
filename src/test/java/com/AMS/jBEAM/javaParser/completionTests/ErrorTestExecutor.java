@@ -18,11 +18,6 @@ public class ErrorTestExecutor extends AbstractTestExecutor<ErrorTestExecutor>
 		super(testInstance);
 	}
 
-	public ErrorTestExecutor evaluationMode(EvaluationMode evaluationMode) {
-		settingsBuilder.evaluationModeCodeCompletion(evaluationMode);
-		return this;
-	}
-
 	public ErrorTestExecutor test(String javaExpression, int caret, Class<? extends Exception> expectedExceptionClass) {
 		ParserSettings settings = settingsBuilder.build();
 

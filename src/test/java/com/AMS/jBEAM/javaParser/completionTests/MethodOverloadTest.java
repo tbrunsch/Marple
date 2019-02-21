@@ -1,7 +1,6 @@
 package com.AMS.jBEAM.javaParser.completionTests;
 
 import com.AMS.jBEAM.javaParser.ParseException;
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import org.junit.Test;
 
 public class MethodOverloadTest
@@ -28,7 +27,7 @@ public class MethodOverloadTest
 			.test("getTestClass(getTestClass(i)).", 30, ParseException.class);
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("getTestClass(getTestClass(i)).", "myInt")
 			.test("getTestClass(getTestClass(j)).", "myString");
 	}

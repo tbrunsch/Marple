@@ -2,6 +2,7 @@ package com.AMS.jBEAM.javaParser;
 
 import com.AMS.jBEAM.javaParser.parsers.*;
 import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
+import com.AMS.jBEAM.javaParser.settings.ParseMode;
 import com.AMS.jBEAM.javaParser.settings.ParserSettings;
 import com.AMS.jBEAM.javaParser.utils.dataProviders.*;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
@@ -39,9 +40,11 @@ public class ParserContext
 	private final AbstractEntityParser<ObjectInfo>		unaryPrefixOperatorParser;
 	private final AbstractEntityParser<ObjectInfo>		variableParser;
 
-	public ParserContext(ObjectInfo thisInfo, ParserSettings settings, EvaluationMode evaluationMode) {
+	public ParserContext(ObjectInfo thisInfo, ParserSettings settings, ParseMode parseMode) {
 		this.thisInfo = thisInfo;
 		this.settings = settings;
+
+		EvaluationMode evaluationMode = getEvaluationMode(settings, parseMode);
 
 		classDataProvider				= new ClassDataProvider(this);
 		executableDataProvider			= new ExecutableDataProvider(this);
@@ -69,6 +72,13 @@ public class ParserContext
 		rootParser						= createRootParser(OperatorResultProvider.MAX_BINARY_OPERATOR_PRECEDENCE_LEVEL);
 		unaryPrefixOperatorParser		= new UnaryPrefixOperatorParser(this, thisInfo);
 		variableParser					= new VariableParser(this, thisInfo);
+	}
+
+	private static EvaluationMode getEvaluationMode(ParserSettings settings, ParseMode parseMode) {
+		if (settings.isEnableDynamicTyping()) {
+			return EvaluationMode.DYNAMICALLY_TYPED;
+		}
+		return parseMode == ParseMode.EVALUATION ? EvaluationMode.STATICALLY_TYPED : EvaluationMode.NONE;
 	}
 
 	public ObjectInfo getThisInfo() {

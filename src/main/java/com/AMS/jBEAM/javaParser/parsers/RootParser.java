@@ -4,7 +4,7 @@ import com.AMS.jBEAM.javaParser.ParserContext;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
+import com.AMS.jBEAM.javaParser.settings.ParseMode;
 import com.AMS.jBEAM.javaParser.tokenizer.BinaryOperator;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
@@ -184,7 +184,7 @@ public class RootParser extends AbstractEntityParser<ObjectInfo>
 	}
 
 	private ParserContext createContextWithoutEvaluation() {
-		return new ParserContext(parserContext.getThisInfo(), parserContext.getSettings(), EvaluationMode.NONE);
+		return new ParserContext(parserContext.getThisInfo(), parserContext.getSettings(), ParseMode.WITHOUT_EVALUATION);
 	}
 
 	@FunctionalInterface

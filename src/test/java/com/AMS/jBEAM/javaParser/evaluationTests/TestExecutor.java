@@ -6,7 +6,6 @@ import com.AMS.jBEAM.javaParser.common.AbstractTestExecutor;
 import com.AMS.jBEAM.javaParser.debug.LogLevel;
 import com.AMS.jBEAM.javaParser.debug.ParserLogEntry;
 import com.AMS.jBEAM.javaParser.debug.ParserLoggerIF;
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.javaParser.settings.ParserSettings;
 
 import java.util.Objects;
@@ -21,11 +20,6 @@ public class TestExecutor extends AbstractTestExecutor<TestExecutor>
 {
 	public TestExecutor(Object testInstance) {
 		super(testInstance);
-	}
-
-	public TestExecutor evaluationMode(EvaluationMode evaluationMode) {
-		settingsBuilder.evaluationModeCodeEvaluation(evaluationMode);
-		return this;
 	}
 
 	public TestExecutor test(String javaExpression, Object expectedValue) {

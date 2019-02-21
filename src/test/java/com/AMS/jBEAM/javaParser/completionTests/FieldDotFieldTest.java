@@ -33,7 +33,7 @@ public class FieldDotFieldTest
 			.test("member.xyz",	"xyz", "x");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("member.",		"xy", "x", "xyz")
 			.test("member.x",		"x", "xy", "xyz")
 			.test("member.xy",		"xy", "xyz", "x")

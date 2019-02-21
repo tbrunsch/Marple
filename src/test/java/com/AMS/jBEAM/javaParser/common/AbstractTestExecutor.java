@@ -21,39 +21,48 @@ public class AbstractTestExecutor<T extends AbstractTestExecutor>
 		this.testInstance = testInstance;
 	}
 
+	private T getBuilder() {
+		return (T) this;
+	}
+
 	public T addVariable(Variable variable) {
 		settingsBuilder.addVariable(variable);
-		return (T) this;
+		return getBuilder();
 	}
 
 	public T minimumAccessLevel(AccessLevel minimumAccessLevel) {
 		settingsBuilder.minimumAccessLevel(minimumAccessLevel);
-		return (T) this;
+		return getBuilder();
 	}
 
 	public T importClass(String className) {
 		settingsBuilder.importClass(className);
-		return (T) this;
+		return getBuilder();
 	}
 
 	public T importPackage(String packageName) {
 		settingsBuilder.importPackage(packageName);
-		return (T) this;
+		return getBuilder();
 	}
 
 	public T customHierarchyRoot(ObjectTreeNodeIF root) {
 		settingsBuilder.customHierarchyRoot(root);
-		return (T) this;
+		return getBuilder();
+	}
+
+	public T enableDynamicTyping() {
+		settingsBuilder.enableDynamicTyping(true);
+		return getBuilder();
 	}
 
 	public T stopAtError() {
 		stopAtError = true;
-		return (T) this;
+		return getBuilder();
 	}
 
 	public T printLogEntriesAtError() {
 		printLogEntriesAtError = true;
-		return (T) this;
+		return getBuilder();
 	}
 
 	protected ParserLoggerIF prepareLogger(boolean printToConsole, int numLoggedEntriesToStopAfter) {

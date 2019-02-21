@@ -1,6 +1,5 @@
 package com.AMS.jBEAM.javaParser.completionTests;
 
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import org.junit.Test;
 
 import java.util.*;
@@ -19,7 +18,7 @@ public class GenericsTest
 			.test("testSetString(",	"collListInt", "collListString", "collSetInt", "collSetString", "listInt", "listString");	// no class match, so fields ordered lexicographically
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("testCollInt(",		"collListInt", "collSetInt", "listInt")
 			.test("testCollString(",	"collListString", "collSetString", "listString")
 			.test("testListInt(",		"collListInt", "listInt")

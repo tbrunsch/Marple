@@ -15,8 +15,7 @@ public class ParserSettingsBuilder
 
 	private AccessLevel													minimumAccessLevel				= AccessLevel.PUBLIC;
 
-	private EvaluationMode												evaluationModeCodeCompletion	= EvaluationMode.NONE;
-	private EvaluationMode												evaluationModeCodeEvaluation	= EvaluationMode.STATICALLY_TYPED;
+	private boolean														enableDynamicTyping				= false;
 
 	private ObjectTreeNodeIF											customHierarchyRoot				= LeafObjectTreeNode.EMPTY;
 
@@ -46,13 +45,8 @@ public class ParserSettingsBuilder
 		return this;
 	}
 
-	public ParserSettingsBuilder evaluationModeCodeCompletion(EvaluationMode evaluationModeCodeCompletion) {
-		this.evaluationModeCodeCompletion = evaluationModeCodeCompletion;
-		return this;
-	}
-
-	public ParserSettingsBuilder evaluationModeCodeEvaluation(EvaluationMode evaluationModeCodeEvaluation) {
-		this.evaluationModeCodeEvaluation = evaluationModeCodeEvaluation;
+	public ParserSettingsBuilder enableDynamicTyping(boolean enableDynamicTyping) {
+		this.enableDynamicTyping = enableDynamicTyping;
 		return this;
 	}
 
@@ -69,6 +63,6 @@ public class ParserSettingsBuilder
 	public ParserSettings build() {
 		Imports imports = new Imports(importClassesBuilder.build(), importPackageNamesBuilder.build());
 		VariablePool variablePool = new VariablePool(variablesBuilder.build());
-		return new ParserSettings(imports, variablePool, minimumAccessLevel, evaluationModeCodeCompletion, evaluationModeCodeEvaluation, customHierarchyRoot, logger);
+		return new ParserSettings(imports, variablePool, minimumAccessLevel, enableDynamicTyping, customHierarchyRoot, logger);
 	}
 }

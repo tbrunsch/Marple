@@ -1,6 +1,5 @@
 package com.AMS.jBEAM.javaParser.evaluationTests;
 
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.junit.Test;
@@ -60,7 +59,7 @@ public class GenericsTest
 			.test("testSetString(listString)");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("testListInt(collListInt)",			testInstance.collListInt)
 			.test("testListString(collListString)",	testInstance.collListString)
 			.test("testSetInt(collSetInt)",			testInstance.collSetInt)

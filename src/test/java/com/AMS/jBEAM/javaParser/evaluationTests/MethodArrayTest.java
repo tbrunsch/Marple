@@ -1,6 +1,5 @@
 package com.AMS.jBEAM.javaParser.evaluationTests;
 
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import org.junit.Test;
 
 public class MethodArrayTest
@@ -25,7 +24,7 @@ public class MethodArrayTest
 			.test("getTestClasses()[getI1()].getI1()");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
+			.enableDynamicTyping()
 			.test("getTestClasses()[o].o",				13)
 			.test("getTestClasses()[o].getI1()",		7)
 			.test("getTestClasses()[getI1()].o",		4)
