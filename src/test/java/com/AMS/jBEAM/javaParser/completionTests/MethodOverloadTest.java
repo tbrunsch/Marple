@@ -28,7 +28,7 @@ public class MethodOverloadTest
 			.test("getTestClass(getTestClass(i)).", 30, ParseException.class);
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("getTestClass(getTestClass(i)).", "myInt")
 			.test("getTestClass(getTestClass(j)).", "myString");
 	}

@@ -15,7 +15,7 @@ public class MethodDotFieldOrMethodTest
 	}
 
 	@Test
-	public void testMethodDotFieldOrMethodDuckTyping() {
+	public void testMethodDotFieldOrMethodWithEvaluation() {
 		Object testInstance = new TestClass();
 		new ErrorTestExecutor(testInstance)
 			.test("getTestClassAsObject().i")
@@ -23,7 +23,7 @@ public class MethodDotFieldOrMethodTest
 			.test("getTestClassAsObject().getString()");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("getTestClassAsObject().i",				7)
 			.test("getTestClassAsObject().d",				1.2)
 			.test("getTestClassAsObject().getString()",	"xyz");

@@ -168,7 +168,7 @@ public class ExecutableDataProvider
 
 	private int rateMethodByTypes(ExecutableInfo methodInfo, ParseExpectation expectation) {
 		/*
-		 * Even for EvaluationMode.DUCK_TYPING we only consider the declared return type of the method instead
+		 * Even for EvaluationMode.DYNAMICALLY_TYPED we only consider the declared return type of the method instead
 		 * of the runtime type of the returned object. Otherwise, we would have to invoke the method for code
 		 * completion, possibly causing undesired side effects.
 		 */

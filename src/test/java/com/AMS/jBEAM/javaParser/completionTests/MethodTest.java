@@ -16,7 +16,7 @@ public class MethodTest
 	public void testMethodParseErrorAndSideEffect() {
 		TestClass1 testInstance = new TestClass1();
 		new ErrorTestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.STRONGLY_TYPED)
+			.evaluationMode(EvaluationMode.STATICALLY_TYPED)
 			.test("f(g(), s)", 9, ParseException.class);
 
 		assertEquals("Triggered side effect despite parse error", testInstance.sideEffectCounter, 0);

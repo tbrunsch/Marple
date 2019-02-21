@@ -19,7 +19,7 @@ public class GenericsTest
 			.test("testSetString(",	"collListInt", "collListString", "collSetInt", "collSetString", "listInt", "listString");	// no class match, so fields ordered lexicographically
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("testCollInt(",		"collListInt", "collSetInt", "listInt")
 			.test("testCollString(",	"collListString", "collSetString", "listString")
 			.test("testListInt(",		"collListInt", "listInt")

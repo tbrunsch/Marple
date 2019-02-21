@@ -22,18 +22,19 @@ public enum EvaluationMode
 	 * was 5. Otherwise, one has to fix the expression to "((String) o).length()", leading to the
 	 * desired result.
 	 */
-	STRONGLY_TYPED,
+	STATICALLY_TYPED,
 
 	/**
-	 * use actual types
+	 * use runtime types
 	 *
-	 * Safes (for concrete instances) unnecessary casts, but can be dangerous with overloaded methods.
+	 * Safes unnecessary casts, but can be dangerous with overloaded methods.
 	 *
-	 * Example: Object o = "12345", method String getType(Object obj) { return "object"; }, and
+	 * Example: Object o = "12345",
+	 * 			method String getType(Object obj) { return "object"; }, and
 	 *          method String getType(String s) { return "string"; }
 	 *
-	 * With duck typing, the expression "getType(o)" will be evaluated to "string", with strong typing
-	 * it will be evaluated to "object".
+	 * 			With dynamic typing, the expression "getType(o)" will be evaluated to "string",
+	 * 			with static typing it will be evaluated to "object".
 	 */
-	DUCK_TYPING		// use actual type; safes unnecessary casts, but can be dangerous when
+	DYNAMICALLY_TYPED
 }

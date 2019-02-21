@@ -29,7 +29,7 @@ public class ObjectInfoProvider
 			return TypeToken.of(runtimeClass);
 		}
 
-		if (evaluationMode == EvaluationMode.DUCK_TYPING) {
+		if (evaluationMode == EvaluationMode.DYNAMICALLY_TYPED) {
 			if (declaredType.isPrimitive()) {
 				return declaredType;
 			}

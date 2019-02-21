@@ -60,7 +60,7 @@ public class GenericsTest
 			.test("testSetString(listString)");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("testListInt(collListInt)",			testInstance.collListInt)
 			.test("testListString(collListString)",	testInstance.collListString)
 			.test("testSetInt(collSetInt)",			testInstance.collSetInt)

@@ -14,14 +14,14 @@ public class FieldDotFieldTest
 	}
 
 	@Test
-	public void testFieldDotFieldWithDuckTyping() {
+	public void testFieldDotFieldWithEvaluation() {
 		Object testInstance = new TestClass2();
 		new ErrorTestExecutor(testInstance)
 			.test("o.i")
 			.test("o.f");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("o.i", 2)
 			.test("o.f", 1.3f);
 	}

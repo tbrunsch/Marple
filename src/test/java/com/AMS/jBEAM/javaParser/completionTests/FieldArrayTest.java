@@ -36,13 +36,13 @@ public class FieldArrayTest
 			.test("array[", 6, ParseException.class);
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("array[",		"i0", "i1", "i2")
 			.test("array[i0].",	"value")
 			.test("array[i1].",	"index");
 
 		new ErrorTestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("array[i2].",				10, ParseException.class)
 			.test("array[array[i1].index].",	23, ParseException.class);
 	}

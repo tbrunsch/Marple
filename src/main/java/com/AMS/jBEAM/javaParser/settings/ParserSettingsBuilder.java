@@ -16,7 +16,7 @@ public class ParserSettingsBuilder
 	private AccessLevel													minimumAccessLevel				= AccessLevel.PUBLIC;
 
 	private EvaluationMode												evaluationModeCodeCompletion	= EvaluationMode.NONE;
-	private EvaluationMode												evaluationModeCodeEvaluation	= EvaluationMode.STRONGLY_TYPED;
+	private EvaluationMode												evaluationModeCodeEvaluation	= EvaluationMode.STATICALLY_TYPED;
 
 	private ObjectTreeNodeIF											customHierarchyRoot				= LeafObjectTreeNode.EMPTY;
 

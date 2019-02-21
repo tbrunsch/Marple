@@ -34,7 +34,7 @@ public class JavaParser
 		ParseResultIF parseResult;
 
 		EvaluationMode evaluationMode = settings.getEvaluationModeCodeCompletion();
-		if (evaluationMode == EvaluationMode.STRONGLY_TYPED) {
+		if (evaluationMode == EvaluationMode.STATICALLY_TYPED) {
 			// First iteration without evaluation to avoid side effects when errors occur
 			parseResult = parse(javaExpression, settings, EvaluationMode.NONE, caret, valueOfThis);
 			if (parseResult.getResultType() == ParseResultType.COMPLETION_SUGGESTIONS) {
@@ -81,7 +81,7 @@ public class JavaParser
 		ParseResultIF parseResult;
 
 		EvaluationMode evaluationMode = settings.getEvaluationModeCodeEvaluation();
-		if (evaluationMode == EvaluationMode.STRONGLY_TYPED) {
+		if (evaluationMode == EvaluationMode.STATICALLY_TYPED) {
 			// First iteration without evaluation to avoid side effects when errors occur
 			parseResult = parse(javaExpression, settings, EvaluationMode.NONE,-1, valueOfThis);
 			if (parseResult.getResultType() == ParseResultType.OBJECT_PARSE_RESULT) {

@@ -32,7 +32,7 @@ public class MethodArgumentsTest
 			.test("getTestClassObject(getObject()).get", 35, ParseException.class);
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("getTestClassObject(getObject()).get", "getObject()", "getTestClassObject()", "getClass()");
 	}
 

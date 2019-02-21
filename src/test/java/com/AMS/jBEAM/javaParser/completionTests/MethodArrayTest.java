@@ -39,7 +39,7 @@ public class MethodArrayTest
 			.test("getArray(size)[", 15, ParseException.class);
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("getArray(size)[",			"index", "size")
 			.test("getArray(size)[index].",	"index", "size");
 	}

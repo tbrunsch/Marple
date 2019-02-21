@@ -16,7 +16,7 @@ public class FieldArrayTest
 	}
 
 	@Test
-	public void testFieldArrayWithDuckTyping() {
+	public void testFieldArrayWithEvaluation() {
 		Object testInstance = new TestClass();
 		new ErrorTestExecutor(testInstance)
 			.test("o[i0]")
@@ -25,7 +25,7 @@ public class FieldArrayTest
 			.test("o[i3]");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("o[i0]", 1)
 			.test("o[i1]", 4)
 			.test("o[i2]", 3)

@@ -18,19 +18,19 @@ public class MethodOverloadTest
 	}
 
 	@Test
-	public void testMethodOverloadDuckTyping() {
+	public void testMethodOverloadWithEvaluation() {
 		Object testInstance = new TestClass2C();
 		new ErrorTestExecutor(testInstance)
 			.test("getTestClass(getTestClass(i)).myInt")
 			.test("getTestClass(getTestClass(j)).myString");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("getTestClass(getTestClass(i)).myInt",		7)
 			.test("getTestClass(getTestClass(j)).myString",	"abc");
 
 		new ErrorTestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("getTestClass(getTestClass(i)).myString")
 			.test("getTestClass(getTestClass(j)).myInt");
 	}

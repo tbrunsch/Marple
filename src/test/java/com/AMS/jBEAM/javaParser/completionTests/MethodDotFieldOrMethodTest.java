@@ -35,7 +35,7 @@ public class MethodDotFieldOrMethodTest
 			.test("getObject().get",	"getInt()", getClass, "x", "xyz");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("getObject().",		"xy", "x", "xyz", "getDouble()", "getInt()")
 			.test("getObject().x",		"x", "xy", "xyz", "getDouble()", "getInt()")
 			.test("getObject().xy",	"xy", "xyz", "x", "getDouble()", "getInt()")

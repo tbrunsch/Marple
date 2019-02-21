@@ -18,13 +18,13 @@ public class MethodArgumentsTest
 	}
 
 	@Test
-	public void testMethodArgumentsDuckTyping() {
+	public void testMethodArgumentsWithEvaluation() {
 		Object testInstance = new TestClass1();
 		new ErrorTestExecutor(testInstance)
 			.test("objectAdd(i,objectAdd(i,d))");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("objectAdd(i,objectAdd(i,d))", 8.5);
 	}
 

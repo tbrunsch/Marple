@@ -16,7 +16,7 @@ public class MethodArrayTest
 	}
 
 	@Test
-	public void testMethodArrayWithDuckTyping() {
+	public void testMethodArrayWithEvaluation() {
 		Object testInstance = new TestClass(0, 1);
 		new ErrorTestExecutor(testInstance)
 			.test("getTestClasses()[o].o")
@@ -25,7 +25,7 @@ public class MethodArrayTest
 			.test("getTestClasses()[getI1()].getI1()");
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("getTestClasses()[o].o",				13)
 			.test("getTestClasses()[o].getI1()",		7)
 			.test("getTestClasses()[getI1()].o",		4)

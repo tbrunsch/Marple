@@ -17,7 +17,7 @@ public class AmbiguityTest
 			.test("get(o2)",	testInstance.get(testInstance.o2));
 
 		new TestExecutor(testInstance)
-			.evaluationMode(EvaluationMode.DUCK_TYPING)
+			.evaluationMode(EvaluationMode.DYNAMICALLY_TYPED)
 			.test("get(o1)", testInstance.get(testInstance.o1))
 			.test("get(o2)", testInstance.get((Float) testInstance.o2));
 
