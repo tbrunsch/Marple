@@ -31,7 +31,7 @@ public class RegexUtils
 				 * Example: "ArrLi" will should also match "ArrayList", but not "xArrLi", so the corresponding regex should be "Arr[a-z0-9]*Li"
 				 */
 				if (i > 0) {
-					builder.append("[a-z0-9]*");
+					builder.append("[a-z0-9\\s]*");
 				}
 				builder.append(c);
 			} else {

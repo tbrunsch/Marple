@@ -251,7 +251,7 @@ public class ParseUtils
 
 	private static class WildcardPatternGenerator
 	{
-		private static String	WILDCARD_STRING;
+		private static String	WILDCARD_STRING;	// caches last wildcard string
 		private static Pattern	PATTERN;
 
 		static Pattern generate(String wildcardString) {
