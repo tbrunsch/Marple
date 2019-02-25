@@ -21,7 +21,7 @@ public class ClassCastTest
 			.test("(" + packageName + "." + className.substring(0, className.length()/2),				className);
 
 		new ErrorTestExecutor(testInstance)
-			.test("get(o).", 7, ParseException.class);
+			.test("get(o).", ParseException.class);
 	}
 
 	private static class TestClass

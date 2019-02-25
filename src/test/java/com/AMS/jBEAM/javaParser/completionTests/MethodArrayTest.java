@@ -24,19 +24,19 @@ public class MethodArrayTest
 			.test("getTestClasses()[xyzw].x",	"xy", "xyz", "xyzw");
 
 		new ErrorTestExecutor(testInstance)
-			.test("xy[", 3, ParseException.class)
-			.test("xyz[", 4, ParseException.class)
-			.test("xyzw[", 5, ParseException.class)
-			.test("getTestClasses()[xy].", 21, ParseException.class)
-			.test("getTestClasses()[xyz]", -1, IllegalStateException.class)
-			.test("getTestClasses()[xyz)", 21, ParseException.class);
+			.test("xy[",								ParseException.class)
+			.test("xyz[",								ParseException.class)
+			.test("xyzw[",								ParseException.class)
+			.test("getTestClasses()[xy].",				ParseException.class)
+			.test("getTestClasses()[xyz]", -1,	IllegalStateException.class)
+			.test("getTestClasses()[xyz)",				ParseException.class);
 	}
 
 	@Test
 	public void testMethodArrayWithEvaluation() {
 		Object testInstance = new TestClass2();
 		new ErrorTestExecutor(testInstance)
-			.test("getArray(size)[", 15, ParseException.class);
+			.test("getArray(size)[", ParseException.class);
 
 		new TestExecutor(testInstance)
 			.enableDynamicTyping()

@@ -18,6 +18,10 @@ public class ErrorTestExecutor extends AbstractTestExecutor<ErrorTestExecutor>
 		super(testInstance);
 	}
 
+	public ErrorTestExecutor test(String javaExpression, Class<? extends Exception> expectedExceptionClass) {
+		return test(javaExpression, javaExpression.length(), expectedExceptionClass);
+	}
+
 	public ErrorTestExecutor test(String javaExpression, int caret, Class<? extends Exception> expectedExceptionClass) {
 		ParserSettings settings = settingsBuilder.build();
 

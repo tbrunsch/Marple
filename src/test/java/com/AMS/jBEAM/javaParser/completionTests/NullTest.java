@@ -17,8 +17,8 @@ public class NullTest
 
 		new ErrorTestExecutor(testInstance)
 			.addVariable(new Variable("myNull", null, true))
-			.test("myNull.",	7, ParseException.class)
-			.test("null.",		5, ParseException.class);
+			.test("myNull.",	ParseException.class)
+			.test("null.",		ParseException.class);
 	}
 
 	private static class TestClass

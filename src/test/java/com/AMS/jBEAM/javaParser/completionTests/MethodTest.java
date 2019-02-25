@@ -37,7 +37,7 @@ public class MethodTest
 		new ErrorTestExecutor(testInstance)
 			.test("other()",	-1, IllegalStateException.class)
 			.test("bla",		-1, ParseException.class)
-			.test("other(),",	8, ParseException.class);
+			.test("other(),",	ParseException.class);
 	}
 
 	private static String formatMethod(String methodName) {

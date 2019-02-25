@@ -93,7 +93,7 @@ public class JavaParser
 			}
 			case PARSE_ERROR: {
 				ParseError error = (ParseError) parseResult;
-				throw new ParseException(error.getPosition(), error.getMessage(), error.getException());
+				throw new ParseException(error.getPosition(), error.getMessage(), error.getThrowable());
 			}
 			case AMBIGUOUS_PARSE_RESULT: {
 				AmbiguousParseResult result = (AmbiguousParseResult) parseResult;

@@ -17,17 +17,17 @@ public class ParseError implements ParseResultIF
 	private final int		position;
 	private final String	message;
 	private final ErrorType	errorType;
-	private final Exception	exception;
+	private final Throwable	throwable;
 
 	public ParseError(int position, String message, ErrorType errorType) {
 		this(position, message, errorType, null);
 	}
 
-	public ParseError(int position, String message, ErrorType errorType, Exception exception) {
+	public ParseError(int position, String message, ErrorType errorType, Throwable throwable) {
 		this.position = position;
 		this.message = message;
 		this.errorType = errorType;
-		this.exception = exception;
+		this.throwable = throwable;
 	}
 
 	@Override
@@ -48,12 +48,12 @@ public class ParseError implements ParseResultIF
 		return errorType;
 	}
 
-	public Exception getException() {
-		return exception;
+	public Throwable getThrowable() {
+		return throwable;
 	}
 
 	@Override
 	public String toString() {
-		return position + ": " + errorType + ": " + message + (exception == null ? "" : " (" + exception.getMessage() + ")");
+		return position + ": " + errorType + ": " + message + (throwable == null ? "" : " (" + throwable.getMessage() + ")");
 	}
 }

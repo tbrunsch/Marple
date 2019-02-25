@@ -20,8 +20,8 @@ public class MethodArgumentsTest
 
 		new ErrorTestExecutor(testInstance)
 			.test("prefixI(prefixD)",	-1, IllegalStateException.class)
-			.test("prefixD(prefixI)",	16, ParseException.class)
-			.test("prefixC(prefixI,",	16, ParseException.class)
+			.test("prefixD(prefixI)",	ParseException.class)
+			.test("prefixC(prefixI,",	ParseException.class)
 			.test("prefixI(prefixD))",	-1, ParseException.class);
 	}
 
@@ -29,7 +29,7 @@ public class MethodArgumentsTest
 	public void testMethodArgumentsWithEvaluation() {
 		Object testInstance = new TestClass2();
 		new ErrorTestExecutor(testInstance)
-			.test("getTestClassObject(getObject()).get", 35, ParseException.class);
+			.test("getTestClassObject(getObject()).get", ParseException.class);
 
 		new TestExecutor(testInstance)
 			.enableDynamicTyping()

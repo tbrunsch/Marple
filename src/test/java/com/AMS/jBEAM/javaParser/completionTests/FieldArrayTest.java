@@ -20,19 +20,19 @@ public class FieldArrayTest
 			.test("member[xyzw].x",	"xy", "xyz", "xyzw", "member");
 
 		new ErrorTestExecutor(testInstance)
-			.test("xy[",			3, ParseException.class)
-			.test("xyz[",			4, ParseException.class)
-			.test("xyzw[",			5, ParseException.class)
-			.test("member[xy].",	11, ParseException.class)
+			.test("xy[",			ParseException.class)
+			.test("xyz[",			ParseException.class)
+			.test("xyzw[",			ParseException.class)
+			.test("member[xy].",	ParseException.class)
 			.test("member[xyz]",	-1, IllegalStateException.class)
-			.test("member[xyz)",	11, ParseException.class);
+			.test("member[xyz)",	ParseException.class);
 	}
 
 	@Test
 	public void testFieldArrayWithEvaluation() {
 		TestClass2 testInstance = new TestClass2();
 		new ErrorTestExecutor(testInstance)
-			.test("array[", 6, ParseException.class);
+			.test("array[", ParseException.class);
 
 		new TestExecutor(testInstance)
 			.enableDynamicTyping()
@@ -42,8 +42,8 @@ public class FieldArrayTest
 
 		new ErrorTestExecutor(testInstance)
 			.enableDynamicTyping()
-			.test("array[i2].",				10, ParseException.class)
-			.test("array[array[i1].index].",	23, ParseException.class);
+			.test("array[i2].",				ParseException.class)
+			.test("array[array[i1].index].",	ParseException.class);
 	}
 
 	private static class TestClass1

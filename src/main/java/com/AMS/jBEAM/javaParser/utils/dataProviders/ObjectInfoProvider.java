@@ -46,7 +46,7 @@ public class ObjectInfoProvider
 		return getType(objectInfo.getObject(), objectInfo.getDeclaredType());
 	}
 
-	public ObjectInfo getFieldValueInfo(Object contextObject, FieldInfo fieldInfo) throws NullPointerException {
+	public ObjectInfo getFieldValueInfo(Object contextObject, FieldInfo fieldInfo) {
 		Object fieldValue = ObjectInfo.INDETERMINATE;
 		if (evaluationMode != EvaluationMode.NONE) {
 			try {
@@ -72,7 +72,7 @@ public class ObjectInfoProvider
 		};
 	}
 
-	public ObjectInfo getExecutableReturnInfo(Object contextObject, ExecutableInfo executableInfo, List<ObjectInfo> argumentInfos) throws NullPointerException {
+	public ObjectInfo getExecutableReturnInfo(Object contextObject, ExecutableInfo executableInfo, List<ObjectInfo> argumentInfos) throws InvocationTargetException, InstantiationException {
 		final Object methodReturnValue;
 		if (evaluationMode == EvaluationMode.NONE) {
 			methodReturnValue = ObjectInfo.INDETERMINATE;
@@ -80,7 +80,7 @@ public class ObjectInfoProvider
 			Object[] arguments = executableInfo.createArgumentArray(argumentInfos);
 			try {
 				methodReturnValue = executableInfo.invoke(contextObject, arguments);
-			} catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+			} catch (IllegalAccessException e) {
 				throw new IllegalStateException("Internal error: Unexpected " + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
 			}
 		}
@@ -88,7 +88,7 @@ public class ObjectInfoProvider
 		return new ObjectInfo(methodReturnValue, methodReturnType);
 	}
 
-	public ObjectInfo getArrayElementInfo(ObjectInfo arrayInfo, ObjectInfo indexInfo) throws NullPointerException {
+	public ObjectInfo getArrayElementInfo(ObjectInfo arrayInfo, ObjectInfo indexInfo) {
 		final Object arrayElementValue;
 		final ObjectInfo.ValueSetterIF valueSetter;
 		if (evaluationMode == EvaluationMode.NONE) {

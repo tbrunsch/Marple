@@ -9,6 +9,7 @@ import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ExecutableInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -114,6 +115,15 @@ abstract class AbstractMethodParser<C> extends AbstractEntityParser<C>
 				try {
 					methodReturnInfo = parserToolbox.getObjectInfoProvider().getExecutableReturnInfo(getContextObject(context), bestMatchingExecutableInfo, argumentInfos);
 					log(LogLevel.SUCCESS, "found unique matching method");
+				} catch (InvocationTargetException e) {
+					Throwable cause = e.getCause();
+					StringBuilder messageBuilder = new StringBuilder("caught " + cause.getClass().getSimpleName());
+					String causeMessage = cause.getMessage();
+					if (causeMessage != null) {
+						messageBuilder.append(": ").append(causeMessage);
+					}
+					log(LogLevel.ERROR, messageBuilder.toString());
+					return new ParseError(startPosition, "Exception during method evaluation", ErrorType.EVALUATION_EXCEPTION, cause);
 				} catch (Exception e) {
 					log(LogLevel.ERROR, "caught exception: " + e.getMessage());
 					return new ParseError(startPosition, "Exception during method evaluation", ErrorType.EVALUATION_EXCEPTION, e);

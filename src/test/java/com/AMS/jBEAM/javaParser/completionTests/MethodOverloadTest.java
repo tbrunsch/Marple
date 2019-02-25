@@ -24,7 +24,7 @@ public class MethodOverloadTest
 	public void testMethodOverloadWithEvaluation() {
 		Object testInstance = new TestClass2C();
 		new ErrorTestExecutor(testInstance)
-			.test("getTestClass(getTestClass(i)).", 30, ParseException.class);
+			.test("getTestClass(getTestClass(i)).", ParseException.class);
 
 		new TestExecutor(testInstance)
 			.enableDynamicTyping()

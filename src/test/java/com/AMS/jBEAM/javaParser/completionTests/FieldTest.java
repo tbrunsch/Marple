@@ -18,9 +18,9 @@ public class FieldTest
 			.test("XYW",	"XY", "X", "x", "xy");
 
 		new ErrorTestExecutor(testInstance)
-			.test("xy", -1, IllegalStateException.class)
+			.test("xy", -1,	IllegalStateException.class)
 			.test("bla", -1, ParseException.class)
-			.test("xy,", 3, ParseException.class);
+			.test("xy,",			ParseException.class);
 	}
 
 	private static abstract class BasicTestClass
