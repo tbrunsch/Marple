@@ -8,6 +8,7 @@ import com.AMS.jBEAM.javaParser.settings.ParseMode;
 import com.AMS.jBEAM.javaParser.settings.ParserSettings;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 import java.util.*;
 
@@ -108,7 +109,7 @@ public class JavaParser
 	}
 
 	private ParseResultIF parse(String javaExpression, ParserSettings settings, ParseMode parseMode, int caret, Object valueOfThis) {
-		ObjectInfo thisInfo = new ObjectInfo(valueOfThis, null);
+		ObjectInfo thisInfo = new ObjectInfo(valueOfThis, TypeInfo.UNKNOWN);
 		ParserToolbox parserPool  = new ParserToolbox(thisInfo, settings, parseMode);
 		TokenStream tokenStream = new TokenStream(javaExpression, caret);
 		try {

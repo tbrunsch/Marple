@@ -9,7 +9,7 @@ import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ExecutableInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 		}
 		ClassParseResult parseResult = (ClassParseResult) classParseResult;
 		int parsedToPosition = parseResult.getPosition();
-		TypeToken<?> type = parseResult.getType();
+		TypeInfo type = parseResult.getType();
 
 		tokenStream.moveTo(parsedToPosition);
 
@@ -64,7 +64,7 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 		}
 	}
 
-	private ParseResultIF parseObjectConstructor(TokenStream tokenStream, int startPosition, TypeToken<?> constructorType, ParseExpectation expectation) {
+	private ParseResultIF parseObjectConstructor(TokenStream tokenStream, int startPosition, TypeInfo constructorType, ParseExpectation expectation) {
 		Class<?> constructorClass = constructorType.getRawType();
 		if (constructorClass.getEnclosingClass() != null && !Modifier.isStatic(constructorClass.getModifiers())) {
 			log(LogLevel.ERROR, "cannot instantiate non-static inner class");
@@ -118,7 +118,7 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 		}
 	}
 
-	private ParseResultIF parseArrayConstructor(TokenStream tokenStream, int startPosition, TypeToken<?> componentType, ParseExpectation expectation) {
+	private ParseResultIF parseArrayConstructor(TokenStream tokenStream, int startPosition, TypeInfo componentType, ParseExpectation expectation) {
 		// TODO: currently, only 1d arrays are supported
 		ParseResultIF arraySizeParseResult = parseArraySize(tokenStream);
 		if (arraySizeParseResult == null) {
@@ -175,7 +175,7 @@ public class ConstructorParser extends AbstractEntityParser<ObjectInfo>
 			return null;
 		}
 
-		ParseExpectation expectation = ParseExpectationBuilder.expectObject().allowedType(TypeToken.of(int.class)).build();
+		ParseExpectation expectation = ParseExpectationBuilder.expectObject().allowedType(TypeInfo.of(int.class)).build();
 		ParseResultIF arraySizeParseResult = parserToolbox.getRootParser().parse(tokenStream, thisInfo, expectation);
 
 		if (ParseUtils.propagateParseResult(arraySizeParseResult, expectation)) {

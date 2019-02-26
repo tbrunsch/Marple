@@ -5,7 +5,7 @@ import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.settings.AccessLevel;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ExecutableInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.FieldInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -44,7 +44,7 @@ public class InspectionDataProvider
 		}
 	}
 
-	public List<FieldInfo> getFieldInfos(TypeToken<?> contextType, boolean staticOnly) {
+	public List<FieldInfo> getFieldInfos(TypeInfo contextType, boolean staticOnly) {
 		Predicate<Integer> modifierFilter = staticOnly ? accessLevelFilter.and(STATIC_FILTER) : accessLevelFilter;
 		List<Field> fields = ReflectionUtils.getFields(contextType.getRawType(), true, modifierFilter);
 		return fields.stream()
@@ -52,7 +52,7 @@ public class InspectionDataProvider
 				.collect(Collectors.toList());
 	}
 
-	public List<ExecutableInfo> getMethodInfos(TypeToken<?> contextType, boolean staticOnly) {
+	public List<ExecutableInfo> getMethodInfos(TypeInfo contextType, boolean staticOnly) {
 		Predicate<Integer> modifierFilter = staticOnly ? accessLevelFilter.and(STATIC_FILTER) : accessLevelFilter;
 		List<Method> methods = ReflectionUtils.getMethods(contextType.getRawType(), modifierFilter);
 		List<ExecutableInfo> executableInfos = new ArrayList<>(methods.size());
@@ -62,7 +62,7 @@ public class InspectionDataProvider
 		return executableInfos;
 	}
 
-	public List<ExecutableInfo> getConstructorInfos(TypeToken<?> contextType) {
+	public List<ExecutableInfo> getConstructorInfos(TypeInfo contextType) {
 		List<Constructor<?>> constructors = ReflectionUtils.getConstructors(contextType.getRawType(), accessLevelFilter);
 		List<ExecutableInfo> executableInfos = new ArrayList<>(constructors.size());
 		for (Constructor<?> constructor : constructors) {

@@ -1,17 +1,15 @@
 package com.AMS.jBEAM.javaParser.utils.wrappers;
 
-import com.google.common.reflect.TypeToken;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
 
 public class FieldInfo
 {
-	private final Field			field;
-	private final TypeToken<?>	declaringType;
+	private final Field		field;
+	private final TypeInfo	declaringType;
 
-	public FieldInfo(Field field, TypeToken<?> declaringType) {
+	public FieldInfo(Field field, TypeInfo declaringType) {
 		this.field = field;
 		this.declaringType = declaringType;
 	}
@@ -20,7 +18,7 @@ public class FieldInfo
 		return field.getName();
 	}
 
-	public TypeToken<?> getType() {
+	public TypeInfo getType() {
 		return declaringType.resolveType(field.getGenericType());
 	}
 
@@ -28,7 +26,7 @@ public class FieldInfo
 		return Modifier.isFinal(field.getModifiers());
 	}
 
-	public TypeToken<?> getDeclaringType() {
+	public TypeInfo getDeclaringType() {
 		return declaringType;
 	}
 

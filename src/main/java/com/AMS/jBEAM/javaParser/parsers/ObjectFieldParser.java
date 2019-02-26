@@ -3,7 +3,7 @@ package com.AMS.jBEAM.javaParser.parsers;
 import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.utils.wrappers.FieldInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ public class ObjectFieldParser extends AbstractFieldParser<ObjectInfo>
 
 	@Override
 	List<FieldInfo> getFieldInfos(ObjectInfo contextInfo) {
-		TypeToken<?> contextType = parserToolbox.getObjectInfoProvider().getType(contextInfo);
+		TypeInfo contextType = parserToolbox.getObjectInfoProvider().getType(contextInfo);
 		return parserToolbox.getInspectionDataProvider().getFieldInfos(contextType, false);
 	}
 }

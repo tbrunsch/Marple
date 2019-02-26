@@ -9,15 +9,15 @@ import com.AMS.jBEAM.javaParser.result.ParseResultType;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 import static com.AMS.jBEAM.javaParser.result.ParseError.ErrorType;
 
 public class LiteralParser extends AbstractEntityParser<ObjectInfo>
 {
-	private static final ObjectInfo	TRUE_INFO	= new ObjectInfo(true, TypeToken.of(boolean.class));
-	private static final ObjectInfo	FALSE_INFO	= new ObjectInfo(false, TypeToken.of(boolean.class));
-	private static final ObjectInfo	NULL_INFO	= new ObjectInfo(null, null);
+	private static final ObjectInfo	TRUE_INFO	= new ObjectInfo(true, TypeInfo.of(boolean.class));
+	private static final ObjectInfo	FALSE_INFO	= new ObjectInfo(false, TypeInfo.of(boolean.class));
+	private static final ObjectInfo	NULL_INFO	= new ObjectInfo(null, TypeInfo.NONE);
 
 	private final AbstractEntityParser<ObjectInfo> intParser;
 	private final AbstractEntityParser<ObjectInfo> longParser;
@@ -26,10 +26,10 @@ public class LiteralParser extends AbstractEntityParser<ObjectInfo>
 
 	public LiteralParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
 		super(parserToolbox, thisInfo);
-		intParser 		= new NumericLiteralParser<>(parserToolbox, thisInfo, TypeToken.of(int.class),		TokenStream::readIntegerLiteral,	Integer::parseInt,		"Invalid int literal");
-		longParser 		= new NumericLiteralParser<>(parserToolbox, thisInfo, TypeToken.of(long.class),		TokenStream::readLongLiteral, 		Long::parseLong,		"Invalid long literal");
-		floatParser 	= new NumericLiteralParser<>(parserToolbox, thisInfo, TypeToken.of(float.class),	TokenStream::readFloatLiteral,		Float::parseFloat,		"Invalid float literal");
-		doubleParser 	= new NumericLiteralParser<>(parserToolbox, thisInfo, TypeToken.of(double.class),	TokenStream::readDoubleLiteral,		Double::parseDouble,	"Invalid double literal");
+		intParser 		= new NumericLiteralParser<>(parserToolbox, thisInfo, TypeInfo.of(int.class),		TokenStream::readIntegerLiteral,	Integer::parseInt,		"Invalid int literal");
+		longParser 		= new NumericLiteralParser<>(parserToolbox, thisInfo, TypeInfo.of(long.class),		TokenStream::readLongLiteral, 		Long::parseLong,		"Invalid long literal");
+		floatParser 	= new NumericLiteralParser<>(parserToolbox, thisInfo, TypeInfo.of(float.class),		TokenStream::readFloatLiteral,		Float::parseFloat,		"Invalid float literal");
+		doubleParser 	= new NumericLiteralParser<>(parserToolbox, thisInfo, TypeInfo.of(double.class),	TokenStream::readDoubleLiteral,		Double::parseDouble,	"Invalid double literal");
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class LiteralParser extends AbstractEntityParser<ObjectInfo>
 		String stringLiteralValue = stringLiteralToken.getValue();
 		log(LogLevel.SUCCESS, "detected string literal '" + stringLiteralValue + "'");
 
-		ObjectInfo stringLiteralInfo = new ObjectInfo(stringLiteralValue, TypeToken.of(String.class));
+		ObjectInfo stringLiteralInfo = new ObjectInfo(stringLiteralValue, TypeInfo.of(String.class));
 		return parserToolbox.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectation);
 	}
 
@@ -94,7 +94,7 @@ public class LiteralParser extends AbstractEntityParser<ObjectInfo>
 		}
 		log(LogLevel.SUCCESS, "detected character literal '" + characterLiteralValue + "'");
 
-		ObjectInfo stringLiteralInfo = new ObjectInfo(characterLiteralValue.charAt(0), TypeToken.of(char.class));
+		ObjectInfo stringLiteralInfo = new ObjectInfo(characterLiteralValue.charAt(0), TypeInfo.of(char.class));
 		return parserToolbox.getObjectTailParser().parse(tokenStream, stringLiteralInfo, expectation);
 	}
 
@@ -139,12 +139,12 @@ public class LiteralParser extends AbstractEntityParser<ObjectInfo>
 
 	private static class NumericLiteralParser<T> extends AbstractEntityParser<ObjectInfo>
 	{
-		private final TypeToken<T>			numericType;
+		private final TypeInfo				numericType;
 		private final NumericTokenReader	tokenReader;
 		private final NumericValueParser<T>	valueParser;
 		private final String				wrongTypeError;
 
-		NumericLiteralParser(ParserToolbox parserToolbox, ObjectInfo thisInfo, TypeToken<T> numericType, NumericTokenReader tokenReader, NumericValueParser<T> valueParser, String wrongTypeError) {
+		NumericLiteralParser(ParserToolbox parserToolbox, ObjectInfo thisInfo, TypeInfo numericType, NumericTokenReader tokenReader, NumericValueParser<T> valueParser, String wrongTypeError) {
 			super(parserToolbox, thisInfo);
 			this.numericType = numericType;
 			this.tokenReader = tokenReader;

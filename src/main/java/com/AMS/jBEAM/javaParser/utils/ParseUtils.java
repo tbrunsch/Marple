@@ -6,7 +6,7 @@ import com.AMS.jBEAM.javaParser.parsers.AbstractEntityParser;
 import com.AMS.jBEAM.javaParser.parsers.ParseExpectation;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 import java.util.*;
 import java.util.function.Function;
@@ -170,13 +170,20 @@ public class ParseUtils
 	public static final int	TYPE_MATCH_BOXED_AND_INHERITANCE	= 5;
 	public static final int	TYPE_MATCH_NONE						= 6;
 
-	public static int rateTypeMatch(TypeToken<?> actual, TypeToken<?> expected) {
-		if (expected == null) {
+	public static int rateTypeMatch(TypeInfo actual, TypeInfo expected) {
+		if (actual == TypeInfo.UNKNOWN) {
+			throw new IllegalArgumentException("Internal error: Cannot rate type match for unknown type");
+		}
+		if (expected == TypeInfo.UNKNOWN) {
+			throw new IllegalArgumentException("Internal error: Cannot expect unknown type");
+		}
+
+		if (expected == TypeInfo.NONE) {
 			// no expectations
 			return TYPE_MATCH_FULL;
 		}
 
-		if (actual == null) {
+		if (actual == TypeInfo.NONE) {
 			// null object (only object without class) is convertible to any non-primitive class
 			return expected.isPrimitive() ? TYPE_MATCH_NONE : TYPE_MATCH_FULL;
 		}
@@ -191,7 +198,7 @@ public class ParseUtils
 		if (expected.isPrimitive()) {
 			if (actual.isPrimitive()) {
 				return primitiveConvertible
-						? TYPE_MATCH_PRIMITIVE_CONVERSION    // int -> double
+						? TYPE_MATCH_PRIMITIVE_CONVERSION	// int -> double
 						: TYPE_MATCH_NONE;					// int -> boolean
 			} else {
 				Class<?> actualUnboxedClass = ReflectionUtils.getPrimitiveClass(actualClass);
@@ -213,7 +220,7 @@ public class ParseUtils
 		}
 	}
 
-	public static boolean isConvertibleTo(TypeToken<?> source, TypeToken<?> target) {
+	public static boolean isConvertibleTo(TypeInfo source, TypeInfo target) {
 		return rateTypeMatch(source, target) != TYPE_MATCH_NONE;
 	}
 

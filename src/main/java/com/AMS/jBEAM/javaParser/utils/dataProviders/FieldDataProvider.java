@@ -8,10 +8,10 @@ import com.AMS.jBEAM.javaParser.parsers.ParseExpectation;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionField;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionIF;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
+import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.AMS.jBEAM.javaParser.utils.wrappers.FieldInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
-import com.AMS.jBEAM.javaParser.utils.ParseUtils;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -45,7 +45,7 @@ public class FieldDataProvider
 	}
 
 	private int rateFieldByTypes(FieldInfo fieldInfo, Object contextObject, ParseExpectation expectation) {
-		List<TypeToken<?>> allowedTypes = expectation.getAllowedTypes();
+		List<TypeInfo> allowedTypes = expectation.getAllowedTypes();
 		if (allowedTypes == null) {
 			return ParseUtils.TYPE_MATCH_FULL;
 		}
@@ -53,7 +53,7 @@ public class FieldDataProvider
 			return ParseUtils.TYPE_MATCH_NONE;
 		}
 		ObjectInfo fieldValueInfo = parserToolbox.getObjectInfoProvider().getFieldValueInfo(contextObject, fieldInfo);
-		TypeToken<?> type = parserToolbox.getObjectInfoProvider().getType(fieldValueInfo);
+		TypeInfo type = parserToolbox.getObjectInfoProvider().getType(fieldValueInfo);
 		return allowedTypes.stream().mapToInt(allowedType -> ParseUtils.rateTypeMatch(type, allowedType)).min().getAsInt();
 	}
 

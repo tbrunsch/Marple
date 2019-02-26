@@ -8,25 +8,25 @@ import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 /**
  * Parses a sub expression following a complete Java expression, assuming the context {@code <class>
  */
-public class ClassTailParser extends AbstractTailParser<TypeToken<?>>
+public class ClassTailParser extends AbstractTailParser<TypeInfo>
 {
 	public ClassTailParser(ParserToolbox parserToolbox, ObjectInfo thisInfo) {
 		super(parserToolbox, thisInfo);
 	}
 
 	@Override
-	ParseResultIF parseDot(TokenStream tokenStream, TypeToken<?> classType, ParseExpectation expectation) {
+	ParseResultIF parseDot(TokenStream tokenStream, TypeInfo classType, ParseExpectation expectation) {
 		Token characterToken = tokenStream.readCharacterUnchecked();
 		assert characterToken.getValue().equals(".");
 
-		AbstractEntityParser<TypeToken<?>> fieldParser = parserToolbox.getClassFieldParser();
-		AbstractEntityParser<TypeToken<?>> methodParser = parserToolbox.getClassMethodParser();
-		AbstractEntityParser<TypeToken<?>> innerClassParser = parserToolbox.getInnerClassParser();
+		AbstractEntityParser<TypeInfo> fieldParser = parserToolbox.getClassFieldParser();
+		AbstractEntityParser<TypeInfo> methodParser = parserToolbox.getClassMethodParser();
+		AbstractEntityParser<TypeInfo> innerClassParser = parserToolbox.getInnerClassParser();
 		if (expectation.getEvaluationType() == ParseResultType.CLASS_PARSE_RESULT) {
 			return innerClassParser.parse(tokenStream, classType, expectation);
 		} else {
@@ -39,7 +39,7 @@ public class ClassTailParser extends AbstractTailParser<TypeToken<?>>
 	}
 
 	@Override
-	ParseResultIF parseOpeningSquareBracket(TokenStream tokenStream, TypeToken<?> context, ParseExpectation expectation) {
+	ParseResultIF parseOpeningSquareBracket(TokenStream tokenStream, TypeInfo context, ParseExpectation expectation) {
 		/*
 		 * If called under ConstructorParser, then this is an array construction. As we do not
 		 * know, in which circumstances this method is called, the caller must handle this
@@ -49,7 +49,7 @@ public class ClassTailParser extends AbstractTailParser<TypeToken<?>>
 	}
 
 	@Override
-	ParseResultIF createParseResult(int position, TypeToken<?> type) {
+	ParseResultIF createParseResult(int position, TypeInfo type) {
 		return new ClassParseResult(position, type);
 	}
 }

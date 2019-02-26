@@ -3,7 +3,7 @@ package com.AMS.jBEAM.javaParser.parsers;
 import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ExecutableInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class ObjectMethodParser extends AbstractMethodParser<ObjectInfo>
 
 	@Override
 	List<ExecutableInfo> getMethodInfos(ObjectInfo contextInfo) {
-		TypeToken<?> contextType = parserToolbox.getObjectInfoProvider().getType(contextInfo);
+		TypeInfo contextType = parserToolbox.getObjectInfoProvider().getType(contextInfo);
 		return parserToolbox.getInspectionDataProvider().getMethodInfos(contextType, false);
 	}
 }

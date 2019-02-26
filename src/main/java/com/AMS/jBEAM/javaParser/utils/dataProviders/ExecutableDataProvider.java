@@ -6,10 +6,10 @@ import com.AMS.jBEAM.javaParser.parsers.ParseExpectationBuilder;
 import com.AMS.jBEAM.javaParser.result.*;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
+import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ExecutableInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
-import com.AMS.jBEAM.javaParser.utils.ParseUtils;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 import java.util.*;
 import java.util.function.ToIntFunction;
@@ -57,7 +57,7 @@ public class ExecutableDataProvider
 			final int i = argIndex;
 
 			availableExecutableInfos = availableExecutableInfos.stream().filter(executableInfo -> executableInfo.isArgumentIndexValid(i)).collect(Collectors.toList());
-			List<TypeToken<?>> expectedArgumentTypes_i = getExpectedArgumentTypes(availableExecutableInfos, i);
+			List<TypeInfo> expectedArgumentTypes_i = getExpectedArgumentTypes(availableExecutableInfos, i);
 
 			if (expectedArgumentTypes_i.isEmpty()) {
 				arguments.add(new ParseError(tokenStream.getPosition(), "No further arguments expected", ParseError.ErrorType.SEMANTIC_ERROR));
@@ -105,7 +105,7 @@ public class ExecutableDataProvider
 	}
 
 	// assumes that each of the executableInfos accepts an argument for index argIndex
-	private List<TypeToken<?>> getExpectedArgumentTypes(List<ExecutableInfo> executableInfos, int argIndex) {
+	private List<TypeInfo> getExpectedArgumentTypes(List<ExecutableInfo> executableInfos, int argIndex) {
 		return executableInfos.stream()
 				.map(executableInfo -> executableInfo.getExpectedArgumentType(argIndex))
 				.distinct()
@@ -113,14 +113,14 @@ public class ExecutableDataProvider
 	}
 
 	private boolean acceptsArgumentInfo(ExecutableInfo executableInfo, int argIndex, ObjectInfo argInfo) {
-		TypeToken<?> expectedArgumentType = executableInfo.getExpectedArgumentType(argIndex);
-		TypeToken<?> argumentType = parserToolbox.getObjectInfoProvider().getType(argInfo);
+		TypeInfo expectedArgumentType = executableInfo.getExpectedArgumentType(argIndex);
+		TypeInfo argumentType = parserToolbox.getObjectInfoProvider().getType(argInfo);
 		return ParseUtils.isConvertibleTo(argumentType, expectedArgumentType);
 	}
 
 	public List<ExecutableInfo> getBestMatchingExecutableInfos(List<ExecutableInfo> availableExecutableInfos, List<ObjectInfo> argumentInfos) {
 		ObjectInfoProvider objectInfoProvider = parserToolbox.getObjectInfoProvider();
-		List<TypeToken<?>> argumentTypes = argumentInfos.stream().map(objectInfoProvider::getType).collect(Collectors.toList());
+		List<TypeInfo> argumentTypes = argumentInfos.stream().map(objectInfoProvider::getType).collect(Collectors.toList());
 		int[] ratings = availableExecutableInfos.stream()
 				.mapToInt(executableInfo -> executableInfo.rateArgumentMatch(argumentTypes))
 				.toArray();
@@ -172,7 +172,7 @@ public class ExecutableDataProvider
 		 * of the runtime type of the returned object. Otherwise, we would have to invoke the method for code
 		 * completion, possibly causing undesired side effects.
 		 */
-		List<TypeToken<?>> allowedTypes = expectation.getAllowedTypes();
+		List<TypeInfo> allowedTypes = expectation.getAllowedTypes();
 		return	allowedTypes == null	? ParseUtils.TYPE_MATCH_FULL :
 				allowedTypes.isEmpty()	? ParseUtils.TYPE_MATCH_NONE
 										: allowedTypes.stream().mapToInt(allowedType -> ParseUtils.rateTypeMatch(methodInfo.getReturnType(), allowedType)).min().getAsInt();

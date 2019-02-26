@@ -8,7 +8,7 @@ import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 public class CastParser extends AbstractEntityParser<ObjectInfo>
 {
@@ -40,7 +40,7 @@ public class CastParser extends AbstractEntityParser<ObjectInfo>
 		ClassParseResult parseResult = (ClassParseResult) classParseResult;
 		int parsedToPosition = parseResult.getPosition();
 
-		TypeToken<?> targetType = parseResult.getType();
+		TypeInfo targetType = parseResult.getType();
 
 		tokenStream.moveTo(parsedToPosition);
 
@@ -60,7 +60,7 @@ public class CastParser extends AbstractEntityParser<ObjectInfo>
 		return parseAndCast(tokenStream, targetType);
 	}
 
-	private ParseResultIF parseAndCast(TokenStream tokenStream, TypeToken<?> targetType) {
+	private ParseResultIF parseAndCast(TokenStream tokenStream, TypeInfo targetType) {
 		log(LogLevel.INFO, "parsing object to cast at " + tokenStream);
 		ParseResultIF objectParseResult = parserToolbox.getExpressionParser().parse(tokenStream, thisInfo, ParseExpectation.OBJECT);
 

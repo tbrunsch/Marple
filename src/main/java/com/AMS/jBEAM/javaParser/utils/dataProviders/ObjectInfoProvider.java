@@ -1,14 +1,15 @@
 package com.AMS.jBEAM.javaParser.utils.dataProviders;
 
-import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.common.ReflectionUtils;
+import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.javaParser.settings.Variable;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ExecutableInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.FieldInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 public class ObjectInfoProvider
@@ -19,30 +20,30 @@ public class ObjectInfoProvider
 		this.evaluationMode = evaluationMode;
 	}
 
-	public TypeToken<?> getType(Object object, TypeToken<?> declaredType) {
+	public TypeInfo getType(Object object, TypeInfo declaredType) {
 		if (object == null) {
-			return declaredType;
+			return declaredType == TypeInfo.UNKNOWN ? TypeInfo.NONE : declaredType;
 		}
 
 		Class<?> runtimeClass = object.getClass();
-		if (declaredType == null) {
-			return TypeToken.of(runtimeClass);
+		if (declaredType == TypeInfo.UNKNOWN) {
+			return TypeInfo.of(runtimeClass);
 		}
 
 		if (evaluationMode == EvaluationMode.DYNAMICALLY_TYPED) {
 			if (declaredType.isPrimitive()) {
 				return declaredType;
 			}
-			TypeToken<?> runtimeType = declaredType.getSubtype(runtimeClass);
+			TypeInfo runtimeType = declaredType.getSubtype(runtimeClass);
 			return declaredType.isPrimitive()
-					? TypeToken.of(ReflectionUtils.getPrimitiveClass(runtimeType.getRawType()))
+					? TypeInfo.of(ReflectionUtils.getPrimitiveClass(runtimeType.getRawType()))
 					: runtimeType;
 		} else {
 			return declaredType;
 		}
 	}
 
-	public TypeToken<?> getType(ObjectInfo objectInfo) {
+	public TypeInfo getType(ObjectInfo objectInfo) {
 		return getType(objectInfo.getObject(), objectInfo.getDeclaredType());
 	}
 
@@ -84,7 +85,7 @@ public class ObjectInfoProvider
 				throw new IllegalStateException("Internal error: Unexpected " + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
 			}
 		}
-		TypeToken<?> methodReturnType = getType(methodReturnValue, executableInfo.getReturnType());
+		TypeInfo methodReturnType = getType(methodReturnValue, executableInfo.getReturnType());
 		return new ObjectInfo(methodReturnValue, methodReturnType);
 	}
 
@@ -101,11 +102,11 @@ public class ObjectInfoProvider
 			arrayElementValue = Array.get(arrayObject, index);
 			valueSetter = value -> Array.set(arrayObject, index, value);
 		}
-		TypeToken<?> arrayElementType = getType(arrayElementValue, getType(arrayInfo).getComponentType());
+		TypeInfo arrayElementType = getType(arrayElementValue, getType(arrayInfo).getComponentType());
 		return new ObjectInfo(arrayElementValue, arrayElementType, valueSetter);
 	}
 
-	public ObjectInfo getArrayInfo(TypeToken<?> componentType, ObjectInfo sizeInfo) {
+	public ObjectInfo getArrayInfo(TypeInfo componentType, ObjectInfo sizeInfo) {
 		final int size;
 		if (evaluationMode == EvaluationMode.NONE) {
 			size = 0;
@@ -116,7 +117,7 @@ public class ObjectInfoProvider
 		return getArrayInfo(componentType, size);
 	}
 
-	public ObjectInfo getArrayInfo(TypeToken<?> componentType, List<ObjectInfo> elementInfos) {
+	public ObjectInfo getArrayInfo(TypeInfo componentType, List<ObjectInfo> elementInfos) {
 		int size = elementInfos.size();
 		ObjectInfo arrayInfo = getArrayInfo(componentType, size);
 		if (evaluationMode != EvaluationMode.NONE) {
@@ -130,16 +131,16 @@ public class ObjectInfoProvider
 		return arrayInfo;
 	}
 
-	private ObjectInfo getArrayInfo(TypeToken<?> componentType, int size) {
+	private ObjectInfo getArrayInfo(TypeInfo componentType, int size) {
 		Class<?> componentClass = componentType.getRawType();
 		Object array = Array.newInstance(componentClass, size);
 		Class<?> arrayClass = array.getClass();
-		TypeToken<?> arrayType = TypeToken.of(arrayClass);
+		TypeInfo arrayType = TypeInfo.of(arrayClass);
 		Object arrayObject = evaluationMode == EvaluationMode.NONE ? ObjectInfo.INDETERMINATE : array;
 		return new ObjectInfo(arrayObject, arrayType);
 	}
 
-	public ObjectInfo getCastInfo(ObjectInfo objectInfo, TypeToken<?> targetType) throws ClassCastException {
+	public ObjectInfo getCastInfo(ObjectInfo objectInfo, TypeInfo targetType) throws ClassCastException {
 		Object castedValue = evaluationMode == EvaluationMode.NONE
 								? ObjectInfo.INDETERMINATE
 								: ReflectionUtils.convertTo(objectInfo.getObject(), targetType.getRawType(), true);
@@ -149,6 +150,6 @@ public class ObjectInfoProvider
 	public ObjectInfo getVariableInfo(Variable variable) {
 		Object value = variable.getValue();
 		ObjectInfo.ValueSetterIF valueSetter = newValue -> variable.setValue(newValue);
-		return new ObjectInfo(value, null, valueSetter);
+		return new ObjectInfo(value, TypeInfo.UNKNOWN, valueSetter);
 	}
 }

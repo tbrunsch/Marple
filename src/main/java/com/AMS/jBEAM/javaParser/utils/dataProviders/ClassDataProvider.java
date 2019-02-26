@@ -10,12 +10,12 @@ import com.AMS.jBEAM.javaParser.utils.ClassUtils;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ClassInfo;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.ClassPath;
-import com.google.common.reflect.TypeToken;
 
 import java.io.IOException;
 import java.util.*;
@@ -76,7 +76,7 @@ public class ClassDataProvider
 		return reader.read();
 	}
 
-	public ParseResultIF readInnerClass(TokenStream tokenStream, TypeToken<?> contextType) {
+	public ParseResultIF readInnerClass(TokenStream tokenStream, TypeInfo contextType) {
 		Class<?> contextClass = contextType.getRawType();
 		int startPosition = tokenStream.getPosition();
 
@@ -105,7 +105,7 @@ public class ClassDataProvider
 		}
 
 		Class<?> innerClass = firstClassMatch.get();
-		TypeToken<?> innerClassType = contextType.resolveType(innerClass);
+		TypeInfo innerClassType = contextType.resolveType(innerClass);
 		return new ClassParseResult(tokenStream.getPosition(), innerClassType);
 	}
 
@@ -152,7 +152,7 @@ public class ClassDataProvider
 
 				Class<?> detectedClass = detectClass(packageOrClassName);
 				if (detectedClass != null) {
-					return new ClassParseResult(tokenStream.getPosition(), TypeToken.of(detectedClass));
+					return new ClassParseResult(tokenStream.getPosition(), TypeInfo.of(detectedClass));
 				}
 
 				Token characterToken = tokenStream.readCharacterUnchecked();
@@ -292,8 +292,8 @@ public class ClassDataProvider
 
 		private Class<?> getThisClass() {
 			ObjectInfo thisInfo = parserToolbox.getThisInfo();
-			TypeToken<?> thisType = parserToolbox.getObjectInfoProvider().getType(thisInfo);
-			return thisType == null ? null : thisType.getRawType();
+			TypeInfo thisType = parserToolbox.getObjectInfoProvider().getType(thisInfo);
+			return thisType.getRawType();
 		}
 
 		private Set<ClassInfo> getImportedClasses() {

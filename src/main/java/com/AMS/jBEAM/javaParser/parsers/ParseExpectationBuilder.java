@@ -1,8 +1,8 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.result.ParseResultType;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 
 import java.util.List;
 
@@ -17,18 +17,18 @@ public class ParseExpectationBuilder
 	}
 
 	private final ParseResultType	evaluationType;
-	private List<TypeToken<?>>		allowedTypes;
+	private List<TypeInfo>			allowedTypes;
 
 	ParseExpectationBuilder(ParseResultType evaluationType) {
 		this.evaluationType = evaluationType;
 	}
 
-	public ParseExpectationBuilder allowedTypes(List<TypeToken<?>> allowedTypes) {
+	public ParseExpectationBuilder allowedTypes(List<TypeInfo> allowedTypes) {
 		this.allowedTypes = ImmutableList.copyOf(allowedTypes);
 		return this;
 	}
 
-	public ParseExpectationBuilder allowedType(TypeToken<?> allowedType) {
+	public ParseExpectationBuilder allowedType(TypeInfo allowedType) {
 		this.allowedTypes = ImmutableList.of(allowedType);
 		return this;
 	}

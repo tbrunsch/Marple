@@ -2,7 +2,6 @@ package com.AMS.jBEAM.javaParser.utils.wrappers;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
-import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
@@ -11,7 +10,7 @@ import java.util.List;
 
 public class VariadicExecutableInfo extends ExecutableInfo
 {
-	VariadicExecutableInfo(Executable executable, TypeToken<?> declaringType) {
+	VariadicExecutableInfo(Executable executable, TypeInfo declaringType) {
 		super(executable, declaringType);
 
 		assert isVariadic() : "Cannot create VariadicExecutableInfo for non-variadic methods";
@@ -27,11 +26,11 @@ public class VariadicExecutableInfo extends ExecutableInfo
 		int lastIndex = getNumberOfArguments() - 1;
 		return argIndex < lastIndex
 				? executable.getGenericParameterTypes()[argIndex]
-				: TypeToken.of(executable.getGenericParameterTypes()[lastIndex]).getComponentType().getType();
+				: TypeInfo.of(executable.getGenericParameterTypes()[lastIndex]).getComponentType().getType();
 	}
 
 	@Override
-	int doRateArgumentMatch(List<TypeToken<?>> argumentTypes) {
+	int doRateArgumentMatch(List<TypeInfo> argumentTypes) {
 		if (argumentTypes.size() < getNumberOfArguments() - 1) {
 			return ParseUtils.TYPE_MATCH_NONE;
 		}
@@ -43,16 +42,16 @@ public class VariadicExecutableInfo extends ExecutableInfo
 		return worstArgumentClassMatchRating;
 	}
 
-	private int rateArgumentTypeMatch(int argIndex, TypeToken<?> argumentType) {
+	private int rateArgumentTypeMatch(int argIndex, TypeInfo argumentType) {
 		int lastArgIndex = getNumberOfArguments() - 1;
-		if (argIndex == lastArgIndex && argumentType == null) {
+		if (argIndex == lastArgIndex && argumentType == TypeInfo.NONE) {
 			/*
 			 * If the last argument in a variadic method is null, then the regular array type
 			 * (the one returned in RegularExecutableInfo) is assumed and not its component type.
 			 */
 			return ParseUtils.TYPE_MATCH_NONE;
 		}
-		TypeToken<?> expectedArgumentType = getExpectedArgumentType(argIndex);
+		TypeInfo expectedArgumentType = getExpectedArgumentType(argIndex);
 		return ParseUtils.rateTypeMatch(argumentType, expectedArgumentType);
 	}
 

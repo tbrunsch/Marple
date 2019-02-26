@@ -6,39 +6,39 @@ import com.AMS.jBEAM.javaParser.settings.ParseMode;
 import com.AMS.jBEAM.javaParser.settings.ParserSettings;
 import com.AMS.jBEAM.javaParser.utils.dataProviders.*;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 public class ParserToolbox
 {
-	private final ObjectInfo							thisInfo;
-	private final ParserSettings						settings;
+	private final ObjectInfo						thisInfo;
+	private final ParserSettings					settings;
 
-	private final ClassDataProvider						classDataProvider;
-	private final ExecutableDataProvider				executableDataProvider;
-	private final FieldDataProvider						fieldDataProvider;
-	private final InspectionDataProvider				inspectionDataProvider;
-	private final ObjectInfoProvider					objectInfoProvider;
-	private final ObjectTreeNodeDataProvider			objectTreeNodeDataProvider;
-	private final OperatorResultProvider 				operatorResultProvider;
-	private final VariableDataProvider					variableDataProvider;
+	private final ClassDataProvider					classDataProvider;
+	private final ExecutableDataProvider			executableDataProvider;
+	private final FieldDataProvider					fieldDataProvider;
+	private final InspectionDataProvider			inspectionDataProvider;
+	private final ObjectInfoProvider				objectInfoProvider;
+	private final ObjectTreeNodeDataProvider		objectTreeNodeDataProvider;
+	private final OperatorResultProvider 			operatorResultProvider;
+	private final VariableDataProvider				variableDataProvider;
 
-	private final AbstractEntityParser<ObjectInfo>		castParser;
-	private final AbstractEntityParser<TypeToken<?>>	classFieldParser;
-	private final AbstractEntityParser<TypeToken<?>>	classMethodParser;
-	private final AbstractEntityParser<ObjectInfo>		classParser;
-	private final AbstractEntityParser<TypeToken<?>>	classTailParser;
-	private final AbstractEntityParser<ObjectInfo>		constructorParser;
-	private final AbstractEntityParser<ObjectInfo>		customHierarchyParser;
-	private final AbstractEntityParser<ObjectInfo> 		expressionParser;
-	private final AbstractEntityParser<TypeToken<?>>	innerClassParser;
-	private final AbstractEntityParser<ObjectInfo>		literalParser;
-	private final AbstractEntityParser<ObjectInfo>		objectFieldParser;
-	private final AbstractEntityParser<ObjectInfo>		objectMethodParser;
-	private final AbstractEntityParser<ObjectInfo>		objectTailParser;
-	private final AbstractEntityParser<ObjectInfo>		parenthesizedExpressionParser;
-	private final AbstractEntityParser<ObjectInfo>		rootParser;
-	private final AbstractEntityParser<ObjectInfo>		unaryPrefixOperatorParser;
-	private final AbstractEntityParser<ObjectInfo>		variableParser;
+	private final AbstractEntityParser<ObjectInfo>	castParser;
+	private final AbstractEntityParser<TypeInfo>	classFieldParser;
+	private final AbstractEntityParser<TypeInfo>	classMethodParser;
+	private final AbstractEntityParser<ObjectInfo>	classParser;
+	private final AbstractEntityParser<TypeInfo>	classTailParser;
+	private final AbstractEntityParser<ObjectInfo>	constructorParser;
+	private final AbstractEntityParser<ObjectInfo>	customHierarchyParser;
+	private final AbstractEntityParser<ObjectInfo> 	expressionParser;
+	private final AbstractEntityParser<TypeInfo>	innerClassParser;
+	private final AbstractEntityParser<ObjectInfo>	literalParser;
+	private final AbstractEntityParser<ObjectInfo>	objectFieldParser;
+	private final AbstractEntityParser<ObjectInfo>	objectMethodParser;
+	private final AbstractEntityParser<ObjectInfo>	objectTailParser;
+	private final AbstractEntityParser<ObjectInfo>	parenthesizedExpressionParser;
+	private final AbstractEntityParser<ObjectInfo>	rootParser;
+	private final AbstractEntityParser<ObjectInfo>	unaryPrefixOperatorParser;
+	private final AbstractEntityParser<ObjectInfo>	variableParser;
 
 	public ParserToolbox(ObjectInfo thisInfo, ParserSettings settings, ParseMode parseMode) {
 		this.thisInfo = thisInfo;
@@ -122,17 +122,17 @@ public class ParserToolbox
 	 */
 	public AbstractEntityParser<ObjectInfo> getCastParser() { return castParser; }
 
-	public AbstractEntityParser<TypeToken<?>> getClassFieldParser() {
+	public AbstractEntityParser<TypeInfo> getClassFieldParser() {
 		return classFieldParser;
 	}
 
-	public AbstractEntityParser<TypeToken<?>> getClassMethodParser() {
+	public AbstractEntityParser<TypeInfo> getClassMethodParser() {
 		return classMethodParser;
 	}
 
 	public AbstractEntityParser<ObjectInfo> getClassParser() { return classParser; }
 
-	public AbstractEntityParser<TypeToken<?>> getClassTailParser() {
+	public AbstractEntityParser<TypeInfo> getClassTailParser() {
 		return classTailParser;
 	}
 
@@ -156,7 +156,7 @@ public class ParserToolbox
 		return expressionParser;
 	}
 
-	public AbstractEntityParser<TypeToken<?>> getInnerClassParser() {
+	public AbstractEntityParser<TypeInfo> getInnerClassParser() {
 		return innerClassParser;
 	}
 

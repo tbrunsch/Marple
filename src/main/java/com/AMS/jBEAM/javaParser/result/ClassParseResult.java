@@ -1,13 +1,13 @@
 package com.AMS.jBEAM.javaParser.result;
 
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 public class ClassParseResult implements ParseResultIF
 {
-	private final int			position; // exclusive
-	private final TypeToken<?>	type;
+	private final int		position; // exclusive
+	private final TypeInfo type;
 
-	public ClassParseResult(int position, TypeToken<?> type) {
+	public ClassParseResult(int position, TypeInfo type) {
 		this.position = position;
 		this.type = type;
 	}
@@ -17,7 +17,7 @@ public class ClassParseResult implements ParseResultIF
 		return ParseResultType.CLASS_PARSE_RESULT;
 	}
 
-	public TypeToken<?> getType() {
+	public TypeInfo getType() {
 		return type;
 	}
 

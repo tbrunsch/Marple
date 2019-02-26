@@ -10,7 +10,7 @@ import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 /**
  * Parses a sub expression following a complete Java expression, assuming the context
@@ -41,15 +41,15 @@ public class ObjectTailParser extends AbstractTailParser<ObjectInfo>
 	@Override
 	ParseResultIF parseOpeningSquareBracket(TokenStream tokenStream, ObjectInfo contextInfo, ParseExpectation expectation) {
 		// array access
-		TypeToken<?> currentContextType = parserToolbox.getObjectInfoProvider().getType(contextInfo);
-		TypeToken<?> elementType = currentContextType.getComponentType();
-		if (elementType == null) {
+		TypeInfo currentContextType = parserToolbox.getObjectInfoProvider().getType(contextInfo);
+		TypeInfo elementType = currentContextType.getComponentType();
+		if (elementType == TypeInfo.NONE) {
 			log(LogLevel.ERROR, "cannot apply operator [] for non-array types");
 			return new ParseError(tokenStream.getPosition(), "Cannot apply [] to non-array types", ParseError.ErrorType.SEMANTIC_ERROR);
 		}
 
 		int indexStartPosition = tokenStream.getPosition();
-		ParseExpectation indexExpectation = ParseExpectationBuilder.expectObject().allowedType(TypeToken.of(int.class)).build();
+		ParseExpectation indexExpectation = ParseExpectationBuilder.expectObject().allowedType(TypeInfo.of(int.class)).build();
 		ParseResultIF arrayIndexParseResult = parseArrayIndex(tokenStream, indexExpectation);
 
 		if (ParseUtils.propagateParseResult(arrayIndexParseResult, indexExpectation)) {

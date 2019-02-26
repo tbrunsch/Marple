@@ -11,8 +11,8 @@ import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.AMS.jBEAM.javaParser.utils.dataProviders.OperatorResultProvider;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.reflect.TypeToken;
 
 import java.util.List;
 import java.util.Map;
@@ -157,8 +157,8 @@ public class RootParser extends AbstractEntityParser<ObjectInfo>
 		}
 
 		ObjectParseResult objectParseResult = (ObjectParseResult) parseResult;
-		List<TypeToken<?>> allowedTypes = expectation.getAllowedTypes();
-		TypeToken<?> resultType = parserToolbox.getObjectInfoProvider().getType(objectParseResult.getObjectInfo());
+		List<TypeInfo> allowedTypes = expectation.getAllowedTypes();
+		TypeInfo resultType = parserToolbox.getObjectInfoProvider().getType(objectParseResult.getObjectInfo());
 		if (allowedTypes != null && allowedTypes.stream().noneMatch(expectedResultType -> ParseUtils.isConvertibleTo(resultType, expectedResultType))) {
 			String messagePrefix = "The class '" + resultType + "' is not assignable to ";
 			String messageMiddle = allowedTypes.size() > 1

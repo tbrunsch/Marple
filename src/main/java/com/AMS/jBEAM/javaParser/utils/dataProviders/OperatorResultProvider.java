@@ -5,12 +5,12 @@ import com.AMS.jBEAM.javaParser.ParserToolbox;
 import com.AMS.jBEAM.javaParser.settings.EvaluationMode;
 import com.AMS.jBEAM.javaParser.tokenizer.BinaryOperator;
 import com.AMS.jBEAM.javaParser.tokenizer.UnaryOperator;
-import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
+import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Table;
-import com.google.common.reflect.TypeToken;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -197,7 +197,7 @@ public class OperatorResultProvider
 			throw new OperatorException("Operator cannot be applied to '" + clazz + "'");
 		}
 		Object result = evaluationMode == EvaluationMode.NONE ? ObjectInfo.INDETERMINATE : !((boolean) objectInfo.getObject());
-		TypeToken<?> resultType = TypeToken.of(boolean.class);
+		TypeInfo resultType = TypeInfo.of(boolean.class);
 		return new ObjectInfo(result, resultType);
 	}
 
@@ -207,7 +207,7 @@ public class OperatorResultProvider
 		if (!isIntegral(primitiveClass)) {
 			throw new OperatorException("Operator cannot be applied to '" + clazz + "'");
 		}
-		TypeToken<?> resultType = primitiveClass == long.class ? TypeToken.of(long.class) : TypeToken.of(int.class);
+		TypeInfo resultType = primitiveClass == long.class ? TypeInfo.of(long.class) : TypeInfo.of(int.class);
 		Object result = ObjectInfo.INDETERMINATE;
 		if (evaluationMode != EvaluationMode.NONE) {
 			Object object = objectInfo.getObject();
@@ -280,7 +280,7 @@ public class OperatorResultProvider
 			return applyNumericComparisonOperator(lhs, rhs, BinaryOperator.EQUAL_TO);
 		}
 		Object result = evaluationMode == EvaluationMode.NONE ? ObjectInfo.INDETERMINATE : lhs.getObject() == rhs.getObject();
-		TypeToken<?> resultType = TypeToken.of(boolean.class);
+		TypeInfo resultType = TypeInfo.of(boolean.class);
 		return new ObjectInfo(result, resultType);
 	}
 
@@ -291,7 +291,7 @@ public class OperatorResultProvider
 			return applyNumericComparisonOperator(lhs, rhs, BinaryOperator.NOT_EQUAL_TO);
 		}
 		Object result = evaluationMode == EvaluationMode.NONE ? ObjectInfo.INDETERMINATE : lhs.getObject() != rhs.getObject();
-		TypeToken<?> resultType = TypeToken.of(boolean.class);
+		TypeInfo resultType = TypeInfo.of(boolean.class);
 		return new ObjectInfo(result, resultType);
 	}
 
@@ -320,12 +320,14 @@ public class OperatorResultProvider
 		if (lhsValueSetter == null) {
 			throw new OperatorException("Cannot assign values to non-lvalues or final fields");
 		}
-		TypeToken<?> declaredLhsType = lhs.getDeclaredType();
-		TypeToken<?> rhsType = parserToolbox.getObjectInfoProvider().getType(rhs);
-		if (ParseUtils.rateTypeMatch(rhsType, declaredLhsType) == ParseUtils.TYPE_MATCH_NONE) {
+		TypeInfo declaredLhsType = lhs.getDeclaredType();
+		TypeInfo rhsType = parserToolbox.getObjectInfoProvider().getType(rhs);
+
+		// declared type of variables is unknown and we want be able to assign them a value
+		if (declaredLhsType != TypeInfo.UNKNOWN && ParseUtils.rateTypeMatch(rhsType, declaredLhsType) == ParseUtils.TYPE_MATCH_NONE) {
 			throw new OperatorException("Cannot assign value of type '" + rhsType + "' to left-hand side. Expected an instance of class '" + declaredLhsType + "'");
 		}
-		TypeToken<?> declaredResultType = declaredLhsType;
+		TypeInfo declaredResultType = declaredLhsType;
 		Object resultObject = ObjectInfo.INDETERMINATE;
 		if (evaluationMode != EvaluationMode.NONE) {
 			try {
@@ -342,8 +344,8 @@ public class OperatorResultProvider
 	 * Utility Methods
 	 */
 	private Class<?> getClass(ObjectInfo objectInfo) {
-		TypeToken<?> type = parserToolbox.getObjectInfoProvider().getType(objectInfo);
-		return type == null ? null : type.getRawType();
+		TypeInfo type = parserToolbox.getObjectInfoProvider().getType(objectInfo);
+		return type.getRawType();
 	}
 
 	private static boolean isIntegral(Class<?> primitiveClass) {
@@ -388,7 +390,7 @@ public class OperatorResultProvider
 		if (operatorInfo == null) {
 			throw new OperatorException("Operator not defined on '" + getClass(objectInfo) + "'");
 		}
-		TypeToken<?> resultType = TypeToken.of(operatorInfo.getResultClass());
+		TypeInfo resultType = TypeInfo.of(operatorInfo.getResultClass());
 		Object result = ObjectInfo.INDETERMINATE;
 		if (evaluationMode != EvaluationMode.NONE) {
 			Function<Object, Object> operation = operatorInfo.getOperation();
@@ -462,7 +464,7 @@ public class OperatorResultProvider
 		if (operatorInfo == null) {
 			throw new OperatorException("Operator not defined on '" + getClass(lhs) + "' and '" + getClass(rhs) + "'");
 		}
-		TypeToken<?> resultType = TypeToken.of(operatorInfo.getResultClass());
+		TypeInfo resultType = TypeInfo.of(operatorInfo.getResultClass());
 		Object result = ObjectInfo.INDETERMINATE;
 		if (evaluationMode != EvaluationMode.NONE) {
 			BiFunction<Object, Object, Object> operation = operatorInfo.getOperation();
@@ -478,7 +480,7 @@ public class OperatorResultProvider
 	}
 
 	private ObjectInfo concat(ObjectInfo lhs, ObjectInfo rhs) {
-		TypeToken<?> resultType = TypeToken.of(String.class);
+		TypeInfo resultType = TypeInfo.of(String.class);
 		Object result = ObjectInfo.INDETERMINATE;
 		if (evaluationMode != EvaluationMode.NONE) {
 			String lhsAsString = getStringRepresentation(lhs.getObject());

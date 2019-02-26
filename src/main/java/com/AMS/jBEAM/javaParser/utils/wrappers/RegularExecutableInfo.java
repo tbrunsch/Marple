@@ -2,7 +2,6 @@ package com.AMS.jBEAM.javaParser.utils.wrappers;
 
 import com.AMS.jBEAM.common.ReflectionUtils;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
-import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Executable;
 import java.lang.reflect.Type;
@@ -10,7 +9,7 @@ import java.util.List;
 
 public class RegularExecutableInfo extends ExecutableInfo
 {
-	RegularExecutableInfo(Executable executable, TypeToken<?> declaringType) {
+	RegularExecutableInfo(Executable executable, TypeInfo declaringType) {
 		super(executable, declaringType);
 	}
 
@@ -28,7 +27,7 @@ public class RegularExecutableInfo extends ExecutableInfo
 	}
 
 	@Override
-	int doRateArgumentMatch(List<TypeToken<?>> argumentTypes) {
+	int doRateArgumentMatch(List<TypeInfo> argumentTypes) {
 		if (argumentTypes.size() != getNumberOfArguments()) {
 			return ParseUtils.TYPE_MATCH_NONE;
 		}
@@ -40,8 +39,8 @@ public class RegularExecutableInfo extends ExecutableInfo
 		return worstArgumentClassMatchRating;
 	}
 
-	private int rateArgumentTypeMatch(int argIndex, TypeToken<?> argumentType) {
-		TypeToken<?> expectedArgumentType = getExpectedArgumentType(argIndex);
+	private int rateArgumentTypeMatch(int argIndex, TypeInfo argumentType) {
+		TypeInfo expectedArgumentType = getExpectedArgumentType(argIndex);
 		return ParseUtils.rateTypeMatch(argumentType, expectedArgumentType);
 	}
 

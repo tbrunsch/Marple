@@ -7,7 +7,7 @@ import com.AMS.jBEAM.javaParser.result.ParseResultIF;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 public class ClassParser extends AbstractEntityParser<ObjectInfo>
 {
@@ -27,7 +27,7 @@ public class ClassParser extends AbstractEntityParser<ObjectInfo>
 
 		ClassParseResult parseResult = (ClassParseResult) classParseResult;
 		int parsedToPosition = parseResult.getPosition();
-		TypeToken<?> type = parseResult.getType();
+		TypeInfo type = parseResult.getType();
 
 		tokenStream.moveTo(parsedToPosition);
 

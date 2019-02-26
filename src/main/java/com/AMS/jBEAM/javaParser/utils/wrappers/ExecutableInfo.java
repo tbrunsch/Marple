@@ -1,7 +1,6 @@
 package com.AMS.jBEAM.javaParser.utils.wrappers;
 
 import com.google.common.base.Joiner;
-import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
@@ -11,23 +10,23 @@ import java.util.Objects;
 
 public abstract class ExecutableInfo
 {
-	public static List<ExecutableInfo> getAvailableExecutableInfos(Executable executable, TypeToken<?> declaringType) {
+	public static List<ExecutableInfo> getAvailableExecutableInfos(Executable executable, TypeInfo declaringType) {
 		return executable.isVarArgs()
 				? Arrays.asList(new RegularExecutableInfo(executable, declaringType), new VariadicExecutableInfo(executable, declaringType))
 				: Arrays.asList(new RegularExecutableInfo(executable, declaringType));
 	}
 
 	protected final Executable	executable;
-	private final TypeToken<?>	declaringType;
+	private final TypeInfo		declaringType;
 
-	ExecutableInfo(Executable executable, TypeToken<?> declaringType) {
+	ExecutableInfo(Executable executable, TypeInfo declaringType) {
 		this.executable = executable;
 		this.declaringType = declaringType;
 	}
 
 	abstract boolean doIsArgumentIndexValid(int argIndex);
 	abstract Type doGetExpectedArgumentType(int argIndex);
-	abstract int doRateArgumentMatch(List<TypeToken<?>> argumentTypes);
+	abstract int doRateArgumentMatch(List<TypeInfo> argumentTypes);
 	abstract Object[] doCreateArgumentArray(List<ObjectInfo> argumentInfos);
 
 	public String getName() {
@@ -42,7 +41,7 @@ public abstract class ExecutableInfo
 		return executable.isVarArgs();
 	}
 
-	public TypeToken<?> getDeclaringType() {
+	public TypeInfo getDeclaringType() {
 		return declaringType;
 	}
 
@@ -50,21 +49,21 @@ public abstract class ExecutableInfo
 		return Modifier.isStatic(executable.getModifiers());
 	}
 
-	public TypeToken<?> getReturnType() {
+	public TypeInfo getReturnType() {
 		return	executable instanceof Method	? declaringType.resolveType(((Method) executable).getGenericReturnType()) :
 		executable instanceof Constructor<?> 	? declaringType
-												: null;
+												: TypeInfo.NONE;
 	}
 
 	public final boolean isArgumentIndexValid(int argIndex) {
 		return doIsArgumentIndexValid(argIndex);
 	}
 
-	public final TypeToken<?> getExpectedArgumentType(int argIndex) {
+	public final TypeInfo getExpectedArgumentType(int argIndex) {
 		return declaringType.resolveType(doGetExpectedArgumentType(argIndex));
 	}
 
-	public final int rateArgumentMatch(List<TypeToken<?>> argumentTypes) {
+	public final int rateArgumentMatch(List<TypeInfo> argumentTypes) {
 		return doRateArgumentMatch(argumentTypes);
 	}
 
@@ -83,7 +82,7 @@ public abstract class ExecutableInfo
 		int numArguments = getNumberOfArguments();
 		List<String> argumentTypeNames = new ArrayList<>(numArguments);
 		for (int i = 0; i < numArguments; i++) {
-			TypeToken<?> argumentType = declaringType.resolveType(executable.getGenericParameterTypes()[i]);
+			TypeInfo argumentType = declaringType.resolveType(executable.getGenericParameterTypes()[i]);
 			String argumentTypeName = i < numArguments - 1 || !isVariadic()
 										? argumentType.toString()
 										: argumentType.getComponentType().toString() + "...";

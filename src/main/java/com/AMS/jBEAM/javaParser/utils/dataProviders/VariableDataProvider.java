@@ -1,13 +1,13 @@
 package com.AMS.jBEAM.javaParser.utils.dataProviders;
 
 import com.AMS.jBEAM.javaParser.parsers.ParseExpectation;
-import com.AMS.jBEAM.javaParser.settings.Variable;
-import com.AMS.jBEAM.javaParser.settings.VariablePool;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionIF;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestionVariable;
 import com.AMS.jBEAM.javaParser.result.CompletionSuggestions;
+import com.AMS.jBEAM.javaParser.settings.Variable;
+import com.AMS.jBEAM.javaParser.settings.VariablePool;
 import com.AMS.jBEAM.javaParser.utils.ParseUtils;
-import com.google.common.reflect.TypeToken;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 import java.util.Comparator;
 import java.util.List;
@@ -38,11 +38,11 @@ public class VariableDataProvider
 	}
 
 	private int rateVariableByTypes(Variable variable, ParseExpectation expectation) {
-		List<TypeToken<?>> allowedTypes = expectation.getAllowedTypes();
+		List<TypeInfo> allowedTypes = expectation.getAllowedTypes();
 		Object value = variable.getValue();
 		return	allowedTypes == null	? ParseUtils.TYPE_MATCH_FULL :
 				allowedTypes.isEmpty()	? ParseUtils.TYPE_MATCH_NONE
-										: allowedTypes.stream().mapToInt(allowedType -> ParseUtils.rateTypeMatch(value == null ? null : TypeToken.of(value.getClass()), allowedType)).min().getAsInt();
+										: allowedTypes.stream().mapToInt(allowedType -> ParseUtils.rateTypeMatch(value == null ? TypeInfo.NONE : TypeInfo.of(value.getClass()), allowedType)).min().getAsInt();
 	}
 
 	private ToIntFunction<Variable> rateVariableByNameAndTypesFunc(String variableName, ParseExpectation expectation) {

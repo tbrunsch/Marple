@@ -10,6 +10,7 @@ import com.AMS.jBEAM.javaParser.settings.ObjectTreeNodeIF;
 import com.AMS.jBEAM.javaParser.tokenizer.Token;
 import com.AMS.jBEAM.javaParser.tokenizer.TokenStream;
 import com.AMS.jBEAM.javaParser.utils.wrappers.ObjectInfo;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 
 import java.util.List;
 import java.util.Optional;
@@ -83,7 +84,7 @@ public class CustomHierarchyParser extends AbstractEntityParser<ObjectInfo>
 			return parseHierarchyNode(tokenStream, childNode, expectation);
 		} else if (character == HIERARCHY_END) {
 			Object userObject = childNode.getUserObject();
-			ObjectInfo userObjectInfo = new ObjectInfo(userObject, null);
+			ObjectInfo userObjectInfo = new ObjectInfo(userObject, TypeInfo.UNKNOWN);
 			return parserToolbox.getObjectTailParser().parse(tokenStream, userObjectInfo, expectation);
 		}
 

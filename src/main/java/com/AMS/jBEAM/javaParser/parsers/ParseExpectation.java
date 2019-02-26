@@ -1,8 +1,8 @@
 package com.AMS.jBEAM.javaParser.parsers;
 
 import com.AMS.jBEAM.javaParser.result.ParseResultType;
+import com.AMS.jBEAM.javaParser.utils.wrappers.TypeInfo;
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 
 import java.util.List;
 
@@ -12,9 +12,9 @@ public class ParseExpectation
 	public static final ParseExpectation	OBJECT	= ParseExpectationBuilder.expectObject().build();
 
 	private final ParseResultType		evaluationType;
-	private final List<TypeToken<?>>	allowedTypes;
+	private final List<TypeInfo>		allowedTypes;
 
-	ParseExpectation(ParseResultType evaluationType, List<TypeToken<?>> allowedTypes) {
+	ParseExpectation(ParseResultType evaluationType, List<TypeInfo> allowedTypes) {
 		if (evaluationType != ParseResultType.OBJECT_PARSE_RESULT && evaluationType != ParseResultType.CLASS_PARSE_RESULT) {
 			throw new IllegalArgumentException("Only objects and classes can be expected as valid code evaluation types");
 		}
@@ -26,7 +26,7 @@ public class ParseExpectation
 		return evaluationType;
 	}
 
-	public List<TypeToken<?>> getAllowedTypes() {
+	public List<TypeInfo> getAllowedTypes() {
 		return allowedTypes;
 	}
 
