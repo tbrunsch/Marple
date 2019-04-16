@@ -1,4 +1,4 @@
-package dd.kms.marple;
+package dd.kms.marple.common;
 
 import java.lang.reflect.Modifier;
 

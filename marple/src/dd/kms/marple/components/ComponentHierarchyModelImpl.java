@@ -2,6 +2,7 @@ package dd.kms.marple.components;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import dd.kms.marple.common.ReflectionUtils;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -31,25 +32,11 @@ class ComponentHierarchyModelImpl<C, P> implements ComponentHierarchyModel<C, P>
 
 	@Override
 	public List<?> getSubcomponentHierarchy(C component, P position) {
-		if (component == null) {
+		Class<? extends C> componentClass = ReflectionUtils.getBestMatchingClass(component, subcomponentHierarchyStrategies.keySet());
+		if (componentClass == null) {
 			return ImmutableList.of();
 		}
-		Class<? extends C> bestClass = null;
-		List<? extends Object> bestSubcomponentHierarchy = Collections.emptyList();
-		for (Class<? extends C> componentClass : subcomponentHierarchyStrategies.keySet()) {
-			if (!componentClass.isInstance(component)) {
-				continue;
-			}
-			SubcomponentHierarchyStrategy<C, P> subcomponentHierarchyStrategy = subcomponentHierarchyStrategies.get(componentClass);
-			List<?> subcomponentHierarchy = subcomponentHierarchyStrategy.getSubcomponentHierarchy(component, position);
-			if (subcomponentHierarchy.isEmpty()) {
-				continue;
-			}
-			if (bestClass == null || bestClass.isAssignableFrom(componentClass)) {
-				bestClass = componentClass;
-				bestSubcomponentHierarchy = ImmutableList.copyOf(subcomponentHierarchy);
-			}
-		}
-		return bestSubcomponentHierarchy;
+		SubcomponentHierarchyStrategy<C, P> subcomponentHierarchyStrategy = subcomponentHierarchyStrategies.get(componentClass);
+		return subcomponentHierarchyStrategy.getSubcomponentHierarchy(component, position);
 	}
 }

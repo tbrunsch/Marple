@@ -5,10 +5,10 @@ import dd.kms.marple.InspectionContext;
 
 public class SwingExpressionEvaluator implements ExpressionEvaluator
 {
-	private InspectionContext<?>	inspectionContext;
+	private InspectionContext<?, ?>	inspectionContext;
 
 	@Override
-	public void setInspectionContext(InspectionContext<?> inspectionContext) {
+	public void setInspectionContext(InspectionContext<?, ?> inspectionContext) {
 		this.inspectionContext = inspectionContext;
 	}
 

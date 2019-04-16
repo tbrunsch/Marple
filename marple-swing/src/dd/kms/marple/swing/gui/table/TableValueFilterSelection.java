@@ -1,6 +1,6 @@
 package dd.kms.marple.swing.gui.table;
 
-import dd.kms.marple.DisplayUtils;
+import dd.kms.marple.InspectionContext;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,8 +12,14 @@ import java.util.stream.Collectors;
 
 class TableValueFilterSelection extends AbstractTableValueFilter
 {
+	private final InspectionContext<?, ?>	inspectionContext;
+
 	// Map to true if it should be shown
-	private final Map<Object, Boolean> filteredValues = new LinkedHashMap<>();
+	private final Map<Object, Boolean>		filteredValues = new LinkedHashMap<>();
+
+	TableValueFilterSelection(InspectionContext<?, ?> inspectionContext) {
+		this.inspectionContext = inspectionContext;
+	}
 
 	@Override
 	public boolean isActive() {
@@ -59,8 +65,8 @@ class TableValueFilterSelection extends AbstractTableValueFilter
 		fireFilterChanged();
 	}
 
-	private JCheckBox createCheckbox(final Object value, boolean allowed) {
-		JCheckBox checkBox = new JCheckBox(DisplayUtils.toString(value));
+	private JCheckBox createCheckbox(Object value, boolean allowed) {
+		JCheckBox checkBox = new JCheckBox(inspectionContext.getDisplayText(value));
 		checkBox.setSelected(allowed);
 		checkBox.addItemListener(e -> setAllowed(value, e.getStateChange() == ItemEvent.SELECTED));
 		return checkBox;

@@ -1,7 +1,7 @@
 package dd.kms.marple.swing.gui.views;
 
 import com.google.common.collect.ImmutableList;
-import dd.kms.marple.AccessModifier;
+import dd.kms.marple.common.AccessModifier;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
@@ -18,12 +18,12 @@ public class FieldView extends JPanel
 {
 	private static final String	NAME	= "Fields";
 
-	private final ListBasedTable<Field>			table;
+	private final ListBasedTable<Field>		table;
 
-	private final Object						object;
-	private final InspectionContext<Component>	inspectionContext;
+	private final Object					object;
+	private final InspectionContext<?, ?>	inspectionContext;
 
-	public FieldView(InspectionContext<Component> inspectionContext, Object object) {
+	public FieldView(Object object, InspectionContext<?, ?> inspectionContext) {
 		super(new GridBagLayout());
 		this.object = object;
 		this.inspectionContext = inspectionContext;
@@ -48,8 +48,8 @@ public class FieldView extends JPanel
 			ColumnDescriptions.of("Name",		String.class,			Field::getName,										TableValueFilters.createWildcardFilter()),
 			ColumnDescriptions.of("Value",		ActionProvider.class,	field -> getFieldValueActionProvider(field),		TableValueFilters.createWildcardFilter()),
 			ColumnDescriptions.of("Type",		Class.class,			field -> field.getType().getSimpleName(),			TableValueFilters.createWildcardFilter()),
-			ColumnDescriptions.of("Class",		String.class,			field -> field.getDeclaringClass().getSimpleName(),	TableValueFilters.createSelectionFilter()),
-			ColumnDescriptions.of("Modifier",	AccessModifier.class,	field -> getAccessModifier(field),					TableValueFilters.createSelectionFilter())
+			ColumnDescriptions.of("Class",		String.class,			field -> field.getDeclaringClass().getSimpleName(),	TableValueFilters.createSelectionFilter(inspectionContext)),
+			ColumnDescriptions.of("Modifier",	AccessModifier.class,	field -> getAccessModifier(field),					TableValueFilters.createSelectionFilter(inspectionContext))
 		);
 	}
 
@@ -65,7 +65,7 @@ public class FieldView extends JPanel
 			actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(fieldValue));
 		}
 		actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(field.getName(), object));
-		return ActionProvider.of(inspectionContext.getDisplayString(fieldValue), actionsBuilder.build());
+		return ActionProvider.of(inspectionContext.getDisplayText(fieldValue), actionsBuilder.build());
 	}
 
 	private Object getFieldValue(Field field) {

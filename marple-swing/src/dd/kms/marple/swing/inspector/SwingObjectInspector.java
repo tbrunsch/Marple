@@ -13,7 +13,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
 
-public class SwingObjectInspector implements ObjectInspector<Component>
+public class SwingObjectInspector implements ObjectInspector<Component, Component>
 {
 	public static Object getHierarchyLeaf(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
 		List<?> lastNonEmptyList =	!subcomponentHierarchy.isEmpty()	? subcomponentHierarchy :
@@ -22,18 +22,18 @@ public class SwingObjectInspector implements ObjectInspector<Component>
 		return lastNonEmptyList == null ? null : lastNonEmptyList.get(lastNonEmptyList.size()-1);
 	}
 
-	private InspectionContext<Component>	inspectionContext;
-	private InspectionFrame					inspectionFrame;
+	private InspectionContext<Component, Component>	inspectionContext;
+	private InspectionFrame							inspectionFrame;
 
 	@Override
-	public void setInspectionContext(InspectionContext<Component> inspectionContext) {
+	public void setInspectionContext(InspectionContext<Component, Component> inspectionContext) {
 		this.inspectionContext = inspectionContext;
 	}
 
 	@Override
 	public void inspectComponent(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
 		ImmutableList.Builder<Component> viewBuilder = ImmutableList.builder();
-		viewBuilder.add(new ComponentHierarchyView(inspectionContext, componentHierarchy, subcomponentHierarchy));
+		viewBuilder.add(new ComponentHierarchyView(componentHierarchy, subcomponentHierarchy, inspectionContext));
 		Object hierarchyLeaf = getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
 		addObjectViews(hierarchyLeaf, viewBuilder);
 		showViews(hierarchyLeaf, viewBuilder.build());
@@ -47,9 +47,9 @@ public class SwingObjectInspector implements ObjectInspector<Component>
 	}
 
 	private void addObjectViews(Object object, ImmutableList.Builder<Component> viewBuilder) {
-		// TODO: Make configurable
-		viewBuilder.add(new FieldView(inspectionContext, object));
-		viewBuilder.add(new MethodView(inspectionContext, object));
+		viewBuilder.add(new FieldView(object, inspectionContext));
+		viewBuilder.add(new MethodView(object, inspectionContext));
+		viewBuilder.addAll(inspectionContext.getInspectionViews(object));
 	}
 
 	/*

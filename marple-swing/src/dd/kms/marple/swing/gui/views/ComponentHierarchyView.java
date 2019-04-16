@@ -3,7 +3,7 @@ package dd.kms.marple.swing.gui.views;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import dd.kms.marple.ReflectionUtils;
+import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
@@ -27,12 +27,12 @@ public class ComponentHierarchyView extends JPanel
 {
 	private static final String	NAME	= "Component Hierarchy";
 
-	private final JScrollPane					scrollPane;
-	private final JTree							tree;
+	private final JScrollPane	scrollPane;
+	private final JTree			tree;
 
-	private final InspectionContext<Component>	inspectionContext;
+	private final InspectionContext<Component, ?>	inspectionContext;
 
-	public ComponentHierarchyView(InspectionContext<Component> inspectionContext, List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
+	public ComponentHierarchyView(List<Component> componentHierarchy, List<?> subcomponentHierarchy, InspectionContext<Component, ?> inspectionContext) {
 		super(new GridBagLayout());
 		this.inspectionContext = inspectionContext;
 

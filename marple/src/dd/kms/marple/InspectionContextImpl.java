@@ -12,15 +12,16 @@ import java.util.function.Consumer;
 /**
  *
  * @param <C>	GUI component class
+ * @param <V>	View class (GUI component class plus name)
  * @param <K>	KeyStroke class
  * @param <P>	Point class
  */
-class InspectionContextImpl<C, K, P> implements InspectionContext<C>
+class InspectionContextImpl<C, V, K, P> implements InspectionContext<C, V>
 {
-	private final InspectionSettings<C, K, P>	settings;
-	private final InspectionHistory				inspectionHistory;
+	private final InspectionSettings<C, V, K, P>	settings;
+	private final InspectionHistory					inspectionHistory;
 
-	InspectionContextImpl(InspectionSettings<C, K, P> settings) {
+	InspectionContextImpl(InspectionSettings<C, V, K, P> settings) {
 		this.settings = settings;
 		inspectionHistory = new InspectionHistory();
 		settings.getInspector().setInspectionContext(this);
@@ -42,7 +43,7 @@ class InspectionContextImpl<C, K, P> implements InspectionContext<C>
 		Object hierarchyLeaf = subcomponentHierarchy.isEmpty()
 								? componentHierarchy.get(componentHierarchy.size()-1)
 								: subcomponentHierarchy.get(subcomponentHierarchy.size()-1);
-		String leafDisplayText = getDisplayString(hierarchyLeaf);
+		String leafDisplayText = getDisplayText(hierarchyLeaf);
 		InspectionAction action = new InspectComponentAction<>(settings.getInspector(), componentHierarchy, subcomponentHierarchy, leafDisplayText);
 		return new HistoryActionWrapper(inspectionHistory, action);
 	}
@@ -54,7 +55,7 @@ class InspectionContextImpl<C, K, P> implements InspectionContext<C>
 			List<C> componentHierarchy = getComponentHierarchy(component);
 			return createInspectComponentAction(componentHierarchy, ImmutableList.of());
 		}
-		InspectionAction action = new InspectObjectAction(settings.getInspector(), object, getDisplayString(object));
+		InspectionAction action = new InspectObjectAction(settings.getInspector(), object, getDisplayText(object));
 		return new HistoryActionWrapper(inspectionHistory, action);
 	}
 
@@ -74,9 +75,13 @@ class InspectionContextImpl<C, K, P> implements InspectionContext<C>
 	}
 
 	@Override
-	public String getDisplayString(Object object) {
-		// TODO: Let user configure how to display which kind of object
-		return object == null ? "NULL" : object.toString();
+	public String getDisplayText(Object object) {
+		return settings.getVisualSettings().getDisplayText(object);
+	}
+
+	@Override
+	public List<V> getInspectionViews(Object object) {
+		return settings.getVisualSettings().getInspectionViews(object, this);
 	}
 
 	@Override
@@ -84,7 +89,7 @@ class InspectionContextImpl<C, K, P> implements InspectionContext<C>
 		inspectionHistory.clear();
 	}
 
-	InspectionSettings<C, K, P> getSettings() {
+	InspectionSettings<C, V, K, P> getSettings() {
 		return settings;
 	}
 

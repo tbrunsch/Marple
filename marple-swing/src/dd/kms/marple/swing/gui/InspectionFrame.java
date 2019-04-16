@@ -11,23 +11,23 @@ public class InspectionFrame extends JFrame
 {
 	private static final Dimension INITIAL_SIZE = new Dimension(400, 300);
 
-	private final JButton						prevButton			= new JButton();
-	private final JButton						nextButton			= new JButton();
+	private final JButton		prevButton			= new JButton();
+	private final JButton		nextButton			= new JButton();
 
-	private final JPanel						contentPanel		= new JPanel(new BorderLayout());
+	private final JPanel		contentPanel		= new JPanel(new BorderLayout());
 
-	private final JPanel						objectOverviewPanel	= new JPanel(new GridBagLayout());
-	private final JLabel						classInfoLabel		= new JLabel();
-	private final JLabel						toStringLabel		= new JLabel();
+	private final JPanel		objectOverviewPanel	= new JPanel(new GridBagLayout());
+	private final JLabel		classInfoLabel		= new JLabel();
+	private final JLabel		toStringLabel		= new JLabel();
 
-	private final JTabbedPane   				tabbedPane			= new JTabbedPane();
+	private final JTabbedPane  	tabbedPane			= new JTabbedPane();
 
-	private final InspectionContext<Component>	inspectionContext;
+	private final InspectionContext<Component, Component>	inspectionContext;
 
-	private boolean								initializing;
-	private String								lastSelectedTabTitle;
+	private boolean											initializing;
+	private String											lastSelectedTabTitle;
 
-	public InspectionFrame(InspectionContext<Component> inspectionContext) {
+	public InspectionFrame(InspectionContext<Component, Component> inspectionContext) {
 		this.inspectionContext = inspectionContext;
 		configure();
 	}
@@ -57,7 +57,7 @@ public class InspectionFrame extends JFrame
 
 	public void setViews(Object object, List<? extends Component> views) {
 		initializing = true;
-		toStringLabel.setText('"' + inspectionContext.getDisplayString(object) + '"');
+		toStringLabel.setText('"' + inspectionContext.getDisplayText(object) + '"');
 		classInfoLabel.setText(object.getClass().toString());
 		tabbedPane.removeAll();
 

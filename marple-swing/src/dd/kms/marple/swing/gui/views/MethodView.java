@@ -1,7 +1,7 @@
 package dd.kms.marple.swing.gui.views;
 
 import com.google.common.collect.ImmutableList;
-import dd.kms.marple.AccessModifier;
+import dd.kms.marple.common.AccessModifier;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
@@ -19,12 +19,12 @@ public class MethodView extends JPanel
 {
 	private static final String	NAME	= "Methods";
 
-	private final ListBasedTable<Method>		table;
+	private final ListBasedTable<Method>	table;
 
-	private final Object						object;
-	private final InspectionContext<Component>	inspectionContext;
+	private final Object					object;
+	private final InspectionContext<?, ?>	inspectionContext;
 
-	public MethodView(InspectionContext<Component> inspectionContext, Object object) {
+	public MethodView(Object object, InspectionContext<?, ?> inspectionContext) {
 		super(new GridBagLayout());
 		this.inspectionContext = inspectionContext;
 		this.object = object;
@@ -47,8 +47,8 @@ public class MethodView extends JPanel
 			ColumnDescriptions.of("Return Type",	String.class,			method -> method.getReturnType().getSimpleName(),		TableValueFilters.createWildcardFilter()),
 			ColumnDescriptions.of("Name",			Object.class,			method -> getMethodActionProvider(method),				TableValueFilters.createWildcardFilter()),
 			ColumnDescriptions.of("Arguments",		String.class,			method -> getArgumentsAsString(method),					TableValueFilters.createWildcardFilter()),
-			ColumnDescriptions.of("Class",			String.class,			method -> method.getDeclaringClass().getSimpleName(),	TableValueFilters.createSelectionFilter()),
-			ColumnDescriptions.of("Modifier",		AccessModifier.class,	method -> getAccessModifier(method),					TableValueFilters.createSelectionFilter())
+			ColumnDescriptions.of("Class",			String.class,			method -> method.getDeclaringClass().getSimpleName(),	TableValueFilters.createSelectionFilter(inspectionContext)),
+			ColumnDescriptions.of("Modifier",		AccessModifier.class,	method -> getAccessModifier(method),					TableValueFilters.createSelectionFilter(inspectionContext))
 		);
 	}
 
@@ -61,7 +61,7 @@ public class MethodView extends JPanel
 			actionsBuilder.add(createInvokeMethodAction(method));
 		}
 		actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(methodName + "(" + argumentList + ")", object));
-		return ActionProvider.of(inspectionContext.getDisplayString(methodName), actionsBuilder.build());
+		return ActionProvider.of(inspectionContext.getDisplayText(methodName), actionsBuilder.build());
 	}
 
 	private static String getArgumentsAsString(Method method) {

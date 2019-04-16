@@ -4,11 +4,11 @@ import dd.kms.marple.ObjectInspector;
 
 public class InspectObjectAction implements InspectionAction
 {
-	private final ObjectInspector<?>	inspector;
+	private final ObjectInspector<?, ?>	inspector;
 	private final Object				object;
 	private final String				objectDisplayText;
 
-	public InspectObjectAction(ObjectInspector<?> inspector, Object object, String objectDisplayText) {
+	public InspectObjectAction(ObjectInspector<?, ?> inspector, Object object, String objectDisplayText) {
 		this.inspector = inspector;
 		this.object = object;
 		this.objectDisplayText = objectDisplayText;

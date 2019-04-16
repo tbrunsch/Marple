@@ -33,8 +33,8 @@ class ComponentHierarchyModelBuilderImpl<C, P> implements ComponentHierarchyMode
 			componentClass,
 			(component, p) -> componentClass.isInstance(component)
 							? subcomponentHierarchyStrategy.getSubcomponentHierarchy(componentClass.cast(component), p)
-							: ImmutableList.of());
-
+							: ImmutableList.of()
+		);
 		return this;
 	}
 

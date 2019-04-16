@@ -3,11 +3,14 @@ package dd.kms.marple.swing;
 import dd.kms.marple.AbstractObjectInspectionFramework;
 import dd.kms.marple.components.ComponentHierarchyModelBuilder;
 import dd.kms.marple.components.ComponentHierarchyModels;
+import dd.kms.marple.gui.VisualSettingsBuilder;
+import dd.kms.marple.gui.VisualSettingsBuilders;
 import dd.kms.marple.settings.InspectionSettings;
 import dd.kms.marple.settings.InspectionSettingsBuilder;
 import dd.kms.marple.settings.InspectionSettingsBuilders;
 import dd.kms.marple.swing.evaluator.SwingExpressionEvaluator;
 import dd.kms.marple.swing.gui.SubcomponentHierarchyStrategies;
+import dd.kms.marple.swing.gui.VisualSwingSettings;
 import dd.kms.marple.swing.inspector.SwingObjectInspector;
 
 import java.awt.*;
@@ -15,7 +18,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.security.AccessControlException;
 
-public class SwingObjectInspectionFramework extends AbstractObjectInspectionFramework<Component, SwingKey, Point>
+public class SwingObjectInspectionFramework extends AbstractObjectInspectionFramework<Component, Component, SwingKey, Point>
 {
 	private static final SwingKey	INSPECTION_KEY	= new SwingKey(KeyEvent.VK_I, 	KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
 	private static final SwingKey	EVALUATION_KEY	= new SwingKey(KeyEvent.VK_F8,	KeyEvent.ALT_DOWN_MASK | KeyEvent.ALT_MASK);
@@ -23,13 +26,14 @@ public class SwingObjectInspectionFramework extends AbstractObjectInspectionFram
 	private static final Object						LOCK		= new Object();
 	private static SwingObjectInspectionFramework	FRAMEWORK	= null;
 
-	public static InspectionSettingsBuilder<Component, SwingKey, Point> createInspectionSettingsBuilder() {
-		return InspectionSettingsBuilders.<Component, SwingKey, Point>create(Component.class)
+	public static InspectionSettingsBuilder<Component, Component, SwingKey, Point> createInspectionSettingsBuilder() {
+		return InspectionSettingsBuilders.<Component, Component, SwingKey, Point>create(Component.class)
 			.inspector(new SwingObjectInspector())
 			.inspectionKey(INSPECTION_KEY)
 			.evaluator(new SwingExpressionEvaluator())
 			.evaluationKey(EVALUATION_KEY)
-			.componentHierarchyModel(createComponentHierarchyModelBuilder().build());
+			.componentHierarchyModel(createComponentHierarchyModelBuilder().build())
+			.visualSettings(createVisualSettingsBuilder().build());
 	}
 
 	public static ComponentHierarchyModelBuilder<Component, Point> createComponentHierarchyModelBuilder() {
@@ -38,7 +42,14 @@ public class SwingObjectInspectionFramework extends AbstractObjectInspectionFram
 		return builder;
 	}
 
-	public static void register(Object identifier, InspectionSettings<Component, SwingKey, Point> inspectionSettings) {
+	public static VisualSettingsBuilder<Component, Component> createVisualSettingsBuilder() {
+		VisualSettingsBuilder<Component, Component> builder = VisualSettingsBuilders.createBuilder();
+		VisualSwingSettings.addDefaultDisplayTextFunctions(builder);
+		VisualSwingSettings.addDefaultViews(builder);
+		return builder;
+	}
+
+	public static void register(Object identifier, InspectionSettings<Component, Component, SwingKey, Point> inspectionSettings) {
 		synchronized (LOCK) {
 			SwingObjectInspectionFramework framework = getFramework(true);
 			framework.registerSettings(identifier, inspectionSettings);

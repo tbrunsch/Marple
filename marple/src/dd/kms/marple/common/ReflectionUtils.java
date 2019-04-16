@@ -1,36 +1,29 @@
-package dd.kms.marple;
+package dd.kms.marple.common;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import dd.kms.marple.components.SubcomponentHierarchyStrategy;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
 public class ReflectionUtils
 {
-	public static Collection<Class<?>> getImplementedClasses(Object object, boolean includeInterfaces) {
+	public static <T> Class<? extends T> getBestMatchingClass(Object object, Iterable<Class<? extends T>> classes) {
 		if (object == null) {
-			return Collections.emptyList();
+			return null;
 		}
-		List<Class<?>> classesToExamine = new ArrayList<>();
-		classesToExamine.add(object.getClass());
-		Set<Class<?>> implementedClasses = new LinkedHashSet<>();
-		while (!classesToExamine.isEmpty()) {
-			Class<?> clazz = classesToExamine.get(0);
-			classesToExamine.remove(0);
-			if (implementedClasses.contains(clazz)) {
+		Class<? extends T> bestClass = null;
+		for (Class<? extends T> clazz : classes) {
+			if (!clazz.isInstance(object)) {
 				continue;
 			}
-			implementedClasses.add(clazz);
-			Class<?> superClass = clazz.getSuperclass();
-			if (superClass != null) {
-				classesToExamine.add(superClass);
-			}
-			if (includeInterfaces) {
-				classesToExamine.addAll(Arrays.asList(clazz.getInterfaces()));
+			if (bestClass == null || bestClass.isAssignableFrom(clazz)) {
+				bestClass = clazz;
 			}
 		}
-		return implementedClasses;
+		return bestClass;
 	}
 
 	/**
