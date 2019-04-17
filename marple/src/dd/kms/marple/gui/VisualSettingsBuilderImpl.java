@@ -1,5 +1,7 @@
 package dd.kms.marple.gui;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import dd.kms.marple.InspectionContext;
 
 import java.util.HashMap;
@@ -14,7 +16,7 @@ import java.util.function.Function;
  */
 class VisualSettingsBuilderImpl<C, V> implements VisualSettingsBuilder<C, V>
 {
-	private String																nullDisplayText			= "null";
+	private String																		nullDisplayText			= "null";
 
 	/*
 	 * Since we want the user to add strategies without having to know which strategies
@@ -22,7 +24,7 @@ class VisualSettingsBuilderImpl<C, V> implements VisualSettingsBuilder<C, V>
 	 * an exception if he specified a strategy for the same object class for which there is already
 	 * a default strategy defined.
 	 */
-	private final Map<Class<?>, Function<Object, String>>						displayTextFunctions	= new HashMap<>();
+	private final Map<Class<?>, Function<Object, String>>								displayTextFunctions	= new HashMap<>();
 
 	/*
 	 * Since we want the user to add strategies without having to know which strategies
@@ -30,7 +32,7 @@ class VisualSettingsBuilderImpl<C, V> implements VisualSettingsBuilder<C, V>
 	 * an exception if he specified a strategy for the same object class for which there is already
 	 * a default strategy defined.
 	 */
-	private final Map<Class<?>, BiFunction<Object, InspectionContext<C, V>, V>>	objectViewConstructors	= new LinkedHashMap<>();
+	private final Multimap<Class<?>, BiFunction<Object, InspectionContext<C, V>, V>>	objectViewConstructors	= ArrayListMultimap.create();
 
 	@Override
 	public VisualSettingsBuilder<C, V> nullDisplayText(String nullDisplayText) {

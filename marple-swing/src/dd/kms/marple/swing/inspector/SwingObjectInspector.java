@@ -32,24 +32,18 @@ public class SwingObjectInspector implements ObjectInspector<Component, Componen
 
 	@Override
 	public void inspectComponent(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
-		ImmutableList.Builder<Component> viewBuilder = ImmutableList.builder();
-		viewBuilder.add(new ComponentHierarchyView(componentHierarchy, subcomponentHierarchy, inspectionContext));
 		Object hierarchyLeaf = getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
-		addObjectViews(hierarchyLeaf, viewBuilder);
+		ImmutableList.Builder<Component> viewBuilder = ImmutableList.<Component>builder()
+			.add(new ComponentHierarchyView(componentHierarchy, subcomponentHierarchy, inspectionContext))
+			.addAll(inspectionContext.getInspectionViews(hierarchyLeaf));
 		showViews(hierarchyLeaf, viewBuilder.build());
 	}
 
 	@Override
 	public void inspectObject(Object object) {
-		ImmutableList.Builder<Component> viewBuilder = ImmutableList.builder();
-		addObjectViews(object, viewBuilder);
+		ImmutableList.Builder<Component> viewBuilder = ImmutableList.<Component>builder()
+			.addAll(inspectionContext.getInspectionViews(object));
 		showViews(object, viewBuilder.build());
-	}
-
-	private void addObjectViews(Object object, ImmutableList.Builder<Component> viewBuilder) {
-		viewBuilder.add(new FieldView(object, inspectionContext));
-		viewBuilder.add(new MethodView(object, inspectionContext));
-		viewBuilder.addAll(inspectionContext.getInspectionViews(object));
 	}
 
 	/*

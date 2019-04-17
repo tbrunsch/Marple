@@ -1,6 +1,8 @@
 package dd.kms.marple.swing.gui;
 
 import dd.kms.marple.gui.VisualSettingsBuilder;
+import dd.kms.marple.swing.gui.views.FieldView;
+import dd.kms.marple.swing.gui.views.MethodView;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -21,6 +23,10 @@ public class VisualSwingSettings
 	}
 
 	public static void addDefaultViews(VisualSettingsBuilder<Component, Component> builder) {
+		builder
+			.objectView(Object.class, FieldView::new)
+			.objectView(Object.class, MethodView::new)
+			;
 		// TODO: Add special view for collections
 	}
 

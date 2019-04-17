@@ -2,6 +2,8 @@ package dd.kms.marple.gui;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.common.ReflectionUtils;
 
@@ -17,14 +19,14 @@ import java.util.function.Function;
  */
 class VisualSettingsImpl<C, V> implements VisualSettings<C, V>
 {
-	private final String														nullDisplayText;
-	private final Map<Class<?>, Function<Object, String>>						displayTextFunctions;
-	private final Map<Class<?>, BiFunction<Object, InspectionContext<C, V>, V>>	objectViewConstructors;
+	private final String																nullDisplayText;
+	private final Map<Class<?>, Function<Object, String>>								displayTextFunctions;
+	private final Multimap<Class<?>, BiFunction<Object, InspectionContext<C, V>, V>>	objectViewConstructors;
 
-	VisualSettingsImpl(String nullDisplayText, Map<Class<?>, Function<Object, String>> displayTextFunctions, Map<Class<?>, BiFunction<Object, InspectionContext<C, V>, V>> objectViewConstructors) {
+	VisualSettingsImpl(String nullDisplayText, Map<Class<?>, Function<Object, String>> displayTextFunctions, Multimap<Class<?>, BiFunction<Object, InspectionContext<C, V>, V>> objectViewConstructors) {
 		this.nullDisplayText = nullDisplayText;
 		this.displayTextFunctions = ImmutableMap.copyOf(displayTextFunctions);
-		this.objectViewConstructors = ImmutableMap.copyOf(objectViewConstructors);
+		this.objectViewConstructors = ImmutableMultimap.copyOf(objectViewConstructors);
 	}
 
 	@Override
@@ -43,8 +45,12 @@ class VisualSettingsImpl<C, V> implements VisualSettings<C, V>
 		ImmutableList.Builder<V> viewsBuilder = ImmutableList.builder();
 		for (Class<?> objectClass : objectViewConstructors.keySet()) {
 			if (objectClass.isInstance(object)) {
-				V view = objectViewConstructors.get(objectClass).apply(object, inspectionContext);
-				viewsBuilder.add(view);
+				for (BiFunction<Object, InspectionContext<C, V>, V> objectViewConstructor : objectViewConstructors.get(objectClass)) {
+					V view = objectViewConstructor.apply(object, inspectionContext);
+					if (view != null) {
+						viewsBuilder.add(view);
+					}
+				}
 			}
 		}
 		return viewsBuilder.build();
