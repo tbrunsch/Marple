@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class ActionProvider
 {
@@ -22,7 +24,7 @@ public class ActionProvider
 	private ActionProvider(String displayText, List<InspectionAction> actions) {
 		this.displayText = displayText;
 		Preconditions.checkArgument(!actions.isEmpty());
-		this.actions = ImmutableList.copyOf(actions);
+		this.actions = actions.stream().filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
 	public List<InspectionAction> getActions() {

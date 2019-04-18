@@ -19,10 +19,10 @@ public class FieldView extends JPanel
 
 	private final JPanel		viewPanel					= new JPanel(new GridBagLayout());
 
-	private final Object					object;
-	private final InspectionContext<?, ?>	inspectionContext;
+	private final Object							object;
+	private final InspectionContext<Component, ?>	inspectionContext;
 
-	public FieldView(Object object, InspectionContext<?, ?> inspectionContext) {
+	public FieldView(Object object, InspectionContext<Component, ?> inspectionContext) {
 		super(new BorderLayout());
 
 		this.object = object;

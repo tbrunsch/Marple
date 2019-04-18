@@ -60,6 +60,11 @@ class InspectionContextImpl<C, V, K, P> implements InspectionContext<C, V>
 	}
 
 	@Override
+	public InspectionAction createHighlightComponentAction(C component) {
+		return new HighlightComponentAction<>(settings.getInspector(), component, getDisplayText(component));
+	}
+
+	@Override
 	public InspectionAction createInvokeMethodAction(Object object, Method method, Consumer<Object> returnValueConsumer, Consumer<Exception> exceptionConsumer) {
 		return new InvokeMethodAction(object, method, returnValueConsumer, exceptionConsumer);
 	}

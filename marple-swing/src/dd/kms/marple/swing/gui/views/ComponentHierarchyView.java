@@ -85,8 +85,9 @@ public class ComponentHierarchyView extends JPanel
 		Object hierarchyLeaf = SwingObjectInspector.getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
 		String displayText = createActionProviderDisplayText(hierarchyLeaf, detectedFields);
 		InspectionAction inspectComponentAction = inspectionContext.createInspectComponentAction(componentHierarchy, subcomponentHierarchy);
+		InspectionAction highlightComponentAction = subcomponentHierarchy.isEmpty() ? inspectionContext.createHighlightComponentAction((Component) hierarchyLeaf) : null;
 		InspectionAction evaluateAsThisAction = inspectionContext.createEvaluateAsThisAction(hierarchyLeaf);
-		return ActionProvider.of(displayText, inspectComponentAction, evaluateAsThisAction);
+		return ActionProvider.of(displayText, inspectComponentAction, highlightComponentAction, evaluateAsThisAction);
 	}
 
 	private String createActionProviderDisplayText(Object object, Collection<Field> fields) {

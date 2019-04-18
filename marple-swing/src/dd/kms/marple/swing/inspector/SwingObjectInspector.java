@@ -8,10 +8,13 @@ import dd.kms.marple.swing.gui.views.FieldView;
 import dd.kms.marple.swing.gui.views.ComponentHierarchyView;
 import dd.kms.marple.swing.gui.views.MethodView;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class SwingObjectInspector implements ObjectInspector<Component, Component>
 {
@@ -44,6 +47,12 @@ public class SwingObjectInspector implements ObjectInspector<Component, Componen
 		ImmutableList.Builder<Component> viewBuilder = ImmutableList.<Component>builder()
 			.addAll(inspectionContext.getInspectionViews(object));
 		showViews(object, viewBuilder.build());
+	}
+
+	@Override
+	public void highlightComponent(Component component) {
+		Runnable componentHighlighter = new ComponentHighlighter(component);
+		new Thread(componentHighlighter).start();
 	}
 
 	/*

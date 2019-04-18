@@ -17,6 +17,7 @@ public interface InspectionContext<C, V>
 	InspectionAction createHistoryForwardAction();
 	InspectionAction createInspectComponentAction(List<C> componentHierarchy, List<?> subcomponentHierarchy);
 	InspectionAction createInspectObjectAction(Object object);
+	InspectionAction createHighlightComponentAction(C component);
 	InspectionAction createInvokeMethodAction(Object object, Method method, Consumer<Object> returnValueConsumer, Consumer<Exception> exceptionConsumer);
 	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue);
 	InspectionAction createEvaluateAsThisAction(Object thisValue);

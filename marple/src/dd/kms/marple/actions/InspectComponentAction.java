@@ -12,12 +12,12 @@ import java.util.List;
  */
 public class InspectComponentAction<C, V> implements InspectionAction
 {
-	private final ObjectInspector<C, V>	inspector;
+	private final ObjectInspector<C, ?>	inspector;
 	private final List<C>				componentHierarchy;
 	private final List<?>				subcomponentHierarchy;
 	private final String				leafDisplayText;
 
-	public InspectComponentAction(ObjectInspector<C, V> inspector, List<C> componentHierarchy, List<?> subcomponentHierarchy, String leafDisplayText) {
+	public InspectComponentAction(ObjectInspector<C, ?> inspector, List<C> componentHierarchy, List<?> subcomponentHierarchy, String leafDisplayText) {
 		this.inspector = inspector;
 		this.componentHierarchy = ImmutableList.copyOf(componentHierarchy);
 		this.subcomponentHierarchy = ImmutableList.copyOf(subcomponentHierarchy);

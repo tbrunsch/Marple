@@ -16,12 +16,12 @@ import java.util.List;
 
 public class FieldTable extends JPanel
 {
-	private final ListBasedTable<Field>		table;
+	private final ListBasedTable<Field>				table;
 
-	private final Object					object;
-	private final InspectionContext<?, ?>	inspectionContext;
+	private final Object							object;
+	private final InspectionContext<Component, ?>	inspectionContext;
 
-	public FieldTable(Object object, InspectionContext<?, ?> inspectionContext) {
+	public FieldTable(Object object, InspectionContext<Component, ?> inspectionContext) {
 		super(new GridBagLayout());
 		this.object = object;
 		this.inspectionContext = inspectionContext;
@@ -58,6 +58,9 @@ public class FieldTable extends JPanel
 		boolean primitiveValue = field.getType().isPrimitive();
 		if (!primitiveValue) {
 			actionsBuilder.add(inspectionContext.createInspectObjectAction(fieldValue));
+			if (fieldValue instanceof Component) {
+				actionsBuilder.add(inspectionContext.createHighlightComponentAction((Component) fieldValue));
+			}
 			actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(fieldValue));
 		}
 		actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(field.getName(), object));

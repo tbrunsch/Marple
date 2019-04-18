@@ -12,4 +12,5 @@ public interface ObjectInspector<C, V>
 	void setInspectionContext(InspectionContext<C, V> inspectionContext);
 	void inspectComponent(List<C> componentHierarchy, List<?> subcomponentHierarchy);
 	void inspectObject(Object object);
+	void highlightComponent(C component);
 }
