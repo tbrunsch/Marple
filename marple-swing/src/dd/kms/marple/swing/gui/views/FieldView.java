@@ -1,84 +1,61 @@
 package dd.kms.marple.swing.gui.views;
 
-import com.google.common.collect.ImmutableList;
-import dd.kms.marple.common.AccessModifier;
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.actions.ActionProvider;
-import dd.kms.marple.actions.InspectionAction;
-import dd.kms.marple.swing.gui.table.*;
-import dd.kms.zenodot.common.ReflectionUtils;
 
 import javax.swing.*;
+import javax.swing.text.View;
 import java.awt.*;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
+
+import static java.awt.GridBagConstraints.*;
 
 public class FieldView extends JPanel
 {
 	private static final String	NAME	= "Fields";
 
-	private final ListBasedTable<Field>		table;
+	private final JPanel		viewSelectionPanel			= new JPanel(new GridBagLayout());
+	private final JToggleButton	quickViewToggleButton		= new JToggleButton("Quick View");
+	private final JToggleButton	detailedViewToggleButton	= new JToggleButton("Detailed View");
+	private final ButtonGroup	viewButtonGroup				= new ButtonGroup();
+
+	private final JPanel		viewPanel					= new JPanel(new GridBagLayout());
 
 	private final Object					object;
 	private final InspectionContext<?, ?>	inspectionContext;
 
 	public FieldView(Object object, InspectionContext<?, ?> inspectionContext) {
-		super(new GridBagLayout());
+		super(new BorderLayout());
+
 		this.object = object;
 		this.inspectionContext = inspectionContext;
 
-		List<Field> fields = ReflectionUtils.getFields(object.getClass(), false);
-		fields.forEach(field -> field.setAccessible(true));
+		add(viewSelectionPanel,	BorderLayout.NORTH);
+		add(viewPanel,			BorderLayout.CENTER);
 
-		List<ColumnDescription<Field>> columnDescriptions = createColumnDescriptions();
+		viewSelectionPanel.add(quickViewToggleButton, 		new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, NORTHWEST, BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		viewSelectionPanel.add(detailedViewToggleButton, 	new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, NORTHWEST, BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		viewSelectionPanel.add(new JLabel(), 				new GridBagConstraints(2, 0, 1, 1, 1.0, 0.0, NORTHWEST, HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 
-		table = new ListBasedTable<>(fields, columnDescriptions);
-		JTable internalTable = table.getInternalTable();
-		internalTable.getColumnModel().getColumn(1).setCellRenderer(new ActionProviderRenderer());
-		internalTable.setDefaultRenderer(AccessModifier.class, new AccessModifierRenderer());
+		viewButtonGroup.add(quickViewToggleButton);
+		viewButtonGroup.add(detailedViewToggleButton);
 
-		add(table, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		setView(ViewType.QUICK);
+
+		quickViewToggleButton.addActionListener(e -> setView(ViewType.QUICK));
+		detailedViewToggleButton.addActionListener(e -> setView(ViewType.DETAILED));
 
 		setName(NAME);
 	}
 
-	private List<ColumnDescription<Field>> createColumnDescriptions() {
-		return Arrays.asList(
-			ColumnDescriptions.of("Name",		String.class,			Field::getName,										TableValueFilters.createWildcardFilter()),
-			ColumnDescriptions.of("Value",		ActionProvider.class,	field -> getFieldValueActionProvider(field),		TableValueFilters.createWildcardFilter()),
-			ColumnDescriptions.of("Type",		Class.class,			field -> field.getType().getSimpleName(),			TableValueFilters.createWildcardFilter()),
-			ColumnDescriptions.of("Class",		String.class,			field -> field.getDeclaringClass().getSimpleName(),	TableValueFilters.createSelectionFilter(inspectionContext)),
-			ColumnDescriptions.of("Modifier",	AccessModifier.class,	field -> getAccessModifier(field),					TableValueFilters.createSelectionFilter(inspectionContext))
-		);
+	private void setView(ViewType viewType) {
+		Component view = viewType == ViewType.QUICK
+							? new FieldTree(object, inspectionContext)
+							: new FieldTable(object, inspectionContext);
+		JToggleButton toggleButton = viewType == ViewType.QUICK ? quickViewToggleButton : detailedViewToggleButton;
+		viewPanel.removeAll();
+		viewPanel.add(view, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, NORTHWEST, BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		viewPanel.validate();
+		toggleButton.setSelected(true);
 	}
 
-	private ActionProvider getFieldValueActionProvider(Field field) {
-		Object fieldValue = getFieldValue(field);
-		if (fieldValue == null) {
-			return null;
-		}
-		ImmutableList.Builder<InspectionAction> actionsBuilder = ImmutableList.builder();
-		boolean primitiveValue = field.getType().isPrimitive();
-		if (!primitiveValue) {
-			actionsBuilder.add(inspectionContext.createInspectObjectAction(fieldValue));
-			actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(fieldValue));
-		}
-		actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(field.getName(), object));
-		return ActionProvider.of(inspectionContext.getDisplayText(fieldValue), actionsBuilder.build());
-	}
-
-	private Object getFieldValue(Field field) {
-		try {
-			return field.get(object);
-		} catch (IllegalAccessException e) {
-			// should not happen
-			return null;
-		}
-	}
-
-	private static AccessModifier getAccessModifier(Field field) {
-		int modifiers = field.getModifiers();
-		return AccessModifier.getValue(modifiers);
-	}
+	private enum ViewType { QUICK, DETAILED }
 }

@@ -8,16 +8,15 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.swing.gui.Actions;
+import dd.kms.marple.swing.gui.actionprovidertree.ActionProviderTreeMouseListener;
+import dd.kms.marple.swing.gui.actionprovidertree.ActionProviderTreeMouseMotionListener;
+import dd.kms.marple.swing.gui.actionprovidertree.ActionProviderTreeNode;
 import dd.kms.marple.swing.inspector.SwingObjectInspector;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
@@ -111,7 +110,7 @@ public class ComponentHierarchyView extends JPanel
 		MutableTreeNode root = null;
 		MutableTreeNode parent = null;
 		for (ActionProvider actionProvider : actionProviderHierarchy) {
-			DefaultMutableTreeNode node = new DefaultMutableTreeNode(actionProvider);
+			MutableTreeNode node = new ComponentHierarchyTreeNode(actionProvider);
 			if (root == null) {
 				root = node;
 			} else {
@@ -124,64 +123,21 @@ public class ComponentHierarchyView extends JPanel
 		}
 		JTree tree = new JTree(root);
 
-		tree.addMouseListener(new ActionProviderTreeMouseListener(tree));
-		tree.addMouseMotionListener(new ActionProviderTreeMouseMotionListener(tree));
+		tree.addMouseListener(new ActionProviderTreeMouseListener());
+		tree.addMouseMotionListener(new ActionProviderTreeMouseMotionListener());
 
 		return tree;
 	}
 
-	private static class ActionProviderTreeMouseListener extends MouseAdapter
+	private static class ComponentHierarchyTreeNode extends DefaultMutableTreeNode implements ActionProviderTreeNode
 	{
-		private final JTree	tree;
-
-		private ActionProviderTreeMouseListener(JTree tree) {
-			this.tree = tree;
+		ComponentHierarchyTreeNode(ActionProvider actionProvider) {
+			super(actionProvider);
 		}
 
 		@Override
-		public void mouseClicked(MouseEvent e) {
-			assert e.getComponent() == tree;
-			TreePath path = tree.getPathForLocation(e.getX(), e.getY());
-			ActionProvider actionProvider = getActionProvider(path);
-			if (actionProvider == null) {
-				return;
-			}
-			if (SwingUtilities.isLeftMouseButton(e)) {
-				Actions.runDefaultAction(actionProvider);
-			} else if (SwingUtilities.isRightMouseButton(e)) {
-				Actions.showActionPopup(tree, actionProvider, e);
-			}
-		}
-
-		private ActionProvider getActionProvider(TreePath path) {
-			if (path == null) {
-				return null;
-			}
-			Object node = path.getLastPathComponent();
-			if (!(node instanceof DefaultMutableTreeNode)) {
-				return null;
-			}
-			Object userObject = ((DefaultMutableTreeNode) node).getUserObject();
-			if (!(userObject instanceof ActionProvider)) {
-				return null;
-			}
-			return (ActionProvider) userObject;
-		}
-	}
-
-	private static class ActionProviderTreeMouseMotionListener extends MouseMotionAdapter
-	{
-		private final JTree	tree;
-
-		private ActionProviderTreeMouseMotionListener(JTree tree) {
-			this.tree = tree;
-		}
-
-		@Override
-		public void mouseMoved(MouseEvent e) {
-			TreePath path = tree.getPathForLocation(e.getX(), e.getY());
-			Cursor cursor = path == null ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
-			tree.setCursor(cursor);
+		public ActionProvider getActionProvider() {
+			return (ActionProvider) getUserObject();
 		}
 	}
 }

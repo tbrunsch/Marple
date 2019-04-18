@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Actions
 {
-	private static final int	MAX_NAME_LENGTH	= 40;
+	private static final int	MAX_NAME_LENGTH	= 60;
 
 	public static String trimName(String name) {
 		return name.length() > MAX_NAME_LENGTH
