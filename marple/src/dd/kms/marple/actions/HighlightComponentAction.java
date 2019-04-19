@@ -4,11 +4,11 @@ import dd.kms.marple.ObjectInspector;
 
 public class HighlightComponentAction<C> implements InspectionAction
 {
-	private final ObjectInspector<C, ?> inspector;
-	private final C						component;
-	private final String				displayText;
+	private final ObjectInspector<C> inspector;
+	private final C					component;
+	private final String			displayText;
 
-	public HighlightComponentAction(ObjectInspector<C, ?> inspector, C component, String displayText) {
+	public HighlightComponentAction(ObjectInspector<C> inspector, C component, String displayText) {
 		this.inspector = inspector;
 		this.component = component;
 		this.displayText = displayText;

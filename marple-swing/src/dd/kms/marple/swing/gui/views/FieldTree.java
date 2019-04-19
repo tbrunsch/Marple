@@ -29,7 +29,7 @@ public class FieldTree extends JPanel
 	private final JTree			tree			= new JTree();
 	private final JScrollPane	treeScrollPane	= new JScrollPane(tree);
 
-	public FieldTree(Object object, InspectionContext<Component, ?> inspectionContext) {
+	public FieldTree(Object object, InspectionContext<Component> inspectionContext) {
 		super(new GridBagLayout());
 
 		TreeModel model = new FieldTreeModel(object, inspectionContext);
@@ -44,10 +44,10 @@ public class FieldTree extends JPanel
 	private static class FieldTreeModel implements TreeModel
 	{
 		private final Object										rootObject;
-		private final InspectionContext<Component, ?>				inspectionContext;
+		private final InspectionContext<Component>					inspectionContext;
 		private final LoadingCache<Object, List<ObjectTreeNode>>	childCache;
 
-		private FieldTreeModel(Object rootObject, InspectionContext<Component, ?> inspectionContext) {
+		private FieldTreeModel(Object rootObject, InspectionContext<Component> inspectionContext) {
 			this.rootObject = rootObject;
 			this.inspectionContext = inspectionContext;
 			this.childCache = CacheBuilder.newBuilder()
@@ -138,12 +138,12 @@ public class FieldTree extends JPanel
 
 	private static class ObjectTreeNode extends DefaultMutableTreeNode implements ActionProviderTreeNode
 	{
-		private final String							key;
-		private final TypeInfo							typeInfo;
-		private final int								childIndex;
-		private final InspectionContext<Component, ?>	inspectionContext;
+		private final String						key;
+		private final TypeInfo						typeInfo;
+		private final int							childIndex;
+		private final InspectionContext<Component>	inspectionContext;
 
-		private ObjectTreeNode(String key, Object value, TypeInfo typeInfo, int childIndex, InspectionContext<Component, ?> inspectionContext) {
+		private ObjectTreeNode(String key, Object value, TypeInfo typeInfo, int childIndex, InspectionContext<Component> inspectionContext) {
 			super(value);
 			this.key = key;
 			this.typeInfo = typeInfo;

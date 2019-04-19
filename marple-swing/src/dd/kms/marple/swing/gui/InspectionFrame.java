@@ -2,6 +2,7 @@ package dd.kms.marple.swing.gui;
 
 import com.google.common.base.Preconditions;
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.gui.ObjectView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,12 +24,13 @@ public class InspectionFrame extends JFrame
 	private final JTabbedPane 	viewPane			= new JTabbedPane();
 	private final JScrollPane	viewScrollPane		= new JScrollPane(viewPane);
 
-	private final InspectionContext<Component, Component>	inspectionContext;
+	private final InspectionContext<Component>	inspectionContext;
 
-	private boolean											initializing;
-	private String											lastSelectedTabTitle;
+	private String								lastSelectedViewName;
+	private Object								lastSelectedViewSettings;
+	private List<ObjectView<Component>>			views;
 
-	public InspectionFrame(InspectionContext<Component, Component> inspectionContext) {
+	public InspectionFrame(InspectionContext<Component> inspectionContext) {
 		this.inspectionContext = inspectionContext;
 		configure();
 	}
@@ -50,43 +52,38 @@ public class InspectionFrame extends JFrame
 		currentObjectPanel.add(classInfoLabel, new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 
 		setSize(INITIAL_SIZE);
-
-		viewPane.addChangeListener(e -> onTabChanged());
 	}
 
-	public void setViews(Object object, List<? extends Component> views) {
-		initializing = true;
+	public void setViews(Object object, List<ObjectView<Component>> views) {
+		storeLastViewSettings();
+		this.views = views;
 		toStringLabel.setText('"' + inspectionContext.getDisplayText(object) + '"');
 		classInfoLabel.setText(object.getClass().toString());
 		viewPane.removeAll();
 
-		for (Component view : views) {
-			viewPane.add(view, Preconditions.checkNotNull(view.getName(), "Missing name of view '" + view + "'"));
+		for (ObjectView<Component> view : views) {
+			viewPane.add(view.getViewComponent(), Preconditions.checkNotNull(view.getViewName(), "Missing name of view '" + view + "'"));
 		}
 
-		if (lastSelectedTabTitle != null) {
-			int indexOfLastSelectedTab = viewPane.indexOfTab(lastSelectedTabTitle);
-			if (indexOfLastSelectedTab >= 0) {
-				viewPane.setSelectedIndex(indexOfLastSelectedTab);
+		if (lastSelectedViewName != null) {
+			int indexOfLastSelectedView = viewPane.indexOfTab(lastSelectedViewName);
+			if (indexOfLastSelectedView >= 0) {
+				viewPane.setSelectedIndex(indexOfLastSelectedView);
+				views.get(indexOfLastSelectedView).applyViewSettings(lastSelectedViewSettings);
 			}
 		}
 		setVisible(true);
-		initializing = false;
 
 		prevButton.setAction(new ActionWrapper(inspectionContext.createHistoryBackAction()));
 		nextButton.setAction(new ActionWrapper(inspectionContext.createHistoryForwardAction()));
 	}
 
-	/*
-	 * Event Handling
-	 */
-	private void onTabChanged() {
-		if (initializing) {
-			return;
-		}
-		int selectedIndex = viewPane.getSelectedIndex();
-		if (selectedIndex >= 0) {
-			lastSelectedTabTitle = viewPane.getTitleAt(selectedIndex);
+	private void storeLastViewSettings() {
+		int selectedViewIndex = viewPane.getSelectedIndex();
+		if (selectedViewIndex >= 0) {
+			ObjectView<Component> selectedView = views.get(selectedViewIndex);
+			lastSelectedViewName = selectedView.getViewName();
+			lastSelectedViewSettings = selectedView.getViewSettings();
 		}
 	}
 }

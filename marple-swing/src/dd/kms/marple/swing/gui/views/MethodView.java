@@ -5,6 +5,7 @@ import dd.kms.marple.common.AccessModifier;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
+import dd.kms.marple.gui.ObjectView;
 import dd.kms.marple.swing.gui.table.*;
 import dd.kms.zenodot.common.ReflectionUtils;
 
@@ -15,19 +16,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MethodView extends JPanel
+public class MethodView extends JPanel implements ObjectView<Component>
 {
 	private static final String	NAME	= "Methods";
 
 	private final ListBasedTable<Method>	table;
 
 	private final Object					object;
-	private final InspectionContext<?, ?>	inspectionContext;
+	private final InspectionContext<?>		inspectionContext;
 
-	public MethodView(Object object, InspectionContext<?, ?> inspectionContext) {
+	public MethodView(Object object, InspectionContext<?> inspectionContext) {
 		super(new GridBagLayout());
 		this.inspectionContext = inspectionContext;
 		this.object = object;
+
+		setName(NAME);
 
 		List<Method> methods = ReflectionUtils.getMethods(object.getClass());
 		List<ColumnDescription<Method>> columnDescriptions = createColumnDescriptions();
@@ -38,8 +41,27 @@ public class MethodView extends JPanel
 		internalTable.setDefaultRenderer(AccessModifier.class, new AccessModifierRenderer());
 
 		add(table, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+	}
 
-		setName(NAME);
+	@Override
+	public String getViewName() {
+		return NAME;
+	}
+
+	@Override
+	public Component getViewComponent() {
+		return this;
+	}
+
+	@Override
+	public Object getViewSettings() {
+		/* currently there are no settings */
+		return null;
+	}
+
+	@Override
+	public void applyViewSettings(Object settings) {
+		/* currently there are no settings */
 	}
 
 	private List<ColumnDescription<Method>> createColumnDescriptions() {

@@ -3,6 +3,7 @@ package dd.kms.marple.swing.inspector;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.ObjectInspector;
+import dd.kms.marple.gui.ObjectView;
 import dd.kms.marple.swing.gui.InspectionFrame;
 import dd.kms.marple.swing.gui.views.FieldView;
 import dd.kms.marple.swing.gui.views.ComponentHierarchyView;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class SwingObjectInspector implements ObjectInspector<Component, Component>
+public class SwingObjectInspector implements ObjectInspector<Component>
 {
 	public static Object getHierarchyLeaf(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
 		List<?> lastNonEmptyList =	!subcomponentHierarchy.isEmpty()	? subcomponentHierarchy :
@@ -25,18 +26,18 @@ public class SwingObjectInspector implements ObjectInspector<Component, Componen
 		return lastNonEmptyList == null ? null : lastNonEmptyList.get(lastNonEmptyList.size()-1);
 	}
 
-	private InspectionContext<Component, Component>	inspectionContext;
-	private InspectionFrame							inspectionFrame;
+	private InspectionContext<Component>	inspectionContext;
+	private InspectionFrame					inspectionFrame;
 
 	@Override
-	public void setInspectionContext(InspectionContext<Component, Component> inspectionContext) {
+	public void setInspectionContext(InspectionContext<Component> inspectionContext) {
 		this.inspectionContext = inspectionContext;
 	}
 
 	@Override
 	public void inspectComponent(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
 		Object hierarchyLeaf = getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
-		ImmutableList.Builder<Component> viewBuilder = ImmutableList.<Component>builder()
+		ImmutableList.Builder<ObjectView<Component>> viewBuilder = ImmutableList.<ObjectView<Component>>builder()
 			.add(new ComponentHierarchyView(componentHierarchy, subcomponentHierarchy, inspectionContext))
 			.addAll(inspectionContext.getInspectionViews(hierarchyLeaf));
 		showViews(hierarchyLeaf, viewBuilder.build());
@@ -44,7 +45,7 @@ public class SwingObjectInspector implements ObjectInspector<Component, Componen
 
 	@Override
 	public void inspectObject(Object object) {
-		ImmutableList.Builder<Component> viewBuilder = ImmutableList.<Component>builder()
+		ImmutableList.Builder<ObjectView<Component>> viewBuilder = ImmutableList.<ObjectView<Component>>builder()
 			.addAll(inspectionContext.getInspectionViews(object));
 		showViews(object, viewBuilder.build());
 	}
@@ -58,7 +59,7 @@ public class SwingObjectInspector implements ObjectInspector<Component, Componen
 	/*
 	 * Inspection Frame Handling
 	 */
-	private void showViews(Object object, List<Component> views) {
+	private void showViews(Object object, List<ObjectView<Component>> views) {
 		boolean virginInspectionFrame = inspectionFrame == null;
 		if (virginInspectionFrame) {
 			inspectionFrame = createInspectionFrame();

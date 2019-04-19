@@ -12,12 +12,12 @@ import java.util.stream.Collectors;
 
 class TableValueFilterSelection extends AbstractTableValueFilter
 {
-	private final InspectionContext<?, ?>	inspectionContext;
+	private final InspectionContext<?>		inspectionContext;
 
 	// Map to true if it should be shown
 	private final Map<Object, Boolean>		filteredValues = new LinkedHashMap<>();
 
-	TableValueFilterSelection(InspectionContext<?, ?> inspectionContext) {
+	TableValueFilterSelection(InspectionContext<?> inspectionContext) {
 		this.inspectionContext = inspectionContext;
 	}
 

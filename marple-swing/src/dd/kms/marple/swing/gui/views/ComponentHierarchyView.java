@@ -7,6 +7,7 @@ import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
+import dd.kms.marple.gui.ObjectView;
 import dd.kms.marple.swing.gui.Actions;
 import dd.kms.marple.swing.gui.actionprovidertree.ActionProviderTreeMouseListener;
 import dd.kms.marple.swing.gui.actionprovidertree.ActionProviderTreeMouseMotionListener;
@@ -22,16 +23,16 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ComponentHierarchyView extends JPanel
+public class ComponentHierarchyView extends JPanel implements ObjectView<Component>
 {
 	private static final String	NAME	= "Component Hierarchy";
 
 	private final JScrollPane	scrollPane;
 	private final JTree			tree;
 
-	private final InspectionContext<Component, ?>	inspectionContext;
+	private final InspectionContext<Component>	inspectionContext;
 
-	public ComponentHierarchyView(List<Component> componentHierarchy, List<?> subcomponentHierarchy, InspectionContext<Component, ?> inspectionContext) {
+	public ComponentHierarchyView(List<Component> componentHierarchy, List<?> subcomponentHierarchy, InspectionContext<Component> inspectionContext) {
 		super(new GridBagLayout());
 		this.inspectionContext = inspectionContext;
 
@@ -44,6 +45,27 @@ public class ComponentHierarchyView extends JPanel
 		}
 		scrollPane  = new JScrollPane(tree);
 		add(scrollPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+	}
+
+	@Override
+	public String getViewName() {
+		return NAME;
+	}
+
+	@Override
+	public JPanel getViewComponent() {
+		return this;
+	}
+
+	@Override
+	public Object getViewSettings() {
+		/* currently there are no settings */
+		return null;
+	}
+
+	@Override
+	public void applyViewSettings(Object settings) {
+		/* currently there are no settings */
 	}
 
 	private List<ActionProvider> createActionProviderHierarchy(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {

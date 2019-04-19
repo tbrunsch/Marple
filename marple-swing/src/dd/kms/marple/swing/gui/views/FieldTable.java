@@ -16,12 +16,12 @@ import java.util.List;
 
 public class FieldTable extends JPanel
 {
-	private final ListBasedTable<Field>				table;
+	private final ListBasedTable<Field>			table;
 
-	private final Object							object;
-	private final InspectionContext<Component, ?>	inspectionContext;
+	private final Object						object;
+	private final InspectionContext<Component>	inspectionContext;
 
-	public FieldTable(Object object, InspectionContext<Component, ?> inspectionContext) {
+	public FieldTable(Object object, InspectionContext<Component> inspectionContext) {
 		super(new GridBagLayout());
 		this.object = object;
 		this.inspectionContext = inspectionContext;

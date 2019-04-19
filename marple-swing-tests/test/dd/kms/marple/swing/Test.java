@@ -8,7 +8,7 @@ import java.awt.*;
 public class Test
 {
     public static void main(String[] args) {
-        InspectionSettings<Component, Component, SwingKey, Point> inspectionSettings = SwingObjectInspectionFramework.createInspectionSettingsBuilder().build();
+        InspectionSettings<Component, SwingKey, Point> inspectionSettings = SwingObjectInspectionFramework.createInspectionSettingsBuilder().build();
         SwingObjectInspectionFramework.register("Test", inspectionSettings);
 
         JFrame test = new TestFrame();

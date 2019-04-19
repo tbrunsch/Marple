@@ -3,6 +3,7 @@ package dd.kms.marple;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.actions.*;
 import dd.kms.marple.components.ComponentHierarchyModel;
+import dd.kms.marple.gui.ObjectView;
 import dd.kms.marple.settings.InspectionSettings;
 
 import java.lang.reflect.Method;
@@ -12,16 +13,15 @@ import java.util.function.Consumer;
 /**
  *
  * @param <C>	GUI component class
- * @param <V>	View class (GUI component class plus name)
  * @param <K>	KeyStroke class
  * @param <P>	Point class
  */
-class InspectionContextImpl<C, V, K, P> implements InspectionContext<C, V>
+class InspectionContextImpl<C, K, P> implements InspectionContext<C>
 {
-	private final InspectionSettings<C, V, K, P>	settings;
-	private final InspectionHistory					inspectionHistory;
+	private final InspectionSettings<C, K, P>	settings;
+	private final InspectionHistory				inspectionHistory;
 
-	InspectionContextImpl(InspectionSettings<C, V, K, P> settings) {
+	InspectionContextImpl(InspectionSettings<C, K, P> settings) {
 		this.settings = settings;
 		inspectionHistory = new InspectionHistory();
 		settings.getInspector().setInspectionContext(this);
@@ -85,7 +85,7 @@ class InspectionContextImpl<C, V, K, P> implements InspectionContext<C, V>
 	}
 
 	@Override
-	public List<V> getInspectionViews(Object object) {
+	public List<ObjectView<C>> getInspectionViews(Object object) {
 		return settings.getVisualSettings().getInspectionViews(object, this);
 	}
 
@@ -94,7 +94,7 @@ class InspectionContextImpl<C, V, K, P> implements InspectionContext<C, V>
 		inspectionHistory.clear();
 	}
 
-	InspectionSettings<C, V, K, P> getSettings() {
+	InspectionSettings<C, K, P> getSettings() {
 		return settings;
 	}
 

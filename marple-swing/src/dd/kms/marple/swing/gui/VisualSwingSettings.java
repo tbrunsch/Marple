@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 public class VisualSwingSettings
 {
-	public static void addDefaultDisplayTextFunctions(VisualSettingsBuilder<Component, Component> builder) {
+	public static void addDefaultDisplayTextFunctions(VisualSettingsBuilder<Component> builder) {
 		builder
 			.displayText(Component.class, 		VisualSwingSettings::getComponentDefaultDisplayText)
 			.displayText(Frame.class, 			frame -> getComponentDisplayText(frame, Frame::getTitle))
@@ -22,7 +22,7 @@ public class VisualSwingSettings
 		// TODO: Add special functions for special objects
 	}
 
-	public static void addDefaultViews(VisualSettingsBuilder<Component, Component> builder) {
+	public static void addDefaultViews(VisualSettingsBuilder<Component> builder) {
 		builder
 			.objectView(Object.class, FieldView::new)
 			.objectView(Object.class, MethodView::new)

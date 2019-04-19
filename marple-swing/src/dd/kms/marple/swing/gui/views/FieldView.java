@@ -1,14 +1,14 @@
 package dd.kms.marple.swing.gui.views;
 
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.gui.ObjectView;
 
 import javax.swing.*;
-import javax.swing.text.View;
 import java.awt.*;
 
 import static java.awt.GridBagConstraints.*;
 
-public class FieldView extends JPanel
+public class FieldView extends JPanel implements ObjectView<Component>
 {
 	private static final String	NAME	= "Fields";
 
@@ -19,14 +19,16 @@ public class FieldView extends JPanel
 
 	private final JPanel		viewPanel					= new JPanel(new GridBagLayout());
 
-	private final Object							object;
-	private final InspectionContext<Component, ?>	inspectionContext;
+	private final Object						object;
+	private final InspectionContext<Component>	inspectionContext;
 
-	public FieldView(Object object, InspectionContext<Component, ?> inspectionContext) {
+	public FieldView(Object object, InspectionContext<Component> inspectionContext) {
 		super(new BorderLayout());
 
 		this.object = object;
 		this.inspectionContext = inspectionContext;
+
+		setName(NAME);
 
 		add(viewSelectionPanel,	BorderLayout.NORTH);
 		add(viewPanel,			BorderLayout.CENTER);
@@ -38,15 +40,35 @@ public class FieldView extends JPanel
 		viewButtonGroup.add(quickViewToggleButton);
 		viewButtonGroup.add(detailedViewToggleButton);
 
-		setView(ViewType.QUICK);
+		setViewType(ViewType.QUICK);
 
-		quickViewToggleButton.addActionListener(e -> setView(ViewType.QUICK));
-		detailedViewToggleButton.addActionListener(e -> setView(ViewType.DETAILED));
-
-		setName(NAME);
+		quickViewToggleButton.addActionListener(e -> setViewType(ViewType.QUICK));
+		detailedViewToggleButton.addActionListener(e -> setViewType(ViewType.DETAILED));
 	}
 
-	private void setView(ViewType viewType) {
+	@Override
+	public String getViewName() {
+		return NAME;
+	}
+
+	@Override
+	public Component getViewComponent() {
+		return this;
+	}
+
+	@Override
+	public Object getViewSettings() {
+		return getViewType();
+	}
+
+	@Override
+	public void applyViewSettings(Object settings) {
+		if (settings instanceof ViewType) {
+			setViewType((ViewType) settings);
+		}
+	}
+
+	private void setViewType(ViewType viewType) {
 		Component view = viewType == ViewType.QUICK
 							? new FieldTree(object, inspectionContext)
 							: new FieldTable(object, inspectionContext);
@@ -55,6 +77,10 @@ public class FieldView extends JPanel
 		viewPanel.add(view, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, NORTHWEST, BOTH, new Insets(5, 5, 5, 5), 0, 0));
 		viewPanel.validate();
 		toggleButton.setSelected(true);
+	}
+
+	private ViewType getViewType() {
+		return quickViewToggleButton.isSelected() ? ViewType.QUICK : ViewType.DETAILED;
 	}
 
 	private enum ViewType { QUICK, DETAILED }

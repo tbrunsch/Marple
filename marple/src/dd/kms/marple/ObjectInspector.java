@@ -5,11 +5,10 @@ import java.util.List;
 /**
  *
  * @param <C>	GUI component class
- * @param <V>	View class (GUI component class plus name)
  */
-public interface ObjectInspector<C, V>
+public interface ObjectInspector<C>
 {
-	void setInspectionContext(InspectionContext<C, V> inspectionContext);
+	void setInspectionContext(InspectionContext<C> inspectionContext);
 	void inspectComponent(List<C> componentHierarchy, List<?> subcomponentHierarchy);
 	void inspectObject(Object object);
 	void highlightComponent(C component);

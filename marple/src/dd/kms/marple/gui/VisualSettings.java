@@ -7,10 +7,9 @@ import java.util.List;
 /**
  *
  * @param <C>	GUI component class
- * @param <V>	View class (GUI component class plus name)
  */
-public interface VisualSettings<C, V>
+public interface VisualSettings<C>
 {
 	String getDisplayText(Object object);
-	List<V> getInspectionViews(Object object, InspectionContext<C, V> inspectionContext);
+	List<ObjectView<C>> getInspectionViews(Object object, InspectionContext<C> inspectionContext);
 }

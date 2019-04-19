@@ -2,7 +2,7 @@ package dd.kms.marple.gui;
 
 public class VisualSettingsBuilders
 {
-	public static <C, V> VisualSettingsBuilder<C, V> createBuilder() {
+	public static <C> VisualSettingsBuilder<C> createBuilder() {
 		return new VisualSettingsBuilderImpl<>();
 	}
 }

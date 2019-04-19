@@ -4,7 +4,7 @@ import dd.kms.marple.InspectionContext;
 
 public class TableValueFilters
 {
-	public static TableValueFilter createSelectionFilter(InspectionContext<?, ?> inspectionContext) {
+	public static TableValueFilter createSelectionFilter(InspectionContext<?> inspectionContext) {
 		return new TableValueFilterSelection(inspectionContext);
 	}
 

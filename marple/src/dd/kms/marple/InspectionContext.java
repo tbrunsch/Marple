@@ -1,6 +1,7 @@
 package dd.kms.marple;
 
 import dd.kms.marple.actions.InspectionAction;
+import dd.kms.marple.gui.ObjectView;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -9,9 +10,8 @@ import java.util.function.Consumer;
 /**
  *
  * @param <C>	GUI component class
- * @param <V>	View class (GUI component class plus name)
  */
-public interface InspectionContext<C, V>
+public interface InspectionContext<C>
 {
 	InspectionAction createHistoryBackAction();
 	InspectionAction createHistoryForwardAction();
@@ -22,6 +22,6 @@ public interface InspectionContext<C, V>
 	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue);
 	InspectionAction createEvaluateAsThisAction(Object thisValue);
 	String getDisplayText(Object object);
-	List<V> getInspectionViews(Object object);
+	List<ObjectView<C>> getInspectionViews(Object object);
 	void clearHistory();
 }

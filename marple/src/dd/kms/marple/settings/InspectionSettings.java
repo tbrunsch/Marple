@@ -10,18 +10,17 @@ import java.util.function.Predicate;
 /**
  *
  * @param <C>	GUI component class
- * @param <V>	View class (GUI component class plus name)
  * @param <K>	KeyStroke class
  * @param <P>	Point class
  */
-public interface InspectionSettings<C, V, K, P>
+public interface InspectionSettings<C, K, P>
 {
 	boolean isComponent(Object object);
-	ObjectInspector<C, V> getInspector();
+	ObjectInspector<C> getInspector();
 	K getInspectionKey();
 	ExpressionEvaluator getEvaluator();
 	K getEvaluationKey();
 	ComponentHierarchyModel<C, P> getComponentHierarchyModel();
-	VisualSettings<C, V> getVisualSettings();
+	VisualSettings<C> getVisualSettings();
 	Predicate<C> getResponsibilityPredicate();
 }

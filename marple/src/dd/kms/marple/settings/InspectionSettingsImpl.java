@@ -10,22 +10,21 @@ import java.util.function.Predicate;
 /**
  *
  * @param <C>	GUI component class
- * @param <V>	View class (GUI component class plus name)
  * @param <K>	KeyStroke class
  * @param <P>	Point class
  */
-class InspectionSettingsImpl<C, V, K, P> implements InspectionSettings<C, V, K, P>
+class InspectionSettingsImpl<C, K, P> implements InspectionSettings<C, K, P>
 {
 	private final Class<C>						componentClass;
-	private final ObjectInspector<C, V>			inspector;
+	private final ObjectInspector<C>			inspector;
 	private final K								inspectionKey;
 	private final ExpressionEvaluator			evaluator;
 	private final K								evaluationKey;
 	private final ComponentHierarchyModel<C, P>	componentHierarchyModel;
-	private final VisualSettings<C, V>			visualSettings;
+	private final VisualSettings<C>				visualSettings;
 	private final Predicate<C>					responsibilityPredicate;
 
-	InspectionSettingsImpl(Class<C> componentClass, ObjectInspector<C, V> inspector, K inspectionKey, ExpressionEvaluator evaluator, K evaluationKey, ComponentHierarchyModel<C, P> componentHierarchyModel, VisualSettings<C, V> visualSettings, Predicate<C> responsibilityPredicate) {
+	InspectionSettingsImpl(Class<C> componentClass, ObjectInspector<C> inspector, K inspectionKey, ExpressionEvaluator evaluator, K evaluationKey, ComponentHierarchyModel<C, P> componentHierarchyModel, VisualSettings<C> visualSettings, Predicate<C> responsibilityPredicate) {
 		this.componentClass = componentClass;
 		this.inspector = inspector;
 		this.inspectionKey = inspectionKey;
@@ -42,7 +41,7 @@ class InspectionSettingsImpl<C, V, K, P> implements InspectionSettings<C, V, K, 
 	}
 
 	@Override
-	public ObjectInspector<C, V> getInspector() {
+	public ObjectInspector<C> getInspector() {
 		return inspector;
 	}
 
@@ -67,7 +66,7 @@ class InspectionSettingsImpl<C, V, K, P> implements InspectionSettings<C, V, K, 
 	}
 
 	@Override
-	public VisualSettings<C, V> getVisualSettings() {
+	public VisualSettings<C> getVisualSettings() {
 		return visualSettings;
 	}
 
