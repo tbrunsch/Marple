@@ -15,6 +15,10 @@ import java.lang.reflect.Field;
 import static java.awt.GridBagConstraints.HORIZONTAL;
 import static java.awt.GridBagConstraints.WEST;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 public class TestFrame extends JFrame
 {
     private static final Insets DEFAULT_INSETS  = new Insets(3, 3, 3, 3);
@@ -58,6 +62,9 @@ public class TestFrame extends JFrame
     private final JPopupMenuButton      popupMenuButton     = new JPopupMenuButton("I create a popup");
 
     private final JButton               closeButton         = new JButton("Close");
+
+    private final List<Double>          demoList            = IntStream.range(0, 12345).mapToObj(i -> Math.random()).collect(Collectors.toList());
+    private final double[]              demoArray           = IntStream.range(0, 12345).mapToDouble(i -> Math.random()).toArray();
 
     TestFrame() {
         super("Test Frame");
