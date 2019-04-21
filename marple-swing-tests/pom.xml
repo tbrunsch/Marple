@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>marple-parent</artifactId>
-        <groupId>dd.kms.marple</groupId>
-        <version>0.9-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>marple-parent</artifactId>
+		<groupId>dd.kms.marple</groupId>
+		<version>0.9-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
 
-    <artifactId>marple-swing-tests</artifactId>
+	<artifactId>marple-swing-tests</artifactId>
 
-    <build>
-        <testSourceDirectory>test</testSourceDirectory>
-    </build>
+	<build>
+		<testSourceDirectory>test</testSourceDirectory>
+	</build>
 
-    <dependencies>
-        <dependency>
-            <groupId>dd.kms.marple</groupId>
-            <artifactId>marple-swing</artifactId>
-            <version>0.9-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>dd.kms.marple</groupId>
+			<artifactId>marple-swing</artifactId>
+			<version>0.9-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 
 </project>

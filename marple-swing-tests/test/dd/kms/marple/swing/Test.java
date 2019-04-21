@@ -7,12 +7,12 @@ import java.awt.*;
 
 public class Test
 {
-    public static void main(String[] args) {
-        InspectionSettings<Component, SwingKey, Point> inspectionSettings = SwingObjectInspectionFramework.createInspectionSettingsBuilder().build();
-        SwingObjectInspectionFramework.register("Test", inspectionSettings);
+	public static void main(String[] args) {
+		InspectionSettings<Component, SwingKey, Point> inspectionSettings = SwingObjectInspectionFramework.createInspectionSettingsBuilder().build();
+		SwingObjectInspectionFramework.register("Test", inspectionSettings);
 
-        JFrame test = new TestFrame();
-        test.pack();
-        test.setVisible(true);
-    }
+		JFrame test = new TestFrame();
+		test.pack();
+		test.setVisible(true);
+	}
 }
