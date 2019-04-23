@@ -8,7 +8,7 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.gui.ObjectView;
-import dd.kms.marple.swing.gui.Actions;
+import dd.kms.marple.swing.actions.Actions;
 import dd.kms.marple.swing.gui.actionprovidertree.ActionProviderTreeMouseListener;
 import dd.kms.marple.swing.gui.actionprovidertree.ActionProviderTreeMouseMotionListener;
 import dd.kms.marple.swing.gui.actionprovidertree.ActionProviderTreeNode;
@@ -108,8 +108,9 @@ public class ComponentHierarchyView extends JPanel implements ObjectView<Compone
 		String displayText = createActionProviderDisplayText(hierarchyLeaf, detectedFields);
 		InspectionAction inspectComponentAction = inspectionContext.createInspectComponentAction(componentHierarchy, subcomponentHierarchy);
 		InspectionAction highlightComponentAction = subcomponentHierarchy.isEmpty() ? inspectionContext.createHighlightComponentAction((Component) hierarchyLeaf) : null;
+		InspectionAction addVariableAction = Actions.createAddVariableAction(null, hierarchyLeaf, inspectionContext);
 		InspectionAction evaluateAsThisAction = inspectionContext.createEvaluateAsThisAction(hierarchyLeaf);
-		return ActionProvider.of(displayText, inspectComponentAction, highlightComponentAction, evaluateAsThisAction);
+		return ActionProvider.of(displayText, inspectComponentAction, highlightComponentAction, addVariableAction, evaluateAsThisAction);
 	}
 
 	private String createActionProviderDisplayText(Object object, Collection<Field> fields) {

@@ -21,7 +21,10 @@ public interface InspectionContext<C>
 	InspectionAction createInvokeMethodAction(Object object, Method method, Consumer<Object> returnValueConsumer, Consumer<Exception> exceptionConsumer);
 	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue);
 	InspectionAction createEvaluateAsThisAction(Object thisValue);
+
+	void clearHistory();
+
 	String getDisplayText(Object object);
 	List<ObjectView<C>> getInspectionViews(Object object);
-	void clearHistory();
+	ExpressionEvaluator getEvaluator();
 }

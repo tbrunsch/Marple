@@ -5,7 +5,7 @@ import com.google.common.primitives.Primitives;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
-import dd.kms.marple.swing.gui.Actions;
+import dd.kms.marple.swing.actions.Actions;
 import dd.kms.zenodot.common.ReflectionUtils;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
@@ -63,8 +63,9 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 		InspectionAction highlightComponentAction = object instanceof Component
 			? inspectionContext.createHighlightComponentAction((Component) object)
 			: null;
+		InspectionAction addVariableAction = Actions.createAddVariableAction(fieldName, object, inspectionContext);
 		InspectionAction evaluateAsThisAction = inspectionContext.createEvaluateAsThisAction(object);
-		return ActionProvider.of(toString(), inspectObjectAction, highlightComponentAction, evaluateAsThisAction);
+		return ActionProvider.of(toString(), inspectObjectAction, highlightComponentAction, addVariableAction, evaluateAsThisAction);
 	}
 
 	@Override

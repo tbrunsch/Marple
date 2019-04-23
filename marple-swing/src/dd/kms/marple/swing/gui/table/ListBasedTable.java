@@ -1,7 +1,7 @@
 package dd.kms.marple.swing.gui.table;
 
 import dd.kms.marple.actions.ActionProvider;
-import dd.kms.marple.swing.gui.Actions;
+import dd.kms.marple.swing.actions.Actions;
 
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
@@ -68,6 +68,9 @@ public class ListBasedTable<T> extends JPanel
 				return;
 			}
 			TableValueFilter valueFilter = tableModel.getValueFilter(col);
+			if (valueFilter == TableValueFilters.NONE) {
+				return;
+			}
 			String columnName = tableModel.getPlainColumnName(col);
 			JDialog filterPopup = new FilterPopup(valueFilter, columnName);
 			Point framePosition = table.getTopLevelAncestor().getLocationOnScreen();

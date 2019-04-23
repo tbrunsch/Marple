@@ -1,4 +1,4 @@
-package dd.kms.marple.swing.gui;
+package dd.kms.marple.swing.actions;
 
 import dd.kms.marple.actions.InspectionAction;
 

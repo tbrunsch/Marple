@@ -23,9 +23,11 @@ public class ListBasedTableModel<T> extends AbstractTableModel
 		for (int col = 0; col < numCols; col++) {
 			ColumnDescription<T> columnDescription = columnDescriptions.get(col);
 			TableValueFilter valueFilter = columnDescription.createValueFilter();
-			for (int row = 0; row < numRows; row++) {
-				Object value = getValueAt(row, col);
-				valueFilter.addAvailableValue(value);
+			if (valueFilter != null) {
+				for (int row = 0; row < numRows; row++) {
+					Object value = getValueAt(row, col);
+					valueFilter.addAvailableValue(value);
+				}
 			}
 			valueFilters.add(valueFilter);
 		}
@@ -56,7 +58,8 @@ public class ListBasedTableModel<T> extends AbstractTableModel
 
 	@Override
 	public boolean isCellEditable(int row, int col) {
-		return false;
+		EditorSettings<T> editorSettings = columnDescriptions.get(col).getEditorSettings();
+		return editorSettings != null;
 	}
 
 	@Override
@@ -65,8 +68,12 @@ public class ListBasedTableModel<T> extends AbstractTableModel
 	}
 
 	@Override
-	public void setValueAt(Object value, int rowIndex, int col) {
-		throw new IllegalStateException("Cell is not editable");
+	public void setValueAt(Object value, int row, int col) {
+		EditorSettings<T> editorSettings = columnDescriptions.get(col).getEditorSettings();
+		if (editorSettings == null) {
+			throw new IllegalStateException("Cell is not editable");
+		}
+		editorSettings.setElementValue(list, row, value);
 	}
 
 	String getPlainColumnName(int col) {

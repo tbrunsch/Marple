@@ -5,6 +5,8 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.common.AccessModifier;
+import dd.kms.marple.swing.actions.Actions;
+import dd.kms.marple.swing.actions.AddVariableAction;
 import dd.kms.marple.swing.gui.table.*;
 import dd.kms.zenodot.common.ReflectionUtils;
 
@@ -41,15 +43,16 @@ public class FieldTable extends JPanel
 
 	private List<ColumnDescription<Field>> createColumnDescriptions() {
 		return Arrays.asList(
-			ColumnDescriptions.of("Name",		String.class,			Field::getName,										TableValueFilters.createWildcardFilter()),
-			ColumnDescriptions.of("Value",		ActionProvider.class,	field -> getFieldValueActionProvider(field),		TableValueFilters.createWildcardFilter()),
-			ColumnDescriptions.of("Type",		Class.class,			field -> field.getType().getSimpleName(),			TableValueFilters.createWildcardFilter()),
-			ColumnDescriptions.of("Class",		String.class,			field -> field.getDeclaringClass().getSimpleName(),	TableValueFilters.createSelectionFilter(inspectionContext)),
-			ColumnDescriptions.of("Modifier",	AccessModifier.class,	field -> getAccessModifier(field),					TableValueFilters.createSelectionFilter(inspectionContext))
+			new ColumnDescriptionBuilder<Field>("Name",		String.class,			field -> field.getName())							.valueFilter(TableValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<Field>("Value",	ActionProvider.class, 	field -> getFieldValueActionProvider(field))		.valueFilter(TableValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<Field>("Type",		Class.class,			field -> field.getType().getSimpleName())			.valueFilter(TableValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<Field>("Class",	String.class,			field -> field.getDeclaringClass().getSimpleName())	.valueFilter(TableValueFilters.createSelectionFilter(inspectionContext)).build(),
+			new ColumnDescriptionBuilder<Field>("Modifier",	AccessModifier.class,	field -> getAccessModifier(field))					.valueFilter(TableValueFilters.createSelectionFilter(inspectionContext)).build()
 		);
 	}
 
 	private ActionProvider getFieldValueActionProvider(Field field) {
+		String fieldName = field.getName();
 		Object fieldValue = getFieldValue(field);
 		if (fieldValue == null) {
 			return null;
@@ -63,7 +66,8 @@ public class FieldTable extends JPanel
 			}
 			actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(fieldValue));
 		}
-		actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(field.getName(), object));
+		actionsBuilder.add(Actions.createAddVariableAction(fieldName, fieldValue, inspectionContext));
+		actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(fieldName, object));
 		return ActionProvider.of(inspectionContext.getDisplayText(fieldValue), actionsBuilder.build());
 	}
 

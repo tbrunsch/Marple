@@ -3,6 +3,7 @@ package dd.kms.marple.swing.gui;
 import com.google.common.base.Preconditions;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.ObjectView;
+import dd.kms.marple.swing.actions.ActionWrapper;
 
 import javax.swing.*;
 import java.awt.*;

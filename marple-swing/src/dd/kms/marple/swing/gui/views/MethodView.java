@@ -66,11 +66,11 @@ public class MethodView extends JPanel implements ObjectView<Component>
 
 	private List<ColumnDescription<Method>> createColumnDescriptions() {
 		return Arrays.asList(
-			ColumnDescriptions.of("Return Type",	String.class,			method -> method.getReturnType().getSimpleName(),		TableValueFilters.createWildcardFilter()),
-			ColumnDescriptions.of("Name",			Object.class,			method -> getMethodActionProvider(method),				TableValueFilters.createWildcardFilter()),
-			ColumnDescriptions.of("Arguments",		String.class,			method -> getArgumentsAsString(method),					TableValueFilters.createWildcardFilter()),
-			ColumnDescriptions.of("Class",			String.class,			method -> method.getDeclaringClass().getSimpleName(),	TableValueFilters.createSelectionFilter(inspectionContext)),
-			ColumnDescriptions.of("Modifier",		AccessModifier.class,	method -> getAccessModifier(method),					TableValueFilters.createSelectionFilter(inspectionContext))
+			new ColumnDescriptionBuilder<Method>("Return Type",	String.class, 			method -> method.getReturnType().getSimpleName()	).valueFilter(TableValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<Method>("Name",		Object.class, 			method -> getMethodActionProvider(method)			).valueFilter(TableValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<Method>("Arguments",	String.class, 			method -> getArgumentsAsString(method)				).valueFilter(TableValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<Method>("Class",		String.class, 			method -> method.getDeclaringClass().getSimpleName()).valueFilter(TableValueFilters.createSelectionFilter(inspectionContext)).build(),
+			new ColumnDescriptionBuilder<Method>("Modifier",	AccessModifier.class,	method -> getAccessModifier(method)					).valueFilter(TableValueFilters.createSelectionFilter(inspectionContext)).build()
 		);
 	}
 

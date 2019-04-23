@@ -80,6 +80,11 @@ class InspectionContextImpl<C, K, P> implements InspectionContext<C>
 	}
 
 	@Override
+	public void clearHistory() {
+		inspectionHistory.clear();
+	}
+
+	@Override
 	public String getDisplayText(Object object) {
 		return settings.getVisualSettings().getDisplayText(object);
 	}
@@ -90,8 +95,8 @@ class InspectionContextImpl<C, K, P> implements InspectionContext<C>
 	}
 
 	@Override
-	public void clearHistory() {
-		inspectionHistory.clear();
+	public ExpressionEvaluator getEvaluator() {
+		return settings.getEvaluator();
 	}
 
 	InspectionSettings<C, K, P> getSettings() {

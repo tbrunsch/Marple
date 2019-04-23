@@ -7,13 +7,15 @@ class ColumnDescriptionImpl<T> implements ColumnDescription<T>
 	private final String				name;
 	private final Class<?>				clazz;
 	private final Function<T, Object>	valueExtractor;
-	private final TableValueFilter valueFilter;
+	private final TableValueFilter		valueFilter;
+	private final EditorSettings<T>		editorSettings;
 
-	ColumnDescriptionImpl(String name, Class<?> clazz, Function<T, Object> valueExtractor, TableValueFilter valueFilter) {
+	ColumnDescriptionImpl(String name, Class<?> clazz, Function<T, Object> valueExtractor, TableValueFilter valueFilter, EditorSettings<T> editorSettings) {
 		this.name = name;
 		this.clazz = clazz;
 		this.valueExtractor = valueExtractor;
 		this.valueFilter = valueFilter;
+		this.editorSettings = editorSettings;
 	}
 
 	@Override
@@ -34,5 +36,10 @@ class ColumnDescriptionImpl<T> implements ColumnDescription<T>
 	@Override
 	public TableValueFilter createValueFilter() {
 		return valueFilter;
+	}
+
+	@Override
+	public EditorSettings<T> getEditorSettings() {
+		return editorSettings;
 	}
 }

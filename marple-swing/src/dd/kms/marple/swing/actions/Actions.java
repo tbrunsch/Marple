@@ -1,5 +1,6 @@
-package dd.kms.marple.swing.gui;
+package dd.kms.marple.swing.actions;
 
+import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
 
@@ -24,6 +25,11 @@ public class Actions
 			InspectionAction defaultAction = actions.get(0);
 			defaultAction.perform();
 		}
+	}
+
+	public static InspectionAction createAddVariableAction(String suggestedVariableName, Object value, InspectionContext<Component> inspectionContext) {
+		String variableName = suggestedVariableName == null ? "variable" : suggestedVariableName;
+		return new AddVariableAction(variableName, value, inspectionContext);
 	}
 
 	public static void showActionPopup(Component parent, ActionProvider actionProvider, MouseEvent e) {

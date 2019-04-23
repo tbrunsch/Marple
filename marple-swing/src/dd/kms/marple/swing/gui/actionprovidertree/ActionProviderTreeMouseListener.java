@@ -1,7 +1,7 @@
 package dd.kms.marple.swing.gui.actionprovidertree;
 
 import dd.kms.marple.actions.ActionProvider;
-import dd.kms.marple.swing.gui.Actions;
+import dd.kms.marple.swing.actions.Actions;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
