@@ -50,12 +50,12 @@ class IndexedObjectContainerIndexRangeTreeNode extends AbstractInspectionTreeNod
 		int rangeSize = calculateRangeSize();
 		int rangeBeginIndex = this.rangeBeginIndex;
 		ImmutableList.Builder<InspectionTreeNode> childBuilder = ImmutableList.builder();
-		int numChildren = 0;
+		int childIndex = 0;
 		while (rangeBeginIndex < rangeEndIndex) {
 			int rangeEndIndex = Math.min(rangeBeginIndex + rangeSize, this.rangeEndIndex);
-			InspectionTreeNode node = createRangeNode(numChildren, rangeBeginIndex, rangeEndIndex);
+			InspectionTreeNode node = createRangeNode(childIndex, rangeBeginIndex, rangeEndIndex);
 			childBuilder.add(node);
-			numChildren++;
+			childIndex++;
 			rangeBeginIndex = rangeEndIndex;
 		}
 		return childBuilder.build();

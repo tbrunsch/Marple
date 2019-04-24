@@ -16,14 +16,14 @@ import java.util.List;
 
 class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 {
-	private final @Nullable String				fieldName;
+	private final @Nullable String				displayKey;
 	private final @Nullable Object				object;
 	private final TypeInfo						typeInfo;
 	private final InspectionContext<Component>	inspectionContext;
 
-	DefaultObjectTreeNode(int childIndex, @Nullable String fieldName, Object object, TypeInfo typeInfo, InspectionContext<Component> inspectionContext) {
+	DefaultObjectTreeNode(int childIndex, @Nullable String displayKey, Object object, TypeInfo typeInfo, InspectionContext<Component> inspectionContext) {
 		super(childIndex);
-		this.fieldName = fieldName;
+		this.displayKey = displayKey;
 		this.object = object;
 		this.typeInfo = typeInfo;
 		this.inspectionContext = inspectionContext;
@@ -47,7 +47,7 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 				System.err.println(e.getMessage());
 				fieldValue = null;
 			}
-			TypeInfo childTypeInfo = typeInfo.resolveType(field.getType());
+			TypeInfo childTypeInfo = fieldValue == null ? TypeInfo.NONE : typeInfo.resolveType(fieldValue.getClass());
 			InspectionTreeNode child = InspectionTreeNodes.create(childIndex++, field.getName(), fieldValue, childTypeInfo, inspectionContext);
 			childBuilder.add(child);
 		}
@@ -63,7 +63,7 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 		InspectionAction highlightComponentAction = object instanceof Component
 			? inspectionContext.createHighlightComponentAction((Component) object)
 			: null;
-		InspectionAction addVariableAction = Actions.createAddVariableAction(fieldName, object, inspectionContext);
+		InspectionAction addVariableAction = Actions.createAddVariableAction(displayKey, object, inspectionContext);
 		InspectionAction evaluateAsThisAction = inspectionContext.createEvaluateAsThisAction(object);
 		return ActionProvider.of(toString(), inspectObjectAction, highlightComponentAction, addVariableAction, evaluateAsThisAction);
 	}
@@ -71,9 +71,9 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 	@Override
 	public String toString() {
 		String valueDisplayText = inspectionContext.getDisplayText(object);
-		String fullNodeDisplayText = fieldName == null
+		String fullNodeDisplayText = displayKey == null
 			? valueDisplayText + " (" + typeInfo.getType() + ")"
-			: fieldName + " = " + valueDisplayText;
+			: displayKey + " = " + valueDisplayText;
 		return Actions.trimName(fullNodeDisplayText);
 	}
 }

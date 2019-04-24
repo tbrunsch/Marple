@@ -5,7 +5,6 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.swing.actions.Actions;
-import dd.kms.marple.swing.actions.AddVariableAction;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
@@ -20,20 +19,20 @@ class IndexedObjectContainerTreeNode extends AbstractInspectionTreeNode
 {
 	static final int	RANGE_SIZE_BASE	= 10;
 
-	private final @Nullable String				fieldName;
+	private final @Nullable String				displayKey;
 	private final Object 						container;
 	private final TypeInfo						typeInfo;
-	private final IntFunction<Object>			elementAccessor;
 	private final int							containerSize;
+	private final IntFunction<Object>			elementAccessor;
 	private final InspectionContext<Component>	inspectionContext;
 
-	IndexedObjectContainerTreeNode(int childIndex, @Nullable String fieldName, Object container, TypeInfo typeInfo, IntFunction<Object> elementAccessor, int containerSize, InspectionContext<Component> inspectionContext) {
+	IndexedObjectContainerTreeNode(int childIndex, @Nullable String displayKey, Object container, TypeInfo typeInfo, int containerSize, IntFunction<Object> elementAccessor, InspectionContext<Component> inspectionContext) {
 		super(childIndex);
-		this.fieldName = fieldName;
+		this.displayKey = displayKey;
 		this.container = container;
 		this.typeInfo = typeInfo;
-		this.elementAccessor = elementAccessor;
 		this.containerSize = containerSize;
+		this.elementAccessor = elementAccessor;
 		this.inspectionContext = inspectionContext;
 	}
 
@@ -42,13 +41,13 @@ class IndexedObjectContainerTreeNode extends AbstractInspectionTreeNode
 		int rangeSize = 1;
 		int rangeBeginIndex = 0;
 		ImmutableList.Builder<InspectionTreeNode> childBuilder = ImmutableList.builder();
-		int numChildren = 0;
+		int childIndex = 0;
 		int firstIndexWithLargerRange = RANGE_SIZE_BASE;
 		while (rangeBeginIndex < containerSize) {
 			int rangeEndIndex = Math.min(rangeBeginIndex + rangeSize, containerSize);
-			InspectionTreeNode node = createRangeNode(numChildren, rangeBeginIndex, rangeEndIndex);
+			InspectionTreeNode node = createRangeNode(childIndex, rangeBeginIndex, rangeEndIndex);
 			childBuilder.add(node);
-			numChildren++;
+			childIndex++;
 			rangeBeginIndex = rangeEndIndex;
 			if (rangeBeginIndex == firstIndexWithLargerRange) {
 				firstIndexWithLargerRange *= RANGE_SIZE_BASE;
@@ -65,7 +64,7 @@ class IndexedObjectContainerTreeNode extends AbstractInspectionTreeNode
 	@Override
 	public ActionProvider getActionProvider() {
 		InspectionAction inspectObjectAction = inspectionContext.createInspectObjectAction(container);
-		InspectionAction addVariableAction = Actions.createAddVariableAction(fieldName, container, inspectionContext);
+		InspectionAction addVariableAction = Actions.createAddVariableAction(displayKey, container, inspectionContext);
 		InspectionAction evaluateAsThisAction = inspectionContext.createEvaluateAsThisAction(container);
 		return ActionProvider.of(toString(), inspectObjectAction, addVariableAction, evaluateAsThisAction);
 	}
@@ -73,6 +72,6 @@ class IndexedObjectContainerTreeNode extends AbstractInspectionTreeNode
 	@Override
 	public String toString() {
 		String valueDisplayText = Actions.trimName(inspectionContext.getDisplayText(container)) + " size = " + containerSize;
-		return fieldName == null ? valueDisplayText : fieldName + " = " + valueDisplayText;
+		return displayKey == null ? valueDisplayText : displayKey + " = " + valueDisplayText;
 	}
 }

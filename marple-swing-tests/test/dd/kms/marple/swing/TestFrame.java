@@ -1,7 +1,5 @@
 package dd.kms.marple.swing;
 
-import sun.misc.Unsafe;
-
 import javax.swing.*;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
@@ -10,14 +8,9 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Field;
 
 import static java.awt.GridBagConstraints.HORIZONTAL;
 import static java.awt.GridBagConstraints.WEST;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class TestFrame extends JFrame
 {
@@ -63,8 +56,7 @@ public class TestFrame extends JFrame
 
 	private final JButton				closeButton			= new JButton("Close");
 
-	private final List<Double>			demoList			= IntStream.range(0, 12345).mapToObj(i -> Math.random()).collect(Collectors.toList());
-	private final double[]				demoArray		 	= IntStream.range(0, 12345).mapToDouble(i -> Math.random()).toArray();
+	private final TestData				demoData			= new TestData();
 
 	TestFrame() {
 		super("Test Frame");
