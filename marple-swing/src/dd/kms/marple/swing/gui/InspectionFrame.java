@@ -58,7 +58,7 @@ public class InspectionFrame extends JFrame
 	public void setViews(Object object, List<ObjectView<Component>> views) {
 		storeLastViewSettings();
 		this.views = views;
-		toStringLabel.setText('"' + inspectionContext.getDisplayText(object) + '"');
+		toStringLabel.setText(inspectionContext.getDisplayText(object));
 		classInfoLabel.setText(object.getClass().toString());
 		viewPane.removeAll();
 

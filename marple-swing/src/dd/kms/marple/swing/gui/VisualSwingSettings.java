@@ -13,6 +13,7 @@ public class VisualSwingSettings
 {
 	public static void addDefaultDisplayTextFunctions(VisualSettingsBuilder<Component> builder) {
 		builder
+			.displayText(String.class,			s -> '"' + s + '"')
 			.displayText(Component.class, 		VisualSwingSettings::getComponentDefaultDisplayText)
 			.displayText(Frame.class, 			frame -> getComponentDisplayText(frame, Frame::getTitle))
 			.displayText(AbstractButton.class,	button -> getComponentDisplayText(button, AbstractButton::getText))
