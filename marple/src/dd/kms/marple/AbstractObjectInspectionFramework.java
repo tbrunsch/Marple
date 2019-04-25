@@ -1,9 +1,12 @@
 package dd.kms.marple;
 
 import dd.kms.marple.settings.InspectionSettings;
+import dd.kms.marple.settings.SecuritySettings;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  *
@@ -67,10 +70,28 @@ public abstract class AbstractObjectInspectionFramework<C, K, P>
 
 		InspectionSettings<C, K, P> settings = context.getSettings();
 		if (keyMatches(key, settings.getInspectionKey())) {
-			context.performInspection(lastComponentUnderMouse, lastMousePositionOnComponent);
+			if (userHasPermission(settings)) {
+				context.performInspection(lastComponentUnderMouse, lastMousePositionOnComponent);
+			}
 		} else {
 			assert keyMatches(key, settings.getEvaluationKey());
-			context.performEvaluation();
+			if (userHasPermission(settings)) {
+				context.performEvaluation();
+			}
+		}
+	}
+
+	private boolean userHasPermission(InspectionSettings<C, K, P> settings) {
+		Optional<SecuritySettings> securitySettingsOptional = settings.getSecuritySettings();
+		if (!securitySettingsOptional.isPresent()) {
+			return true;
+		}
+		SecuritySettings securitySettings = securitySettingsOptional.get();
+		try {
+			String passwordHash = securitySettings.hashPassword(securitySettings.queryPassword());
+			return Objects.equals(passwordHash, securitySettings.getPasswordHash());
+		} catch (Exception e) {
+			return false;
 		}
 	}
 

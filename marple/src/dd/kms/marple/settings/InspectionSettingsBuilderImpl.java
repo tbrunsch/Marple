@@ -7,6 +7,7 @@ import dd.kms.marple.components.ComponentHierarchyModels;
 import dd.kms.marple.gui.VisualSettings;
 import dd.kms.marple.gui.VisualSettingsBuilders;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -25,6 +26,7 @@ class InspectionSettingsBuilderImpl<C, K, P> implements InspectionSettingsBuilde
 	private ComponentHierarchyModel<C, P>	componentHierarchyModel	= ComponentHierarchyModels.<C, P>createBuilder(component -> null).build();
 	private VisualSettings<C>				visualSettings			= VisualSettingsBuilders.<C>createBuilder().build();
 	private Predicate<C>					responsibilityPredicate	= component -> true;
+	private Optional<SecuritySettings> 		securitySettings		= Optional.empty();
 
 	InspectionSettingsBuilderImpl(Class<C> componentClass) {
 		this.componentClass = componentClass;
@@ -73,7 +75,13 @@ class InspectionSettingsBuilderImpl<C, K, P> implements InspectionSettingsBuilde
 	}
 
 	@Override
+	public InspectionSettingsBuilder<C, K, P> securitySettings(Optional<SecuritySettings> securitySettings) {
+		this.securitySettings = securitySettings;
+		return this;
+	}
+
+	@Override
 	public InspectionSettings<C, K, P> build() {
-		return new InspectionSettingsImpl<>(componentClass, inspector, inspectionKey, evaluator, evaluationKey, componentHierarchyModel, visualSettings, responsibilityPredicate);
+		return new InspectionSettingsImpl<>(componentClass, inspector, inspectionKey, evaluator, evaluationKey, componentHierarchyModel, visualSettings, responsibilityPredicate, securitySettings);
 	}
 }

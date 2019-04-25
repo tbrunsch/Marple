@@ -5,6 +5,7 @@ import dd.kms.marple.ObjectInspector;
 import dd.kms.marple.components.ComponentHierarchyModel;
 import dd.kms.marple.gui.VisualSettings;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -22,5 +23,6 @@ public interface InspectionSettingsBuilder<C, K, P>
 	InspectionSettingsBuilder<C, K, P> componentHierarchyModel(ComponentHierarchyModel<C, P> componentHierarchyModel);
 	InspectionSettingsBuilder<C, K, P> visualSettings(VisualSettings<C> visualSettings);
 	InspectionSettingsBuilder<C, K, P> responsibilityPredicate(Predicate<C> responsibilityPredicate);
+	InspectionSettingsBuilder<C, K, P> securitySettings(Optional<SecuritySettings> securitySettings);
 	InspectionSettings<C, K, P> build();
 }

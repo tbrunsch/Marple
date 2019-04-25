@@ -5,6 +5,7 @@ import dd.kms.marple.ObjectInspector;
 import dd.kms.marple.components.ComponentHierarchyModel;
 import dd.kms.marple.gui.VisualSettings;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
@@ -23,8 +24,9 @@ class InspectionSettingsImpl<C, K, P> implements InspectionSettings<C, K, P>
 	private final ComponentHierarchyModel<C, P>	componentHierarchyModel;
 	private final VisualSettings<C>				visualSettings;
 	private final Predicate<C>					responsibilityPredicate;
+	private final Optional<SecuritySettings>	securitySettings;
 
-	InspectionSettingsImpl(Class<C> componentClass, ObjectInspector<C> inspector, K inspectionKey, ExpressionEvaluator evaluator, K evaluationKey, ComponentHierarchyModel<C, P> componentHierarchyModel, VisualSettings<C> visualSettings, Predicate<C> responsibilityPredicate) {
+	InspectionSettingsImpl(Class<C> componentClass, ObjectInspector<C> inspector, K inspectionKey, ExpressionEvaluator evaluator, K evaluationKey, ComponentHierarchyModel<C, P> componentHierarchyModel, VisualSettings<C> visualSettings, Predicate<C> responsibilityPredicate, Optional<SecuritySettings> securitySettings) {
 		this.componentClass = componentClass;
 		this.inspector = inspector;
 		this.inspectionKey = inspectionKey;
@@ -33,6 +35,7 @@ class InspectionSettingsImpl<C, K, P> implements InspectionSettings<C, K, P>
 		this.componentHierarchyModel = componentHierarchyModel;
 		this.visualSettings = visualSettings;
 		this.responsibilityPredicate = responsibilityPredicate;
+		this.securitySettings = securitySettings;
 	}
 
 	@Override
@@ -73,5 +76,10 @@ class InspectionSettingsImpl<C, K, P> implements InspectionSettings<C, K, P>
 	@Override
 	public Predicate<C> getResponsibilityPredicate() {
 		return responsibilityPredicate;
+	}
+
+	@Override
+	public Optional<SecuritySettings> getSecuritySettings() {
+		return securitySettings;
 	}
 }
