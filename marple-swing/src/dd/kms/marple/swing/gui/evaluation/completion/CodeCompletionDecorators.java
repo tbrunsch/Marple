@@ -13,11 +13,13 @@ public class CodeCompletionDecorators
 		new CodeCompletionDecorator(textComponent, completionSuggestionProvider, completionSuggestionKey, expressionConsumer);
 	}
 
+	@FunctionalInterface
 	public interface CompletionSuggestionProvider
 	{
 		List<CompletionSuggestion> suggestCompletions(String expression, int caretPosition) throws ParseException;
 	}
 
+	@FunctionalInterface
 	public interface ExpressionConsumer
 	{
 		void consume(String expression);

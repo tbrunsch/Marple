@@ -13,17 +13,15 @@ public class InspectionFrame extends JFrame
 {
 	private static final Dimension INITIAL_SIZE = new Dimension(400, 300);
 
-	private final JPanel		mainPanel			= new JPanel(new BorderLayout());
+	private final JPanel				mainPanel			= new JPanel(new BorderLayout());
 
-	private final JPanel		navigationPanel		= new JPanel(new GridBagLayout());
-	private final JButton		prevButton			= new JButton();
-	private final JButton		nextButton			= new JButton();
-	private final JPanel		currentObjectPanel	= new JPanel(new GridBagLayout());
-	private final JLabel		classInfoLabel		= new JLabel();
-	private final JLabel		toStringLabel		= new JLabel();
+	private final JPanel				navigationPanel		= new JPanel(new GridBagLayout());
+	private final JButton				prevButton			= new JButton();
+	private final JButton				nextButton			= new JButton();
+	private final CurrentObjectPanel	currentObjectPanel;
 
-	private final JTabbedPane 	viewPane			= new JTabbedPane();
-	private final JScrollPane	viewScrollPane		= new JScrollPane(viewPane);
+	private final JTabbedPane 			viewPane			= new JTabbedPane();
+	private final JScrollPane			viewScrollPane		= new JScrollPane(viewPane);
 
 	private final InspectionContext<Component>	inspectionContext;
 
@@ -33,6 +31,7 @@ public class InspectionFrame extends JFrame
 
 	public InspectionFrame(InspectionContext<Component> inspectionContext) {
 		this.inspectionContext = inspectionContext;
+		this.currentObjectPanel = new CurrentObjectPanel(inspectionContext);
 		configure();
 	}
 
@@ -48,18 +47,13 @@ public class InspectionFrame extends JFrame
 		navigationPanel.add(currentObjectPanel,	new GridBagConstraints(1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 		navigationPanel.add(nextButton,   		new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 
-		currentObjectPanel.setBorder(BorderFactory.createEtchedBorder());
-		currentObjectPanel.add(toStringLabel,  new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-		currentObjectPanel.add(classInfoLabel, new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-
 		setSize(INITIAL_SIZE);
 	}
 
 	public void setViews(Object object, List<ObjectView<Component>> views) {
 		storeLastViewSettings();
 		this.views = views;
-		toStringLabel.setText(inspectionContext.getDisplayText(object));
-		classInfoLabel.setText(object.getClass().toString());
+		currentObjectPanel.setCurrentObject(object);
 		viewPane.removeAll();
 
 		for (ObjectView<Component> view : views) {

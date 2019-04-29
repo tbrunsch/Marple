@@ -20,8 +20,10 @@ import java.security.AccessControlException;
 
 public class SwingObjectInspectionFramework extends AbstractObjectInspectionFramework<Component, SwingKey, Point>
 {
-	private static final SwingKey	INSPECTION_KEY	= new SwingKey(KeyEvent.VK_I, 	KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
-	private static final SwingKey	EVALUATION_KEY	= new SwingKey(KeyEvent.VK_F8,	KeyEvent.ALT_MASK);
+	private static final SwingKey	INSPECTION_KEY		= new SwingKey(KeyEvent.VK_I, 	KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
+	private static final SwingKey	EVALUATION_KEY		= new SwingKey(KeyEvent.VK_F8,	KeyEvent.ALT_MASK);
+
+	private static SwingKey			CODE_COMPLETION_KEY = new SwingKey(KeyEvent.VK_ENTER,	KeyEvent.ALT_MASK);
 
 	private static final Object						LOCK		= new Object();
 	private static SwingObjectInspectionFramework	FRAMEWORK	= null;
@@ -70,6 +72,10 @@ public class SwingObjectInspectionFramework extends AbstractObjectInspectionFram
 			FRAMEWORK = new SwingObjectInspectionFramework();
 		}
 		return FRAMEWORK;
+	}
+
+	public static SwingKey getCodeCompletionKey() {
+		return CODE_COMPLETION_KEY;
 	}
 
 	@Override
