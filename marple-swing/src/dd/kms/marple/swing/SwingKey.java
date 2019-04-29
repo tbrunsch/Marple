@@ -11,6 +11,6 @@ public class SwingKey
 	}
 
 	public boolean matches(SwingKey expectedKey) {
-		return keyCode == expectedKey.keyCode && (modifiers & expectedKey.modifiers) == expectedKey.modifiers;
+		return keyCode == expectedKey.keyCode && modifiers == expectedKey.modifiers;
 	}
 }
