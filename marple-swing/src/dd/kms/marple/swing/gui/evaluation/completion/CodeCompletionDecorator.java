@@ -63,10 +63,7 @@ class CodeCompletionDecorator
 			}
 
 			private void updateCompletionSuggestions() {
-				if (popupMenu == null || !popupMenu.isVisible()) {
-					return;
-				}
-				showSuggestions();
+				SwingUtilities.invokeLater(() -> showSuggestions());
 			}
 		});
 	}
