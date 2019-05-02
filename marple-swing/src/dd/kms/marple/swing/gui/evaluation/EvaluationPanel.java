@@ -122,8 +122,8 @@ public class EvaluationPanel extends JPanel
 
 	private void displayException(ParseException e) {
 		evaluationResultPanel.removeAll();
-		JLabel exceptionLabel = new JLabel("<html><p>" + e.getMessage().replace("\n", "<br/>") + "</p></html>");
-		exceptionLabel.setForeground(Color.RED);
+		JLabel exceptionLabel = new JLabel(CodeCompletionDecorators.formatExceptionMessage(evaluationTextField.getText(), e));
+		CodeCompletionDecorators.configureExceptionComponent(exceptionLabel);
 		evaluationResultPanel.add(exceptionLabel,	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, NORTH, BOTH, new Insets(3, 3, 3, 3), 0, 0));
 		evaluationResultPanel.revalidate();
 		evaluationResultPanel.repaint();

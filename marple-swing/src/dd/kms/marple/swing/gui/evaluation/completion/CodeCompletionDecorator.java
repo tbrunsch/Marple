@@ -12,10 +12,7 @@ import dd.kms.zenodot.result.IntRange;
 import dd.kms.zenodot.utils.wrappers.AbstractExecutableInfo;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
+import javax.swing.event.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -77,6 +74,8 @@ class CodeCompletionDecorator
 				SwingUtilities.invokeLater(() -> updatePopupMenu());
 			}
 		});
+
+		textComponent.addCaretListener(e -> SwingUtilities.invokeLater(() -> updatePopupMenu()));
 	}
 
 	private void updatePopupMenu() {
@@ -172,8 +171,8 @@ class CodeCompletionDecorator
 		try {
 			actions = getCompletionActions(textComponent.getText(), textComponent.getCaretPosition());
 		} catch (ParseException e) {
-			JMenuItem menuItem = new JMenuItem(e.getMessage());
-			menuItem.setForeground(Color.RED);
+			JMenuItem menuItem = new JMenuItem(CodeCompletionDecorators.formatExceptionMessage(textComponent.getText(), e));
+			CodeCompletionDecorators.configureExceptionComponent(menuItem);
 			popupMenu.add(menuItem);
 		}
 		for (Action action : actions) {
@@ -217,8 +216,8 @@ class CodeCompletionDecorator
 		try {
 			executableArgumentInfoMenuItems = getExecutableArgumentInfoMenuItems(textComponent.getText(), textComponent.getCaretPosition());
 		} catch (ParseException e) {
-			JMenuItem menuItem = new JMenuItem(e.getMessage());
-			menuItem.setForeground(Color.RED);
+			JMenuItem menuItem = new JMenuItem(CodeCompletionDecorators.formatExceptionMessage(textComponent.getText(), e));
+			CodeCompletionDecorators.configureExceptionComponent(menuItem);
 			executableArgumentInfoMenuItems = ImmutableList.of(menuItem);
 		}
 		for (JMenuItem menuItem : executableArgumentInfoMenuItems) {
