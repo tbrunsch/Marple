@@ -20,13 +20,14 @@ import java.security.AccessControlException;
 
 public class SwingObjectInspectionFramework extends AbstractObjectInspectionFramework<Component, SwingKey, Point>
 {
-	private static final SwingKey	INSPECTION_KEY		= new SwingKey(KeyEvent.VK_I, 		KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
-	private static final SwingKey	EVALUATION_KEY		= new SwingKey(KeyEvent.VK_F8,		KeyEvent.ALT_MASK);
+	private static final SwingKey	INSPECTION_KEY					= new SwingKey(KeyEvent.VK_I, 		KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
+	private static final SwingKey	EVALUATION_KEY					= new SwingKey(KeyEvent.VK_F8,		KeyEvent.ALT_MASK);
 
-	private static final SwingKey	CODE_COMPLETION_KEY = new SwingKey(KeyEvent.VK_SPACE,	KeyEvent.CTRL_MASK);
+	private static final SwingKey	CODE_COMPLETION_KEY 			= new SwingKey(KeyEvent.VK_SPACE,	KeyEvent.CTRL_MASK);
+	private static final SwingKey	SHOW_EXECUTABLE_ARGUMENTS_KEY	= new SwingKey(KeyEvent.VK_P,		KeyEvent.CTRL_MASK);
 
-	private static final Object						LOCK		= new Object();
-	private static SwingObjectInspectionFramework	FRAMEWORK	= null;
+	private static final Object						LOCK			= new Object();
+	private static SwingObjectInspectionFramework	FRAMEWORK		= null;
 
 	public static InspectionSettingsBuilder<Component, SwingKey, Point> createInspectionSettingsBuilder() {
 		return InspectionSettingsBuilders.<Component, SwingKey, Point>create(Component.class)
@@ -76,6 +77,10 @@ public class SwingObjectInspectionFramework extends AbstractObjectInspectionFram
 
 	public static SwingKey getCodeCompletionKey() {
 		return CODE_COMPLETION_KEY;
+	}
+
+	public static SwingKey getShowExecutableArgumentsKey() {
+		return SHOW_EXECUTABLE_ARGUMENTS_KEY;
 	}
 
 	@Override

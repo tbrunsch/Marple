@@ -3,10 +3,13 @@ package dd.kms.marple.swing.gui.evaluation.completion;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.swing.SwingKey;
 import dd.kms.marple.swing.gui.evaluation.completion.CodeCompletionDecorators.CompletionSuggestionProvider;
+import dd.kms.marple.swing.gui.evaluation.completion.CodeCompletionDecorators.ExecutableArgumentInfoProvider;
 import dd.kms.marple.swing.gui.evaluation.completion.CodeCompletionDecorators.ExpressionConsumer;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.result.CompletionSuggestion;
+import dd.kms.zenodot.result.ExecutableArgumentInfo;
 import dd.kms.zenodot.result.IntRange;
+import dd.kms.zenodot.utils.wrappers.AbstractExecutableInfo;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -19,24 +22,32 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 class CodeCompletionDecorator
 {
 	private static final int		MAX_NUM_SUGGESTIONS	= 20;
 	private static final SwingKey 	APPLY_KEY			= new SwingKey(KeyEvent.VK_ENTER, 0);
 
-	private final JTextComponent				textComponent;
+	private final JTextComponent					textComponent;
 
-	private JPopupMenu							popupMenu;
+	private JPopupMenu								popupMenu;
 
-	private final CompletionSuggestionProvider	completionSuggestionProvider;
-	private final SwingKey						completionSuggestionKey;
-	private final ExpressionConsumer			expressionConsumer;
+	private final CompletionSuggestionProvider		completionSuggestionProvider;
+	private final SwingKey							completionSuggestionKey;
+	private final ExecutableArgumentInfoProvider	executableArgumentInfoProvider;
+	private final SwingKey							showExecutableArgumentsKey;
+	private final ExpressionConsumer				expressionConsumer;
 
-	CodeCompletionDecorator(JTextComponent textComponent, CompletionSuggestionProvider completionSuggestionProvider, SwingKey completionSuggestionKey, ExpressionConsumer expressionConsumer) {
+	private DisplayMode								displayMode						= DisplayMode.NOTHING;
+
+	CodeCompletionDecorator(JTextComponent textComponent, CompletionSuggestionProvider completionSuggestionProvider, SwingKey completionSuggestionKey, ExecutableArgumentInfoProvider executableArgumentInfoProvider, SwingKey showExecutableArgumentsKey, ExpressionConsumer expressionConsumer) {
 		this.textComponent = textComponent;
 		this.completionSuggestionProvider = completionSuggestionProvider;
 		this.completionSuggestionKey = completionSuggestionKey;
+		this.executableArgumentInfoProvider = executableArgumentInfoProvider;
+		this.showExecutableArgumentsKey = showExecutableArgumentsKey;
 		this.expressionConsumer = expressionConsumer;
 
 		textComponent.addKeyListener(new KeyAdapter() {
@@ -63,14 +74,25 @@ class CodeCompletionDecorator
 			}
 
 			private void updateCompletionSuggestions() {
-				SwingUtilities.invokeLater(() -> showSuggestions());
+				SwingUtilities.invokeLater(() -> updatePopupMenu());
 			}
 		});
 	}
 
+	private void updatePopupMenu() {
+		switch (displayMode) {
+			case EXECUTABLE_ARGUMENTS:
+				showExecutableArguments();
+				break;
+			default:
+				showSuggestions();
+		}
+	}
+
 	private void showSuggestions() {
+		displayMode = DisplayMode.COMPLETION_SUGGESTIONS;
 		if (popupMenuExists()) {
-			setPopupMenuActions();
+			setPopupMenuCodeCompletionActions();
 			if (popupMenu.getComponentCount() == 0) {
 				destroyPopupMenu();
 			}
@@ -78,19 +100,42 @@ class CodeCompletionDecorator
 		}
 
 		createPopupMenu();
-		setPopupMenuActions();
+		setPopupMenuCodeCompletionActions();
 		if (popupMenu.getComponentCount() == 0) {
 			destroyPopupMenu();
 		} else {
-			popupMenu.setBorder(BorderFactory.createEtchedBorder());
-			popupMenu.show(textComponent, 0, textComponent.getHeight());
-			popupMenu.setVisible(true);
-			textComponent.requestFocus();
+			showPopupMenu();
+		}
+	}
+
+	private void showExecutableArguments() {
+		displayMode = DisplayMode.EXECUTABLE_ARGUMENTS;
+		if (popupMenuExists()) {
+			setPopupMenuExecutableArguments();
+			if (popupMenu.getComponentCount() == 0) {
+				destroyPopupMenu();
+			}
+			return;
+		}
+
+		createPopupMenu();
+		setPopupMenuExecutableArguments();
+		if (popupMenu.getComponentCount() == 0) {
+			destroyPopupMenu();
+		} else {
+			showPopupMenu();
 		}
 	}
 
 	private boolean popupMenuExists() {
 		return popupMenu != null && popupMenu.isVisible();
+	}
+
+	private void showPopupMenu() {
+		popupMenu.setBorder(BorderFactory.createEtchedBorder());
+		popupMenu.show(textComponent, 0, textComponent.getHeight());
+		popupMenu.setVisible(true);
+		textComponent.requestFocus();
 	}
 
 	private void createPopupMenu() {
@@ -118,9 +163,10 @@ class CodeCompletionDecorator
 			popupMenu.setVisible(false);
 			popupMenu = null;
 		}
+		displayMode = DisplayMode.NOTHING;
 	}
 
-	private void setPopupMenuActions() {
+	private void setPopupMenuCodeCompletionActions() {
 		popupMenu.removeAll();
 		List<Action> actions = ImmutableList.of();
 		try {
@@ -165,6 +211,73 @@ class CodeCompletionDecorator
 		};
 	}
 
+	private void setPopupMenuExecutableArguments() {
+		popupMenu.removeAll();
+		List<JMenuItem> executableArgumentInfoMenuItems;
+		try {
+			executableArgumentInfoMenuItems = getExecutableArgumentInfoMenuItems(textComponent.getText(), textComponent.getCaretPosition());
+		} catch (ParseException e) {
+			JMenuItem menuItem = new JMenuItem(e.getMessage());
+			menuItem.setForeground(Color.RED);
+			executableArgumentInfoMenuItems = ImmutableList.of(menuItem);
+		}
+		for (JMenuItem menuItem : executableArgumentInfoMenuItems) {
+			popupMenu.add(menuItem);
+		}
+		popupMenu.pack();
+	}
+
+	private List<JMenuItem> getExecutableArgumentInfoMenuItems(String expression, int caretPosition) throws ParseException {
+		Optional<ExecutableArgumentInfo> executableArgumentInfo = executableArgumentInfoProvider.getExecutableArgumentInfo(expression, caretPosition);
+		if (!executableArgumentInfo.isPresent()) {
+			return ImmutableList.of();
+		}
+		ExecutableArgumentInfo info = executableArgumentInfo.get();
+		int currentArgIndex = info.getCurrentArgumentIndex();
+		Map<AbstractExecutableInfo, Boolean> applicableExecutableOverloads = info.getApplicableExecutableOverloads();
+
+		ImmutableList.Builder<JMenuItem> menuItemBuilder = ImmutableList.builder();
+		for (AbstractExecutableInfo executableInfo : applicableExecutableOverloads.keySet()) {
+			boolean applicable = applicableExecutableOverloads.get(executableInfo);
+			StringBuilder argumentInfoTextBuilder = new StringBuilder();
+			argumentInfoTextBuilder.append("<html>").append(executableInfo.getName()).append("(");
+			int numArguments = executableInfo.getNumberOfArguments();
+			for (int argIndex = 0; argIndex < numArguments; argIndex++) {
+				String argTypeAsString = executableInfo.getExpectedArgumentType(argIndex).getRawType().getSimpleName();
+				if (executableInfo.isVariadic() && argIndex == numArguments - 1) {
+					argTypeAsString += "...";
+				}
+				boolean highlight = false;
+				if (applicable) {
+					if (executableInfo.isVariadic()) {
+						highlight = argIndex <= currentArgIndex;
+					} else {
+						highlight = argIndex == currentArgIndex;
+					}
+				}
+				if (argIndex > 0) {
+					argumentInfoTextBuilder.append(", ");
+				}
+				if (highlight) {
+					argumentInfoTextBuilder.append("<b>").append(argTypeAsString).append("</b>");
+				} else {
+					argumentInfoTextBuilder.append(argTypeAsString);
+				}
+			}
+			argumentInfoTextBuilder.append(")").append("</html>");
+
+			JMenuItem menuItem = new JMenuItem(argumentInfoTextBuilder.toString());
+			menuItem.setFont(menuItem.getFont().deriveFont(Font.PLAIN));
+
+			Color fg = applicable ? Color.BLACK : Color.LIGHT_GRAY;
+			menuItem.setForeground(fg);
+			menuItem.setBackground(Color.WHITE);
+
+			menuItemBuilder.add(menuItem);
+		}
+		return menuItemBuilder.build();
+	}
+
 	private void applySelectedAction() {
 		JMenuItem selectedMenuItem = getSelectedMenuItem();
 		if (selectedMenuItem != null) {
@@ -190,11 +303,15 @@ class CodeCompletionDecorator
 	 */
 	void handleKeyPressed(KeyEvent e) {
 		SwingKey key = new SwingKey(e.getKeyCode(), e.getModifiers());
-		if (isRequestCodeCompletion(key)) {
+		if (key.matches(completionSuggestionKey)) {
 			showSuggestions();
 			return;
 		}
-		if (isApplySuggestion(key)) {
+		if (key.matches(showExecutableArgumentsKey)) {
+			showExecutableArguments();
+			return;
+		}
+		if (key.matches(APPLY_KEY)) {
 			if (popupMenuExists()) {
 				applySelectedAction();
 			} else {
@@ -204,11 +321,5 @@ class CodeCompletionDecorator
 		}
 	}
 
-	private boolean isRequestCodeCompletion(SwingKey key) {
-		return key.matches(completionSuggestionKey);
-	}
-
-	private boolean isApplySuggestion(SwingKey key) {
-		return key.matches(APPLY_KEY);
-	}
+	private enum DisplayMode { NOTHING, COMPLETION_SUGGESTIONS, EXECUTABLE_ARGUMENTS };
 }

@@ -7,11 +7,18 @@ import dd.kms.marple.swing.gui.evaluation.completion.CodeCompletionDecorators;
 import dd.kms.marple.swing.gui.views.FieldView;
 import dd.kms.zenodot.JavaParser;
 import dd.kms.zenodot.ParseException;
+import dd.kms.zenodot.matching.MatchRating;
+import dd.kms.zenodot.matching.StringMatch;
 import dd.kms.zenodot.result.CompletionSuggestion;
+import dd.kms.zenodot.result.CompletionSuggestions;
+import dd.kms.zenodot.result.ExecutableArgumentInfo;
+import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionField;
+import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionVariable;
 import dd.kms.zenodot.settings.ParserSettings;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.*;
 import java.util.List;
 
 import static java.awt.GridBagConstraints.*;
@@ -51,7 +58,14 @@ public class EvaluationPanel extends JPanel
 
 		evaluationResultPanel.setBorder(BorderFactory.createEtchedBorder());
 
-		CodeCompletionDecorators.decorate(evaluationTextField, this::suggestCodeCompletions, SwingObjectInspectionFramework.getCodeCompletionKey(), this::evaluateExpression);
+		CodeCompletionDecorators.decorate(
+			evaluationTextField,
+			this::suggestCodeCompletions,
+			SwingObjectInspectionFramework.getCodeCompletionKey(),
+			this::getExecutableArgumentInfo,
+			SwingObjectInspectionFramework.getShowExecutableArgumentsKey(),
+			this::evaluateExpression
+		);
 	}
 
 	public void setExpression(String expression) {
@@ -61,7 +75,27 @@ public class EvaluationPanel extends JPanel
 
 	private List<CompletionSuggestion> suggestCodeCompletions(String expression, int caretPosition) throws ParseException  {
 		JavaParser parser = new JavaParser();
-		return parser.suggestCodeCompletion(expression, caretPosition, getParserSettings(), thisValue);
+		Map<CompletionSuggestion, MatchRating> ratedSuggestions = parser.suggestCodeCompletion(expression, caretPosition, getParserSettings(), thisValue);
+		List<CompletionSuggestion> suggestions = new ArrayList<>(ratedSuggestions.keySet());
+		suggestions.removeIf(suggestion -> ratedSuggestions.get(suggestion).getNameMatch() == StringMatch.NONE);
+		suggestions.sort(Comparator.comparingInt(EvaluationPanel::getCompletionSuggestionPriorityByClass));
+		suggestions.sort(Comparator.comparing(ratedSuggestions::get));
+		return suggestions;
+	}
+
+	private Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String expression, int caretPosition) throws ParseException  {
+		JavaParser parser = new JavaParser();
+		return parser.getExecutableArgumentInfo(expression, caretPosition, getParserSettings(), thisValue);
+	}
+
+	/**
+	 * Prefer variables ({@link CompletionSuggestionVariable}) over fields ({@link CompletionSuggestionField}) over other suggestions.
+	 */
+	private static int getCompletionSuggestionPriorityByClass(CompletionSuggestion suggestion) {
+		Class<? extends CompletionSuggestion> suggestionClass = suggestion.getClass();
+		return	suggestionClass == CompletionSuggestionVariable.class	? 0 :
+				suggestionClass == CompletionSuggestionField.class		? 1
+																		: 2;
 	}
 
 	private void evaluateExpression(String expression) {
