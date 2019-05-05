@@ -16,7 +16,7 @@ public class InspectObjectAction implements InspectionAction
 
 	@Override
 	public String getName() {
-		return "Inspect object '" + objectDisplayText + "'";
+		return "Inspect";
 	}
 
 	@Override

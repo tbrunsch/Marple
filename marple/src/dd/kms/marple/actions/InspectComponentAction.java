@@ -22,11 +22,7 @@ public class InspectComponentAction implements InspectionAction
 
 	@Override
 	public String getName() {
-		return "Inspect "
-			+ (subcomponentHierarchy.isEmpty() ? "component" : "subcomponent")
-			+ " '"
-			+ leafDisplayText
-			+ "'";
+		return "Inspect";
 	}
 
 	@Override

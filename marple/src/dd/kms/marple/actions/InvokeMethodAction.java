@@ -19,7 +19,7 @@ public class InvokeMethodAction implements InspectionAction
 
 	@Override
 	public String getName() {
-		return "Invoke method '" + method.getName() + "'";
+		return "Invoke";
 	}
 
 	@Override

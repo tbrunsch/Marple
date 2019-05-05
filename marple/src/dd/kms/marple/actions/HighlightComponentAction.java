@@ -18,7 +18,7 @@ public class HighlightComponentAction implements InspectionAction
 
 	@Override
 	public String getName() {
-		return "Highlight component '" + displayText + "'";
+		return "Highlight";
 	}
 
 	@Override
