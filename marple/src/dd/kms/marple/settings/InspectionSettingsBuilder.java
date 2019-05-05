@@ -1,28 +1,25 @@
 package dd.kms.marple.settings;
 
-import dd.kms.marple.ExpressionEvaluator;
-import dd.kms.marple.ObjectInspector;
+import dd.kms.marple.evaluator.ExpressionEvaluator;
+import dd.kms.marple.inspector.ObjectInspector;
 import dd.kms.marple.components.ComponentHierarchyModel;
 import dd.kms.marple.gui.VisualSettings;
 
+import java.awt.*;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-/**
- *
- * @param <C>	GUI component class
- * @param <K>	KeyStroke class
- * @param <P>	Point class
- */
-public interface InspectionSettingsBuilder<C, K, P>
+public interface InspectionSettingsBuilder
 {
-	InspectionSettingsBuilder<C, K, P> inspector(ObjectInspector<C> inspector);
-	InspectionSettingsBuilder<C, K, P> inspectionKey(K inspectionKey);
-	InspectionSettingsBuilder<C, K, P> evaluator(ExpressionEvaluator evaluator);
-	InspectionSettingsBuilder<C, K, P> evaluationKey(K evaluationKey);
-	InspectionSettingsBuilder<C, K, P> componentHierarchyModel(ComponentHierarchyModel<C, P> componentHierarchyModel);
-	InspectionSettingsBuilder<C, K, P> visualSettings(VisualSettings<C> visualSettings);
-	InspectionSettingsBuilder<C, K, P> responsibilityPredicate(Predicate<C> responsibilityPredicate);
-	InspectionSettingsBuilder<C, K, P> securitySettings(Optional<SecuritySettings> securitySettings);
-	InspectionSettings<C, K, P> build();
+	InspectionSettingsBuilder inspector(ObjectInspector inspector);
+	InspectionSettingsBuilder evaluator(ExpressionEvaluator evaluator);
+	InspectionSettingsBuilder componentHierarchyModel(ComponentHierarchyModel componentHierarchyModel);
+	InspectionSettingsBuilder visualSettings(VisualSettings visualSettings);
+	InspectionSettingsBuilder responsibilityPredicate(Predicate<Component> responsibilityPredicate);
+	InspectionSettingsBuilder securitySettings(Optional<SecuritySettings> securitySettings);
+	InspectionSettingsBuilder inspectionKey(KeyRepresentation inspectionKey);
+	InspectionSettingsBuilder evaluationKey(KeyRepresentation evaluationKey);
+	InspectionSettingsBuilder codeCompletionKey(KeyRepresentation codeCompletionKey);
+	InspectionSettingsBuilder showMethodArgumentsKey(KeyRepresentation showMethodArgumentsKey);
+	InspectionSettings build();
 }

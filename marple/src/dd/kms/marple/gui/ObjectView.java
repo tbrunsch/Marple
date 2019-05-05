@@ -1,13 +1,11 @@
 package dd.kms.marple.gui;
 
-/**
- *
- * @param <C>	GUI component class
- */
-public interface ObjectView<C>
+import java.awt.*;
+
+public interface ObjectView
 {
 	String getViewName();
-	C getViewComponent();
+	Component getViewComponent();
 	Object getViewSettings();
 	void applyViewSettings(Object settings);
 }

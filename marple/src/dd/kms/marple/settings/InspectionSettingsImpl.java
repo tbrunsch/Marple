@@ -1,56 +1,43 @@
 package dd.kms.marple.settings;
 
-import dd.kms.marple.ExpressionEvaluator;
-import dd.kms.marple.ObjectInspector;
+import dd.kms.marple.evaluator.ExpressionEvaluator;
+import dd.kms.marple.inspector.ObjectInspector;
 import dd.kms.marple.components.ComponentHierarchyModel;
 import dd.kms.marple.gui.VisualSettings;
 
+import java.awt.*;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-/**
- *
- * @param <C>	GUI component class
- * @param <K>	KeyStroke class
- * @param <P>	Point class
- */
-class InspectionSettingsImpl<C, K, P> implements InspectionSettings<C, K, P>
+class InspectionSettingsImpl implements InspectionSettings
 {
-	private final Class<C>						componentClass;
-	private final ObjectInspector<C>			inspector;
-	private final K								inspectionKey;
+	private final ObjectInspector				inspector;
 	private final ExpressionEvaluator			evaluator;
-	private final K								evaluationKey;
-	private final ComponentHierarchyModel<C, P>	componentHierarchyModel;
-	private final VisualSettings<C>				visualSettings;
-	private final Predicate<C>					responsibilityPredicate;
+	private final ComponentHierarchyModel		componentHierarchyModel;
+	private final VisualSettings				visualSettings;
+	private final Predicate<Component>			responsibilityPredicate;
 	private final Optional<SecuritySettings>	securitySettings;
+	private final KeyRepresentation				inspectionKey;
+	private final KeyRepresentation				evaluationKey;
+	private final KeyRepresentation				codeCompletionKey;
+	private final KeyRepresentation				showMethodArgumentsKey;
 
-	InspectionSettingsImpl(Class<C> componentClass, ObjectInspector<C> inspector, K inspectionKey, ExpressionEvaluator evaluator, K evaluationKey, ComponentHierarchyModel<C, P> componentHierarchyModel, VisualSettings<C> visualSettings, Predicate<C> responsibilityPredicate, Optional<SecuritySettings> securitySettings) {
-		this.componentClass = componentClass;
+	InspectionSettingsImpl(ObjectInspector inspector, ExpressionEvaluator evaluator, ComponentHierarchyModel componentHierarchyModel, VisualSettings visualSettings, Predicate<Component> responsibilityPredicate, Optional<SecuritySettings> securitySettings, KeyRepresentation inspectionKey, KeyRepresentation evaluationKey, KeyRepresentation codeCompletionKey, KeyRepresentation showMethodArgumentsKey) {
 		this.inspector = inspector;
-		this.inspectionKey = inspectionKey;
 		this.evaluator = evaluator;
-		this.evaluationKey = evaluationKey;
 		this.componentHierarchyModel = componentHierarchyModel;
 		this.visualSettings = visualSettings;
 		this.responsibilityPredicate = responsibilityPredicate;
 		this.securitySettings = securitySettings;
+		this.inspectionKey = inspectionKey;
+		this.evaluationKey = evaluationKey;
+		this.codeCompletionKey = codeCompletionKey;
+		this.showMethodArgumentsKey = showMethodArgumentsKey;
 	}
 
 	@Override
-	public boolean isComponent(Object object) {
-		return componentClass.isInstance(object);
-	}
-
-	@Override
-	public ObjectInspector<C> getInspector() {
+	public ObjectInspector getInspector() {
 		return inspector;
-	}
-
-	@Override
-	public K getInspectionKey() {
-		return inspectionKey;
 	}
 
 	@Override
@@ -59,27 +46,42 @@ class InspectionSettingsImpl<C, K, P> implements InspectionSettings<C, K, P>
 	}
 
 	@Override
-	public K getEvaluationKey() {
-		return evaluationKey;
-	}
-
-	@Override
-	public ComponentHierarchyModel<C, P> getComponentHierarchyModel() {
+	public ComponentHierarchyModel getComponentHierarchyModel() {
 		return componentHierarchyModel;
 	}
 
 	@Override
-	public VisualSettings<C> getVisualSettings() {
+	public VisualSettings getVisualSettings() {
 		return visualSettings;
 	}
 
 	@Override
-	public Predicate<C> getResponsibilityPredicate() {
+	public Predicate<Component> getResponsibilityPredicate() {
 		return responsibilityPredicate;
 	}
 
 	@Override
 	public Optional<SecuritySettings> getSecuritySettings() {
 		return securitySettings;
+	}
+
+	@Override
+	public KeyRepresentation getInspectionKey() {
+		return inspectionKey;
+	}
+
+	@Override
+	public KeyRepresentation getEvaluationKey() {
+		return evaluationKey;
+	}
+
+	@Override
+	public KeyRepresentation getCodeCompletionKey() {
+		return codeCompletionKey;
+	}
+
+	@Override
+	public KeyRepresentation getShowMethodArgumentsKey() {
+		return showMethodArgumentsKey;
 	}
 }

@@ -1,14 +1,10 @@
 package dd.kms.marple.components;
 
+import java.awt.*;
 import java.util.List;
 
-/**
- *
- * @param <C>	concrete GUI component class
- * @param <P>	Point class
- */
 @FunctionalInterface
-public interface SubcomponentHierarchyStrategy<C, P>
+public interface SubcomponentHierarchyStrategy<C extends Component>
 {
-	List<?> getSubcomponentHierarchy(C component, P point);
+	List<?> getSubcomponentHierarchy(C component, Point point);
 }

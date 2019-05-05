@@ -4,12 +4,8 @@ import dd.kms.marple.InspectionContext;
 
 import java.util.List;
 
-/**
- *
- * @param <C>	GUI component class
- */
-public interface VisualSettings<C>
+public interface VisualSettings
 {
 	String getDisplayText(Object object);
-	List<ObjectView<C>> getInspectionViews(Object object, InspectionContext<C> inspectionContext);
+	List<ObjectView> getInspectionViews(Object object, InspectionContext inspectionContext);
 }

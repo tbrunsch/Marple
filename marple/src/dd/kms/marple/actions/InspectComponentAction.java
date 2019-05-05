@@ -1,22 +1,19 @@
 package dd.kms.marple.actions;
 
 import com.google.common.collect.ImmutableList;
-import dd.kms.marple.ObjectInspector;
+import dd.kms.marple.inspector.ObjectInspector;
 
+import java.awt.*;
 import java.util.List;
 
-/**
- *
- * @param <C>	GUI component class
- */
-public class InspectComponentAction<C> implements InspectionAction
+public class InspectComponentAction implements InspectionAction
 {
-	private final ObjectInspector<C>	inspector;
-	private final List<C>				componentHierarchy;
-	private final List<?>				subcomponentHierarchy;
-	private final String				leafDisplayText;
+	private final ObjectInspector	inspector;
+	private final List<Component>	componentHierarchy;
+	private final List<?>			subcomponentHierarchy;
+	private final String			leafDisplayText;
 
-	public InspectComponentAction(ObjectInspector<C> inspector, List<C> componentHierarchy, List<?> subcomponentHierarchy, String leafDisplayText) {
+	public InspectComponentAction(ObjectInspector inspector, List<Component> componentHierarchy, List<?> subcomponentHierarchy, String leafDisplayText) {
 		this.inspector = inspector;
 		this.componentHierarchy = ImmutableList.copyOf(componentHierarchy);
 		this.subcomponentHierarchy = ImmutableList.copyOf(subcomponentHierarchy);

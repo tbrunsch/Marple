@@ -1,6 +1,6 @@
 package dd.kms.marple.actions;
 
-import dd.kms.marple.InspectionHistory;
+import dd.kms.marple.inspector.InspectionHistory;
 
 public class HistoryActionWrapper implements InspectionAction
 {

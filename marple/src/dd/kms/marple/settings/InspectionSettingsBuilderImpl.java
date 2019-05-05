@@ -1,87 +1,92 @@
 package dd.kms.marple.settings;
 
-import dd.kms.marple.ExpressionEvaluator;
-import dd.kms.marple.ObjectInspector;
+import dd.kms.marple.evaluator.ExpressionEvaluator;
+import dd.kms.marple.gui.VisualSettingsUtils;
+import dd.kms.marple.inspector.ObjectInspector;
 import dd.kms.marple.components.ComponentHierarchyModel;
 import dd.kms.marple.components.ComponentHierarchyModels;
 import dd.kms.marple.gui.VisualSettings;
-import dd.kms.marple.gui.VisualSettingsBuilders;
 
+import java.awt.*;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-/**
- *
- * @param <C>	GUI component class
- * @param <K>	KeyStroke class
- * @param <P>	Point class
- */
-class InspectionSettingsBuilderImpl<C, K, P> implements InspectionSettingsBuilder<C, K, P>
+class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 {
-	private final Class<C>					componentClass;
-	private ObjectInspector<C>				inspector;
-	private K								inspectionKey;
-	private ExpressionEvaluator				evaluator;
-	private K								evaluationKey;
-	private ComponentHierarchyModel<C, P>	componentHierarchyModel	= ComponentHierarchyModels.<C, P>createBuilder(component -> null).build();
-	private VisualSettings<C>				visualSettings			= VisualSettingsBuilders.<C>createBuilder().build();
-	private Predicate<C>					responsibilityPredicate	= component -> true;
-	private Optional<SecuritySettings> 		securitySettings		= Optional.empty();
+	private ObjectInspector				inspector;
+	private ExpressionEvaluator			evaluator;
+	private ComponentHierarchyModel		componentHierarchyModel	= ComponentHierarchyModels.createBuilder().build();
+	private VisualSettings				visualSettings			= VisualSettingsUtils.createBuilder().build();
+	private Predicate<Component>		responsibilityPredicate	= component -> true;
+	private Optional<SecuritySettings> 	securitySettings		= Optional.empty();
 
-	InspectionSettingsBuilderImpl(Class<C> componentClass) {
-		this.componentClass = componentClass;
-	}
+	private KeyRepresentation			inspectionKey;
+	private KeyRepresentation			evaluationKey;
+	private KeyRepresentation			codeCompletionKey;
+	private KeyRepresentation			showMethodArgumentsKey;
 
 	@Override
-	public InspectionSettingsBuilder<C, K, P> inspector(ObjectInspector<C> inspector) {
+	public InspectionSettingsBuilder inspector(ObjectInspector inspector) {
 		this.inspector = inspector;
 		return this;
 	}
 
 	@Override
-	public InspectionSettingsBuilder<C, K, P> inspectionKey(K inspectionKey) {
-		this.inspectionKey = inspectionKey;
-		return this;
-	}
-
-	@Override
-	public InspectionSettingsBuilder<C, K, P> evaluator(ExpressionEvaluator evaluator) {
+	public InspectionSettingsBuilder evaluator(ExpressionEvaluator evaluator) {
 		this.evaluator = evaluator;
 		return this;
 	}
 
 	@Override
-	public InspectionSettingsBuilder<C, K, P> evaluationKey(K evaluationKey) {
-		this.evaluationKey = evaluationKey;
-		return this;
-	}
-
-	@Override
-	public InspectionSettingsBuilder<C, K, P> componentHierarchyModel(ComponentHierarchyModel<C, P> componentHierarchyModel) {
+	public InspectionSettingsBuilder componentHierarchyModel(ComponentHierarchyModel componentHierarchyModel) {
 		this.componentHierarchyModel = componentHierarchyModel;
 		return this;
 	}
 
 	@Override
-	public InspectionSettingsBuilder<C, K, P> visualSettings(VisualSettings<C> visualSettings) {
+	public InspectionSettingsBuilder visualSettings(VisualSettings visualSettings) {
 		this.visualSettings = visualSettings;
 		return this;
 	}
 
 	@Override
-	public InspectionSettingsBuilder<C, K, P> responsibilityPredicate(Predicate<C> responsibilityPredicate) {
+	public InspectionSettingsBuilder responsibilityPredicate(Predicate<Component> responsibilityPredicate) {
 		this.responsibilityPredicate = responsibilityPredicate;
 		return this;
 	}
 
 	@Override
-	public InspectionSettingsBuilder<C, K, P> securitySettings(Optional<SecuritySettings> securitySettings) {
+	public InspectionSettingsBuilder securitySettings(Optional<SecuritySettings> securitySettings) {
 		this.securitySettings = securitySettings;
 		return this;
 	}
 
 	@Override
-	public InspectionSettings<C, K, P> build() {
-		return new InspectionSettingsImpl<>(componentClass, inspector, inspectionKey, evaluator, evaluationKey, componentHierarchyModel, visualSettings, responsibilityPredicate, securitySettings);
+	public InspectionSettingsBuilder inspectionKey(KeyRepresentation inspectionKey) {
+		this.inspectionKey = inspectionKey;
+		return this;
+	}
+
+	@Override
+	public InspectionSettingsBuilder evaluationKey(KeyRepresentation evaluationKey) {
+		this.evaluationKey = evaluationKey;
+		return this;
+	}
+
+	@Override
+	public InspectionSettingsBuilder codeCompletionKey(KeyRepresentation codeCompletionKey) {
+		this.codeCompletionKey = codeCompletionKey;
+		return this;
+	}
+
+	@Override
+	public InspectionSettingsBuilder showMethodArgumentsKey(KeyRepresentation showMethodArgumentsKey) {
+		this.showMethodArgumentsKey = showMethodArgumentsKey;
+		return this;
+	}
+
+	@Override
+	public InspectionSettings build() {
+		return new InspectionSettingsImpl(inspector, evaluator, componentHierarchyModel, visualSettings, responsibilityPredicate, securitySettings, inspectionKey, evaluationKey, codeCompletionKey, showMethodArgumentsKey);
 	}
 }

@@ -10,11 +10,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-/**
- *
- * @param <C>	GUI component class
- */
-class VisualSettingsBuilderImpl<C> implements VisualSettingsBuilder<C>
+class VisualSettingsBuilderImpl implements VisualSettingsBuilder
 {
 	private String																						nullDisplayText			= "null";
 
@@ -32,16 +28,16 @@ class VisualSettingsBuilderImpl<C> implements VisualSettingsBuilder<C>
 	 * an exception if he specified a strategy for the same object class for which there is already
 	 * a default strategy defined.
 	 */
-	private final Multimap<Class<?>, BiFunction<Object, InspectionContext<C>, ObjectView<C>>>	objectViewConstructors	= ArrayListMultimap.create();
+	private final Multimap<Class<?>, BiFunction<Object, InspectionContext, ObjectView>>					objectViewConstructors	= ArrayListMultimap.create();
 
 	@Override
-	public VisualSettingsBuilder<C> nullDisplayText(String nullDisplayText) {
+	public VisualSettingsBuilder nullDisplayText(String nullDisplayText) {
 		this.nullDisplayText = nullDisplayText;
 		return this;
 	}
 
 	@Override
-	public <T> VisualSettingsBuilder<C> displayText(Class<T> objectClass, Function<T, String> displayTextFunction) {
+	public <T> VisualSettingsBuilder displayText(Class<T> objectClass, Function<T, String> displayTextFunction) {
 		displayTextFunctions.put(
 			objectClass,
 			object -> objectClass.isInstance(object)
@@ -52,7 +48,7 @@ class VisualSettingsBuilderImpl<C> implements VisualSettingsBuilder<C>
 	}
 
 	@Override
-	public <T> VisualSettingsBuilder<C> objectView(Class<T> objectClass, BiFunction<T, InspectionContext<C>, ? extends ObjectView<C>> objectViewConstructor) {
+	public <T> VisualSettingsBuilder objectView(Class<T> objectClass, BiFunction<T, InspectionContext, ? extends ObjectView> objectViewConstructor) {
 		objectViewConstructors.put(
 			objectClass,
 			(object, inspectionContext) -> objectClass.isInstance(object)
@@ -63,7 +59,7 @@ class VisualSettingsBuilderImpl<C> implements VisualSettingsBuilder<C>
 	}
 
 	@Override
-	public VisualSettings<C> build() {
-		return new VisualSettingsImpl<>(nullDisplayText, displayTextFunctions, objectViewConstructors);
+	public VisualSettings build() {
+		return new VisualSettingsImpl(nullDisplayText, displayTextFunctions, objectViewConstructors);
 	}
 }

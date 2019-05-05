@@ -1,14 +1,14 @@
 package dd.kms.marple.actions;
 
-import dd.kms.marple.ObjectInspector;
+import dd.kms.marple.inspector.ObjectInspector;
 
 public class InspectObjectAction implements InspectionAction
 {
-	private final ObjectInspector<?>	inspector;
-	private final Object				object;
-	private final String				objectDisplayText;
+	private final ObjectInspector	inspector;
+	private final Object			object;
+	private final String			objectDisplayText;
 
-	public InspectObjectAction(ObjectInspector<?> inspector, Object object, String objectDisplayText) {
+	public InspectObjectAction(ObjectInspector inspector, Object object, String objectDisplayText) {
 		this.inspector = inspector;
 		this.object = object;
 		this.objectDisplayText = objectDisplayText;

@@ -5,18 +5,14 @@ import dd.kms.marple.InspectionContext;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-/**
- *
- * @param <C>	GUI component class
- */
-public interface VisualSettingsBuilder<C>
+public interface VisualSettingsBuilder
 {
-	VisualSettingsBuilder<C> nullDisplayText(String nullDisplayText);
-	<T> VisualSettingsBuilder<C> displayText(Class<T> objectClass, Function<T, String> displayTextFunction);
+	VisualSettingsBuilder nullDisplayText(String nullDisplayText);
+	<T> VisualSettingsBuilder displayText(Class<T> objectClass, Function<T, String> displayTextFunction);
 
 	/**
 	 * {@code objectViewConstructor} may check further conditions whether the view is applicable and, if not, return null.
 	 */
-	<T> VisualSettingsBuilder<C> objectView(Class<T> objectClass, BiFunction<T, InspectionContext<C>, ? extends ObjectView<C>> objectViewConstructor);
-	VisualSettings<C> build();
+	<T> VisualSettingsBuilder objectView(Class<T> objectClass, BiFunction<T, InspectionContext, ? extends ObjectView> objectViewConstructor);
+	VisualSettings build();
 }

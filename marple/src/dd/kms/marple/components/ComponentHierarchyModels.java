@@ -1,29 +1,38 @@
 package dd.kms.marple.components;
 
+import com.google.common.collect.ImmutableList;
+
+import java.awt.*;
 import java.util.Collections;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class ComponentHierarchyModels
 {
-	/**
-	 *
-	 * @param <C>	GUI component class
-	 * @param <P>	Point class
-	 */
-	public static <C, P> ComponentHierarchyModelBuilder<C, P> createBuilder(Function<C, C> parentFunction) {
-		return new ComponentHierarchyModelBuilderImpl<>(parentFunction);
+	public static ComponentHierarchyModelBuilder createBuilder() {
+		return new ComponentHierarchyModelBuilderImpl();
 	}
 
-	/**
-	 *
-	 * @param <C>	concrete GUI component class
-	 * @param <P>	Point class
-	 */
-	public static <C, P> SubcomponentHierarchyStrategy<C, P> createSingleSubcomponentStrategy(BiFunction<C, P, Object> subcomponentDetectionStrategy) {
+	public static <C extends Component> SubcomponentHierarchyStrategy<C> createSingleSubcomponentStrategy(BiFunction<C, Point, Object> subcomponentDetectionStrategy) {
 		return (component, point) -> {
 			Object subcomponent = subcomponentDetectionStrategy.apply(component, point);
 			return subcomponent == null ? Collections.emptyList() : Collections.singletonList(subcomponent);
 		};
+	}
+
+	public static List<Component> getComponentHierarchy(Component component) {
+		ImmutableList.Builder<Component> componentHierarchyBuilder = ImmutableList.builder();
+		for (Component curComponent = component; curComponent != null; curComponent = curComponent.getParent()) {
+			componentHierarchyBuilder.add(curComponent);
+		}
+		return componentHierarchyBuilder.build().reverse();
+	}
+
+	public static Object getHierarchyLeaf(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
+		List<?> lastNonEmptyList =	!subcomponentHierarchy.isEmpty()	? subcomponentHierarchy :
+									!componentHierarchy.isEmpty()		? componentHierarchy
+																		: null;
+		return lastNonEmptyList == null ? null : lastNonEmptyList.get(lastNonEmptyList.size()-1);
 	}
 }

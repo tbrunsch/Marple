@@ -3,29 +3,32 @@ package dd.kms.marple;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.actions.*;
 import dd.kms.marple.components.ComponentHierarchyModel;
+import dd.kms.marple.components.ComponentHierarchyModels;
+import dd.kms.marple.evaluator.ExpressionEvaluator;
 import dd.kms.marple.gui.ObjectView;
+import dd.kms.marple.inspector.InspectionHistory;
 import dd.kms.marple.settings.InspectionSettings;
 
+import java.awt.*;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- *
- * @param <C>	GUI component class
- * @param <K>	KeyStroke class
- * @param <P>	Point class
- */
-class InspectionContextImpl<C, K, P> implements InspectionContext<C>
+class InspectionContextImpl implements InspectionContext
 {
-	private final InspectionSettings<C, K, P>	settings;
-	private final InspectionHistory				inspectionHistory;
+	private final InspectionSettings	settings;
+	private final InspectionHistory 	inspectionHistory;
 
-	InspectionContextImpl(InspectionSettings<C, K, P> settings) {
+	InspectionContextImpl(InspectionSettings settings) {
 		this.settings = settings;
 		inspectionHistory = new InspectionHistory();
 		settings.getInspector().setInspectionContext(this);
 		settings.getEvaluator().setInspectionContext(this);
+	}
+
+	@Override
+	public InspectionSettings getSettings() {
+		return settings;
 	}
 
 	@Override
@@ -39,20 +42,18 @@ class InspectionContextImpl<C, K, P> implements InspectionContext<C>
 	}
 
 	@Override
-	public InspectionAction createInspectComponentAction(List<C> componentHierarchy, List<?> subcomponentHierarchy) {
-		Object hierarchyLeaf = subcomponentHierarchy.isEmpty()
-								? componentHierarchy.get(componentHierarchy.size()-1)
-								: subcomponentHierarchy.get(subcomponentHierarchy.size()-1);
+	public InspectionAction createInspectComponentAction(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
+		Object hierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
 		String leafDisplayText = getDisplayText(hierarchyLeaf);
-		InspectionAction action = new InspectComponentAction<>(settings.getInspector(), componentHierarchy, subcomponentHierarchy, leafDisplayText);
+		InspectionAction action = new InspectComponentAction(settings.getInspector(), componentHierarchy, subcomponentHierarchy, leafDisplayText);
 		return new HistoryActionWrapper(inspectionHistory, action);
 	}
 
 	@Override
 	public InspectionAction createInspectObjectAction(Object object) {
-		if (settings.isComponent(object)) {
-			C component = (C) object;
-			List<C> componentHierarchy = getComponentHierarchy(component);
+		if (object instanceof Component) {
+			Component component = (Component) object;
+			List<Component> componentHierarchy = ComponentHierarchyModels.getComponentHierarchy(component);
 			return createInspectComponentAction(componentHierarchy, ImmutableList.of());
 		}
 		InspectionAction action = new InspectObjectAction(settings.getInspector(), object, getDisplayText(object));
@@ -60,8 +61,8 @@ class InspectionContextImpl<C, K, P> implements InspectionContext<C>
 	}
 
 	@Override
-	public InspectionAction createHighlightComponentAction(C component) {
-		return new HighlightComponentAction<>(settings.getInspector(), component, getDisplayText(component));
+	public InspectionAction createHighlightComponentAction(Component component) {
+		return new HighlightComponentAction(settings.getInspector(), component, getDisplayText(component));
 	}
 
 	@Override
@@ -90,46 +91,12 @@ class InspectionContextImpl<C, K, P> implements InspectionContext<C>
 	}
 
 	@Override
-	public List<ObjectView<C>> getInspectionViews(Object object) {
+	public List<ObjectView> getInspectionViews(Object object) {
 		return settings.getVisualSettings().getInspectionViews(object, this);
 	}
 
 	@Override
 	public ExpressionEvaluator getEvaluator() {
 		return settings.getEvaluator();
-	}
-
-	InspectionSettings<C, K, P> getSettings() {
-		return settings;
-	}
-
-	void performInspection(C component, P position) {
-		List<C> componentHierarchy = getComponentHierarchy(component);
-		List<?> subcomponentHierarchy = getSubcomponentHierarchy(component, position);
-		InspectionAction inspectComponentAction = createInspectComponentAction(componentHierarchy, subcomponentHierarchy);
-		if (inspectComponentAction.isEnabled()) {
-			inspectComponentAction.perform();
-		}
-	}
-
-	void performEvaluation() {
-		InspectionAction evaluationAction = createEvaluateExpressionAction(null, null);
-		if (evaluationAction.isEnabled()) {
-			evaluationAction.perform();
-		}
-	}
-
-	private List<C> getComponentHierarchy(C component) {
-		ImmutableList.Builder<C> componentHierarchyBuilder = ImmutableList.builder();
-		ComponentHierarchyModel<C, P> componentHierarchyModel = settings.getComponentHierarchyModel();
-		for (C curComponent = component; curComponent != null; curComponent = componentHierarchyModel.getParent(curComponent)) {
-			componentHierarchyBuilder.add(curComponent);
-		}
-		return componentHierarchyBuilder.build().reverse();
-	}
-
-	private List<?> getSubcomponentHierarchy(C component, P position) {
-		ComponentHierarchyModel<C, P> componentHierarchyModel = settings.getComponentHierarchyModel();
-		return ImmutableList.copyOf(componentHierarchyModel.getSubcomponentHierarchy(component, position));
 	}
 }

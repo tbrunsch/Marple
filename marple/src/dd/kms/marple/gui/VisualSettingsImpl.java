@@ -15,19 +15,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/**
- *
- * @param <C>	GUI component class
- */
-class VisualSettingsImpl<C, V> implements VisualSettings<C>
+class VisualSettingsImpl implements VisualSettings
 {
 	private static final int	MAX_NUM_ARRAY_ELEMENTS_TO_DISPLAY	= 10;
 
-	private final String																				nullDisplayText;
-	private final Map<Class<?>, Function<Object, String>>												displayTextFunctions;
-	private final Multimap<Class<?>, BiFunction<Object, InspectionContext<C>, ObjectView<C>>>	objectViewConstructors;
+	private final String																nullDisplayText;
+	private final Map<Class<?>, Function<Object, String>>								displayTextFunctions;
+	private final Multimap<Class<?>, BiFunction<Object, InspectionContext, ObjectView>>	objectViewConstructors;
 
-	VisualSettingsImpl(String nullDisplayText, Map<Class<?>, Function<Object, String>> displayTextFunctions, Multimap<Class<?>, BiFunction<Object, InspectionContext<C>, ObjectView<C>>> objectViewConstructors) {
+	VisualSettingsImpl(String nullDisplayText, Map<Class<?>, Function<Object, String>> displayTextFunctions, Multimap<Class<?>, BiFunction<Object, InspectionContext, ObjectView>> objectViewConstructors) {
 		this.nullDisplayText = nullDisplayText;
 		this.displayTextFunctions = ImmutableMap.copyOf(displayTextFunctions);
 		this.objectViewConstructors = ImmutableMultimap.copyOf(objectViewConstructors);
@@ -56,12 +52,12 @@ class VisualSettingsImpl<C, V> implements VisualSettings<C>
 	}
 
 	@Override
-	public List<ObjectView<C>> getInspectionViews(Object object, InspectionContext<C> inspectionContext) {
-		ImmutableList.Builder<ObjectView<C>> viewsBuilder = ImmutableList.builder();
+	public List<ObjectView> getInspectionViews(Object object, InspectionContext inspectionContext) {
+		ImmutableList.Builder<ObjectView> viewsBuilder = ImmutableList.builder();
 		for (Class<?> objectClass : objectViewConstructors.keySet()) {
 			if (objectClass.isInstance(object)) {
-				for (BiFunction<Object, InspectionContext<C>, ObjectView<C>> objectViewConstructor : objectViewConstructors.get(objectClass)) {
-					ObjectView<C> view = objectViewConstructor.apply(object, inspectionContext);
+				for (BiFunction<Object, InspectionContext, ObjectView> objectViewConstructor : objectViewConstructors.get(objectClass)) {
+					ObjectView view = objectViewConstructor.apply(object, inspectionContext);
 					if (view != null) {
 						viewsBuilder.add(view);
 					}

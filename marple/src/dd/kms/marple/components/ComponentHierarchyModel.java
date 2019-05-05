@@ -1,15 +1,9 @@
 package dd.kms.marple.components;
 
-import javax.annotation.Nullable;
+import java.awt.*;
 import java.util.List;
 
-/**
- *
- * @param <C>	GUI component class
- * @param <P>	Point class
- */
-public interface ComponentHierarchyModel<C, P>
+public interface ComponentHierarchyModel
 {
-	@Nullable C getParent(C component);
-	List<?> getSubcomponentHierarchy(C component, P position);
+	List<?> getSubcomponentHierarchy(Component component, Point position);
 }

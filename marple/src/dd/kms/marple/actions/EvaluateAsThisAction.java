@@ -1,6 +1,6 @@
 package dd.kms.marple.actions;
 
-import dd.kms.marple.ExpressionEvaluator;
+import dd.kms.marple.evaluator.ExpressionEvaluator;
 
 public class EvaluateAsThisAction implements InspectionAction
 {
@@ -14,7 +14,7 @@ public class EvaluateAsThisAction implements InspectionAction
 
 	@Override
 	public String getName() {
-		return "Evaluate as 'this'";
+		return "Evaluate";
 	}
 
 	@Override

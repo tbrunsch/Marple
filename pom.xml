@@ -10,8 +10,7 @@
 	<version>0.9-SNAPSHOT</version>
 	<modules>
 		<module>marple</module>
-		<module>marple-swing</module>
-		<module>marple-swing-tests</module>
+		<module>marple-tests</module>
 	</modules>
 	<dependencies>
 		<dependency>
