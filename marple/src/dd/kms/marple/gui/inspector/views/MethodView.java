@@ -83,7 +83,7 @@ public class MethodView extends JPanel implements ObjectView
 			actionsBuilder.add(createInvokeMethodAction(method));
 		}
 		actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(methodName + "(" + argumentList + ")", object));
-		return ActionProvider.of(inspectionContext.getDisplayText(methodName), actionsBuilder.build());
+		return ActionProvider.of(methodName, actionsBuilder.build());
 	}
 
 	private static String getArgumentsAsString(Method method) {

@@ -15,6 +15,7 @@ import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionVariable;
 import dd.kms.zenodot.settings.ParserSettings;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -23,38 +24,27 @@ import static java.awt.GridBagConstraints.*;
 
 public class EvaluationPanel extends JPanel
 {
-	private final CurrentObjectPanel	currentObjectPanel;
-
-	private final JLabel				expressionLabel			= new JLabel("Expression:");
+	private final JPanel				expressionPanel			= new JPanel(new GridBagLayout());
 	private final JTextField			evaluationTextField		= new JTextField();
 
-	private final JLabel				resultLabel				= new JLabel("Result:");
 	private final JPanel				evaluationResultPanel	= new JPanel(new GridBagLayout());
 
-	private final Object				thisValue;
 	private final InspectionContext		inspectionContext;
 
-	public EvaluationPanel(Object thisValue, InspectionContext context) {
+	private Object						thisValue;
+
+	public EvaluationPanel(InspectionContext context) {
 		super(new GridBagLayout());
 
-		this.thisValue = thisValue;
 		this.inspectionContext = context;
 
-		if (thisValue != null) {
-			currentObjectPanel = new CurrentObjectPanel(context);
-			currentObjectPanel.setCurrentObject(thisValue);
-			add(currentObjectPanel,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 0.2, CENTER, BOTH, new Insets(5, 5, 5, 5), 0, 0));
-		} else {
-			currentObjectPanel = null;
-		}
+		add(expressionPanel,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(0, 0, 5, 0), 0, 0));
+		add(evaluationResultPanel,	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 0.8, CENTER, BOTH, new Insets(5, 0, 0, 0), 0, 0));
 
-		add(expressionLabel,		new GridBagConstraints(0, 1, 1, 1, 0.0, 0.2, WEST, NONE, new Insets(5, 5, 5, 5), 0, 0));
-		add(evaluationTextField,	new GridBagConstraints(1, 1, REMAINDER, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+		expressionPanel.setBorder(BorderFactory.createTitledBorder("Expression"));
+		expressionPanel.add(evaluationTextField,	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 
-		add(resultLabel,			new GridBagConstraints(0, 2, REMAINDER, 1, 1.0, 0.0, WEST, NONE, new Insets(5, 5, 5, 5), 0, 0));
-		add(evaluationResultPanel,	new GridBagConstraints(0, 3, REMAINDER, 1, 1.0, 0.6, CENTER, BOTH, new Insets(5, 5, 5, 5), 0, 0));
-
-		evaluationResultPanel.setBorder(BorderFactory.createEtchedBorder());
+		evaluationResultPanel.setBorder(BorderFactory.createTitledBorder("Result"));
 
 		CodeCompletionDecorators.decorate(
 			evaluationTextField,
@@ -64,6 +54,10 @@ public class EvaluationPanel extends JPanel
 			context.getSettings().getShowMethodArgumentsKey(),
 			this::evaluateExpression
 		);
+	}
+
+	public void setThisValue(Object thisValue) {
+		this.thisValue = thisValue;
 	}
 
 	public void setExpression(String expression) {

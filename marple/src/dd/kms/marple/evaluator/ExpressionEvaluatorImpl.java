@@ -1,15 +1,20 @@
 package dd.kms.marple.evaluator;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.gui.common.GuiCommons;
+import dd.kms.marple.gui.evaluator.EvaluationFrame;
 import dd.kms.marple.gui.evaluator.EvaluationPanel;
 import dd.kms.zenodot.settings.ParserSettings;
 import dd.kms.zenodot.settings.ParserSettingsUtils;
+
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 class ExpressionEvaluatorImpl implements ExpressionEvaluator
 {
 	private ParserSettings		parserSettings		= ParserSettingsUtils.createBuilder().build();
 	private InspectionContext	inspectionContext;
+	private EvaluationFrame		evaluationFrame;
 
 	@Override
 	public void setInspectionContext(InspectionContext inspectionContext) {
@@ -28,9 +33,38 @@ class ExpressionEvaluatorImpl implements ExpressionEvaluator
 
 	@Override
 	public void evaluate(String expression, Object thisValue) {
-		EvaluationPanel evaluationPanel = new EvaluationPanel(thisValue, inspectionContext);
-		evaluationPanel.setExpression(expression);
+		showEvaluationFrame(expression, thisValue);
+	}
 
-		GuiCommons.showPanel("Evaluate", evaluationPanel);
+	/*
+	 * Evaluation Frame Handling
+	 */
+	private void showEvaluationFrame(String expression, Object thisValue) {
+		boolean virginEvaluationFrame = evaluationFrame == null;
+		if (virginEvaluationFrame) {
+			evaluationFrame = createEvaluationFrame();
+			evaluationFrame.setPreferredSize(new Dimension(600, 400));
+		}
+		evaluationFrame.setThisValue(thisValue);
+		evaluationFrame.setExpression(expression);
+		if (virginEvaluationFrame) {
+			evaluationFrame.pack();
+			evaluationFrame.setVisible(true);
+		}
+	}
+
+	private EvaluationFrame createEvaluationFrame() {
+		EvaluationFrame evaluationFrame = new EvaluationFrame(inspectionContext);
+		evaluationFrame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				disposeEvaluationFrame();
+			}
+		});
+		return evaluationFrame;
+	}
+
+	private void disposeEvaluationFrame() {
+		evaluationFrame = null;
 	}
 }

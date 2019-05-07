@@ -12,8 +12,6 @@ import java.util.List;
 
 public class InspectionFrame extends JFrame
 {
-	private static final Dimension INITIAL_SIZE = new Dimension(400, 300);
-
 	private final JPanel				mainPanel			= new JPanel(new BorderLayout());
 
 	private final JPanel				navigationPanel		= new JPanel(new GridBagLayout());
@@ -30,9 +28,9 @@ public class InspectionFrame extends JFrame
 	private Object						lastSelectedViewSettings;
 	private List<ObjectView>			views;
 
-	public InspectionFrame(InspectionContext inspectionContext) {
-		this.inspectionContext = inspectionContext;
-		this.currentObjectPanel = new CurrentObjectPanel(inspectionContext);
+	public InspectionFrame(InspectionContext context) {
+		this.inspectionContext = context;
+		this.currentObjectPanel = new CurrentObjectPanel(context);
 		configure();
 	}
 
@@ -47,8 +45,6 @@ public class InspectionFrame extends JFrame
 		navigationPanel.add(prevButton,   		new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		navigationPanel.add(currentObjectPanel,	new GridBagConstraints(1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 		navigationPanel.add(nextButton,   		new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-
-		setSize(INITIAL_SIZE);
 	}
 
 	public void setViews(Object object, List<ObjectView> views) {

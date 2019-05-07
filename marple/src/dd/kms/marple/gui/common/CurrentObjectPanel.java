@@ -19,7 +19,7 @@ public class CurrentObjectPanel extends JPanel
 		add(toStringLabel,  new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 		add(classInfoLabel, new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 
-		setBorder(BorderFactory.createEtchedBorder());
+		setBorder(BorderFactory.createTitledBorder("Context"));
 	}
 
 	public void setCurrentObject(Object currentObject) {
