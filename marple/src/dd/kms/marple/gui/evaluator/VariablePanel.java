@@ -4,6 +4,7 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.table.ColumnDescription;
 import dd.kms.marple.gui.table.ColumnDescriptionBuilder;
 import dd.kms.marple.gui.table.ListBasedTableModel;
+import dd.kms.zenodot.settings.ParserSettingsUtils;
 import dd.kms.zenodot.settings.Variable;
 
 import javax.swing.*;
@@ -80,7 +81,7 @@ public class VariablePanel extends JPanel
 		if (!acceptVariableName(oldVariable, name)) {
 			return oldVariable;
 		}
-		return new Variable(name, oldVariable.getValue(), oldVariable.isUseHardReference());
+		return ParserSettingsUtils.createVariable(name, oldVariable.getValue(), oldVariable.isUseHardReference());
 	}
 
 	private boolean acceptVariableName(Variable oldVariable, String name) {
@@ -100,7 +101,7 @@ public class VariablePanel extends JPanel
 			return oldVariable;
 		}
 		boolean useHardReference = (Boolean) useHardReferenceAsObject;
-		return new Variable(oldVariable.getName(), oldVariable.getValue(), useHardReference);
+		return ParserSettingsUtils.createVariable(oldVariable.getName(), oldVariable.getValue(), useHardReference);
 	}
 
 	private static class CellRenderer extends DefaultTableCellRenderer

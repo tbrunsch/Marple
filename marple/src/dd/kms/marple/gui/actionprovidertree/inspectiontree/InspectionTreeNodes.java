@@ -3,6 +3,7 @@ package dd.kms.marple.gui.actionprovidertree.inspectiontree;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import dd.kms.marple.InspectionContext;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
@@ -36,7 +37,7 @@ public class InspectionTreeNodes
 	private static final List<ListReflectionData>					LIST_REFLECTION_DATA = LIST_REFLECTION_DATA_BUILDER.build();
 
 	public static TreeModel createModel(@Nullable String fieldName, Object object, InspectionContext inspectionContext) {
-		TypeInfo typeInfo = object == null ? TypeInfo.NONE : TypeInfo.of(object.getClass());
+		TypeInfo typeInfo = object == null ? InfoProvider.NO_TYPE : InfoProvider.createTypeInfo(object.getClass());
 		InspectionTreeNode treeNode = create(-1, fieldName, object, typeInfo, inspectionContext);
 		return new InspectionTreeModel(treeNode);
 	}

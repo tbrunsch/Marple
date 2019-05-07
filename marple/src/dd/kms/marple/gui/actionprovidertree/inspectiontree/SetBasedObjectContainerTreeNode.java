@@ -3,12 +3,12 @@ package dd.kms.marple.gui.actionprovidertree.inspectiontree;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
-import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.actions.Actions;
+import dd.kms.marple.actions.InspectionAction;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -71,13 +71,13 @@ class SetBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 
 	private InspectionTreeNode createKeyNode(int childIndex, int entryIndex, Object key) {
 		String displayText = getKeyNodeDisplayText(entryIndex);
-		TypeInfo typeInfo = key == null ? TypeInfo.NONE : this.typeInfo.resolveType(key.getClass());
+		TypeInfo typeInfo = key == null ? InfoProvider.NO_TYPE : this.typeInfo.resolveType(key.getClass());
 		return InspectionTreeNodes.create(childIndex, displayText, key, typeInfo, inspectionContext);
 	}
 
 	private InspectionTreeNode createValueNode(int childIndex, int entryIndex, Object value) {
 		String displayText = getValueNodeDisplayText(entryIndex);
-		TypeInfo typeInfo = value == null ? TypeInfo.NONE : this.typeInfo.resolveType(value.getClass());
+		TypeInfo typeInfo = value == null ? InfoProvider.NO_TYPE : this.typeInfo.resolveType(value.getClass());
 		return InspectionTreeNodes.create(childIndex, displayText, value, typeInfo, inspectionContext);
 	}
 

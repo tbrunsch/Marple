@@ -1,18 +1,21 @@
 package dd.kms.marple.gui.evaluator.completion;
 
 import com.google.common.collect.ImmutableList;
-import dd.kms.marple.settings.KeyRepresentation;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators.CompletionSuggestionProvider;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators.ExecutableArgumentInfoProvider;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators.ExpressionConsumer;
+import dd.kms.marple.settings.KeyRepresentation;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;
 import dd.kms.zenodot.result.IntRange;
-import dd.kms.zenodot.utils.wrappers.AbstractExecutableInfo;
+import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
 
 import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -233,10 +236,10 @@ class CodeCompletionDecorator
 		}
 		ExecutableArgumentInfo info = executableArgumentInfo.get();
 		int currentArgIndex = info.getCurrentArgumentIndex();
-		Map<AbstractExecutableInfo, Boolean> applicableExecutableOverloads = info.getApplicableExecutableOverloads();
+		Map<ExecutableInfo, Boolean> applicableExecutableOverloads = info.getApplicableExecutableOverloads();
 
 		ImmutableList.Builder<JMenuItem> menuItemBuilder = ImmutableList.builder();
-		for (AbstractExecutableInfo executableInfo : applicableExecutableOverloads.keySet()) {
+		for (ExecutableInfo executableInfo : applicableExecutableOverloads.keySet()) {
 			boolean applicable = applicableExecutableOverloads.get(executableInfo);
 			StringBuilder argumentInfoTextBuilder = new StringBuilder();
 			argumentInfoTextBuilder.append("<html>").append(executableInfo.getName()).append("(");

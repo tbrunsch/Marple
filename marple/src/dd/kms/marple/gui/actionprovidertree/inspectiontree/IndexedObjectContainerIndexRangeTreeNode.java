@@ -3,6 +3,7 @@ package dd.kms.marple.gui.actionprovidertree.inspectiontree;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
@@ -22,7 +23,7 @@ class IndexedObjectContainerIndexRangeTreeNode extends AbstractInspectionTreeNod
 		if (rangeSize == 1) {
 			int index = rangeBeginIndex;
 			Object element = elementAccessor.apply(index);
-			TypeInfo elementTypeInfo = element == null ? TypeInfo.NONE : typeInfo.resolveType(element.getClass());
+			TypeInfo elementTypeInfo = element == null ? InfoProvider.NO_TYPE : typeInfo.resolveType(element.getClass());
 			return InspectionTreeNodes.create(childIndex, "[" + index + "]", element, elementTypeInfo, inspectionContext);
 		}
 		return new IndexedObjectContainerIndexRangeTreeNode(childIndex, container, typeInfo, elementAccessor, rangeBeginIndex, rangeEndIndex, inspectionContext);

@@ -4,11 +4,11 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.common.GuiCommons;
 import dd.kms.marple.gui.evaluator.EvaluationPanel;
 import dd.kms.zenodot.settings.ParserSettings;
-import dd.kms.zenodot.settings.ParserSettingsBuilder;
+import dd.kms.zenodot.settings.ParserSettingsUtils;
 
 class ExpressionEvaluatorImpl implements ExpressionEvaluator
 {
-	private ParserSettings		parserSettings		= new ParserSettingsBuilder().build();
+	private ParserSettings		parserSettings		= ParserSettingsUtils.createBuilder().build();
 	private InspectionContext	inspectionContext;
 
 	@Override

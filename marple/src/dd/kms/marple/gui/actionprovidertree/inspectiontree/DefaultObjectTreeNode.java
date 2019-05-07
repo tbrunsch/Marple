@@ -7,6 +7,7 @@ import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.actions.Actions;
 import dd.kms.zenodot.common.ReflectionUtils;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
@@ -47,7 +48,7 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 				System.err.println(e.getMessage());
 				fieldValue = null;
 			}
-			TypeInfo childTypeInfo = fieldValue == null ? TypeInfo.NONE : typeInfo.resolveType(fieldValue.getClass());
+			TypeInfo childTypeInfo = fieldValue == null ? InfoProvider.NO_TYPE : typeInfo.resolveType(fieldValue.getClass());
 			InspectionTreeNode child = InspectionTreeNodes.create(childIndex++, field.getName(), fieldValue, childTypeInfo, inspectionContext);
 			childBuilder.add(child);
 		}
