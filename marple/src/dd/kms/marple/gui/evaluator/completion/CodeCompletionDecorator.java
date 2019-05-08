@@ -3,7 +3,6 @@ package dd.kms.marple.gui.evaluator.completion;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators.CompletionSuggestionProvider;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators.ExecutableArgumentInfoProvider;
-import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators.ExpressionConsumer;
 import dd.kms.marple.settings.KeyRepresentation;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.result.CompletionSuggestion;
@@ -24,6 +23,7 @@ import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 class CodeCompletionDecorator
 {
@@ -38,11 +38,11 @@ class CodeCompletionDecorator
 	private final KeyRepresentation					completionSuggestionKey;
 	private final ExecutableArgumentInfoProvider	executableArgumentInfoProvider;
 	private final KeyRepresentation					showExecutableArgumentsKey;
-	private final ExpressionConsumer				expressionConsumer;
+	private final Consumer<String>					expressionConsumer;
 
 	private DisplayMode								displayMode						= DisplayMode.NOTHING;
 
-	CodeCompletionDecorator(JTextComponent textComponent, CompletionSuggestionProvider completionSuggestionProvider, KeyRepresentation completionSuggestionKey, ExecutableArgumentInfoProvider executableArgumentInfoProvider, KeyRepresentation showExecutableArgumentsKey, ExpressionConsumer expressionConsumer) {
+	CodeCompletionDecorator(JTextComponent textComponent, CompletionSuggestionProvider completionSuggestionProvider, KeyRepresentation completionSuggestionKey, ExecutableArgumentInfoProvider executableArgumentInfoProvider, KeyRepresentation showExecutableArgumentsKey, Consumer<String> expressionConsumer) {
 		this.textComponent = textComponent;
 		this.completionSuggestionProvider = completionSuggestionProvider;
 		this.completionSuggestionKey = completionSuggestionKey;
@@ -317,7 +317,7 @@ class CodeCompletionDecorator
 			if (popupMenuExists()) {
 				applySelectedAction();
 			} else {
-				expressionConsumer.consume(textComponent.getText());
+				expressionConsumer.accept(textComponent.getText());
 			}
 			return;
 		}

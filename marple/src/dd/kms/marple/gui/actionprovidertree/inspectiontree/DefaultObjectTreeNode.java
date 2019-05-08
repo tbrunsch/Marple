@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Primitives;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
+import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.actions.Actions;
 import dd.kms.zenodot.common.ReflectionUtils;
@@ -57,16 +58,9 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 
 	@Override
 	public ActionProvider getActionProvider() {
-		if (object == null) {
-			return null;
-		}
-		InspectionAction inspectObjectAction = inspectionContext.createInspectObjectAction(object);
-		InspectionAction highlightComponentAction = object instanceof Component
-			? inspectionContext.createHighlightComponentAction((Component) object)
-			: null;
-		InspectionAction addVariableAction = Actions.createAddVariableAction(displayKey, object, inspectionContext);
-		InspectionAction evaluateAsThisAction = inspectionContext.createEvaluateAsThisAction(object);
-		return ActionProvider.of(toString(), inspectObjectAction, highlightComponentAction, addVariableAction, evaluateAsThisAction);
+		return new ActionProviderBuilder(toString(), object, inspectionContext)
+			.suggestVariableName(displayKey)
+			.build();
 	}
 
 	@Override

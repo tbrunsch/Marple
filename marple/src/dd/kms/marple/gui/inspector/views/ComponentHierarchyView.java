@@ -3,6 +3,7 @@ package dd.kms.marple.gui.inspector.views;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
@@ -106,11 +107,7 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 	private ActionProvider createActionProvider(List<Component> componentHierarchy, List<?> subcomponentHierarchy, Collection<Field> detectedFields) {
 		Object hierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
 		String displayText = createActionProviderDisplayText(hierarchyLeaf, detectedFields);
-		InspectionAction inspectComponentAction = inspectionContext.createInspectComponentAction(componentHierarchy, subcomponentHierarchy);
-		InspectionAction highlightComponentAction = subcomponentHierarchy.isEmpty() ? inspectionContext.createHighlightComponentAction((Component) hierarchyLeaf) : null;
-		InspectionAction addVariableAction = Actions.createAddVariableAction(null, hierarchyLeaf, inspectionContext);
-		InspectionAction evaluateAsThisAction = inspectionContext.createEvaluateAsThisAction(hierarchyLeaf);
-		return ActionProvider.of(displayText, inspectComponentAction, highlightComponentAction, addVariableAction, evaluateAsThisAction);
+		return new ActionProviderBuilder(displayText, componentHierarchy, subcomponentHierarchy, inspectionContext).build();
 	}
 
 	private String createActionProviderDisplayText(Object object, Collection<Field> fields) {

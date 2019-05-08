@@ -10,10 +10,11 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class CodeCompletionDecorators
 {
-	public static void decorate(JTextComponent textComponent, CompletionSuggestionProvider completionSuggestionProvider, KeyRepresentation completionSuggestionKey, ExecutableArgumentInfoProvider executableArgumentInfoProvider, KeyRepresentation showExecutableArgumentsKey, ExpressionConsumer expressionConsumer) {
+	public static void decorate(JTextComponent textComponent, CompletionSuggestionProvider completionSuggestionProvider, KeyRepresentation completionSuggestionKey, ExecutableArgumentInfoProvider executableArgumentInfoProvider, KeyRepresentation showExecutableArgumentsKey, Consumer<String> expressionConsumer) {
 		new CodeCompletionDecorator(textComponent, completionSuggestionProvider, completionSuggestionKey, executableArgumentInfoProvider, showExecutableArgumentsKey, expressionConsumer);
 	}
 
@@ -62,11 +63,5 @@ public class CodeCompletionDecorators
 	public interface ExecutableArgumentInfoProvider
 	{
 		Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String expression, int caretPosition) throws ParseException;
-	}
-
-	@FunctionalInterface
-	public interface ExpressionConsumer
-	{
-		void consume(String expression);
 	}
 }

@@ -71,6 +71,11 @@ class InspectionContextImpl implements InspectionContext
 	}
 
 	@Override
+	public InspectionAction createAddVariableAction(String suggestedName, Object value) {
+		return new AddVariableAction(suggestedName, value, this);
+	}
+
+	@Override
 	public InspectionAction createEvaluateExpressionAction(String expression, Object thisValue) {
 		return new EvaluateExpressionAction(settings.getEvaluator(), expression, thisValue);
 	}

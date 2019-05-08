@@ -3,6 +3,7 @@ package dd.kms.marple.gui.actionprovidertree.inspectiontree;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
+import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.actions.Actions;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
@@ -57,10 +58,9 @@ class SetBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 
 	@Override
 	public ActionProvider getActionProvider() {
-		InspectionAction inspectObjectAction = inspectionContext.createInspectObjectAction(container);
-		InspectionAction addVariableAction = Actions.createAddVariableAction(fieldName, container, inspectionContext);
-		InspectionAction evaluateAsThisAction = inspectionContext.createEvaluateAsThisAction(container);
-		return ActionProvider.of(toString(), inspectObjectAction, addVariableAction, evaluateAsThisAction);
+		return new ActionProviderBuilder(toString(), container, inspectionContext)
+			.suggestVariableName(fieldName)
+			.build();
 	}
 
 	@Override

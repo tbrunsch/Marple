@@ -10,10 +10,6 @@ import java.util.stream.Collectors;
 
 public class ActionProvider
 {
-	public static ActionProvider of(String displayText, InspectionAction... actions) {
-		return of(displayText, Arrays.asList(actions));
-	}
-
 	public static ActionProvider of(String displayText, List<InspectionAction> actions) {
 		return new ActionProvider(displayText, actions);
 	}

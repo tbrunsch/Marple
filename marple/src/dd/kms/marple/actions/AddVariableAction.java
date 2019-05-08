@@ -2,15 +2,12 @@ package dd.kms.marple.actions;
 
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.evaluator.ExpressionEvaluator;
 import dd.kms.marple.evaluator.ExpressionEvaluators;
 import dd.kms.marple.gui.common.GuiCommons;
 import dd.kms.marple.gui.evaluator.VariablePanel;
-import dd.kms.zenodot.settings.ParserSettings;
 import dd.kms.zenodot.settings.ParserSettingsUtils;
 import dd.kms.zenodot.settings.Variable;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,7 +47,7 @@ public class AddVariableAction implements InspectionAction
 		ExpressionEvaluators.setVariables(variablesBuilder.build(), inspectionContext);
 
 		VariablePanel variablePanel = new VariablePanel(inspectionContext);
-		GuiCommons.showPanel("Variables", variablePanel);
+		GuiCommons.showInDialog("Variables", variablePanel);
 	}
 
 	private String createVariableName(String suggestedName) {

@@ -3,6 +3,7 @@ package dd.kms.marple.gui.inspector.views;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
+import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.actions.Actions;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.gui.table.*;
@@ -53,21 +54,9 @@ public class FieldTable extends JPanel
 	private ActionProvider getFieldValueActionProvider(Field field) {
 		String fieldName = field.getName();
 		Object fieldValue = getFieldValue(field);
-		if (fieldValue == null) {
-			return null;
-		}
-		ImmutableList.Builder<InspectionAction> actionsBuilder = ImmutableList.builder();
-		boolean primitiveValue = field.getType().isPrimitive();
-		if (!primitiveValue) {
-			actionsBuilder.add(inspectionContext.createInspectObjectAction(fieldValue));
-			if (fieldValue instanceof Component) {
-				actionsBuilder.add(inspectionContext.createHighlightComponentAction((Component) fieldValue));
-			}
-			actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(fieldValue));
-		}
-		actionsBuilder.add(Actions.createAddVariableAction(fieldName, fieldValue, inspectionContext));
-		actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(fieldName, object));
-		return ActionProvider.of(inspectionContext.getDisplayText(fieldValue), actionsBuilder.build());
+		return new ActionProviderBuilder(inspectionContext.getDisplayText(fieldValue), fieldValue, inspectionContext)
+				.evaluateAs(fieldName, object)
+				.build();
 	}
 
 	private Object getFieldValue(Field field) {
