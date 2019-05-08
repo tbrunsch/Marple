@@ -3,10 +3,10 @@ package dd.kms.marple.gui.inspector.views;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
-import dd.kms.marple.actions.InspectionAction;
-import dd.kms.marple.common.AccessModifier;
 import dd.kms.marple.actions.Actions;
+import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.gui.table.*;
+import dd.kms.zenodot.common.AccessModifier;
 import dd.kms.zenodot.common.ReflectionUtils;
 
 import javax.swing.*;
@@ -46,7 +46,7 @@ public class FieldTable extends JPanel
 			new ColumnDescriptionBuilder<Field>("Value",	ActionProvider.class, 	field -> getFieldValueActionProvider(field))		.valueFilter(TableValueFilters.createWildcardFilter()).build(),
 			new ColumnDescriptionBuilder<Field>("Type",		Class.class,			field -> field.getType().getSimpleName())			.valueFilter(TableValueFilters.createWildcardFilter()).build(),
 			new ColumnDescriptionBuilder<Field>("Class",	String.class,			field -> field.getDeclaringClass().getSimpleName())	.valueFilter(TableValueFilters.createSelectionFilter(inspectionContext)).build(),
-			new ColumnDescriptionBuilder<Field>("Modifier",	AccessModifier.class,	field -> getAccessModifier(field))					.valueFilter(TableValueFilters.createSelectionFilter(inspectionContext)).build()
+			new ColumnDescriptionBuilder<Field>("Modifier",	AccessModifier.class,	field -> getAccessModifier(field))					.valueFilter(TableValueFilters.createMinimumAccessLevelFilter()).build()
 		);
 	}
 

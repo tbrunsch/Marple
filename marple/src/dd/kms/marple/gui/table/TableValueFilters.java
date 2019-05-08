@@ -16,6 +16,8 @@ public class TableValueFilters
 		return new TableValueFilterWildcard();
 	}
 
+	public static TableValueFilter createMinimumAccessLevelFilter() { return new TableValueFilterMinimumAccessLevel(); }
+
 	private static class NoTableValueFilter implements TableValueFilter
 	{
 		@Override

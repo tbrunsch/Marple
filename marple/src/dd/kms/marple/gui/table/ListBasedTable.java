@@ -39,6 +39,7 @@ public class ListBasedTable<T> extends JPanel
 
 		table = new JTable(tableModel);
 		table.setRowSorter(rowSorter);
+		table.getTableHeader().setReorderingAllowed(false);
 
 		scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(600, 400));

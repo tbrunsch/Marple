@@ -1,12 +1,12 @@
 package dd.kms.marple.gui.inspector.views;
 
 import com.google.common.collect.ImmutableList;
-import dd.kms.marple.common.AccessModifier;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.gui.ObjectView;
 import dd.kms.marple.gui.table.*;
+import dd.kms.zenodot.common.AccessModifier;
 import dd.kms.zenodot.common.ReflectionUtils;
 
 import javax.swing.*;
@@ -70,7 +70,7 @@ public class MethodView extends JPanel implements ObjectView
 			new ColumnDescriptionBuilder<Method>("Name",		Object.class, 			method -> getMethodActionProvider(method)			).valueFilter(TableValueFilters.createWildcardFilter()).build(),
 			new ColumnDescriptionBuilder<Method>("Arguments",	String.class, 			method -> getArgumentsAsString(method)				).valueFilter(TableValueFilters.createWildcardFilter()).build(),
 			new ColumnDescriptionBuilder<Method>("Class",		String.class, 			method -> method.getDeclaringClass().getSimpleName()).valueFilter(TableValueFilters.createSelectionFilter(inspectionContext)).build(),
-			new ColumnDescriptionBuilder<Method>("Modifier",	AccessModifier.class,	method -> getAccessModifier(method)					).valueFilter(TableValueFilters.createSelectionFilter(inspectionContext)).build()
+			new ColumnDescriptionBuilder<Method>("Modifier",	AccessModifier.class,	method -> getAccessModifier(method)					).valueFilter(TableValueFilters.createMinimumAccessLevelFilter()).build()
 		);
 	}
 
