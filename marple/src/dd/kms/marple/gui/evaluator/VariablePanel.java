@@ -1,6 +1,8 @@
 package dd.kms.marple.gui.evaluator;
 
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.evaluator.ExpressionEvaluator;
+import dd.kms.marple.evaluator.ExpressionEvaluators;
 import dd.kms.marple.gui.table.ColumnDescription;
 import dd.kms.marple.gui.table.ColumnDescriptionBuilder;
 import dd.kms.marple.gui.table.ListBasedTableModel;
@@ -8,6 +10,7 @@ import dd.kms.zenodot.settings.ParserSettingsUtils;
 import dd.kms.zenodot.settings.Variable;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.util.ArrayList;
@@ -17,22 +20,26 @@ import java.util.Objects;
 
 public class VariablePanel extends JPanel
 {
-	private final JScrollPane		scrollPane;
-	private final JTable			table;
-	private final JButton			deleteButton	= new JButton("Delete selected variables");
+	private final JScrollPane					scrollPane;
+	private final JTable						table;
+	private final ListBasedTableModel<Variable> tableModel;
+	private final JButton						deleteButton	= new JButton("Delete selected variables");
 
-	private final List<Variable>	variables;
+	private final InspectionContext				inspectionContext;
+	private final List<Variable>				variables;
 
-	public VariablePanel(List<Variable> variables, InspectionContext context) {
+	public VariablePanel(InspectionContext inspectionContext) {
 		super(new GridBagLayout());
 
-		this.variables = new ArrayList<>(variables);
+		this.inspectionContext = inspectionContext;
+		this.variables = new ArrayList<>(ExpressionEvaluators.getVariables(inspectionContext));
 
 		List<ColumnDescription<Variable>> columnDescriptions = createColumnDescriptions();
-		table = new JTable(new ListBasedTableModel<>(this.variables, columnDescriptions));
+		tableModel = new ListBasedTableModel<>(this.variables, columnDescriptions);
+		table = new JTable(tableModel);
 		scrollPane = new JScrollPane(table);
 
-		table.setDefaultRenderer(Object.class, new CellRenderer(context));
+		table.setDefaultRenderer(Object.class, new CellRenderer(inspectionContext));
 
 		add(scrollPane,		new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 		add(deleteButton,	new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	 	GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
@@ -44,19 +51,16 @@ public class VariablePanel extends JPanel
 
 	private List<ColumnDescription<Variable>> createColumnDescriptions() {
 		return Arrays.asList(
-			new ColumnDescriptionBuilder<Variable>("Name",					String.class, 	Variable::getName)				.editorSettings(this::changeVariableName).build(),
-			new ColumnDescriptionBuilder<Variable>("Value",					Object.class, 	Variable::getValue)				.build(),
-			new ColumnDescriptionBuilder<Variable>("Use hard reference",	Boolean.class,	Variable::isUseHardReference)	.editorSettings(this::changeUseHardReference).build()
+			new ColumnDescriptionBuilder<>("Name",					String.class, 	Variable::getName)				.editorSettings(this::changeVariableName).build(),
+			new ColumnDescriptionBuilder<>("Value",					Object.class, 	Variable::getValue)				.build(),
+			new ColumnDescriptionBuilder<>("Use hard reference",	Boolean.class,	Variable::isUseHardReference)	.editorSettings(this::changeUseHardReference).build()
 		);
-	}
-
-	public List<Variable> getVariables() {
-		return new ArrayList<>(variables);
 	}
 
 	private void addListeners() {
 		deleteButton.addActionListener(e -> deleteSelectedVariables());
 		table.getSelectionModel().addListSelectionListener(e -> updateDeleteButton());
+		tableModel.addTableModelListener(e -> updateParserSettings());
 	}
 
 	private void updateDeleteButton() {
@@ -69,8 +73,7 @@ public class VariablePanel extends JPanel
 			int index = rowIndicesToDelete[i];
 			variables.remove(index);
 		}
-		table.revalidate();
-		table.repaint();
+		tableModel.fireTableChanged(new TableModelEvent(tableModel));
 	}
 
 	private Variable changeVariableName(Variable oldVariable, Object nameAsObject) {
@@ -102,6 +105,10 @@ public class VariablePanel extends JPanel
 		}
 		boolean useHardReference = (Boolean) useHardReferenceAsObject;
 		return ParserSettingsUtils.createVariable(oldVariable.getName(), oldVariable.getValue(), useHardReference);
+	}
+
+	private void updateParserSettings() {
+		ExpressionEvaluators.setVariables(variables, inspectionContext);
 	}
 
 	private static class CellRenderer extends DefaultTableCellRenderer

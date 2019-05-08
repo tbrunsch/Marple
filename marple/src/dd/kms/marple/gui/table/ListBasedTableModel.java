@@ -1,5 +1,6 @@
 package dd.kms.marple.gui.table;
 
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +75,7 @@ public class ListBasedTableModel<T> extends AbstractTableModel
 			throw new IllegalStateException("Cell is not editable");
 		}
 		editorSettings.setElementValue(list, row, value);
+		fireTableChanged(new TableModelEvent(this));
 	}
 
 	String getPlainColumnName(int col) {

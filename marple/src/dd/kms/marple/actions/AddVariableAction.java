@@ -3,6 +3,7 @@ package dd.kms.marple.actions;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.evaluator.ExpressionEvaluator;
+import dd.kms.marple.evaluator.ExpressionEvaluators;
 import dd.kms.marple.gui.common.GuiCommons;
 import dd.kms.marple.gui.evaluator.VariablePanel;
 import dd.kms.zenodot.settings.ParserSettings;
@@ -44,32 +45,21 @@ public class AddVariableAction implements InspectionAction
 	public void perform() {
 		String name = createVariableName(suggestedName);
 		ImmutableList.Builder<Variable> variablesBuilder = ImmutableList.builder();
-		variablesBuilder.addAll(getVariables());
+		variablesBuilder.addAll(ExpressionEvaluators.getVariables(inspectionContext));
 		variablesBuilder.add(ParserSettingsUtils.createVariable(name, value, false));
-		VariablePanel variablePanel = new VariablePanel(variablesBuilder.build(), inspectionContext);
+		ExpressionEvaluators.setVariables(variablesBuilder.build(), inspectionContext);
 
+		VariablePanel variablePanel = new VariablePanel(inspectionContext);
 		GuiCommons.showPanel("Variables", variablePanel);
-
-		ExpressionEvaluator evaluator = inspectionContext.getEvaluator();
-		ParserSettings parserSettings = evaluator.getParserSettings().builder()
-			.variables(variablePanel.getVariables())
-			.build();
-		evaluator.setParserSettings(parserSettings);
 	}
 
 	private String createVariableName(String suggestedName) {
-		Set<String> variableNames = getVariables().stream().map(Variable::getName).collect(Collectors.toSet());
+		Set<String> variableNames = ExpressionEvaluators.getVariables(inspectionContext).stream().map(Variable::getName).collect(Collectors.toSet());
 		String name = suggestedName;
 		int index = 1;
 		while (variableNames.contains(name)) {
 			name = suggestedName + (++index);
 		}
 		return name;
-	}
-
-	private List<Variable> getVariables() {
-		ExpressionEvaluator evaluator = inspectionContext.getEvaluator();
-		ParserSettings parserSettings = evaluator.getParserSettings();
-		return parserSettings.getVariables();
 	}
 }
