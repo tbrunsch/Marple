@@ -40,7 +40,7 @@ public class AddVariableAction implements InspectionAction
 
 	@Override
 	public void perform() {
-		String name = createVariableName(suggestedName);
+		String name = createVariableName(suggestedName == null ? "variable" : suggestedName);
 		ImmutableList.Builder<Variable> variablesBuilder = ImmutableList.builder();
 		variablesBuilder.addAll(ExpressionEvaluators.getVariables(inspectionContext));
 		variablesBuilder.add(ParserSettingsUtils.createVariable(name, value, false));
