@@ -1,24 +1,15 @@
 package dd.kms.marple.gui.evaluator;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.gui.common.GuiCommons;
+import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.gui.inspector.views.FieldView;
 import dd.kms.zenodot.JavaParser;
 import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.matching.MatchRating;
-import dd.kms.zenodot.matching.StringMatch;
-import dd.kms.zenodot.result.CompletionSuggestion;
-import dd.kms.zenodot.result.ExecutableArgumentInfo;
-import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionField;
-import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionVariable;
-import dd.kms.zenodot.settings.ObjectTreeNode;
 import dd.kms.zenodot.settings.ParserSettings;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
-import java.util.*;
 
 import static java.awt.GridBagConstraints.*;
 
@@ -64,6 +55,10 @@ public class EvaluationPanel extends JPanel
 		evaluationTextField.setExpression(expression);
 	}
 
+	void updateContent() {
+		dynamicTypingControls.updateControls();
+	}
+
 	private void evaluateExpression(String expression) {
 		JavaParser parser = new JavaParser();
 		try {
@@ -96,8 +91,6 @@ public class EvaluationPanel extends JPanel
 	}
 
 	private void openSettingsDialog() {
-		EvaluationSettingsPane settingsPane = new EvaluationSettingsPane(inspectionContext);
-		GuiCommons.showInDialog("Settings", settingsPane);
-		dynamicTypingControls.updateControls();
+		WindowManager.showInFrame("Settings", () -> new EvaluationSettingsPane(inspectionContext), EvaluationSettingsPane::updateContent);
 	}
 }

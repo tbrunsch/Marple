@@ -19,8 +19,8 @@ class CustomImportPanel extends JPanel
 
 	private final JLabel						titleLabel;
 
-	private final JList<String>					importList;
-	private final DefaultListModel<String>		importListModel;
+	private final DefaultListModel<String>		importListModel		= new DefaultListModel<>();
+	private final JList<String>					importList			= new JList<>(importListModel);
 
 	private final JTextField					evaluationTextField;
 	private final JButton						addButton			= new JButton("+");
@@ -36,12 +36,6 @@ class CustomImportPanel extends JPanel
 		this.importsConsumer = importsConsumer;
 
 		titleLabel = new JLabel(title);
-
-		importListModel = new DefaultListModel<>();
-		for (String initialImport : initialImports) {
-			importListModel.addElement(initialImport);
-		}
-		importList = new JList<>(importListModel);
 
 		evaluationTextField = new EvaluationTextField(string -> {}, inspectionContext);
 		InputVerifier inputVerifier = new InputVerifier() {
@@ -62,7 +56,16 @@ class CustomImportPanel extends JPanel
 
 		deleteButton.setEnabled(false);
 
+		updateContent(initialImports);
+
 		addListeners();
+	}
+
+	void updateContent(Collection<String> imports) {
+		importListModel.clear();
+		for (String imp : imports) {
+			importListModel.addElement(imp);
+		}
 	}
 
 	private void addListeners() {

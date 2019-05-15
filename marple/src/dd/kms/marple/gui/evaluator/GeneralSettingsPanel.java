@@ -35,4 +35,9 @@ public class GeneralSettingsPanel extends JPanel
 		minimumAccessLevelControls.updateControls();
 		dynamicTypingControls.updateControls();
 	}
+
+	public void updateContent() {
+		minimumAccessLevelControls.updateControls();
+		dynamicTypingControls.updateControls();
+	}
 }

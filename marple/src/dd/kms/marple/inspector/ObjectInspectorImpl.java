@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.components.ComponentHierarchyModels;
 import dd.kms.marple.gui.ObjectView;
+import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.inspector.InspectionFrame;
 import dd.kms.marple.gui.inspector.views.ComponentHierarchyView;
 
@@ -15,7 +16,6 @@ import java.util.List;
 class ObjectInspectorImpl implements ObjectInspector
 {
 	private InspectionContext	inspectionContext;
-	private InspectionFrame		inspectionFrame;
 
 	@Override
 	public void setInspectionContext(InspectionContext inspectionContext) {
@@ -48,30 +48,17 @@ class ObjectInspectorImpl implements ObjectInspector
 	 * Inspection Frame Handling
 	 */
 	private void showViews(Object object, List<ObjectView> views) {
-		boolean virginInspectionFrame = inspectionFrame == null;
-		if (virginInspectionFrame) {
-			inspectionFrame = createInspectionFrame();
-			inspectionFrame.setPreferredSize(new Dimension(800, 600));
-		}
+		InspectionFrame inspectionFrame = WindowManager.getWindow(ObjectInspector.class, this::createInspectionFrame, this::onCloseInspectionFrame);
 		inspectionFrame.setViews(object, views);
-		if (virginInspectionFrame) {
-			inspectionFrame.pack();
-		}
 	}
 
 	private InspectionFrame createInspectionFrame() {
 		InspectionFrame inspectionFrame = new InspectionFrame(inspectionContext);
-		inspectionFrame.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				disposeInspectionFrame();
-			}
-		});
+		inspectionFrame.setPreferredSize(new Dimension(800, 600));
 		return inspectionFrame;
 	}
 
-	private void disposeInspectionFrame() {
-		inspectionFrame = null;
+	private void onCloseInspectionFrame() {
 		inspectionContext.clearHistory();
 	}
 }

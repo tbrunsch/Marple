@@ -1,9 +1,7 @@
 package dd.kms.marple.gui.evaluator;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.gui.common.GuiCommons;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
-import dd.kms.marple.gui.inspector.views.FieldView;
 import dd.kms.zenodot.JavaParser;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.matching.MatchRating;
@@ -15,12 +13,9 @@ import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionVariable;
 import dd.kms.zenodot.settings.ParserSettings;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
-
-import static java.awt.GridBagConstraints.*;
 
 class EvaluationTextField extends JTextField
 {

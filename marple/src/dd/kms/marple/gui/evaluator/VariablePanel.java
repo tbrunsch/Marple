@@ -23,16 +23,15 @@ public class VariablePanel extends JPanel
 	private final JScrollPane					scrollPane;
 	private final JTable						table;
 	private final ListBasedTableModel<Variable> tableModel;
-	private final JButton						deleteButton	= new JButton("Delete selected variables");
+	private final JButton						deleteButton		= new JButton("Delete selected variables");
 
 	private final InspectionContext				inspectionContext;
-	private final List<Variable>				variables;
+	private final List<Variable>				variables			= new ArrayList<>();
 
 	public VariablePanel(InspectionContext inspectionContext) {
 		super(new GridBagLayout());
 
 		this.inspectionContext = inspectionContext;
-		this.variables = new ArrayList<>(ExpressionEvaluators.getVariables(inspectionContext));
 
 		List<ColumnDescription<Variable>> columnDescriptions = createColumnDescriptions();
 		tableModel = new ListBasedTableModel<>(this.variables, columnDescriptions);
@@ -44,9 +43,17 @@ public class VariablePanel extends JPanel
 		add(scrollPane,		new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 		add(deleteButton,	new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	 	GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 
-		updateDeleteButton();
+		updateContent();
 
 		addListeners();
+	}
+
+	public void updateContent() {
+		variables.clear();
+		variables.addAll(ExpressionEvaluators.getVariables(inspectionContext));
+		tableModel.fireTableChanged(new TableModelEvent(tableModel));
+
+		updateDeleteButton();
 	}
 
 	private List<ColumnDescription<Variable>> createColumnDescriptions() {

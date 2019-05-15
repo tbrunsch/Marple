@@ -1,8 +1,9 @@
 package dd.kms.marple.evaluator;
 
+import com.google.common.util.concurrent.Runnables;
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.evaluator.EvaluationFrame;
-import dd.kms.marple.gui.evaluator.EvaluationPanel;
 import dd.kms.zenodot.settings.ParserSettings;
 import dd.kms.zenodot.settings.ParserSettingsUtils;
 
@@ -14,7 +15,6 @@ class ExpressionEvaluatorImpl implements ExpressionEvaluator
 {
 	private ParserSettings		parserSettings		= ParserSettingsUtils.createBuilder().build();
 	private InspectionContext	inspectionContext;
-	private EvaluationFrame		evaluationFrame;
 
 	@Override
 	public void setInspectionContext(InspectionContext inspectionContext) {
@@ -40,31 +40,14 @@ class ExpressionEvaluatorImpl implements ExpressionEvaluator
 	 * Evaluation Frame Handling
 	 */
 	private void showEvaluationFrame(String expression, Object thisValue) {
-		boolean virginEvaluationFrame = evaluationFrame == null;
-		if (virginEvaluationFrame) {
-			evaluationFrame = createEvaluationFrame();
-			evaluationFrame.setPreferredSize(new Dimension(600, 400));
-		}
+		EvaluationFrame evaluationFrame = WindowManager.getWindow(ExpressionEvaluator.class, this::createEvaluationFrame, Runnables.doNothing());
 		evaluationFrame.setThisValue(thisValue);
 		evaluationFrame.setExpression(expression);
-		if (virginEvaluationFrame) {
-			evaluationFrame.pack();
-			evaluationFrame.setVisible(true);
-		}
 	}
 
 	private EvaluationFrame createEvaluationFrame() {
 		EvaluationFrame evaluationFrame = new EvaluationFrame(inspectionContext);
-		evaluationFrame.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				disposeEvaluationFrame();
-			}
-		});
+		evaluationFrame.setPreferredSize(new Dimension(600, 400));
 		return evaluationFrame;
-	}
-
-	private void disposeEvaluationFrame() {
-		evaluationFrame = null;
 	}
 }

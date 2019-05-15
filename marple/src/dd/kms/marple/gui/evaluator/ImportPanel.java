@@ -20,8 +20,8 @@ class ImportPanel extends JPanel
 {
 	private static final Insets	DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
 
-	private final JPanel	packagesPanel;
-	private final JPanel	classesPanel;
+	private final CustomImportPanel	packagesPanel;
+	private final CustomImportPanel	classesPanel;
 
 	private final InspectionContext	inspectionContext;
 
@@ -35,6 +35,11 @@ class ImportPanel extends JPanel
 
 		add(packagesPanel,	new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		add(classesPanel,	new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
+	}
+
+	public void updateContent() {
+		packagesPanel.updateContent(getPackageNames());
+		classesPanel.updateContent(getClassNames());
 	}
 
 	/*
