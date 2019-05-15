@@ -3,6 +3,7 @@ package dd.kms.marple.common;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import com.google.common.primitives.Primitives;
 import dd.kms.marple.components.SubcomponentHierarchyStrategy;
 
 import java.lang.reflect.Field;
@@ -10,6 +11,22 @@ import java.util.*;
 
 public class ReflectionUtils
 {
+	/**
+	 * We consider an object worth being inspected if it is
+	 * <ul>
+	 *     <li>neither null</li>
+	 *     <li>nor (wrapped) primitive</li>
+	 *     <li>nor a String.</li>
+	 * </ul>
+	 */
+	public static boolean isObjectInspectable(Object object) {
+		if (object == null) {
+			return false;
+		}
+		Class<?> clazz = object.getClass();
+		return !Primitives.unwrap(clazz).isPrimitive() && clazz != String.class;
+	}
+
 	public static <T> Class<? extends T> getBestMatchingClass(Object object, Iterable<Class<? extends T>> classes) {
 		if (object == null) {
 			return null;

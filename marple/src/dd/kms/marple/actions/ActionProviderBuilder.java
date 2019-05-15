@@ -3,14 +3,18 @@ package dd.kms.marple.actions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Primitives;
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.components.ComponentHierarchyModels;
 
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class ActionProviderBuilder
 {
+	private static final Pattern VARIABLE_NAME_PATTERN	= Pattern.compile("^[A-Za-z][_A-Za-z0-9]*");
+
 	private final String						displayText;
 	private final Object						object;
 	private final InspectionContext				inspectionContext;
@@ -34,7 +38,9 @@ public class ActionProviderBuilder
 	}
 
 	public ActionProviderBuilder suggestVariableName(String suggestedVariableName) {
-		this.suggestedVariableName = suggestedVariableName;
+		if (suggestedVariableName != null && VARIABLE_NAME_PATTERN.matcher(suggestedVariableName).matches()) {
+			this.suggestedVariableName = suggestedVariableName;
+		}
 		return this;
 	}
 
@@ -47,10 +53,9 @@ public class ActionProviderBuilder
 	public ActionProvider build() {
 		ImmutableList.Builder<InspectionAction> actionsBuilder = ImmutableList.builder();
 		if (object != null) {
-			Class<?> objectClass = object.getClass();
-			boolean isPrimitive = objectClass.isPrimitive() || Primitives.isWrapperType(objectClass);
+			boolean isInspectable = ReflectionUtils.isObjectInspectable(object);
 			if (componentHierarchyData == null) {
-				if (!isPrimitive) {
+				if (isInspectable) {
 					actionsBuilder.add(inspectionContext.createInspectObjectAction(object));
 				}
 			} else {

@@ -1,18 +1,14 @@
 package dd.kms.marple.gui.actionprovidertree.inspectiontree;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Primitives;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.ActionProviderBuilder;
-import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.actions.Actions;
-import dd.kms.zenodot.common.ReflectionUtils;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -33,10 +29,10 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 
 	@Override
 	List<? extends InspectionTreeNode> doGetChildren() {
-		if (object == null || Primitives.unwrap(object.getClass()).isPrimitive()) {
+		if (!dd.kms.marple.common.ReflectionUtils.isObjectInspectable(object)) {
 			return ImmutableList.of();
 		}
-		List<Field> fields = ReflectionUtils.getFields(typeInfo.getRawType(), false);
+		List<Field> fields = dd.kms.zenodot.common.ReflectionUtils.getFields(typeInfo.getRawType(), false);
 		ImmutableList.Builder<InspectionTreeNode> childBuilder = ImmutableList.builder();
 		int childIndex = 0;
 		for (int i = 0; i < fields.size(); i++) {

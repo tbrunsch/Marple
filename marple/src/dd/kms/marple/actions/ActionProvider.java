@@ -1,9 +1,5 @@
 package dd.kms.marple.actions;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -19,7 +15,6 @@ public class ActionProvider
 
 	private ActionProvider(String displayText, List<InspectionAction> actions) {
 		this.displayText = displayText;
-		Preconditions.checkArgument(!actions.isEmpty());
 		this.actions = actions.stream().filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
