@@ -7,7 +7,7 @@ import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.gui.ObjectView;
 import dd.kms.marple.gui.table.*;
 import dd.kms.zenodot.common.AccessModifier;
-import dd.kms.zenodot.common.ReflectionUtils;
+import dd.kms.zenodot.common.MethodScanner;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,7 +32,7 @@ public class MethodView extends JPanel implements ObjectView
 
 		setName(NAME);
 
-		List<Method> methods = ReflectionUtils.getMethods(object.getClass());
+		List<Method> methods = new MethodScanner().getMethods(object.getClass());
 		List<ColumnDescription<Method>> columnDescriptions = createColumnDescriptions();
 
 		table = new ListBasedTable<>(methods, columnDescriptions);

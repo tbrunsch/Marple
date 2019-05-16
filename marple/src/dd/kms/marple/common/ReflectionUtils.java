@@ -1,13 +1,13 @@
 package dd.kms.marple.common;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.primitives.Primitives;
-import dd.kms.marple.components.SubcomponentHierarchyStrategy;
+import dd.kms.zenodot.common.FieldScanner;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 public class ReflectionUtils
 {
@@ -52,7 +52,7 @@ public class ReflectionUtils
 		if (instance == null) {
 			return fieldsByValue;
 		}
-		List<Field> fields = dd.kms.zenodot.common.ReflectionUtils.getFields(instance.getClass(), false);
+		List<Field> fields = new FieldScanner().getFields(instance.getClass(), false);
 		for (Field field : fields) {
 			try {
 				field.setAccessible(true);

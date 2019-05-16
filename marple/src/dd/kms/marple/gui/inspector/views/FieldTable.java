@@ -1,14 +1,11 @@
 package dd.kms.marple.gui.inspector.views;
 
-import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.ActionProviderBuilder;
-import dd.kms.marple.actions.Actions;
-import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.gui.table.*;
 import dd.kms.zenodot.common.AccessModifier;
-import dd.kms.zenodot.common.ReflectionUtils;
+import dd.kms.zenodot.common.FieldScanner;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,7 +25,7 @@ public class FieldTable extends JPanel
 		this.object = object;
 		this.inspectionContext = inspectionContext;
 
-		List<Field> fields = ReflectionUtils.getFields(object.getClass(), false);
+		List<Field> fields = new FieldScanner().getFields(object.getClass(), false);
 		fields.forEach(field -> field.setAccessible(true));
 
 		List<ColumnDescription<Field>> columnDescriptions = createColumnDescriptions();
