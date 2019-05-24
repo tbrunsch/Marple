@@ -26,25 +26,17 @@ class CustomImportPanel extends JPanel
 	private final JButton						addButton			= new JButton("+");
 	private final JButton						deleteButton		= new JButton("-");
 
-	private final Function<String, Boolean> 	importVerifier;
 	private final Consumer<List<String>>		importsConsumer;
 
-	CustomImportPanel(String title, Collection<String> initialImports, Function<String, Boolean> importVerifier, Consumer<List<String>> importsConsumer, InspectionContext inspectionContext) {
+	CustomImportPanel(String title, Collection<String> initialImports, Consumer<List<String>> importsConsumer, Consumer<JTextComponent> verifierAdder, InspectionContext inspectionContext) {
 		super(new GridBagLayout());
 
-		this.importVerifier = importVerifier;
 		this.importsConsumer = importsConsumer;
 
 		titleLabel = new JLabel(title);
 
 		evaluationTextField = new EvaluationTextField(string -> {}, inspectionContext);
-		InputVerifier inputVerifier = new InputVerifier() {
-			@Override
-			public boolean verify(JComponent input) {
-				return input instanceof JTextComponent && importVerifier.apply(((JTextComponent) input).getText());
-			}
-		};
-		evaluationTextField.setInputVerifier(inputVerifier);
+		verifierAdder.accept(evaluationTextField);
 
 		add(titleLabel,				new GridBagConstraints(0, 0, REMAINDER, 1, 0.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
 
@@ -92,9 +84,8 @@ class CustomImportPanel extends JPanel
 	}
 
 	private void onAddButtonClicked() {
-		String importExpression = evaluationTextField.getText();
-		if (importVerifier.apply(importExpression)) {
-			importListModel.addElement(importExpression);
+		if (evaluationTextField.getInputVerifier().verify(evaluationTextField)) {
+			importListModel.addElement(evaluationTextField.getText());
 		}
 		updateParserSettings();
 	}

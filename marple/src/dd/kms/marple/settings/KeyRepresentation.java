@@ -11,6 +11,6 @@ public class KeyRepresentation
 	}
 
 	public boolean matches(KeyRepresentation expectedKey) {
-		return keyCode == expectedKey.keyCode && modifiers == expectedKey.modifiers;
+		return expectedKey != null && keyCode == expectedKey.keyCode && modifiers == expectedKey.modifiers;
 	}
 }

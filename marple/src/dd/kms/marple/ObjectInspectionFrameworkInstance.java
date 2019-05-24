@@ -25,7 +25,7 @@ class ObjectInspectionFrameworkInstance
 	private Point									lastMousePositionOnScreen;
 
 	/*
-	 * Listener registration/unregistration
+	 * Listener registration/deregistration
 	 */
 	void registerSettings(Object identifier, InspectionSettings inspectionSettings) {
 		if (managedInspectionContexts.isEmpty()) {
@@ -83,10 +83,19 @@ class ObjectInspectionFrameworkInstance
 		}
 	}
 
-	private void performEvaluation(InspectionContext context) {
-		InspectionAction evaluationAction = context.createEvaluateExpressionAction(null, null);
+	private void performEvaluation(InspectionContext context, Component component, Point position) {
+		Object componentHierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(component, position, context);
+		InspectionAction evaluationAction = context.createEvaluateAsThisAction(componentHierarchyLeaf);
 		if (evaluationAction.isEnabled()) {
 			evaluationAction.perform();
+		}
+	}
+
+	private void performSearch(InspectionContext context, Component component, Point position) {
+		Object componentHierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(component, position, context);
+		InspectionAction searchAction = context.createSearchInstancesFromHereAction(componentHierarchyLeaf);
+		if (searchAction.isEnabled()) {
+			searchAction.perform();
 		}
 	}
 
@@ -149,6 +158,7 @@ class ObjectInspectionFrameworkInstance
 			}
 			KeyRepresentation inspectionKey = settings.getInspectionKey();
 			KeyRepresentation evaluationKey = settings.getEvaluationKey();
+			KeyRepresentation searchKey = settings.getSearchKey();
 
 			if (key.matches(inspectionKey)) {
 				if (userHasPermission(settings)) {
@@ -157,7 +167,12 @@ class ObjectInspectionFrameworkInstance
 				}
 			} else if (key.matches(evaluationKey)) {
 				if (userHasPermission(settings)) {
-					performEvaluation(context);
+					performEvaluation(context, lastComponentUnderMouse, lastMousePositionOnComponent);
+					return;
+				}
+			} else if (key.matches(searchKey)) {
+				if (userHasPermission(settings)) {
+					performSearch(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 					return;
 				}
 			}

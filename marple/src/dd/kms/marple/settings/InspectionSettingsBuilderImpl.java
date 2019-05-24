@@ -23,6 +23,7 @@ class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 	private KeyRepresentation			inspectionKey;
 	private KeyRepresentation			evaluationKey;
 	private KeyRepresentation			codeCompletionKey;
+	private KeyRepresentation			searchKey;
 	private KeyRepresentation			showMethodArgumentsKey;
 
 	@Override
@@ -74,6 +75,12 @@ class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 	}
 
 	@Override
+	public InspectionSettingsBuilder searchKey(KeyRepresentation searchKey) {
+		this.searchKey = searchKey;
+		return this;
+	}
+
+	@Override
 	public InspectionSettingsBuilder codeCompletionKey(KeyRepresentation codeCompletionKey) {
 		this.codeCompletionKey = codeCompletionKey;
 		return this;
@@ -87,6 +94,6 @@ class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 
 	@Override
 	public InspectionSettings build() {
-		return new InspectionSettingsImpl(inspector, evaluator, componentHierarchyModel, visualSettings, responsibilityPredicate, securitySettings, inspectionKey, evaluationKey, codeCompletionKey, showMethodArgumentsKey);
+		return new InspectionSettingsImpl(inspector, evaluator, componentHierarchyModel, visualSettings, responsibilityPredicate, securitySettings, inspectionKey, evaluationKey, searchKey, codeCompletionKey, showMethodArgumentsKey);
 	}
 }

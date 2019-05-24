@@ -17,13 +17,13 @@ import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
 
-class EvaluationTextField extends JTextField
+public class EvaluationTextField extends JTextField
 {
 	private final InspectionContext		inspectionContext;
 
 	private Object						thisValue;
 
-	EvaluationTextField(Consumer<String> expressionConsumer, InspectionContext context) {
+	public EvaluationTextField(Consumer<String> expressionConsumer, InspectionContext context) {
 		this.inspectionContext = context;
 
 		CodeCompletionDecorators.decorate(
@@ -36,7 +36,7 @@ class EvaluationTextField extends JTextField
 		);
 	}
 
-	void setThisValue(Object thisValue) {
+	public void setThisValue(Object thisValue) {
 		this.thisValue = thisValue;
 	}
 
@@ -46,8 +46,7 @@ class EvaluationTextField extends JTextField
 	}
 
 	private List<CompletionSuggestion> suggestCodeCompletions(String expression, int caretPosition) throws ParseException  {
-		JavaParser parser = new JavaParser();
-		Map<CompletionSuggestion, MatchRating> ratedSuggestions = parser.suggestCodeCompletion(expression, caretPosition, getParserSettings(), thisValue);
+		Map<CompletionSuggestion, MatchRating> ratedSuggestions = JavaParser.suggestCodeCompletion(expression, caretPosition, getParserSettings(), thisValue);
 		List<CompletionSuggestion> suggestions = new ArrayList<>(ratedSuggestions.keySet());
 		suggestions.removeIf(suggestion -> ratedSuggestions.get(suggestion).getNameMatch() == StringMatch.NONE);
 		suggestions.sort(Comparator.comparingInt(EvaluationTextField::getCompletionSuggestionPriorityByClass));

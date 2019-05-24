@@ -2,7 +2,15 @@ package dd.kms.marple;
 
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.actions.*;
-import dd.kms.marple.components.ComponentHierarchyModel;
+import dd.kms.marple.actions.evaluator.EvaluateAsThisAction;
+import dd.kms.marple.actions.evaluator.EvaluateExpressionAction;
+import dd.kms.marple.actions.history.HistoryActionWrapper;
+import dd.kms.marple.actions.history.HistoryBackAction;
+import dd.kms.marple.actions.history.HistoryForwardAction;
+import dd.kms.marple.actions.inspector.InspectComponentAction;
+import dd.kms.marple.actions.inspector.InspectObjectAction;
+import dd.kms.marple.actions.search.SearchInstanceAction;
+import dd.kms.marple.actions.search.SearchInstancesFromHereAction;
 import dd.kms.marple.components.ComponentHierarchyModels;
 import dd.kms.marple.evaluator.ExpressionEvaluator;
 import dd.kms.marple.gui.ObjectView;
@@ -83,6 +91,11 @@ class InspectionContextImpl implements InspectionContext
 	@Override
 	public InspectionAction createEvaluateAsThisAction(Object thisValue) {
 		return new EvaluateAsThisAction(settings.getEvaluator(), thisValue);
+	}
+
+	@Override
+	public InspectionAction createSearchInstancesFromHereAction(Object root) {
+		return new SearchInstancesFromHereAction(this, root);
 	}
 
 	@Override

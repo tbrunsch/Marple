@@ -19,10 +19,11 @@ class InspectionSettingsImpl implements InspectionSettings
 	private final Optional<SecuritySettings>	securitySettings;
 	private final KeyRepresentation				inspectionKey;
 	private final KeyRepresentation				evaluationKey;
+	private final KeyRepresentation				searchKey;
 	private final KeyRepresentation				codeCompletionKey;
 	private final KeyRepresentation				showMethodArgumentsKey;
 
-	InspectionSettingsImpl(ObjectInspector inspector, ExpressionEvaluator evaluator, ComponentHierarchyModel componentHierarchyModel, VisualSettings visualSettings, Predicate<Component> responsibilityPredicate, Optional<SecuritySettings> securitySettings, KeyRepresentation inspectionKey, KeyRepresentation evaluationKey, KeyRepresentation codeCompletionKey, KeyRepresentation showMethodArgumentsKey) {
+	InspectionSettingsImpl(ObjectInspector inspector, ExpressionEvaluator evaluator, ComponentHierarchyModel componentHierarchyModel, VisualSettings visualSettings, Predicate<Component> responsibilityPredicate, Optional<SecuritySettings> securitySettings, KeyRepresentation inspectionKey, KeyRepresentation evaluationKey, KeyRepresentation searchKey, KeyRepresentation codeCompletionKey, KeyRepresentation showMethodArgumentsKey) {
 		this.inspector = inspector;
 		this.evaluator = evaluator;
 		this.componentHierarchyModel = componentHierarchyModel;
@@ -31,6 +32,7 @@ class InspectionSettingsImpl implements InspectionSettings
 		this.securitySettings = securitySettings;
 		this.inspectionKey = inspectionKey;
 		this.evaluationKey = evaluationKey;
+		this.searchKey = searchKey;
 		this.codeCompletionKey = codeCompletionKey;
 		this.showMethodArgumentsKey = showMethodArgumentsKey;
 	}
@@ -73,6 +75,11 @@ class InspectionSettingsImpl implements InspectionSettings
 	@Override
 	public KeyRepresentation getEvaluationKey() {
 		return evaluationKey;
+	}
+
+	@Override
+	public KeyRepresentation getSearchKey() {
+		return searchKey;
 	}
 
 	@Override

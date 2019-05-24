@@ -24,11 +24,12 @@ public class ObjectInspectionFramework
 
 	private static final KeyRepresentation				INSPECTION_KEY					= new KeyRepresentation(KeyEvent.VK_I, 		KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
 	private static final KeyRepresentation				EVALUATION_KEY					= new KeyRepresentation(KeyEvent.VK_F8,		KeyEvent.ALT_MASK);
+	private static final KeyRepresentation				SEARCH_KEY						= new KeyRepresentation(KeyEvent.VK_F,		KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
 	private static final KeyRepresentation				CODE_COMPLETION_KEY 			= new KeyRepresentation(KeyEvent.VK_SPACE,	KeyEvent.CTRL_MASK);
 	private static final KeyRepresentation				SHOW_EXECUTABLE_ARGUMENTS_KEY	= new KeyRepresentation(KeyEvent.VK_P,		KeyEvent.CTRL_MASK);
 
 	/*
-	 * Registration/Unregistration
+	 * Registration/Deregistration
 	 */
 	public static void register(Object identifier, InspectionSettings inspectionSettings) {
 		synchronized (LOCK) {
@@ -57,6 +58,7 @@ public class ObjectInspectionFramework
 			.visualSettings(createVisualSettingsBuilder().build())
 			.inspectionKey(INSPECTION_KEY)
 			.evaluationKey(EVALUATION_KEY)
+			.searchKey(SEARCH_KEY)
 			.codeCompletionKey(CODE_COMPLETION_KEY)
 			.showMethodArgumentsKey(SHOW_EXECUTABLE_ARGUMENTS_KEY);
 	}

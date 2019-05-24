@@ -19,6 +19,7 @@ public interface InspectionSettingsBuilder
 	InspectionSettingsBuilder securitySettings(Optional<SecuritySettings> securitySettings);
 	InspectionSettingsBuilder inspectionKey(KeyRepresentation inspectionKey);
 	InspectionSettingsBuilder evaluationKey(KeyRepresentation evaluationKey);
+	InspectionSettingsBuilder searchKey(KeyRepresentation searchKey);
 	InspectionSettingsBuilder codeCompletionKey(KeyRepresentation codeCompletionKey);
 	InspectionSettingsBuilder showMethodArgumentsKey(KeyRepresentation showMethodArgumentsKey);
 	InspectionSettings build();

@@ -22,83 +22,9 @@ public class Test
 	public static void main(String[] args) {
 		JFrame testFrame = new TestFrame();
 
-		setupInspectionFramework(testFrame);
+		TestUtils.setupInspectionFramework(testFrame);
 
 		testFrame.pack();
 		testFrame.setVisible(true);
-	}
-
-	private static void setupInspectionFramework(JFrame testFrame) {
-		Variable variable1 = ParserSettingsUtils.createVariable("testFrame", testFrame, false);
-		Variable variable2 = ParserSettingsUtils.createVariable("testData", new TestData(), true);
-
-		String importPackage1 = "javax.swing";
-		String importPackage2 = "dd.kms.marple";
-
-		String importClass1 = "com.google.common.collect.ImmutableList";
-		String importClass2 = "com.google.common.collect.ImmutableSet";
-
-		ObjectTreeNode customHierarchyRoot = new PrimeNode(0);
-
-		ParserSettings parserSettings = ParserSettingsUtils.createBuilder()
-			.variables(ImmutableList.of(variable1, variable2))
-			.minimumAccessLevel(AccessModifier.PRIVATE)
-			.importPackages(ImmutableSet.of(importPackage1, importPackage2))
-			.importClasses(ImmutableSet.of(importClass1, importClass2))
-			.customHierarchyRoot(customHierarchyRoot)
-			.build();
-
-		InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspectionSettingsBuilder().build();
-		inspectionSettings.getEvaluator().setParserSettings(parserSettings);
-
-		ObjectInspectionFramework.register("Test", inspectionSettings);
-	}
-
-	private static class PrimeNode implements ObjectTreeNode
-	{
-		// Use single-element int[] instead of an int to demonstrate action providers
-		private final int[]		numbers;
-
-		private List<PrimeNode>	primeChildren	= null;
-
-		PrimeNode(int number) {
-			this.numbers = new int[]{ number };
-		}
-
-		@Override
-		public String getName() {
-			return String.valueOf(getNumber());
-		}
-
-		@Override
-		public Iterable<? extends ObjectTreeNode> getChildNodes() {
-			if (primeChildren == null) {
-				primeChildren = createChildren();
-			}
-			return primeChildren;
-		}
-
-		@Override
-		public @Nullable Object getUserObject() {
-			return numbers;
-		}
-
-		private int getNumber() {
-			return numbers[0];
-		}
-
-		private List<PrimeNode> createChildren() {
-			int base = 10*getNumber();
-			List<Integer> potentialSummands = base == 0 ? Lists.newArrayList(2, 3, 5, 7) : Lists.newArrayList(1, 3, 7, 9);
-			List<PrimeNode> children = new ArrayList<>();
-			for (int summand : potentialSummands) {
-				int number = base + summand;
-				if (IntMath.isPrime(number)) {
-					PrimeNode child = new PrimeNode(number);
-					children.add(child);
-				}
-			}
-			return children;
-		}
 	}
 }

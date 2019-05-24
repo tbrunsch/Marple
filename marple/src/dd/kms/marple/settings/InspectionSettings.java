@@ -20,6 +20,7 @@ public interface InspectionSettings
 
 	KeyRepresentation getInspectionKey();
 	KeyRepresentation getEvaluationKey();
+	KeyRepresentation getSearchKey();
 	KeyRepresentation getCodeCompletionKey();
 	KeyRepresentation getShowMethodArgumentsKey();
 }

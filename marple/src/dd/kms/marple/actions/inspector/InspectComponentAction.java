@@ -1,6 +1,7 @@
-package dd.kms.marple.actions;
+package dd.kms.marple.actions.inspector;
 
 import com.google.common.collect.ImmutableList;
+import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.inspector.ObjectInspector;
 
 import java.awt.*;

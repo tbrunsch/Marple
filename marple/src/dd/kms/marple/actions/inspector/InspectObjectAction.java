@@ -1,5 +1,6 @@
-package dd.kms.marple.actions;
+package dd.kms.marple.actions.inspector;
 
+import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.inspector.ObjectInspector;
 
 public class InspectObjectAction implements InspectionAction

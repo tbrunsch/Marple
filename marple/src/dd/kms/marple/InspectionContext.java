@@ -23,6 +23,7 @@ public interface InspectionContext
 	InspectionAction createAddVariableAction(String suggestedName, Object value);
 	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue);
 	InspectionAction createEvaluateAsThisAction(Object thisValue);
+	InspectionAction createSearchInstancesFromHereAction(Object root);
 
 	void clearHistory();
 

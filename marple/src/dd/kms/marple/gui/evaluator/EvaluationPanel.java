@@ -15,6 +15,8 @@ import static java.awt.GridBagConstraints.*;
 
 public class EvaluationPanel extends JPanel
 {
+	private static final Insets	DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
+
 	private final JPanel				expressionPanel			= new JPanel(new GridBagLayout());
 	private final EvaluationTextField	evaluationTextField;
 	private final JButton				settingsButton			= new JButton("...");
@@ -37,9 +39,9 @@ public class EvaluationPanel extends JPanel
 		add(evaluationResultPanel,	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 0.8, CENTER, BOTH, new Insets(5, 0, 0, 0), 0, 0));
 
 		expressionPanel.setBorder(BorderFactory.createTitledBorder("Expression"));
-		expressionPanel.add(evaluationTextField,								new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-		expressionPanel.add(settingsButton,										new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, EAST, NONE, new Insets(5, 5, 5, 5), 0, 0));
-		expressionPanel.add(dynamicTypingControls.getDynamicTypingCheckBox(),	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 0.0, WEST, NONE, new Insets(5, 5, 5, 5), 0, 0));
+		expressionPanel.add(evaluationTextField,								new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		expressionPanel.add(settingsButton,										new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
+		expressionPanel.add(dynamicTypingControls.getDynamicTypingCheckBox(),	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 
 		evaluationResultPanel.setBorder(BorderFactory.createTitledBorder("Result"));
 
@@ -60,9 +62,8 @@ public class EvaluationPanel extends JPanel
 	}
 
 	private void evaluateExpression(String expression) {
-		JavaParser parser = new JavaParser();
 		try {
-			Object evaluationResult = parser.evaluate(expression, getParserSettings(), thisValue);
+			Object evaluationResult = JavaParser.evaluate(expression, getParserSettings(), thisValue);
 			displayObject(evaluationResult);
 		} catch (ParseException e) {
 			displayException(e);

@@ -21,6 +21,9 @@ class ComponentHierarchyModelImpl implements ComponentHierarchyModel
 
 	@Override
 	public List<?> getSubcomponentHierarchy(Component component, Point position) {
+		if (component == null) {
+			return ImmutableList.of();
+		}
 		Class<? extends Component> componentClass = ReflectionUtils.getBestMatchingClass(component, subcomponentHierarchyStrategies.keySet());
 		if (componentClass == null) {
 			return ImmutableList.of();

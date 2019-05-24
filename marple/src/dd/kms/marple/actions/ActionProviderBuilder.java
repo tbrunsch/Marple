@@ -1,8 +1,9 @@
 package dd.kms.marple.actions;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Primitives;
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.actions.search.SearchInstanceAction;
+import dd.kms.marple.actions.search.SearchInstancesFromHereAction;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.components.ComponentHierarchyModels;
 
@@ -71,6 +72,8 @@ public class ActionProviderBuilder
 				Object expressionContext = evaluationData.getExpressionContext();
 				actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(expression, expressionContext));
 			}
+			actionsBuilder.add(new SearchInstancesFromHereAction(inspectionContext, object));
+			actionsBuilder.add(new SearchInstanceAction(inspectionContext, object));
 		}
 		return ActionProvider.of(displayText, actionsBuilder.build());
 	}

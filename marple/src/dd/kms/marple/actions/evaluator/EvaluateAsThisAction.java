@@ -1,5 +1,6 @@
-package dd.kms.marple.actions;
+package dd.kms.marple.actions.evaluator;
 
+import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.evaluator.ExpressionEvaluator;
 
 public class EvaluateAsThisAction implements InspectionAction

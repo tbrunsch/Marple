@@ -1,8 +1,10 @@
 package dd.kms.marple.components;
 
 import com.google.common.collect.ImmutableList;
+import dd.kms.marple.InspectionContext;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -27,6 +29,15 @@ public class ComponentHierarchyModels
 			componentHierarchyBuilder.add(curComponent);
 		}
 		return componentHierarchyBuilder.build().reverse();
+	}
+
+	public static Object getHierarchyLeaf(Component component, Point position, InspectionContext context) {
+		if (component == null) {
+			return null;
+		}
+		List<Component> componentHierarchy = Arrays.asList(component);
+		List<?> subcomponentHierarchy = context.getSettings().getComponentHierarchyModel().getSubcomponentHierarchy(component, position);
+		return getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
 	}
 
 	public static Object getHierarchyLeaf(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {

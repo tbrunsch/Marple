@@ -2,6 +2,7 @@ package dd.kms.marple.gui.evaluator;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.evaluator.ExpressionEvaluators;
+import dd.kms.marple.gui.evaluator.completion.ExpressionVerifiers;
 import dd.kms.zenodot.settings.ParserSettingsBuilder;
 import dd.kms.zenodot.utils.wrappers.ClassInfo;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
@@ -30,8 +31,8 @@ class ImportPanel extends JPanel
 
 		this.inspectionContext = inspectionContext;
 
-		packagesPanel = new CustomImportPanel("Packages", getPackageNames(), this::isPackageName, this::setPackageNames, inspectionContext);
-		classesPanel = new CustomImportPanel("Classes", getClassNames(), this::isClassName, this::setClassNames, inspectionContext);
+		packagesPanel = new CustomImportPanel("Packages", getPackageNames(), this::setPackageNames, ExpressionVerifiers::addPackageNameVerifier, inspectionContext);
+		classesPanel = new CustomImportPanel("Classes", getClassNames(), this::setClassNames, ExpressionVerifiers::addClassNameVerifier, inspectionContext);
 
 		add(packagesPanel,	new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		add(classesPanel,	new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
@@ -42,31 +43,13 @@ class ImportPanel extends JPanel
 		classesPanel.updateContent(getClassNames());
 	}
 
-	/*
-	 * Packages
-	 */
-	private boolean isPackageName(String s) {
-		return Package.getPackage(s) != null;
-	}
-
 	private Collection<String> getPackageNames() {
 		return ExpressionEvaluators.getValue(settings -> settings.getImports().getImportedPackageNames(), inspectionContext);
 	}
 
 	private void setPackageNames(List<String> packageNames) {
-		Set<String> filteredPackageNames = packageNames.stream().filter(this::isPackageName).collect(Collectors.toSet());
+		Set<String> filteredPackageNames = packageNames.stream().filter(ExpressionVerifiers::isPackageName).collect(Collectors.toSet());
 		ExpressionEvaluators.setValue(filteredPackageNames, ParserSettingsBuilder::importPackages, inspectionContext);
-	}
-
-	/*
-	 * Classes
-	 */
-	private boolean isClassName(String s) {
-		try {
-			return Class.forName(s) != null;
-		} catch (Exception e) {
-			return false;
-		}
 	}
 
 	private Collection<String> getClassNames() {
@@ -75,6 +58,7 @@ class ImportPanel extends JPanel
 	}
 
 	private void setClassNames(List<String> classNames) {
-		Set<String> filteredClassNames = classNames.stream().filter(this::isClassName).collect(Collectors.toSet());
+		Set<String> filteredClassNames = classNames.stream().filter(ExpressionVerifiers::isClassName).collect(Collectors.toSet());
 		ExpressionEvaluators.setValue(filteredClassNames, ParserSettingsBuilder::importClasses, inspectionContext);
-	}}
+	}
+}
