@@ -15,6 +15,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -78,21 +80,6 @@ class InstanceSearchPanel extends JPanel
 		addListeners();
 	}
 
-	void setRoot(Object root) {
-		this.root = root;
-		updateDisplay();
-	}
-
-	void setTarget(Object target) {
-		this.target = target;
-		targetConcreteInstanceRB.setSelected(true);
-		updateDisplay();
-	}
-
-	public void setInspectionContext(InspectionContext inspectionContext) {
-		instancePathFinder.setInspectionContext(inspectionContext);
-	}
-
 	private void setupConfigurationPanel() {
 		configurationPanel.setBorder(new TitledBorder("Search Configuration"));
 
@@ -137,14 +124,47 @@ class InstanceSearchPanel extends JPanel
 		stopSearchButton.addActionListener(e -> stopSearch());
 		targetAllInstancesRB.addActionListener(e -> updateEnabilities());
 		targetConcreteInstanceRB.addActionListener(e -> updateEnabilities());
+		targetClassTF.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				updateEnabilities();
+			}
+		});
+	}
+
+	void setRoot(Object root) {
+		this.root = root;
+		updateDisplay();
+	}
+
+	void setTarget(Object target) {
+		this.target = target;
+		targetConcreteInstanceRB.setSelected(true);
+		updateDisplay();
+	}
+
+	void setInspectionContext(InspectionContext inspectionContext) {
+		instancePathFinder.setInspectionContext(inspectionContext);
 	}
 
 	private void updateEnabilities() {
 		InstancePathFinder.ProcessingState processingState = instancePathFinder.getProcessingState();
 		boolean searching = processingState != InstancePathFinder.ProcessingState.NOT_RUNNING && processingState != InstancePathFinder.ProcessingState.FINISHED;
-		boolean requiredInputSpecified = root != null && (targetAllInstancesRB.isSelected() || target != null);
-		searchButton.setEnabled(!searching && requiredInputSpecified);
+		searchButton.setEnabled(!searching && isRequiredInputSpecified());
 		stopSearchButton.setEnabled(!searchButton.isEnabled());
+	}
+
+	private boolean isRequiredInputSpecified() {
+		if (root == null) {
+			return false;
+		}
+		if (targetAllInstancesRB.isSelected()) {
+			return ExpressionVerifiers.isClassName(targetClassTF.getText());
+		}
+		if (targetConcreteInstanceRB.isSelected()) {
+			return target != null;
+		}
+		return false;
 	}
 
 	private void updateDisplayWhileSearching() {

@@ -1,5 +1,6 @@
 package dd.kms.marple.gui.evaluator.completion;
 
+import com.google.common.base.Strings;
 import dd.kms.marple.InspectionContext;
 import dd.kms.zenodot.JavaParser;
 import dd.kms.zenodot.ParseException;
@@ -43,7 +44,12 @@ public class ExpressionVerifiers
 	{
 		@Override
 		public boolean verify(JComponent input) {
-			return input instanceof JTextComponent && isPackageName(((JTextComponent) input).getText());
+			if (!(input instanceof JTextComponent)) {
+				return false;
+			}
+			JTextComponent textComponent = (JTextComponent) input;
+			String text = textComponent.getText();
+			return Strings.isNullOrEmpty(text) || isPackageName(text);
 		}
 	}
 
@@ -51,7 +57,12 @@ public class ExpressionVerifiers
 	{
 		@Override
 		public boolean verify(JComponent input) {
-			return input instanceof JTextComponent && isClassName(((JTextComponent) input).getText());
+			if (!(input instanceof JTextComponent)) {
+				return false;
+			}
+			JTextComponent textComponent = (JTextComponent) input;
+			String text = textComponent.getText();
+			return Strings.isNullOrEmpty(text) || isClassName(text);
 		}
 	}
 
@@ -71,9 +82,13 @@ public class ExpressionVerifiers
 				return false;
 			}
 			JTextComponent textInput = (JTextComponent) input;
+			String text = textInput.getText();
+			if (Strings.isNullOrEmpty(text)) {
+				return true;
+			}
 			ParserSettings parserSettings = inspectionContext.getEvaluator().getParserSettings();
 			try {
-				JavaParser.evaluate(textInput.getText(), parserSettings, thisValue);
+				JavaParser.evaluate(text, parserSettings, thisValue);
 				return true;
 			} catch (ParseException e) {
 				return false;

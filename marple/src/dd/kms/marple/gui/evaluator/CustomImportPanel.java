@@ -1,5 +1,6 @@
 package dd.kms.marple.gui.evaluator;
 
+import com.google.common.base.Strings;
 import dd.kms.marple.InspectionContext;
 
 import javax.swing.*;
@@ -84,7 +85,7 @@ class CustomImportPanel extends JPanel
 	}
 
 	private void onAddButtonClicked() {
-		if (evaluationTextField.getInputVerifier().verify(evaluationTextField)) {
+		if (!Strings.isNullOrEmpty(evaluationTextField.getText()) && evaluationTextField.getInputVerifier().verify(evaluationTextField)) {
 			importListModel.addElement(evaluationTextField.getText());
 		}
 		updateParserSettings();
