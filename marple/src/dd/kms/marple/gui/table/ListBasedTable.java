@@ -59,32 +59,16 @@ public class ListBasedTable<T> extends JPanel
 		JTableHeader tableHeader = table.getTableHeader();
 		tableHeader.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
-			if (!SwingUtilities.isRightMouseButton(e)) {
-				return;
-			}
-			Point mousePositionInTable = e.getPoint();
-			int col = table.columnAtPoint(mousePositionInTable);
-			if (col < 0) {
-				return;
-			}
-			TableValueFilter valueFilter = tableModel.getValueFilter(col);
-			if (valueFilter == TableValueFilters.NONE) {
-				return;
-			}
-			String columnName = tableModel.getPlainColumnName(col);
-			JDialog filterPopup = new FilterPopup(valueFilter, columnName);
-			Point framePosition = table.getTopLevelAncestor().getLocationOnScreen();
-			Point tablePosition = table.getLocationOnScreen();
-			Point tableShift = new Point(tablePosition.x - framePosition.x, tablePosition.y - framePosition.y);
-			Point position = mousePositionInTable;
-			position.translate(tableShift.x, tableShift.y);
-			filterPopup.setLocation(position);
-			filterPopup.pack();
-			SwingUtilities.invokeLater(() -> {
-				filterPopup.setVisible(true);
-				filterPopup.toFront();
-			});
+			public void mouseReleased(MouseEvent e) {
+				if (!e.isPopupTrigger()) {
+					return;
+				}
+				Point mousePositionInTable = e.getPoint();
+				int col = table.columnAtPoint(mousePositionInTable);
+				if (col < 0) {
+					return;
+				}
+				showFilterPopup(col, e.getPoint());
 			}
 		});
 	}
@@ -158,6 +142,19 @@ public class ListBasedTable<T> extends JPanel
 
 	public JTable getInternalTable() {
 		return table;
+	}
+
+	private void showFilterPopup(int column, Point mousePos) {
+		TableValueFilter valueFilter = tableModel.getValueFilter(column);
+		if (valueFilter == TableValueFilters.NONE) {
+			return;
+		}
+		String columnName = tableModel.getPlainColumnName(column);
+		JPanel filterPanel = new FilterPopupPanel(valueFilter, columnName);
+
+		JPopupMenu popupMenu = new JPopupMenu();
+		popupMenu.add(filterPanel);
+		popupMenu.show(table.getTableHeader(), mousePos.x, mousePos.y);
 	}
 
 	CellCoordinates getModelCoordinates(Point p) {
