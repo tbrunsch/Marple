@@ -46,7 +46,8 @@ public class EvaluationTextField extends JTextField
 	}
 
 	private List<CompletionSuggestion> suggestCodeCompletions(String expression, int caretPosition) throws ParseException  {
-		Map<CompletionSuggestion, MatchRating> ratedSuggestions = JavaParser.suggestCodeCompletion(expression, caretPosition, getParserSettings(), thisValue);
+		JavaParser parser = new JavaParser(expression, thisValue, getParserSettings());
+		Map<CompletionSuggestion, MatchRating> ratedSuggestions = parser.suggestCodeCompletion(caretPosition);
 		List<CompletionSuggestion> suggestions = new ArrayList<>(ratedSuggestions.keySet());
 		suggestions.removeIf(suggestion -> ratedSuggestions.get(suggestion).getNameMatch() == StringMatch.NONE);
 		suggestions.sort(Comparator.comparingInt(EvaluationTextField::getCompletionSuggestionPriorityByClass));
@@ -55,8 +56,8 @@ public class EvaluationTextField extends JTextField
 	}
 
 	private Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String expression, int caretPosition) throws ParseException  {
-		JavaParser parser = new JavaParser();
-		return parser.getExecutableArgumentInfo(expression, caretPosition, getParserSettings(), thisValue);
+		JavaParser parser = new JavaParser(expression, thisValue, getParserSettings());
+		return parser.getExecutableArgumentInfo(caretPosition);
 	}
 
 	/**

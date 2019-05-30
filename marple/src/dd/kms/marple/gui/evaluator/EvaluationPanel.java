@@ -63,7 +63,8 @@ public class EvaluationPanel extends JPanel
 
 	private void evaluateExpression(String expression) {
 		try {
-			Object evaluationResult = JavaParser.evaluate(expression, getParserSettings(), thisValue);
+			JavaParser parser = new JavaParser(expression, thisValue, getParserSettings());
+			Object evaluationResult = parser.evaluate();
 			displayObject(evaluationResult);
 		} catch (ParseException e) {
 			displayException(e);

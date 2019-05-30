@@ -88,7 +88,8 @@ public class ExpressionVerifiers
 			}
 			ParserSettings parserSettings = inspectionContext.getEvaluator().getParserSettings();
 			try {
-				JavaParser.evaluate(text, parserSettings, thisValue);
+				JavaParser parser = new JavaParser(text, thisValue, parserSettings);
+				parser.evaluate();
 				return true;
 			} catch (ParseException e) {
 				return false;
