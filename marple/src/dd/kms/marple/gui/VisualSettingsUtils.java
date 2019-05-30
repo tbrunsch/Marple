@@ -17,11 +17,13 @@ public class VisualSettingsUtils
 	public static void addDefaultDisplayTextFunctions(VisualSettingsBuilder builder) {
 		builder
 			.displayText(String.class,			s -> '"' + s + '"')
-			.displayText(Component.class, 		VisualSettingsUtils::getComponentDefaultDisplayText)
-			.displayText(Frame.class, 			frame -> getComponentDisplayText(frame, Frame::getTitle))
-			.displayText(AbstractButton.class,	button -> getComponentDisplayText(button, AbstractButton::getText))
-			.displayText(JLabel.class,			label -> getComponentDisplayText(label, JLabel::getText))
-			.displayText(JTextComponent.class, 	textComponent -> getComponentDisplayText(textComponent, JTextComponent::getText))
+			.displayText(char.class,			c -> "'" + c + "'")
+			.displayText(Character.class,		c -> "'" + c + "'")
+			.displayText(Object.class, 			object -> getDisplayText(object, Object::toString))
+			.displayText(Frame.class, 			frame -> getDisplayText(frame, Frame::getTitle))
+			.displayText(AbstractButton.class,	button -> getDisplayText(button, AbstractButton::getText))
+			.displayText(JLabel.class,			label -> getDisplayText(label, JLabel::getText))
+			.displayText(JTextComponent.class, 	textComponent -> getDisplayText(textComponent, JTextComponent::getText))
 			;
 		// TODO: Add special functions for special objects
 	}
@@ -32,14 +34,15 @@ public class VisualSettingsUtils
 			.objectView(Object.class, MethodView::new);
 	}
 
-	private static String getComponentDefaultDisplayText(Component component) {
-		return component.getClass().getSimpleName() + "@" + System.identityHashCode(component);
+	private static String getObjectHashText(Object object) {
+		return object.getClass().getSimpleName() + "@" + System.identityHashCode(object);
 	}
 
-	private static <C extends Component> String getComponentDisplayText(C component, Function<C, String> textExtractionFunction) {
-		String text = textExtractionFunction.apply(component);
-		return text == null || text.isEmpty()
-			? getComponentDefaultDisplayText(component)
-			: text + " (" + getComponentDefaultDisplayText(component) + " )";
+	private static <T> String getDisplayText(T object, Function<T, String> textExtractionFunction) {
+		String text = textExtractionFunction.apply(object);
+		return getObjectHashText(object)
+			+ " ("
+			+ (text == null ? "null" : text)
+			+ ")";
 	}
 }
