@@ -1,6 +1,7 @@
 package dd.kms.marple.gui.evaluator;
 
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.gui.evaluator.imports.ImportPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +10,7 @@ class EvaluationSettingsPane extends JTabbedPane
 {
 	private final GeneralSettingsPanel	generalSettingsPanel;
 	private final VariablePanel			variablePanel;
-	private final ImportPanel			importPanel;
+	private final ImportPanel importPanel;
 	private final CustomHierarchyPanel	customHierarchyPanel;
 
 	EvaluationSettingsPane(InspectionContext inspectionContext) {

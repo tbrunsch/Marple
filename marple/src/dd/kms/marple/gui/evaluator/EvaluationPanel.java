@@ -3,9 +3,11 @@ package dd.kms.marple.gui.evaluator;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
+import dd.kms.marple.gui.evaluator.textfields.ExpressionInputTextField;
 import dd.kms.marple.gui.inspector.views.FieldView;
-import dd.kms.zenodot.JavaParser;
+import dd.kms.zenodot.ExpressionParser;
 import dd.kms.zenodot.ParseException;
+import dd.kms.zenodot.Parsers;
 import dd.kms.zenodot.settings.ParserSettings;
 
 import javax.swing.*;
@@ -17,22 +19,20 @@ public class EvaluationPanel extends JPanel
 {
 	private static final Insets	DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
 
-	private final JPanel				expressionPanel			= new JPanel(new GridBagLayout());
-	private final EvaluationTextField	evaluationTextField;
-	private final JButton				settingsButton			= new JButton("...");
-	private final DynamicTypingControls	dynamicTypingControls;
+	private final JPanel					expressionPanel			= new JPanel(new GridBagLayout());
+	private final ExpressionInputTextField	evaluationTextField;
+	private final JButton					settingsButton			= new JButton("...");
+	private final DynamicTypingControls		dynamicTypingControls;
 
-	private final JPanel				evaluationResultPanel	= new JPanel(new GridBagLayout());
+	private final JPanel					evaluationResultPanel	= new JPanel(new GridBagLayout());
 
-	private final InspectionContext		inspectionContext;
-
-	private Object						thisValue;
+	private final InspectionContext			inspectionContext;
 
 	public EvaluationPanel(InspectionContext inspectionContext) {
 		super(new GridBagLayout());
 
 		this.inspectionContext = inspectionContext;
-		this.evaluationTextField = new EvaluationTextField(this::evaluateExpression, inspectionContext);
+		this.evaluationTextField = new ExpressionInputTextField(this::displayObject, this::displayException, inspectionContext);
 		this.dynamicTypingControls = new DynamicTypingControls(inspectionContext);
 
 		add(expressionPanel,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(0, 0, 5, 0), 0, 0));
@@ -49,7 +49,6 @@ public class EvaluationPanel extends JPanel
 	}
 
 	public void setThisValue(Object thisValue) {
-		this.thisValue = thisValue;
 		evaluationTextField.setThisValue(thisValue);
 	}
 
@@ -59,20 +58,6 @@ public class EvaluationPanel extends JPanel
 
 	void updateContent() {
 		dynamicTypingControls.updateControls();
-	}
-
-	private void evaluateExpression(String expression) {
-		try {
-			JavaParser parser = new JavaParser(expression, thisValue, getParserSettings());
-			Object evaluationResult = parser.evaluate();
-			displayObject(evaluationResult);
-		} catch (ParseException e) {
-			displayException(e);
-		}
-	}
-
-	private ParserSettings getParserSettings() {
-		return inspectionContext.getEvaluator().getParserSettings();
 	}
 
 	private void displayObject(Object object) {

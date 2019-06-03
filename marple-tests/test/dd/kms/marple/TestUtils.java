@@ -18,7 +18,7 @@ import java.util.List;
 
 class TestUtils
 {
-	static void setupInspectionFramework(JFrame testFrame) {
+	static void setupInspectionFramework(JFrame testFrame) throws ClassNotFoundException {
 		Variable variable1 = ParserSettingsUtils.createVariable("testFrame", testFrame, false);
 		Variable variable2 = ParserSettingsUtils.createVariable("testData", new TestData(), true);
 
@@ -33,8 +33,8 @@ class TestUtils
 		ParserSettings parserSettings = ParserSettingsUtils.createBuilder()
 			.variables(ImmutableList.of(variable1, variable2))
 			.minimumAccessLevel(AccessModifier.PRIVATE)
-			.importPackages(ImmutableSet.of(importPackage1, importPackage2))
-			.importClasses(ImmutableSet.of(importClass1, importClass2))
+			.importPackagesByName(ImmutableSet.of(importPackage1, importPackage2))
+			.importClassesByName(ImmutableSet.of(importClass1, importClass2))
 			.customHierarchyRoot(customHierarchyRoot)
 			.build();
 

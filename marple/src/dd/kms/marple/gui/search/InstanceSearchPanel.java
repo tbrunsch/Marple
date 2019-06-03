@@ -3,14 +3,14 @@ package dd.kms.marple.gui.search;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseListener;
 import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseMotionListener;
-import dd.kms.marple.gui.evaluator.EvaluationTextField;
-import dd.kms.marple.gui.evaluator.completion.ExpressionVerifiers;
+import dd.kms.marple.gui.evaluator.textfields.ClassInputTextField;
 import dd.kms.marple.instancesearch.InstancePath;
 import dd.kms.marple.instancesearch.InstancePathFinder;
+import dd.kms.zenodot.ParseException;
+import dd.kms.zenodot.utils.wrappers.ClassInfo;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -32,7 +32,7 @@ class InstanceSearchPanel extends JPanel
 	private final JLabel				rootValueLabel				= new JLabel("---");
 	private final JLabel				targetLabel					= new JLabel("Instances to find:");
 	private final JRadioButton			targetAllInstancesRB		= new JRadioButton("all instances of class:");
-	private final EvaluationTextField	targetClassTF;
+	private final ClassInputTextField	targetClassTF;
 	private final JRadioButton			targetConcreteInstanceRB	= new JRadioButton("concrete instance:");
 	private final JLabel				targetValueLabel			= new JLabel("---");
 	private final ButtonGroup			targetButtonGroup			= new ButtonGroup();
@@ -62,8 +62,8 @@ class InstanceSearchPanel extends JPanel
 
 		this.inspectionContext = inspectionContext;
 
-		targetClassTF = new EvaluationTextField(string -> {}, inspectionContext);
-		ExpressionVerifiers.addClassNameVerifier(targetClassTF);
+		targetClassTF = new ClassInputTextField(classInfo -> {}, e -> {}, inspectionContext);
+		targetClassTF.addInputVerifier();
 
 		instancePathFinder = new InstancePathFinder(this::onPathDetected);
 
@@ -159,7 +159,13 @@ class InstanceSearchPanel extends JPanel
 			return false;
 		}
 		if (targetAllInstancesRB.isSelected()) {
-			return ExpressionVerifiers.isClassName(targetClassTF.getText());
+			try {
+				targetClassTF.evaluateText();
+				return true;
+			} catch (ParseException e) {
+				/* happens if the class name cannot be parsed */
+				return false;
+			}
 		}
 		if (targetConcreteInstanceRB.isSelected()) {
 			return target != null;
@@ -212,7 +218,8 @@ class InstanceSearchPanel extends JPanel
 		final Predicate<Object> targetFilter;
 		if (targetAllInstancesRB.isSelected()) {
 			try {
-				targetClass = Class.forName(targetClassTF.getText());
+				ClassInfo targetClassInfo = targetClassTF.evaluateText();
+				targetClass = Class.forName(targetClassInfo.getNormalizedName());
 			} catch (Throwable t) {
 				String message = "Invalid target class:\n\n" + t.getMessage();
 				JOptionPane.showMessageDialog(this, message, "Parse Error", JOptionPane.ERROR_MESSAGE);

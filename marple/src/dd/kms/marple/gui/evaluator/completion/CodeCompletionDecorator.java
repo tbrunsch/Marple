@@ -38,17 +38,17 @@ class CodeCompletionDecorator
 	private final KeyRepresentation					completionSuggestionKey;
 	private final ExecutableArgumentInfoProvider	executableArgumentInfoProvider;
 	private final KeyRepresentation					showExecutableArgumentsKey;
-	private final Consumer<String>					expressionConsumer;
+	private final Consumer<String>					inputConsumer;
 
 	private DisplayMode								displayMode						= DisplayMode.NOTHING;
 
-	CodeCompletionDecorator(JTextComponent textComponent, CompletionSuggestionProvider completionSuggestionProvider, KeyRepresentation completionSuggestionKey, ExecutableArgumentInfoProvider executableArgumentInfoProvider, KeyRepresentation showExecutableArgumentsKey, Consumer<String> expressionConsumer) {
+	CodeCompletionDecorator(JTextComponent textComponent, CompletionSuggestionProvider completionSuggestionProvider, KeyRepresentation completionSuggestionKey, ExecutableArgumentInfoProvider executableArgumentInfoProvider, KeyRepresentation showExecutableArgumentsKey, Consumer<String> inputConsumer) {
 		this.textComponent = textComponent;
 		this.completionSuggestionProvider = completionSuggestionProvider;
 		this.completionSuggestionKey = completionSuggestionKey;
 		this.executableArgumentInfoProvider = executableArgumentInfoProvider;
 		this.showExecutableArgumentsKey = showExecutableArgumentsKey;
-		this.expressionConsumer = expressionConsumer;
+		this.inputConsumer = inputConsumer;
 
 		textComponent.addKeyListener(new KeyAdapter() {
 			@Override
@@ -186,28 +186,28 @@ class CodeCompletionDecorator
 		popupMenu.pack();
 	}
 
-	private List<Action> getCompletionActions(String expression, int caretPosition) throws ParseException {
-		List<CompletionSuggestion> completionSuggestions = completionSuggestionProvider.suggestCompletions(expression, caretPosition);
+	private List<Action> getCompletionActions(String text, int caretPosition) throws ParseException {
+		List<CompletionSuggestion> completionSuggestions = completionSuggestionProvider.suggestCompletions(text, caretPosition);
 		ImmutableList.Builder<Action> actionsBuilder = ImmutableList.builder();
 		for (int i = 0; i < Math.min(completionSuggestions.size(), MAX_NUM_SUGGESTIONS); i++) {
 			CompletionSuggestion completionSuggestion = completionSuggestions.get(i);
-			Action action = createCompletionSuggestionAction(expression, completionSuggestion);
+			Action action = createCompletionSuggestionAction(text, completionSuggestion);
 			actionsBuilder.add(action);
 		}
 		return actionsBuilder.build();
 	}
 
-	private Action createCompletionSuggestionAction(String expression, CompletionSuggestion completionSuggestion) {
+	private Action createCompletionSuggestionAction(String text, CompletionSuggestion completionSuggestion) {
 		int caretPositionAfterInsertion = completionSuggestion.getCaretPositionAfterInsertion();
 		IntRange insertionRange = completionSuggestion.getInsertionRange();
 		String textToInsert = completionSuggestion.getTextToInsert();
 		return new AbstractAction(completionSuggestion.toString()) {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String text = expression.substring(0, insertionRange.getBegin())
+				String newText = text.substring(0, insertionRange.getBegin())
 								+ textToInsert
-								+ expression.substring(insertionRange.getEnd());
-				textComponent.setText(text);
+								+ text.substring(insertionRange.getEnd());
+				textComponent.setText(newText);
 				textComponent.setCaretPosition(caretPositionAfterInsertion);
 			}
 		};
@@ -229,8 +229,8 @@ class CodeCompletionDecorator
 		popupMenu.pack();
 	}
 
-	private List<JMenuItem> getExecutableArgumentInfoMenuItems(String expression, int caretPosition) throws ParseException {
-		Optional<ExecutableArgumentInfo> executableArgumentInfo = executableArgumentInfoProvider.getExecutableArgumentInfo(expression, caretPosition);
+	private List<JMenuItem> getExecutableArgumentInfoMenuItems(String text, int caretPosition) throws ParseException {
+		Optional<ExecutableArgumentInfo> executableArgumentInfo = executableArgumentInfoProvider.getExecutableArgumentInfo(text, caretPosition);
 		if (!executableArgumentInfo.isPresent()) {
 			return ImmutableList.of();
 		}
@@ -317,7 +317,7 @@ class CodeCompletionDecorator
 			if (popupMenuExists()) {
 				applySelectedAction();
 			} else {
-				expressionConsumer.accept(textComponent.getText());
+				inputConsumer.accept(textComponent.getText());
 			}
 			return;
 		}

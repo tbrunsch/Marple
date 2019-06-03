@@ -23,9 +23,7 @@ public class VisualSettingsUtils
 			.displayText(Frame.class, 			frame -> getDisplayText(frame, Frame::getTitle))
 			.displayText(AbstractButton.class,	button -> getDisplayText(button, AbstractButton::getText))
 			.displayText(JLabel.class,			label -> getDisplayText(label, JLabel::getText))
-			.displayText(JTextComponent.class, 	textComponent -> getDisplayText(textComponent, JTextComponent::getText))
-			;
-		// TODO: Add special functions for special objects
+			.displayText(JTextComponent.class, 	textComponent -> getDisplayText(textComponent, JTextComponent::getText));
 	}
 
 	public static void addDefaultViews(VisualSettingsBuilder builder) {

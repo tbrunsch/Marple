@@ -1,43 +1,42 @@
-package dd.kms.marple.gui.evaluator;
+package dd.kms.marple.gui.evaluator.imports;
 
-import com.google.common.base.Strings;
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.gui.evaluator.textfields.AbstractInputTextField;
+import dd.kms.zenodot.ParseException;
+import dd.kms.zenodot.settings.ParserSettings;
 
 import javax.swing.*;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static java.awt.GridBagConstraints.*;
 
-class CustomImportPanel extends JPanel
+abstract class AbstractImportPanel<T> extends JPanel
 {
 	private static final Insets	DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
 
 	private final JLabel						titleLabel;
 
-	private final DefaultListModel<String>		importListModel		= new DefaultListModel<>();
-	private final JList<String>					importList			= new JList<>(importListModel);
+	private final DefaultListModel<T>			importListModel		= new DefaultListModel<>();
+	private final JList<T>						importList			= new JList<>(importListModel);
 
-	private final JTextField					evaluationTextField;
+	private final AbstractInputTextField<T>		evaluationTextField;
 	private final JButton						addButton			= new JButton("+");
 	private final JButton						deleteButton		= new JButton("-");
 
-	private final Consumer<List<String>>		importsConsumer;
+	final InspectionContext						inspectionContext;
 
-	CustomImportPanel(String title, Collection<String> initialImports, Consumer<List<String>> importsConsumer, Consumer<JTextComponent> verifierAdder, InspectionContext inspectionContext) {
+	AbstractImportPanel(String title, InspectionContext inspectionContext) {
 		super(new GridBagLayout());
 
-		this.importsConsumer = importsConsumer;
+		this.inspectionContext = inspectionContext;
 
 		titleLabel = new JLabel(title);
 
-		evaluationTextField = new EvaluationTextField(string -> {}, inspectionContext);
-		verifierAdder.accept(evaluationTextField);
+		evaluationTextField = createEvaluationTextField();
+		evaluationTextField.addInputVerifier();
 
 		add(titleLabel,				new GridBagConstraints(0, 0, REMAINDER, 1, 0.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
 
@@ -49,14 +48,19 @@ class CustomImportPanel extends JPanel
 
 		deleteButton.setEnabled(false);
 
-		updateContent(initialImports);
-
 		addListeners();
+
+		SwingUtilities.invokeLater(this::updateContent);
 	}
 
-	void updateContent(Collection<String> imports) {
+	abstract AbstractInputTextField<T> createEvaluationTextField();
+	abstract Collection<T> getImports();
+	abstract void setImports(List<T> imports);
+
+	void updateContent() {
+		Collection<T> imports = getImports();
 		importListModel.clear();
-		for (String imp : imports) {
+		for (T imp : imports) {
 			importListModel.addElement(imp);
 		}
 	}
@@ -67,13 +71,21 @@ class CustomImportPanel extends JPanel
 		deleteButton.addActionListener(e -> onDeleteButtonClicked());
 	}
 
-	private void updateParserSettings() {
+	private void updateImports() {
 		int numImports = importListModel.getSize();
-		List<String> imports = new ArrayList<>(numImports);
+		List<T> imports = new ArrayList<>(numImports);
 		for (int i = 0; i < numImports; i++) {
 			imports.add(importListModel.get(i));
 		}
-		importsConsumer.accept(imports);
+		setImports(imports);
+	}
+
+	ParserSettings getParserSettings() {
+		return inspectionContext.getSettings().getEvaluator().getParserSettings();
+	}
+
+	void setParserSettings(ParserSettings parserSettings) {
+		inspectionContext.getSettings().getEvaluator().setParserSettings(parserSettings);
 	}
 
 	/*
@@ -85,10 +97,13 @@ class CustomImportPanel extends JPanel
 	}
 
 	private void onAddButtonClicked() {
-		if (!Strings.isNullOrEmpty(evaluationTextField.getText()) && evaluationTextField.getInputVerifier().verify(evaluationTextField)) {
-			importListModel.addElement(evaluationTextField.getText());
+		try {
+			T imp = evaluationTextField.evaluateText();
+			importListModel.addElement(imp);
+			updateImports();
+		} catch (ParseException e) {
+			/* happens if the import cannot be parsed */
 		}
-		updateParserSettings();
 	}
 
 	private void onDeleteButtonClicked() {
@@ -97,6 +112,6 @@ class CustomImportPanel extends JPanel
 			int row = selectedRows[i];
 			importListModel.remove(row);
 		}
-		updateParserSettings();
+		updateImports();
 	}
 }
