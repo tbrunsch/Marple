@@ -10,7 +10,7 @@ class EvaluationSettingsPane extends JTabbedPane
 {
 	private final GeneralSettingsPanel	generalSettingsPanel;
 	private final VariablePanel			variablePanel;
-	private final ImportPanel importPanel;
+	private final ImportPanel			importPanel;
 	private final CustomHierarchyPanel	customHierarchyPanel;
 
 	EvaluationSettingsPane(InspectionContext inspectionContext) {
@@ -20,9 +20,9 @@ class EvaluationSettingsPane extends JTabbedPane
 		customHierarchyPanel = new CustomHierarchyPanel(inspectionContext);
 
 		addTab("General Settings",	generalSettingsPanel);
-		addTab("Variables", variablePanel);
-		addTab("Imports", importPanel);
-		addTab("Custom Hierarchy", customHierarchyPanel);
+		addTab("Variables",			variablePanel);
+		addTab("Imports",			importPanel);
+		addTab("Custom Hierarchy",	customHierarchyPanel);
 
 		setPreferredSize(new Dimension(400, 300));
 	}

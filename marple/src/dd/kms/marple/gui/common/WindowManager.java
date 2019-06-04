@@ -17,7 +17,7 @@ public class WindowManager
 	private static final Map<Object, Window>	MANAGED_WINDOWS	= new LinkedHashMap<>();
 	private static final Object					LOCK			= new Object();
 
-	public static <T extends Component> void showInFrame(String title, Supplier<T> componentSupplier, Consumer<T> contentUpdater) {
+	public static <T extends Component> void showInFrame(String title, Supplier<T> componentSupplier, Consumer<T> componentAction, Consumer<T> contentUpdater) {
 		Supplier<JFrame> frameConstructor = () -> {
 			JFrame frame = new JFrame(title);
 			T component = componentSupplier.get();
@@ -26,7 +26,16 @@ public class WindowManager
 			return frame;
 		};
 		JFrame window = getWindow(title, frameConstructor, Runnables.doNothing());
+		if (window == null) {
+			return;
+		}
 		window.requestFocus();
+		Component[] components = window.getContentPane().getComponents();
+		if (components.length == 0) {
+			return;
+		}
+		T component = (T) components[0];
+		componentAction.accept(component);
 	}
 
 	public static void updateFrameOnFocusGained(JFrame frame, Runnable contentUpdater) {

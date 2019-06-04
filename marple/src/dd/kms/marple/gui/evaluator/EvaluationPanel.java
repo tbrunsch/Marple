@@ -5,10 +5,7 @@ import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.gui.evaluator.textfields.ExpressionInputTextField;
 import dd.kms.marple.gui.inspector.views.FieldView;
-import dd.kms.zenodot.ExpressionParser;
 import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.Parsers;
-import dd.kms.zenodot.settings.ParserSettings;
 
 import javax.swing.*;
 import java.awt.*;
@@ -56,6 +53,10 @@ public class EvaluationPanel extends JPanel
 		evaluationTextField.setExpression(expression);
 	}
 
+	private EvaluationSettingsPane createSettingsPane() {
+		return new EvaluationSettingsPane(inspectionContext);
+	}
+
 	void updateContent() {
 		dynamicTypingControls.updateControls();
 	}
@@ -77,7 +78,11 @@ public class EvaluationPanel extends JPanel
 		evaluationResultPanel.repaint();
 	}
 
+	private void onShowSettings(EvaluationSettingsPane settingsPane) {
+		// currently we do nothing at all
+	}
+
 	private void openSettingsDialog() {
-		WindowManager.showInFrame("Settings", () -> new EvaluationSettingsPane(inspectionContext), EvaluationSettingsPane::updateContent);
+		WindowManager.showInFrame("Settings", this::createSettingsPane, this::onShowSettings, EvaluationSettingsPane::updateContent);
 	}
 }

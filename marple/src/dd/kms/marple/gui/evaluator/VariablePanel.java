@@ -12,6 +12,8 @@ import dd.kms.zenodot.settings.Variable;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +48,28 @@ public class VariablePanel extends JPanel
 		updateContent();
 
 		addListeners();
+	}
+
+	public void editVariableName(String name) {
+		updateContent();
+		for (int i = 0; i < variables.size(); i++) {
+			Variable variable = variables.get(i);
+			if (name.equals(variable.getName())) {
+				editVariableName(i);
+				return;
+			}
+		}
+	}
+
+	private void editVariableName(int row) {
+		table.editCellAt(row, 0);
+		TableCellEditor cellEditor = table.getCellEditor();
+		Component editorComponent = cellEditor.getTableCellEditorComponent(table, variables.get(row).getName(), true, row, 0);
+		if (editorComponent instanceof JTextComponent) {
+			JTextComponent textEditorComponent = (JTextComponent) editorComponent;
+			textEditorComponent.requestFocusInWindow();
+			textEditorComponent.selectAll();
+		}
 	}
 
 	public void updateContent() {
