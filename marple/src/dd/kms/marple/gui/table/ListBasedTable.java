@@ -2,6 +2,8 @@ package dd.kms.marple.gui.table;
 
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.Actions;
+import dd.kms.marple.gui.filters.ValueFilter;
+import dd.kms.marple.gui.filters.ValueFilters;
 
 import javax.swing.*;
 import javax.swing.table.JTableHeader;
@@ -76,7 +78,7 @@ public class ListBasedTable<T> extends JPanel
 	private void addFilterChangedListeners() {
 		int numColumns = tableModel.getColumnCount();
 		for (int col = 0; col < numColumns; col++) {
-			TableValueFilter valueFilter = tableModel.getValueFilter(col);
+			ValueFilter valueFilter = tableModel.getValueFilter(col);
 			valueFilter.addFilterChangedListener(this::onFilterChanged);
 		}
 	}
@@ -86,10 +88,10 @@ public class ListBasedTable<T> extends JPanel
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				ActionProvider actionProvider = getCellValueAsActionProvider(e.getPoint());
-			Cursor cursor = actionProvider != null && actionProvider.getDefaultAction().isPresent()
-								? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-								: Cursor.getDefaultCursor();
-			table.setCursor(cursor);
+				Cursor cursor = Actions.hasDefaultAction(actionProvider)
+									? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+									: Cursor.getDefaultCursor();
+				table.setCursor(cursor);
 			}
 		});
 	}
@@ -147,8 +149,8 @@ public class ListBasedTable<T> extends JPanel
 	}
 
 	private void showFilterPopup(int column, Point mousePos) {
-		TableValueFilter valueFilter = tableModel.getValueFilter(column);
-		if (valueFilter == TableValueFilters.NONE) {
+		ValueFilter valueFilter = tableModel.getValueFilter(column);
+		if (valueFilter == ValueFilters.NONE) {
 			return;
 		}
 		String columnName = tableModel.getPlainColumnName(column);

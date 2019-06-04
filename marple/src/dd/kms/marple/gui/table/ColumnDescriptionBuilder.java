@@ -1,5 +1,8 @@
 package dd.kms.marple.gui.table;
 
+import dd.kms.marple.gui.filters.ValueFilter;
+import dd.kms.marple.gui.filters.ValueFilters;
+
 import java.util.function.Function;
 
 public class ColumnDescriptionBuilder<T>
@@ -8,7 +11,7 @@ public class ColumnDescriptionBuilder<T>
 	private final Class<?>				clazz;
 	private final Function<T, Object>	valueExtractor;
 
-	private TableValueFilter			valueFilter		= TableValueFilters.NONE;
+	private ValueFilter valueFilter		= ValueFilters.NONE;
 	private EditorSettings<T>			editorSettings	= null;
 
 	public ColumnDescriptionBuilder(String name, Class<?> clazz, Function<T, Object> valueExtractor) {
@@ -17,7 +20,7 @@ public class ColumnDescriptionBuilder<T>
 		this.valueExtractor = valueExtractor;
 	}
 
-	public ColumnDescriptionBuilder<T> valueFilter(TableValueFilter valueFilter) {
+	public ColumnDescriptionBuilder<T> valueFilter(ValueFilter valueFilter) {
 		this.valueFilter = valueFilter;
 		return this;
 	}

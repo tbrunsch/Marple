@@ -1,4 +1,4 @@
-package dd.kms.marple.gui.table;
+package dd.kms.marple.gui.filters;
 
 import dd.kms.marple.InspectionContext;
 
@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class TableValueFilterSelection extends AbstractTableValueFilter
+class ValueFilterSelection extends AbstractValueFilter
 {
 	private final InspectionContext	inspectionContext;
 
 	// Map to true if it should be shown
 	private final Map<Object, Boolean>		filteredValues = new LinkedHashMap<>();
 
-	TableValueFilterSelection(InspectionContext inspectionContext) {
+	ValueFilterSelection(InspectionContext inspectionContext) {
 		this.inspectionContext = inspectionContext;
 	}
 

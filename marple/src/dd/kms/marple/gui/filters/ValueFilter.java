@@ -1,9 +1,9 @@
-package dd.kms.marple.gui.table;
+package dd.kms.marple.gui.filters;
 
 import java.awt.*;
 import java.util.function.Predicate;
 
-public interface TableValueFilter extends Predicate<Object>
+public interface ValueFilter extends Predicate<Object>
 {
 	boolean isActive();
 	void addAvailableValue(Object o);

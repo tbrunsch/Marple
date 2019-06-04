@@ -1,10 +1,12 @@
 package dd.kms.marple.gui.table;
 
+import dd.kms.marple.gui.filters.ValueFilter;
+
 public interface ColumnDescription<T>
 {
 	String getName();
 	Class<?> getColumnClass();
 	Object extractValue(T element);
-	TableValueFilter createValueFilter();
+	ValueFilter createValueFilter();
 	EditorSettings<T> getEditorSettings();
 }

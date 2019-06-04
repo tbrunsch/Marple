@@ -1,9 +1,9 @@
-package dd.kms.marple.gui.table;
+package dd.kms.marple.gui.filters;
 
 import java.util.HashSet;
 import java.util.Set;
 
-abstract class AbstractTableValueFilter implements TableValueFilter
+abstract class AbstractValueFilter implements ValueFilter
 {
 	private final Set<Runnable> filterChangedListeners	= new HashSet<>();
 

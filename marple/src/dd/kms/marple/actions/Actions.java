@@ -15,6 +15,10 @@ public class Actions
 			: name;
 	}
 
+	public static boolean hasDefaultAction(ActionProvider actionProvider) {
+		return actionProvider != null && actionProvider.getDefaultAction().isPresent();
+	}
+
 	public static void runDefaultAction(ActionProvider actionProvider) {
 		Optional<InspectionAction> defaultAction = actionProvider.getDefaultAction();
 		if (defaultAction.isPresent()) {

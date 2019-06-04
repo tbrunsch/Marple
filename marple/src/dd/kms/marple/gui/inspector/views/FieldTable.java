@@ -3,6 +3,7 @@ package dd.kms.marple.gui.inspector.views;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.ActionProviderBuilder;
+import dd.kms.marple.gui.filters.ValueFilters;
 import dd.kms.marple.gui.table.*;
 import dd.kms.zenodot.common.AccessModifier;
 import dd.kms.zenodot.common.FieldScanner;
@@ -40,11 +41,11 @@ public class FieldTable extends JPanel
 
 	private List<ColumnDescription<Field>> createColumnDescriptions() {
 		return Arrays.asList(
-			new ColumnDescriptionBuilder<Field>("Name",		String.class,			field -> field.getName())							.valueFilter(TableValueFilters.createWildcardFilter()).build(),
-			new ColumnDescriptionBuilder<Field>("Value",	ActionProvider.class, 	field -> getFieldValueActionProvider(field))		.valueFilter(TableValueFilters.createWildcardFilter()).build(),
-			new ColumnDescriptionBuilder<Field>("Type",		Class.class,			field -> field.getType().getSimpleName())			.valueFilter(TableValueFilters.createWildcardFilter()).build(),
-			new ColumnDescriptionBuilder<Field>("Class",	String.class,			field -> field.getDeclaringClass().getSimpleName())	.valueFilter(TableValueFilters.createSelectionFilter(inspectionContext)).build(),
-			new ColumnDescriptionBuilder<Field>("Modifier",	AccessModifier.class,	field -> getAccessModifier(field))					.valueFilter(TableValueFilters.createMinimumAccessLevelFilter()).build()
+			new ColumnDescriptionBuilder<Field>("Name",		String.class,			field -> field.getName())							.valueFilter(ValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<Field>("Value",	ActionProvider.class, 	field -> getFieldValueActionProvider(field))		.valueFilter(ValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<Field>("Type",		Class.class,			field -> field.getType().getSimpleName())			.valueFilter(ValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<Field>("Class",	String.class,			field -> field.getDeclaringClass().getSimpleName())	.valueFilter(ValueFilters.createSelectionFilter(inspectionContext)).build(),
+			new ColumnDescriptionBuilder<Field>("Modifier",	AccessModifier.class,	field -> getAccessModifier(field))					.valueFilter(ValueFilters.createMinimumAccessLevelFilter()).build()
 		);
 	}
 

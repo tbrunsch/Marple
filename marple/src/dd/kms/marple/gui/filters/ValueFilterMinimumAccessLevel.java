@@ -1,12 +1,11 @@
-package dd.kms.marple.gui.table;
+package dd.kms.marple.gui.filters;
 
-import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.common.AccessModifierInput;
 import dd.kms.zenodot.common.AccessModifier;
 
 import java.awt.*;
 
-class TableValueFilterMinimumAccessLevel extends AbstractTableValueFilter
+class ValueFilterMinimumAccessLevel extends AbstractValueFilter
 {
 	private AccessModifier	minimumAccessLevel	= AccessModifier.PRIVATE;
 

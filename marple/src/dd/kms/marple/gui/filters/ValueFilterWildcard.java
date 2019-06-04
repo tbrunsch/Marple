@@ -1,4 +1,4 @@
-package dd.kms.marple.gui.table;
+package dd.kms.marple.gui.filters;
 
 import dd.kms.zenodot.common.RegexUtils;
 
@@ -8,7 +8,7 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.regex.Pattern;
 
-class TableValueFilterWildcard extends AbstractTableValueFilter
+class ValueFilterWildcard extends AbstractValueFilter
 {
 	private String	text			= "";
 	private Pattern	filterPattern	= RegexUtils.createRegexForWildcardString(text);

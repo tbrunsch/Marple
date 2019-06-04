@@ -10,7 +10,7 @@ import java.awt.event.MouseEvent;
 public class ActionProviderTreeMouseListener extends MouseAdapter
 {
 	@Override
-	public void mouseClicked(MouseEvent e) {
+	public void mouseReleased(MouseEvent e) {
 		ActionProvider actionProvider = ActionProviderTreeNodes.getActionProvider(e);
 		if (actionProvider != null) {
 			if (SwingUtilities.isLeftMouseButton(e)) {

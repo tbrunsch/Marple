@@ -1,5 +1,7 @@
 package dd.kms.marple.gui.table;
 
+import dd.kms.marple.gui.filters.ValueFilter;
+
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -9,7 +11,7 @@ public class ListBasedTableModel<T> extends AbstractTableModel
 {
 	private final List<T>					 	list;
 	private final List<ColumnDescription<T>>	columnDescriptions;
-	private final List<TableValueFilter>		valueFilters;
+	private final List<ValueFilter>		valueFilters;
 
 	public ListBasedTableModel(List<T> list, List<ColumnDescription<T>> columnDescriptions) {
 		this.list = list;
@@ -17,13 +19,13 @@ public class ListBasedTableModel<T> extends AbstractTableModel
 		this.valueFilters = createValueFilters();
 	}
 
-	private List<TableValueFilter> createValueFilters() {
+	private List<ValueFilter> createValueFilters() {
 		int numRows = getRowCount();
 		int numCols = getColumnCount();
-		List<TableValueFilter> valueFilters = new ArrayList<>(numCols);
+		List<ValueFilter> valueFilters = new ArrayList<>(numCols);
 		for (int col = 0; col < numCols; col++) {
 			ColumnDescription<T> columnDescription = columnDescriptions.get(col);
-			TableValueFilter valueFilter = columnDescription.createValueFilter();
+			ValueFilter valueFilter = columnDescription.createValueFilter();
 			if (valueFilter != null) {
 				for (int row = 0; row < numRows; row++) {
 					Object value = getValueAt(row, col);
@@ -47,7 +49,7 @@ public class ListBasedTableModel<T> extends AbstractTableModel
 
 	@Override
 	public String getColumnName(int col) {
-		TableValueFilter valueFilter = getValueFilter(col);
+		ValueFilter valueFilter = getValueFilter(col);
 		String prefix = valueFilter.isActive() ? "*" : "";
 		return prefix + getPlainColumnName(col);
 	}
@@ -82,7 +84,7 @@ public class ListBasedTableModel<T> extends AbstractTableModel
 		return columnDescriptions.get(col).getName();
 	}
 
-	TableValueFilter getValueFilter(int col) {
+	ValueFilter getValueFilter(int col) {
 		return valueFilters.get(col);
 	}
 }
