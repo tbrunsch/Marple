@@ -9,4 +9,5 @@ public interface ExpressionEvaluator
 	ParserSettings getParserSettings();
 	void setParserSettings(ParserSettings parserSettings);
 	void evaluate(String expression, Object thisValue);
+	void evaluate(String expression, Object thisValue, int caretPosition);
 }

@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class MethodView extends JPanel implements ObjectView
 {
@@ -75,14 +76,16 @@ public class MethodView extends JPanel implements ObjectView
 	}
 
 	private ActionProvider getMethodActionProvider(Method method) {
-		String methodName = method.getName();
-		String argumentList = getArgumentsAsString(method);
-		Class<?>[] parameterTypes = method.getParameterTypes();
 		ImmutableList.Builder<InspectionAction> actionsBuilder = ImmutableList.builder();
-		if (parameterTypes.length == 0) {
+		int numArguments = method.getParameterTypes().length;
+		if (numArguments == 0) {
 			actionsBuilder.add(createInvokeMethodAction(method));
 		}
-		actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(methodName + "(" + argumentList + ")", object));
+		String methodName = method.getName();
+		String argumentPlaceholder = IntStream.range(0, numArguments).mapToObj(i -> "").collect(Collectors.joining(", "));
+		String expression = methodName + "(" + argumentPlaceholder + ")";
+		int caretPosition = numArguments == 0 ? expression.length() : methodName.length() + 1;
+		actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(expression, object, caretPosition));
 		return ActionProvider.of(methodName, actionsBuilder.build());
 	}
 

@@ -14,6 +14,11 @@ public class EvaluateAsThisAction implements InspectionAction
 	}
 
 	@Override
+	public boolean isDefaultAction() {
+		return false;
+	}
+
+	@Override
 	public String getName() {
 		return "Evaluate";
 	}

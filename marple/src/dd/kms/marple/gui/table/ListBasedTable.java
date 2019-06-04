@@ -86,7 +86,9 @@ public class ListBasedTable<T> extends JPanel
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				ActionProvider actionProvider = getCellValueAsActionProvider(e.getPoint());
-			Cursor cursor = actionProvider == null ? Cursor.getDefaultCursor() : Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+			Cursor cursor = actionProvider != null && actionProvider.getDefaultAction().isPresent()
+								? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+								: Cursor.getDefaultCursor();
 			table.setCursor(cursor);
 			}
 		});

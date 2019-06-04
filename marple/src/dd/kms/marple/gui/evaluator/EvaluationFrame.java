@@ -45,4 +45,8 @@ public class EvaluationFrame extends JFrame
 	public void setExpression(String expression) {
 		evaluationPanel.setExpression(expression);
 	}
+
+	public void setCaretPosition(int caretPosition) {
+		evaluationPanel.setCaretPosition(caretPosition);
+	}
 }

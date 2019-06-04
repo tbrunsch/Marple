@@ -1,7 +1,10 @@
 package dd.kms.marple.actions;
 
+import com.google.common.collect.Iterables;
+
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ActionProvider
@@ -20,6 +23,15 @@ public class ActionProvider
 
 	public List<InspectionAction> getActions() {
 		return actions;
+	}
+
+	public Optional<InspectionAction> getDefaultAction() {
+		List<InspectionAction> defaultActions = actions.stream()
+			.filter(InspectionAction::isDefaultAction)
+			.collect(Collectors.toList());
+		return defaultActions.size() == 1
+				? Optional.of(Iterables.getOnlyElement(defaultActions))
+				: Optional.empty();
 	}
 
 	@Override

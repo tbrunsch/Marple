@@ -24,6 +24,11 @@ public class AddVariableAction implements InspectionAction
 	}
 
 	@Override
+	public boolean isDefaultAction() {
+		return false;
+	}
+
+	@Override
 	public String getName() {
 		return "Add to variables";
 	}

@@ -14,6 +14,11 @@ public class HistoryActionWrapper implements InspectionAction
 	}
 
 	@Override
+	public boolean isDefaultAction() {
+		return wrappedAction.isDefaultAction();
+	}
+
+	@Override
 	public String getName() {
 		return wrappedAction.getName();
 	}

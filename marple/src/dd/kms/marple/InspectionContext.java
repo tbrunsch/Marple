@@ -22,6 +22,7 @@ public interface InspectionContext
 	InspectionAction createInvokeMethodAction(Object object, Method method, Consumer<Object> returnValueConsumer, Consumer<Exception> exceptionConsumer);
 	InspectionAction createAddVariableAction(String suggestedName, Object value);
 	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue);
+	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue, int caretPosition);
 	InspectionAction createEvaluateAsThisAction(Object thisValue);
 	InspectionAction createSearchInstancesFromHereAction(Object root);
 

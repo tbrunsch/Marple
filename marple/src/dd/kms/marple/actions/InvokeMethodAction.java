@@ -18,6 +18,11 @@ public class InvokeMethodAction implements InspectionAction
 	}
 
 	@Override
+	public boolean isDefaultAction() {
+		return true;
+	}
+
+	@Override
 	public String getName() {
 		return "Invoke";
 	}

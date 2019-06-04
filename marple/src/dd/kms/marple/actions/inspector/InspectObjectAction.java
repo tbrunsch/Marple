@@ -16,6 +16,11 @@ public class InspectObjectAction implements InspectionAction
 	}
 
 	@Override
+	public boolean isDefaultAction() {
+		return true;
+	}
+
+	@Override
 	public String getName() {
 		return "Inspect";
 	}

@@ -53,6 +53,10 @@ public class EvaluationPanel extends JPanel
 		evaluationTextField.setExpression(expression);
 	}
 
+	public void setCaretPosition(int caretPosition) {
+		evaluationTextField.setCaretPosition(caretPosition);
+	}
+
 	private EvaluationSettingsPane createSettingsPane() {
 		return new EvaluationSettingsPane(inspectionContext);
 	}

@@ -12,6 +12,11 @@ public class HistoryBackAction implements InspectionAction
 	}
 
 	@Override
+	public boolean isDefaultAction() {
+		return false;
+	}
+
+	@Override
 	public String getName() {
 		return "Back";
 	}

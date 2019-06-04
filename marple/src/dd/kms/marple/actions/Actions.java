@@ -1,11 +1,9 @@
 package dd.kms.marple.actions;
 
-import dd.kms.marple.InspectionContext;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.List;
+import java.util.Optional;
 
 public class Actions
 {
@@ -18,16 +16,10 @@ public class Actions
 	}
 
 	public static void runDefaultAction(ActionProvider actionProvider) {
-		List<InspectionAction> actions = actionProvider.getActions();
-		if (!actions.isEmpty()) {
-			InspectionAction defaultAction = actions.get(0);
-			defaultAction.perform();
+		Optional<InspectionAction> defaultAction = actionProvider.getDefaultAction();
+		if (defaultAction.isPresent()) {
+			defaultAction.get().perform();
 		}
-	}
-
-	public static InspectionAction createAddVariableAction(String suggestedVariableName, Object value, InspectionContext inspectionContext) {
-		String variableName = suggestedVariableName == null ? "variable" : suggestedVariableName;
-		return new AddVariableAction(variableName, value, inspectionContext);
 	}
 
 	public static void showActionPopup(Component parent, ActionProvider actionProvider, MouseEvent e) {
@@ -37,13 +29,12 @@ public class Actions
 
 	private static JPopupMenu createActionPopup(ActionProvider actionProvider) {
 		JPopupMenu popup = new JPopupMenu();
-		boolean defaultAction = true;
+		InspectionAction defaultAction = actionProvider.getDefaultAction().orElse(null);
 		for (InspectionAction action : actionProvider.getActions()) {
 			JMenuItem actionItem = new JMenuItem(new ActionWrapper(action));
-			Font font = actionItem.getFont().deriveFont(defaultAction ? Font.BOLD : Font.PLAIN);
+			Font font = actionItem.getFont().deriveFont(action == defaultAction ? Font.BOLD : Font.PLAIN);
 			actionItem.setFont(font);
 			popup.add(actionItem);
-			defaultAction = false;
 		}
 		return popup;
 	}
