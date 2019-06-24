@@ -7,40 +7,39 @@ import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.List;
 import java.util.function.IntFunction;
 
-import static dd.kms.marple.gui.actionprovidertree.inspectiontree.IndexedObjectContainerTreeNode.RANGE_SIZE_BASE;
+import static dd.kms.marple.gui.actionprovidertree.inspectiontree.ListTreeNode.RANGE_SIZE_BASE;
 
-class IndexedObjectContainerIndexRangeTreeNode extends AbstractInspectionTreeNode
+class ListIndexRangeTreeNode extends AbstractInspectionTreeNode
 {
 	/**
 	 * Creates a node representing the indices from rangeBeginIndex (inclusive) to rangeEndIndex (exclusive).
 	 */
-	static InspectionTreeNode createRangeNode(int childIndex, Object container, TypeInfo typeInfo, IntFunction<Object> elementAccessor, int rangeBeginIndex, int rangeEndIndex, InspectionContext inspectionContext) {
+	static InspectionTreeNode createRangeNode(int childIndex, Object container, TypeInfo typeInfo, List<?> list, int rangeBeginIndex, int rangeEndIndex, InspectionContext inspectionContext) {
 		int rangeSize = rangeEndIndex - rangeBeginIndex;
 		if (rangeSize == 1) {
 			int index = rangeBeginIndex;
-			Object element = elementAccessor.apply(index);
+			Object element = list.get(index);
 			TypeInfo elementTypeInfo = element == null ? InfoProvider.NO_TYPE : typeInfo.resolveType(element.getClass());
 			return InspectionTreeNodes.create(childIndex, "[" + index + "]", element, elementTypeInfo, inspectionContext);
 		}
-		return new IndexedObjectContainerIndexRangeTreeNode(childIndex, container, typeInfo, elementAccessor, rangeBeginIndex, rangeEndIndex, inspectionContext);
+		return new ListIndexRangeTreeNode(childIndex, container, typeInfo, list, rangeBeginIndex, rangeEndIndex, inspectionContext);
 	}
 
-	private final Object 				container;
-	private final TypeInfo				typeInfo;
-	private final IntFunction<Object>	elementAccessor;
-	private final int					rangeBeginIndex;
-	private final int					rangeEndIndex;
-	private final InspectionContext		inspectionContext;
+	private final Object 			container;
+	private final TypeInfo			typeInfo;
+	private final List<?>			list;
+	private final int				rangeBeginIndex;
+	private final int				rangeEndIndex;
+	private final InspectionContext	inspectionContext;
 
-	IndexedObjectContainerIndexRangeTreeNode(int childIndex, Object container, TypeInfo typeInfo, IntFunction<Object> elementAccessor, int rangeBeginIndex, int rangeEndIndex, InspectionContext inspectionContext) {
+	ListIndexRangeTreeNode(int childIndex, Object container, TypeInfo typeInfo, List<?> list, int rangeBeginIndex, int rangeEndIndex, InspectionContext inspectionContext) {
 		super(childIndex);
 		this.container = container;
 		this.typeInfo = typeInfo;
-		this.elementAccessor = elementAccessor;
+		this.list = list;
 		this.rangeBeginIndex = rangeBeginIndex;
 		this.rangeEndIndex = rangeEndIndex;
 		this.inspectionContext = inspectionContext;
@@ -72,7 +71,7 @@ class IndexedObjectContainerIndexRangeTreeNode extends AbstractInspectionTreeNod
 	}
 
 	private InspectionTreeNode createRangeNode(int childIndex, int rangeBeginIndex, int rangeEndIndex) {
-		return createRangeNode(childIndex, container, typeInfo, elementAccessor, rangeBeginIndex, rangeEndIndex, inspectionContext);
+		return createRangeNode(childIndex, container, typeInfo, list, rangeBeginIndex, rangeEndIndex, inspectionContext);
 	}
 
 	@Override

@@ -6,10 +6,13 @@ import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.actions.Actions;
 import dd.kms.marple.actions.InspectionAction;
+import dd.kms.marple.common.UniformView;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -17,18 +20,22 @@ import java.util.function.Function;
 /**
  * Node that represents both, lists and arrays
  */
-class SetBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
+class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 {
-	static final int	RANGE_SIZE_BASE	= 10;
+	static final int			RANGE_SIZE_BASE	= 10;
+
+	private static final int	UNKNOWN_SIZE	= -1;
 
 	private final @Nullable String				fieldName;
 	private final Object 						container;
 	private final TypeInfo						typeInfo;
-	private final Set<?>						keys;
+	private final Iterable<?>					keys;
 	private final @Nullable Function<Object, ?>	elementAccessor;
 	private final InspectionContext				inspectionContext;
 
-	SetBasedObjectContainerTreeNode(int childIndex, @Nullable String displayKey, Object container, TypeInfo typeInfo, Set<?> keys, @Nullable Function<Object, ?> elementAccessor, InspectionContext inspectionContext) {
+	private int size;
+
+	IterableBasedObjectContainerTreeNode(int childIndex, @Nullable String displayKey, Object container, TypeInfo typeInfo, Iterable<?> keys, @Nullable Function<Object, ?> elementAccessor, InspectionContext inspectionContext) {
 		super(childIndex);
 		this.fieldName = displayKey;
 		this.container = container;
@@ -36,6 +43,8 @@ class SetBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 		this.keys = keys;
 		this.elementAccessor = elementAccessor;
 		this.inspectionContext = inspectionContext;
+
+		this.size = keys instanceof Collection<?> ? ((Collection<?>) keys).size() : UNKNOWN_SIZE;
 	}
 
 	@Override
@@ -53,6 +62,9 @@ class SetBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 			}
 			entryIndex++;
 		}
+		if (size == UNKNOWN_SIZE) {
+			size = entryIndex;
+		}
 		return childBuilder.build();
 	}
 
@@ -65,7 +77,8 @@ class SetBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 
 	@Override
 	public String toString() {
-		String valueDisplayText = Actions.trimName(inspectionContext.getDisplayText(container)) + " size = " + keys.size();
+		String sizeText = size == UNKNOWN_SIZE ? "?" : Integer.toString(size);
+		String valueDisplayText = Actions.trimName(inspectionContext.getDisplayText(container)) + " size = " + sizeText;
 		return fieldName == null ? valueDisplayText : fieldName + " = " + valueDisplayText;
 	}
 
