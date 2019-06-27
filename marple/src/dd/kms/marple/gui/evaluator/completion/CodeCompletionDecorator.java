@@ -1,6 +1,7 @@
 package dd.kms.marple.gui.evaluator.completion;
 
 import com.google.common.collect.ImmutableList;
+import dd.kms.marple.gui.common.ExceptionFormatter;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators.CompletionSuggestionProvider;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators.ExecutableArgumentInfoProvider;
 import dd.kms.marple.settings.KeyRepresentation;
@@ -174,7 +175,7 @@ class CodeCompletionDecorator
 		try {
 			actions = getCompletionActions(textComponent.getText(), textComponent.getCaretPosition());
 		} catch (ParseException e) {
-			JMenuItem menuItem = new JMenuItem(CodeCompletionDecorators.formatExceptionMessage(textComponent.getText(), e));
+			JMenuItem menuItem = new JMenuItem(ExceptionFormatter.formatParseException(textComponent.getText(), e));
 			CodeCompletionDecorators.configureExceptionComponent(menuItem);
 			popupMenu.add(menuItem);
 		}
@@ -219,7 +220,7 @@ class CodeCompletionDecorator
 		try {
 			executableArgumentInfoMenuItems = getExecutableArgumentInfoMenuItems(textComponent.getText(), textComponent.getCaretPosition());
 		} catch (ParseException e) {
-			JMenuItem menuItem = new JMenuItem(CodeCompletionDecorators.formatExceptionMessage(textComponent.getText(), e));
+			JMenuItem menuItem = new JMenuItem(ExceptionFormatter.formatParseException(textComponent.getText(), e));
 			CodeCompletionDecorators.configureExceptionComponent(menuItem);
 			executableArgumentInfoMenuItems = ImmutableList.of(menuItem);
 		}
