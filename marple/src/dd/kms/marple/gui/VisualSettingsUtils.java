@@ -1,7 +1,9 @@
 package dd.kms.marple.gui;
 
-import dd.kms.marple.gui.inspector.views.FieldView;
-import dd.kms.marple.gui.inspector.views.MethodView;
+import dd.kms.marple.InspectionContext;
+import dd.kms.marple.common.ReflectionUtils;
+import dd.kms.marple.gui.inspector.views.fieldview.FieldView;
+import dd.kms.marple.gui.inspector.views.methodview.MethodView;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -19,7 +21,7 @@ public class VisualSettingsUtils
 			.displayText(String.class,			s -> '"' + s + '"')
 			.displayText(char.class,			c -> "'" + c + "'")
 			.displayText(Character.class,		c -> "'" + c + "'")
-			.displayText(Object.class, 			object -> getDisplayText(object, Object::toString))
+			.displayText(Object.class, 			object -> getObjectDisplayText(object))
 			.displayText(Frame.class, 			frame -> getDisplayText(frame, Frame::getTitle))
 			.displayText(AbstractButton.class,	button -> getDisplayText(button, AbstractButton::getText))
 			.displayText(JLabel.class,			label -> getDisplayText(label, JLabel::getText))
@@ -34,6 +36,12 @@ public class VisualSettingsUtils
 
 	private static String getObjectHashText(Object object) {
 		return object.getClass().getSimpleName() + "@" + System.identityHashCode(object);
+	}
+
+	private static String getObjectDisplayText(Object object) {
+		return object != null && !ReflectionUtils.isObjectInspectable(object)
+				? object.toString()
+				: getDisplayText(object, Object::toString);
 	}
 
 	private static <T> String getDisplayText(T object, Function<T, String> textExtractionFunction) {

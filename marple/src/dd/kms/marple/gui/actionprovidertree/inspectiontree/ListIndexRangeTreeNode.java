@@ -23,7 +23,7 @@ class ListIndexRangeTreeNode extends AbstractInspectionTreeNode
 			int index = rangeBeginIndex;
 			Object element = list.get(index);
 			TypeInfo elementTypeInfo = element == null ? InfoProvider.NO_TYPE : typeInfo.resolveType(element.getClass());
-			return InspectionTreeNodes.create(childIndex, "[" + index + "]", element, elementTypeInfo, inspectionContext);
+			return InspectionTreeNodes.create(childIndex, "[" + index + "]", element, elementTypeInfo, true, inspectionContext);
 		}
 		return new ListIndexRangeTreeNode(childIndex, container, typeInfo, list, rangeBeginIndex, rangeEndIndex, inspectionContext);
 	}

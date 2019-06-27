@@ -16,13 +16,13 @@ public class InspectionTreeNodes
 {
 	private static final int	COLLECTION_SIZE_THRESHOLD	= 100;
 
-	public static TreeModel createModel(@Nullable String fieldName, Object object, InspectionContext inspectionContext) {
+	public static TreeModel createModel(@Nullable String fieldName, Object object, boolean limitTreeSize, InspectionContext inspectionContext) {
 		TypeInfo typeInfo = object == null ? InfoProvider.NO_TYPE : InfoProvider.createTypeInfo(object.getClass());
-		InspectionTreeNode treeNode = create(-1, fieldName, object, typeInfo, inspectionContext);
+		InspectionTreeNode treeNode = create(-1, fieldName, object, typeInfo, limitTreeSize, inspectionContext);
 		return new InspectionTreeModel(treeNode);
 	}
 
-	static InspectionTreeNode create(int childIndex, @Nullable String displayKey, Object object, TypeInfo typeInfo, InspectionContext inspectionContext) {
+	static InspectionTreeNode create(int childIndex, @Nullable String displayKey, Object object, TypeInfo typeInfo, boolean limitTreeSize, InspectionContext inspectionContext) {
 		if (UniformView.canViewAsList(object)) {
 			List<?> list = UniformView.asList(object);
 			return new ListTreeNode(childIndex, displayKey, object, typeInfo, list, inspectionContext);
@@ -30,20 +30,22 @@ public class InspectionTreeNodes
 
 		if (object instanceof Iterable<?>) {
 			Iterable<?> iterable = (Iterable<?>) object;
-			boolean tooLarge = (iterable instanceof Collection<?>) && ((Collection<?>) iterable).size() > COLLECTION_SIZE_THRESHOLD;
+			boolean tooLarge = limitTreeSize && (iterable instanceof Collection<?>) && ((Collection<?>) iterable).size() > COLLECTION_SIZE_THRESHOLD;
 			if (!tooLarge) {
 				return new IterableBasedObjectContainerTreeNode(childIndex, displayKey, object, typeInfo, iterable, null, inspectionContext);
 			}
 		}
 		if (object instanceof Map<?, ?>) {
 			Map<?, ?> map = (Map<?, ?>) object;
-			if (map.size() <= COLLECTION_SIZE_THRESHOLD) {
+			boolean tooLarge = limitTreeSize && map.size() > COLLECTION_SIZE_THRESHOLD;
+			if (!tooLarge) {
 				return new IterableBasedObjectContainerTreeNode(childIndex, displayKey, object, typeInfo, map.keySet(), map::get, inspectionContext);
 			}
 		}
 		if (object instanceof Multimap) {
 			Multimap multimap = (Multimap) object;
-			if (multimap.size() <= COLLECTION_SIZE_THRESHOLD) {
+			boolean tooLarge = limitTreeSize && multimap.size() > COLLECTION_SIZE_THRESHOLD;
+			if (!tooLarge) {
 				return new IterableBasedObjectContainerTreeNode(childIndex, displayKey, object, typeInfo, multimap.keySet(), multimap::get, inspectionContext);
 			}
 		}

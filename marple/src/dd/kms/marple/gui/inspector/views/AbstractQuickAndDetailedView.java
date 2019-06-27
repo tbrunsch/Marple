@@ -8,7 +8,7 @@ import java.awt.*;
 
 import static java.awt.GridBagConstraints.*;
 
-abstract class AbstractQuickAndDetailedView extends JPanel implements ObjectView
+public abstract class AbstractQuickAndDetailedView extends JPanel implements ObjectView
 {
 	private final JPanel			viewSelectionPanel			= new JPanel(new GridBagLayout());
 	private final JToggleButton		quickViewToggleButton		= new JToggleButton("Quick View");
@@ -48,7 +48,7 @@ abstract class AbstractQuickAndDetailedView extends JPanel implements ObjectView
 		detailedViewToggleButton.addActionListener(e -> setViewType(ViewType.DETAILED));
 	}
 
-	abstract Component createView(ViewType viewType, Object object, InspectionContext inspectionContext);
+	protected abstract Component createView(ViewType viewType, Object object, InspectionContext inspectionContext);
 
 	@Override
 	public String getViewName() {
@@ -85,5 +85,5 @@ abstract class AbstractQuickAndDetailedView extends JPanel implements ObjectView
 		return quickViewToggleButton.isSelected() ? ViewType.QUICK : ViewType.DETAILED;
 	}
 
-	enum ViewType { QUICK, DETAILED }
+	protected enum ViewType { QUICK, DETAILED }
 }

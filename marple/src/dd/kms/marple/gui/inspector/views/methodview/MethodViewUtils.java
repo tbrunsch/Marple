@@ -1,4 +1,4 @@
-package dd.kms.marple.gui.inspector.views;
+package dd.kms.marple.gui.inspector.views.methodview;
 
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;

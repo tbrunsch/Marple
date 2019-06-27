@@ -48,7 +48,7 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 				fieldValue = null;
 			}
 			TypeInfo childTypeInfo = fieldValue == null ? InfoProvider.NO_TYPE : typeInfo.resolveType(fieldValue.getClass());
-			InspectionTreeNode child = InspectionTreeNodes.create(childIndex++, field.getName(), fieldValue, childTypeInfo, inspectionContext);
+			InspectionTreeNode child = InspectionTreeNodes.create(childIndex++, field.getName(), fieldValue, childTypeInfo, true, inspectionContext);
 			childBuilder.add(child);
 		}
 		return childBuilder.build();

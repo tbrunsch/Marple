@@ -1,9 +1,8 @@
-package dd.kms.marple.gui.inspector.views;
+package dd.kms.marple.gui.inspector.views.methodview;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.Actions;
-import dd.kms.marple.gui.ObjectView;
 import dd.kms.marple.gui.filters.ValueFilter;
 import dd.kms.marple.gui.filters.ValueFilters;
 import dd.kms.zenodot.common.MethodScanner;

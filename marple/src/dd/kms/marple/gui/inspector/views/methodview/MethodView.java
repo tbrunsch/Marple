@@ -1,6 +1,7 @@
-package dd.kms.marple.gui.inspector.views;
+package dd.kms.marple.gui.inspector.views.methodview;
 
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.gui.inspector.views.AbstractQuickAndDetailedView;
 
 import java.awt.*;
 
@@ -13,7 +14,7 @@ public class MethodView extends AbstractQuickAndDetailedView
 	}
 
 	@Override
-	Component createView(ViewType viewType, Object object, InspectionContext inspectionContext) {
+	protected Component createView(ViewType viewType, Object object, InspectionContext inspectionContext) {
 		return viewType == ViewType.QUICK
 			? new MethodList(object, inspectionContext)
 			: new MethodTable(object, inspectionContext);

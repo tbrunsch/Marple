@@ -1,4 +1,4 @@
-package dd.kms.marple.gui.inspector.views;
+package dd.kms.marple.gui.inspector.views.fieldview;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;

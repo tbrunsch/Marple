@@ -1,7 +1,6 @@
-package dd.kms.marple.gui.inspector.views;
+package dd.kms.marple.gui.inspector.views.methodview;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.gui.ObjectView;
 import dd.kms.marple.gui.filters.ValueFilters;
 import dd.kms.marple.gui.table.*;
 import dd.kms.zenodot.common.AccessModifier;
@@ -12,7 +11,6 @@ import java.awt.*;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class MethodTable extends JPanel
 {
