@@ -2,12 +2,12 @@ package dd.kms.marple.common;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.google.common.primitives.Primitives;
 import dd.kms.zenodot.common.FieldScanner;
 
 import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ReflectionUtils
 {
@@ -41,6 +41,36 @@ public class ReflectionUtils
 			}
 		}
 		return bestClass;
+	}
+
+	public static Class<?> getCommonSuperClass(Iterable<?> elements) {
+		Set<Class<?>> commonClassCandidates = null;
+		Object firstNonNullElement = null;
+		for (Object element : elements) {
+			if (element == null) {
+				continue;
+			}
+			if (firstNonNullElement == null) {
+				firstNonNullElement = element;
+				commonClassCandidates = getSuperClassesAndInterfaces(element);
+			} else {
+				commonClassCandidates.removeIf(clazz -> !clazz.isInstance(element));
+			}
+		}
+		return commonClassCandidates == null ? Object.class : getBestMatchingClass(firstNonNullElement, commonClassCandidates);
+	}
+
+	private static Set<Class<?>> getSuperClassesAndInterfaces(Object object) {
+		List<Class<?>> superClasses = new ArrayList<>();
+		Set<Class<?>> superInterfaces = new LinkedHashSet<>();
+		for (Class<?> clazz = object.getClass(); clazz != null; clazz = clazz.getSuperclass()) {
+			superClasses.add(clazz);
+			superInterfaces.addAll(Arrays.asList(clazz.getInterfaces()));
+		}
+		Set<Class<?>> result = new LinkedHashSet<>();
+		result.addAll(superClasses);
+		result.addAll(superInterfaces);
+		return result;
 	}
 
 	/**
