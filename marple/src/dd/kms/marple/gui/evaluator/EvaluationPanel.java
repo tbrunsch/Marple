@@ -1,10 +1,11 @@
 package dd.kms.marple.gui.evaluator;
 
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.gui.common.ExceptionFormatter;
 import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.gui.evaluator.textfields.ExpressionInputTextField;
-import dd.kms.marple.gui.inspector.views.FieldView;
+import dd.kms.marple.gui.inspector.views.fieldview.FieldView;
 import dd.kms.zenodot.ParseException;
 
 import javax.swing.*;
@@ -29,8 +30,11 @@ public class EvaluationPanel extends JPanel
 		super(new GridBagLayout());
 
 		this.inspectionContext = inspectionContext;
-		this.evaluationTextField = new ExpressionInputTextField(this::displayObject, this::displayException, inspectionContext);
+		this.evaluationTextField = new ExpressionInputTextField(inspectionContext);
 		this.dynamicTypingControls = new DynamicTypingControls(inspectionContext);
+
+		evaluationTextField.setEvaluationResultConsumer(this::displayObject);
+		evaluationTextField.setExceptionConsumer(this::displayException);
 
 		add(expressionPanel,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(0, 0, 5, 0), 0, 0));
 		add(evaluationResultPanel,	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 0.8, CENTER, BOTH, new Insets(5, 0, 0, 0), 0, 0));

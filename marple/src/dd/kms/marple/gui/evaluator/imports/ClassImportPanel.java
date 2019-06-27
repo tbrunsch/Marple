@@ -17,7 +17,7 @@ class ClassImportPanel extends AbstractImportPanel<ClassInfo>
 
 	@Override
 	AbstractInputTextField<ClassInfo> createEvaluationTextField() {
-		return new ClassInputTextField(classInfo -> {}, e -> {}, inspectionContext);
+		return new ClassInputTextField(inspectionContext);
 	}
 
 	@Override

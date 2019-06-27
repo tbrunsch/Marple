@@ -17,13 +17,12 @@ import java.util.function.Consumer;
 
 public abstract class AbstractInputTextField<T> extends JTextField
 {
-	private final Consumer<T>				evaluationResultConsumer;
-	private final Consumer<ParseException>	exceptionConsumer;
-	private final InspectionContext			inspectionContext;
+	private final InspectionContext		inspectionContext;
 
-	AbstractInputTextField(Consumer<T> evaluationResultConsumer, Consumer<ParseException> exceptionConsumer, InspectionContext inspectionContext) {
-		this.evaluationResultConsumer = evaluationResultConsumer;
-		this.exceptionConsumer = exceptionConsumer;
+	private Consumer<T>					evaluationResultConsumer	= result -> {};
+	private Consumer<ParseException>	exceptionConsumer			= e -> {};
+
+	AbstractInputTextField(InspectionContext inspectionContext) {
 		this.inspectionContext = inspectionContext;
 
 		InspectionSettings settings = inspectionContext.getSettings();
@@ -40,6 +39,14 @@ public abstract class AbstractInputTextField<T> extends JTextField
 	abstract List<CompletionSuggestion> suggestCodeCompletions(String text, int caretPosition) throws ParseException;
 	abstract Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String text, int caretPosition) throws ParseException;
 	abstract T evaluate(String text) throws ParseException;
+
+	public void setEvaluationResultConsumer(Consumer<T> evaluationResultConsumer) {
+		this.evaluationResultConsumer = evaluationResultConsumer;
+	}
+
+	public void setExceptionConsumer(Consumer<ParseException> exceptionConsumer) {
+		this.exceptionConsumer = exceptionConsumer;
+	}
 
 	public void addInputVerifier() {
 		setInputVerifier(new ParserVerifier());

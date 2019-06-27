@@ -18,8 +18,8 @@ public class ExpressionInputTextField extends AbstractInputTextField<Object>
 {
 	private Object	thisValue;
 
-	public ExpressionInputTextField(Consumer<Object> evaluationResultConsumer, Consumer<ParseException> exceptionConsumer, InspectionContext context) {
-		super(evaluationResultConsumer, exceptionConsumer, context);
+	public ExpressionInputTextField(InspectionContext context) {
+		super(context);
 	}
 
 	public void setThisValue(Object thisValue) {

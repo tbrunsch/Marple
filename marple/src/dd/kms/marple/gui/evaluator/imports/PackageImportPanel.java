@@ -17,7 +17,7 @@ class PackageImportPanel extends AbstractImportPanel<PackageInfo>
 
 	@Override
 	AbstractInputTextField<PackageInfo> createEvaluationTextField() {
-		return new PackageInputTextField(packageInfo -> {}, e -> {}, inspectionContext);
+		return new PackageInputTextField(inspectionContext);
 	}
 
 	@Override

@@ -14,8 +14,8 @@ import java.util.function.Consumer;
 
 public class PackageInputTextField extends AbstractInputTextField<PackageInfo>
 {
-	public PackageInputTextField(Consumer<PackageInfo> packageInfoConsumer, Consumer<ParseException> exceptionConsumer, InspectionContext inspectionContext) {
-		super(packageInfoConsumer, exceptionConsumer, inspectionContext);
+	public PackageInputTextField(InspectionContext inspectionContext) {
+		super(inspectionContext);
 	}
 
 	@Override

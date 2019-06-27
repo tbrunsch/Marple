@@ -14,8 +14,8 @@ import java.util.function.Consumer;
 
 public class ClassInputTextField extends AbstractInputTextField<ClassInfo>
 {
-	public ClassInputTextField(Consumer<ClassInfo> classInfoConsumer, Consumer<ParseException> exceptionConsumer, InspectionContext inspectionContext) {
-		super(classInfoConsumer, exceptionConsumer, inspectionContext);
+	public ClassInputTextField(InspectionContext inspectionContext) {
+		super(inspectionContext);
 	}
 
 	@Override

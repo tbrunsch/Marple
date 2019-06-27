@@ -62,7 +62,7 @@ class InstanceSearchPanel extends JPanel
 
 		this.inspectionContext = inspectionContext;
 
-		targetClassTF = new ClassInputTextField(classInfo -> {}, e -> {}, inspectionContext);
+		targetClassTF = new ClassInputTextField(inspectionContext);
 		targetClassTF.addInputVerifier();
 
 		instancePathFinder = new InstancePathFinder(this::onPathDetected);
