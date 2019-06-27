@@ -2,7 +2,9 @@ package dd.kms.marple.gui;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.common.ReflectionUtils;
+import dd.kms.marple.common.UniformView;
 import dd.kms.marple.gui.inspector.views.fieldview.FieldView;
+import dd.kms.marple.gui.inspector.views.iterableview.IterableView;
 import dd.kms.marple.gui.inspector.views.methodview.MethodView;
 
 import javax.swing.*;
@@ -31,7 +33,8 @@ public class VisualSettingsUtils
 	public static void addDefaultViews(VisualSettingsBuilder builder) {
 		builder
 			.objectView(Object.class, FieldView::new)
-			.objectView(Object.class, MethodView::new);
+			.objectView(Object.class, MethodView::new)
+			.objectView(Object.class, VisualSettingsUtils::createIterableView);
 	}
 
 	private static String getObjectHashText(Object object) {
@@ -50,5 +53,11 @@ public class VisualSettingsUtils
 			+ " ("
 			+ (text == null ? "null" : text)
 			+ ")";
+	}
+
+	private static ObjectView createIterableView(Object object, InspectionContext context) {
+		return UniformView.canViewAsIterable(object)
+				? new IterableView(UniformView.asIterable(object), context)
+				: null;
 	}
 }
