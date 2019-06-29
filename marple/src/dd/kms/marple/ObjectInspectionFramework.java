@@ -52,8 +52,6 @@ public class ObjectInspectionFramework
 	 */
 	public static InspectionSettingsBuilder createInspectionSettingsBuilder() {
 		return InspectionSettingsBuilders.create()
-			.inspector(ObjectInspectors.create())
-			.evaluator(ExpressionEvaluators.create())
 			.componentHierarchyModel(createComponentHierarchyModelBuilder().build())
 			.visualSettings(createVisualSettingsBuilder().build())
 			.inspectionKey(INSPECTION_KEY)

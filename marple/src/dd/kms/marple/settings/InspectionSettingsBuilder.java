@@ -11,8 +11,6 @@ import java.util.function.Predicate;
 
 public interface InspectionSettingsBuilder
 {
-	InspectionSettingsBuilder inspector(ObjectInspector inspector);
-	InspectionSettingsBuilder evaluator(ExpressionEvaluator evaluator);
 	InspectionSettingsBuilder componentHierarchyModel(ComponentHierarchyModel componentHierarchyModel);
 	InspectionSettingsBuilder visualSettings(VisualSettings visualSettings);
 	InspectionSettingsBuilder responsibilityPredicate(Predicate<Component> responsibilityPredicate);

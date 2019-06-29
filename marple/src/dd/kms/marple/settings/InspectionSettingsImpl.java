@@ -1,9 +1,11 @@
 package dd.kms.marple.settings;
 
 import dd.kms.marple.evaluator.ExpressionEvaluator;
+import dd.kms.marple.evaluator.ExpressionEvaluators;
 import dd.kms.marple.inspector.ObjectInspector;
 import dd.kms.marple.components.ComponentHierarchyModel;
 import dd.kms.marple.gui.VisualSettings;
+import dd.kms.marple.inspector.ObjectInspectors;
 
 import java.awt.*;
 import java.util.Optional;
@@ -23,9 +25,9 @@ class InspectionSettingsImpl implements InspectionSettings
 	private final KeyRepresentation				codeCompletionKey;
 	private final KeyRepresentation				showMethodArgumentsKey;
 
-	InspectionSettingsImpl(ObjectInspector inspector, ExpressionEvaluator evaluator, ComponentHierarchyModel componentHierarchyModel, VisualSettings visualSettings, Predicate<Component> responsibilityPredicate, Optional<SecuritySettings> securitySettings, KeyRepresentation inspectionKey, KeyRepresentation evaluationKey, KeyRepresentation searchKey, KeyRepresentation codeCompletionKey, KeyRepresentation showMethodArgumentsKey) {
-		this.inspector = inspector;
-		this.evaluator = evaluator;
+	InspectionSettingsImpl(ComponentHierarchyModel componentHierarchyModel, VisualSettings visualSettings, Predicate<Component> responsibilityPredicate, Optional<SecuritySettings> securitySettings, KeyRepresentation inspectionKey, KeyRepresentation evaluationKey, KeyRepresentation searchKey, KeyRepresentation codeCompletionKey, KeyRepresentation showMethodArgumentsKey) {
+		this.inspector = ObjectInspectors.create();
+		this.evaluator = ExpressionEvaluators.create();
 		this.componentHierarchyModel = componentHierarchyModel;
 		this.visualSettings = visualSettings;
 		this.responsibilityPredicate = responsibilityPredicate;

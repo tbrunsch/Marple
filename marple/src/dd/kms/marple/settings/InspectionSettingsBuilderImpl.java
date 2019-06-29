@@ -13,8 +13,6 @@ import java.util.function.Predicate;
 
 class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 {
-	private ObjectInspector				inspector;
-	private ExpressionEvaluator			evaluator;
 	private ComponentHierarchyModel		componentHierarchyModel	= ComponentHierarchyModels.createBuilder().build();
 	private VisualSettings				visualSettings			= VisualSettingsUtils.createBuilder().build();
 	private Predicate<Component>		responsibilityPredicate	= component -> true;
@@ -25,18 +23,6 @@ class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 	private KeyRepresentation			codeCompletionKey;
 	private KeyRepresentation			searchKey;
 	private KeyRepresentation			showMethodArgumentsKey;
-
-	@Override
-	public InspectionSettingsBuilder inspector(ObjectInspector inspector) {
-		this.inspector = inspector;
-		return this;
-	}
-
-	@Override
-	public InspectionSettingsBuilder evaluator(ExpressionEvaluator evaluator) {
-		this.evaluator = evaluator;
-		return this;
-	}
 
 	@Override
 	public InspectionSettingsBuilder componentHierarchyModel(ComponentHierarchyModel componentHierarchyModel) {
@@ -94,6 +80,6 @@ class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 
 	@Override
 	public InspectionSettings build() {
-		return new InspectionSettingsImpl(inspector, evaluator, componentHierarchyModel, visualSettings, responsibilityPredicate, securitySettings, inspectionKey, evaluationKey, searchKey, codeCompletionKey, showMethodArgumentsKey);
+		return new InspectionSettingsImpl(componentHierarchyModel, visualSettings, responsibilityPredicate, securitySettings, inspectionKey, evaluationKey, searchKey, codeCompletionKey, showMethodArgumentsKey);
 	}
 }
