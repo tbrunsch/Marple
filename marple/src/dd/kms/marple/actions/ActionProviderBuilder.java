@@ -2,6 +2,7 @@ package dd.kms.marple.actions;
 
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.actions.component.HighlightComponentAction;
 import dd.kms.marple.actions.search.SearchInstanceAction;
 import dd.kms.marple.actions.search.SearchInstancesFromHereAction;
 import dd.kms.marple.common.ReflectionUtils;
@@ -63,7 +64,8 @@ public class ActionProviderBuilder
 				actionsBuilder.add(inspectionContext.createInspectComponentAction(componentHierarchyData.getComponentHierarchy(), componentHierarchyData.getSubcomponentHierarchy()));
 			}
 			if (object instanceof Component) {
-				actionsBuilder.add(inspectionContext.createHighlightComponentAction((Component) object));
+				Component component = (Component) this.object;
+				actionsBuilder.add(new HighlightComponentAction(component));
 			}
 			actionsBuilder.add(inspectionContext.createAddVariableAction(suggestedVariableName, object));
 			actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(object));

@@ -2,6 +2,7 @@ package dd.kms.marple;
 
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.actions.*;
+import dd.kms.marple.actions.component.HighlightComponentAction;
 import dd.kms.marple.actions.evaluator.EvaluateAsThisAction;
 import dd.kms.marple.actions.evaluator.EvaluateExpressionAction;
 import dd.kms.marple.actions.history.HistoryActionWrapper;
@@ -9,7 +10,6 @@ import dd.kms.marple.actions.history.HistoryBackAction;
 import dd.kms.marple.actions.history.HistoryForwardAction;
 import dd.kms.marple.actions.inspector.InspectComponentAction;
 import dd.kms.marple.actions.inspector.InspectObjectAction;
-import dd.kms.marple.actions.search.SearchInstanceAction;
 import dd.kms.marple.actions.search.SearchInstancesFromHereAction;
 import dd.kms.marple.components.ComponentHierarchyModels;
 import dd.kms.marple.evaluator.ExpressionEvaluator;
@@ -66,16 +66,6 @@ class InspectionContextImpl implements InspectionContext
 		}
 		InspectionAction action = new InspectObjectAction(settings.getInspector(), object, getDisplayText(object));
 		return new HistoryActionWrapper(inspectionHistory, action);
-	}
-
-	@Override
-	public InspectionAction createHighlightComponentAction(Component component) {
-		return new HighlightComponentAction(settings.getInspector(), component, getDisplayText(component));
-	}
-
-	@Override
-	public InspectionAction createInvokeMethodAction(Object object, Method method, Consumer<Object> returnValueConsumer, Consumer<Exception> exceptionConsumer) {
-		return new InvokeMethodAction(object, method, returnValueConsumer, exceptionConsumer);
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package dd.kms.marple.inspector;
+package dd.kms.marple.actions.component;
 
 import javax.swing.*;
 import java.awt.*;

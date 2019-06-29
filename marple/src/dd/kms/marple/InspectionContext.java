@@ -18,8 +18,6 @@ public interface InspectionContext
 	InspectionAction createHistoryForwardAction();
 	InspectionAction createInspectComponentAction(List<Component> componentHierarchy, List<?> subcomponentHierarchy);
 	InspectionAction createInspectObjectAction(Object object);
-	InspectionAction createHighlightComponentAction(Component component);
-	InspectionAction createInvokeMethodAction(Object object, Method method, Consumer<Object> returnValueConsumer, Consumer<Exception> exceptionConsumer);
 	InspectionAction createAddVariableAction(String suggestedName, Object value);
 	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue);
 	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue, int caretPosition);

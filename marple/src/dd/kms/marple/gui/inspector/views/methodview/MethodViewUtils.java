@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
+import dd.kms.marple.actions.InvokeMethodAction;
 import dd.kms.zenodot.common.AccessModifier;
 
 import javax.swing.*;
@@ -42,7 +43,7 @@ class MethodViewUtils
 	}
 
 	private InspectionAction createInvokeMethodAction(Method method) {
-		return inspectionContext.createInvokeMethodAction(object, method, this::handleMethodReturnValue, this::displayMethodInvokationException);
+		return new InvokeMethodAction(object, method, this::handleMethodReturnValue, this::displayMethodInvokationException);
 	}
 
 	private void handleMethodReturnValue(Object returnValue) {

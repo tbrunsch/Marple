@@ -9,8 +9,6 @@ import dd.kms.marple.gui.inspector.InspectionFrame;
 import dd.kms.marple.gui.inspector.views.ComponentHierarchyView;
 
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.List;
 
 class ObjectInspectorImpl implements ObjectInspector
@@ -36,12 +34,6 @@ class ObjectInspectorImpl implements ObjectInspector
 		ImmutableList.Builder<ObjectView> viewBuilder = ImmutableList.<ObjectView>builder()
 			.addAll(inspectionContext.getInspectionViews(object));
 		showViews(object, viewBuilder.build());
-	}
-
-	@Override
-	public void highlightComponent(Component component) {
-		Runnable componentHighlighter = new ComponentHighlighter(component);
-		new Thread(componentHighlighter).start();
 	}
 
 	/*
