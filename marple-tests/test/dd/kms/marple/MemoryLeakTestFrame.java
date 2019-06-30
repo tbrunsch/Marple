@@ -23,7 +23,7 @@ class MemoryLeakTestFrame extends JFrame
 
 		JButton scanButton = new JButton("Scan");
 		scanButton.setEnabled(false);
-		scanButton.addActionListener(e -> instancePathFinder.search(new InstancePath(this, "this", null), ChildDialog.class, ChildDialog.class::isInstance));
+		scanButton.addActionListener(e -> instancePathFinder.search(new InstancePath(this, "this", null), ChildDialog.class, ChildDialog.class::isInstance, true));
 
 		JButton createDialogButton = new JButton("Create child dialog");
 		createDialogButton.addActionListener(e -> {

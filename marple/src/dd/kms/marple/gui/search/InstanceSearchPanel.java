@@ -216,6 +216,7 @@ class InstanceSearchPanel extends JPanel
 
 		final Class<?> targetClass;
 		final Predicate<Object> targetFilter;
+		final boolean extendPathsBeyondAcceptedInstances;
 		if (targetAllInstancesRB.isSelected()) {
 			try {
 				ClassInfo targetClassInfo = targetClassTF.evaluateText();
@@ -226,15 +227,17 @@ class InstanceSearchPanel extends JPanel
 				return;
 			}
 			targetFilter = targetClass::isInstance;
+			extendPathsBeyondAcceptedInstances = true;
 		} else if (targetConcreteInstanceRB.isSelected()) {
 			targetClass = target.getClass();
 			targetFilter = o -> o == target;
+			extendPathsBeyondAcceptedInstances = false;
 		} else {
 			throw new IllegalStateException("None of the supported search options is selected");
 		}
 
 		instancePathFinder.reset();
-		new Thread(() -> instancePathFinder.search(sourcePath, targetClass, targetFilter)).start();
+		new Thread(() -> instancePathFinder.search(sourcePath, targetClass, targetFilter, extendPathsBeyondAcceptedInstances)).start();
 		new Thread(this::updateDisplayWhileSearching).start();
 	}
 

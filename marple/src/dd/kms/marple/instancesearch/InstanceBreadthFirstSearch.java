@@ -2,7 +2,6 @@ package dd.kms.marple.instancesearch;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
-import dd.kms.marple.InspectionContext;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.instancesearch.elementcollectors.*;
 import dd.kms.zenodot.common.FieldScanner;
@@ -17,14 +16,16 @@ class InstanceBreadthFirstSearch extends AbstractBreadthFirstSearch<Integer, Ins
 	private final Predicate<Object>			searchFilter;
 	private final Consumer<InstancePath>	pathConsumer;
 	private final BooleanSupplier			stopExecutionFlagSupplier;
+	private final boolean					extendPathsBeyondAcceptedInstances;
 
 	private final Function<Object, String>	toStringFunction;
 
-	InstanceBreadthFirstSearch(Set<Class<?>> classesToExcludeFromSearch, Predicate<Object> searchFilter, Consumer<InstancePath> pathConsumer, BooleanSupplier stopExecutionFlagSupplier, Function<Object, String> toStringFunction) {
+	InstanceBreadthFirstSearch(Set<Class<?>> classesToExcludeFromSearch, Predicate<Object> searchFilter, Consumer<InstancePath> pathConsumer, BooleanSupplier stopExecutionFlagSupplier, boolean extendPathsBeyondAcceptedInstances, Function<Object, String> toStringFunction) {
 		this.classesToExcludeFromSearch = classesToExcludeFromSearch;
 		this.searchFilter = searchFilter;
 		this.pathConsumer = pathConsumer;
 		this.stopExecutionFlagSupplier = stopExecutionFlagSupplier;
+		this.extendPathsBeyondAcceptedInstances = extendPathsBeyondAcceptedInstances;
 		this.toStringFunction = toStringFunction;
 	}
 
@@ -77,7 +78,7 @@ class InstanceBreadthFirstSearch extends AbstractBreadthFirstSearch<Integer, Ins
 		Object lastNodeObject = path.getLastNodeObject();
 		if (searchFilter.test(lastNodeObject)) {
 			pathConsumer.accept(path);
-			return false;
+			return extendPathsBeyondAcceptedInstances;
 		}
 		if (lastNodeObject == null) {
 			return false;

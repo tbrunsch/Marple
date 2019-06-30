@@ -6,7 +6,6 @@ import com.google.common.graph.MutableGraph;
 import dd.kms.marple.InspectionContext;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -31,7 +30,7 @@ public class InstancePathFinder
 		this.inspectionContext = inspectionContext;
 	}
 
-	public void search(InstancePath sourcePath, Class<?> targetClass, Predicate<Object> targetFilter) {
+	public void search(InstancePath sourcePath, Class<?> targetClass, Predicate<Object> targetFilter, boolean extendPathsBeyondAcceptedInstances) {
 		Object sourceObject = sourcePath.getLastNodeObject();
 		synchronized (lock) {
 			if (processingState != ProcessingState.NOT_RUNNING && processingState != ProcessingState.FINISHED || sourceObject == null) {
@@ -52,7 +51,7 @@ public class InstancePathFinder
 			Set<Class<?>> classesToExcludeFromSearch = Sets.newHashSet(Sets.difference(classSearchGraph.nodes(), relevantClasses));
 
 			changeProcessingState(ProcessingState.SEARCHING_INSTANCES);
-			InstanceBreadthFirstSearch instanceBreadthFirstSearch = new InstanceBreadthFirstSearch(classesToExcludeFromSearch, targetFilter, pathConsumer, stopFlagSupplier, this::getDisplayString);
+			InstanceBreadthFirstSearch instanceBreadthFirstSearch = new InstanceBreadthFirstSearch(classesToExcludeFromSearch, targetFilter, pathConsumer, stopFlagSupplier, extendPathsBeyondAcceptedInstances, this::getDisplayString);
 			currentSearch = instanceBreadthFirstSearch;
 			instanceBreadthFirstSearch.search(sourcePath);
 		} finally {
