@@ -3,12 +3,14 @@ package dd.kms.marple.actions;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.component.HighlightComponentAction;
+import dd.kms.marple.actions.component.ScreenshotAction;
 import dd.kms.marple.actions.search.SearchInstanceAction;
 import dd.kms.marple.actions.search.SearchInstancesFromHereAction;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.components.ComponentHierarchyModels;
 
 import javax.annotation.Nullable;
+import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -66,6 +68,9 @@ public class ActionProviderBuilder
 			if (object instanceof Component) {
 				Component component = (Component) this.object;
 				actionsBuilder.add(new HighlightComponentAction(component));
+				if (component instanceof JComponent) {
+					actionsBuilder.add(new ScreenshotAction((JComponent) component));
+				}
 			}
 			actionsBuilder.add(inspectionContext.createAddVariableAction(suggestedVariableName, object));
 			actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(object));
