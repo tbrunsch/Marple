@@ -17,25 +17,26 @@ public class WindowManager
 	private static final Map<Object, Window>	MANAGED_WINDOWS	= new LinkedHashMap<>();
 	private static final Object					LOCK			= new Object();
 
-	public static <T extends Component> void showInFrame(String title, Supplier<T> componentSupplier, Consumer<T> componentAction, Consumer<T> contentUpdater) {
-		Supplier<JFrame> frameConstructor = () -> {
-			JFrame frame = new JFrame(title);
-			T component = componentSupplier.get();
-			frame.getContentPane().add(component);
-			updateFrameOnFocusGained(frame, () -> contentUpdater.accept(component));
-			return frame;
-		};
+	public static <T extends Component> void showInFrame(String title, Supplier<T> componentSupplier, Consumer<T> componentConfigurator, Consumer<T> contentUpdater) {
+		Supplier<JFrame> frameConstructor = () -> createComponentFrame(title, componentSupplier, contentUpdater);
 		JFrame window = getWindow(title, frameConstructor, Runnables.doNothing());
 		if (window == null) {
 			return;
 		}
 		window.requestFocus();
+		configureComponent(window, componentConfigurator);
+	}
+
+	public static <T extends Component> void configureComponent(JFrame window, Consumer<T> componentConfigurator) {
+		if (window == null) {
+			return;
+		}
 		Component[] components = window.getContentPane().getComponents();
 		if (components.length == 0) {
 			return;
 		}
 		T component = (T) components[0];
-		componentAction.accept(component);
+		componentConfigurator.accept(component);
 	}
 
 	public static void updateFrameOnFocusGained(JFrame frame, Runnable contentUpdater) {
@@ -51,6 +52,9 @@ public class WindowManager
 		synchronized (LOCK) {
 			if (!MANAGED_WINDOWS.containsKey(identifier)) {
 				T window = windowCreator.get();
+				if (window == null) {
+					return null;
+				}
 				window.addWindowListener(new WindowAdapter() {
 					@Override
 					public void windowClosing(WindowEvent e) {
@@ -73,6 +77,14 @@ public class WindowManager
 			}
 			return (T) MANAGED_WINDOWS.get(identifier);
 		}
+	}
+
+	private static <T extends Component> JFrame createComponentFrame(String title, Supplier<T> componentSupplier, Consumer<T> contentUpdater) {
+		JFrame frame = new JFrame(title);
+		T component = componentSupplier.get();
+		frame.getContentPane().add(component);
+		updateFrameOnFocusGained(frame, () -> contentUpdater.accept(component));
+		return frame;
 	}
 
 	private static @Nullable Point determineWindowLocation(int width, int height) {

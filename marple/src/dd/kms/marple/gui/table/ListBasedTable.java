@@ -87,11 +87,13 @@ public class ListBasedTable<T> extends JPanel
 		table.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				ActionProvider actionProvider = getCellValueAsActionProvider(e.getPoint());
-				Cursor cursor = Actions.hasDefaultAction(actionProvider)
-									? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-									: Cursor.getDefaultCursor();
-				table.setCursor(cursor);
+			ActionProvider actionProvider = getCellValueAsActionProvider(e.getPoint());
+			Cursor cursor = Actions.hasDefaultAction(actionProvider)
+								? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+								: Cursor.getDefaultCursor();
+			table.setCursor(cursor);
+
+			Actions.performImmediateActions(actionProvider);
 			}
 		});
 	}
@@ -105,7 +107,7 @@ public class ListBasedTable<T> extends JPanel
 					return;
 				}
 				if (SwingUtilities.isLeftMouseButton(e)) {
-					Actions.runDefaultAction(actionProvider);
+					Actions.performDefaultAction(actionProvider);
 				} else if (SwingUtilities.isRightMouseButton(e)) {
 					Actions.showActionPopup(table, actionProvider, e);
 				}

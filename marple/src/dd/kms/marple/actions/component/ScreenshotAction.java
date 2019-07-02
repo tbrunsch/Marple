@@ -1,14 +1,16 @@
 package dd.kms.marple.actions.component;
 
-import dd.kms.marple.actions.InspectionAction;
-import dd.kms.marple.gui.common.Screenshots;
+import com.google.common.util.concurrent.Runnables;
+import dd.kms.marple.actions.ImmediateInspectionAction;
 import dd.kms.marple.gui.common.WindowManager;
 
 import javax.swing.*;
-import java.awt.image.BufferedImage;
+import java.awt.*;
 
-public class ScreenshotAction implements InspectionAction
+public class ScreenshotAction implements ImmediateInspectionAction
 {
+	private static final String	FRAME_TITLE	= "Screenshot";
+
 	private final JComponent	component;
 
 	public ScreenshotAction(JComponent component) {
@@ -37,7 +39,16 @@ public class ScreenshotAction implements InspectionAction
 
 	@Override
 	public void perform() {
-		BufferedImage screenshot = Screenshots.takeScreenshot(component);
-		WindowManager.showInFrame("Screenshot", ScreenshotPanel::new, panel -> panel.setScreenshot(screenshot), panel -> {});
+		WindowManager.showInFrame(FRAME_TITLE, ScreenshotPanel::new, panel -> panel.takeScreenshot(component), panel -> {});
+	}
+
+	@Override
+	public void performImmediately() {
+		JFrame window = WindowManager.getWindow(FRAME_TITLE, () -> null, Runnables.doNothing());
+		WindowManager.configureComponent(window, this::takeLiveScreenshot);
+	}
+
+	private void takeLiveScreenshot(ScreenshotPanel screenshotPanel) {
+		screenshotPanel.takeLiveScreenshot(component);
 	}
 }

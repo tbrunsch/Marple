@@ -3,6 +3,7 @@ package dd.kms.marple.gui.inspector.views.methodview;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.Actions;
+import dd.kms.marple.actions.ImmediateInspectionAction;
 import dd.kms.marple.gui.filters.ValueFilter;
 import dd.kms.marple.gui.filters.ValueFilters;
 import dd.kms.zenodot.common.MethodScanner;
@@ -166,7 +167,7 @@ class MethodList extends JPanel
 			ActionProvider actionProvider = getActionProvider(e);
 			if (actionProvider != null) {
 				if (SwingUtilities.isLeftMouseButton(e)) {
-					Actions.runDefaultAction(actionProvider);
+					Actions.performDefaultAction(actionProvider);
 				} else if (SwingUtilities.isRightMouseButton(e)) {
 					Actions.showActionPopup(e.getComponent(), actionProvider, e);
 				}
@@ -183,6 +184,8 @@ class MethodList extends JPanel
 				? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
 				: Cursor.getDefaultCursor();
 			e.getComponent().setCursor(cursor);
+
+			Actions.performImmediateActions(actionProvider);
 		}
 	}
 

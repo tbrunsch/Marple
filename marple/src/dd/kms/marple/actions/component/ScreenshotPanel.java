@@ -10,32 +10,43 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.lang.ref.WeakReference;
 
 import static java.awt.GridBagConstraints.*;
 
 class ScreenshotPanel extends JPanel
 {
-	private static final Insets				DEFAULT_INSETS		= new Insets(3, 3, 3, 3);
+	private static final Insets		DEFAULT_INSETS				= new Insets(3, 3, 3, 3);
 
-	private static final KeyStroke			CTRL_C				= KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_MASK);
-	private static final KeyStroke			CTRL_S				= KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK);
+	private static final KeyStroke	CTRL_C						= KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_MASK);
+	private static final KeyStroke	CTRL_S						= KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK);
 
-	private static File			lastSelectedFile	= null;
+	private static final long		LIVE_SCREENSHOT_INTERVAL_MS	= 500;
 
-	private final ImagePanel	imagePanel		= new ImagePanel();
+	private static File				lastSelectedFile			= null;
 
-	private final JButton		saveButton		= new JButton("Save");
-	private final JButton		copyButton		= new JButton("Copy to clipboard");
+	private final ImagePanel			imagePanel				= new ImagePanel();
 
-	private BufferedImage		screenshot;
+	private final JCheckBox				livePreviewCB = new JCheckBox("live preview");
+
+	private final JButton				saveButton				= new JButton("Save");
+	private final JButton				copyButton				= new JButton("Copy to clipboard");
+
+	private BufferedImage				screenshot;
+
+	private WeakReference<JComponent>	lastScreenshotComponent	= new WeakReference<>(null);
+	private long						lastScreenshotTimeMs	= 0;
 
 	ScreenshotPanel() {
 		super(new GridBagLayout());
 
-		add(imagePanel,	new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
+		add(imagePanel,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 
-		add(saveButton,	new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
-		add(copyButton,	new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
+		add(livePreviewCB,	new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));
+		add(saveButton,		new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
+		add(copyButton,		new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
+
+		livePreviewCB.setToolTipText("Select this option if you want to take a screenshot of components when hovering over component objects in the inspector");
 
 		setPreferredSize(new Dimension(400, 400));
 
@@ -62,9 +73,21 @@ class ScreenshotPanel extends JPanel
 		});
 	}
 
-	void setScreenshot(BufferedImage screenshot) {
-		this.screenshot = screenshot;
+	void takeScreenshot(JComponent component) {
+		lastScreenshotComponent = new WeakReference<>(component);
+		lastScreenshotTimeMs = System.currentTimeMillis();
+		this.screenshot = Screenshots.takeScreenshot(component);
 		imagePanel.setImage(screenshot);
+	}
+
+	void takeLiveScreenshot(JComponent component) {
+		if (!livePreviewCB.isSelected()) {
+			return;
+		}
+		if (component == lastScreenshotComponent.get() && System.currentTimeMillis() < lastScreenshotTimeMs + LIVE_SCREENSHOT_INTERVAL_MS) {
+			return;
+		}
+		takeScreenshot(component);
 	}
 
 	private void copyImageToClipboard() {

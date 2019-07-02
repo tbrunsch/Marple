@@ -19,11 +19,21 @@ public class Actions
 		return actionProvider != null && actionProvider.getDefaultAction().isPresent();
 	}
 
-	public static void runDefaultAction(ActionProvider actionProvider) {
+	public static void performDefaultAction(ActionProvider actionProvider) {
 		Optional<InspectionAction> defaultAction = actionProvider.getDefaultAction();
 		if (defaultAction.isPresent()) {
 			defaultAction.get().perform();
 		}
+	}
+
+	public static void performImmediateActions(ActionProvider actionProvider) {
+		if (actionProvider == null) {
+			return;
+		}
+		actionProvider.getActions().stream()
+			.filter(ImmediateInspectionAction.class::isInstance)
+			.map(ImmediateInspectionAction.class::cast)
+			.forEach(ImmediateInspectionAction::performImmediately);
 	}
 
 	public static void showActionPopup(Component parent, ActionProvider actionProvider, MouseEvent e) {

@@ -2,6 +2,7 @@ package dd.kms.marple.gui.actionprovidertree;
 
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.Actions;
+import dd.kms.marple.actions.ImmediateInspectionAction;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -16,5 +17,7 @@ public class ActionProviderTreeMouseMotionListener extends MouseMotionAdapter
 				? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
 				: Cursor.getDefaultCursor();
 		e.getComponent().setCursor(cursor);
+
+		Actions.performImmediateActions(actionProvider);
 	}
 }

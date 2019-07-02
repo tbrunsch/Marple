@@ -14,7 +14,7 @@ public class ActionProviderTreeMouseListener extends MouseAdapter
 		ActionProvider actionProvider = ActionProviderTreeNodes.getActionProvider(e);
 		if (actionProvider != null) {
 			if (SwingUtilities.isLeftMouseButton(e)) {
-				Actions.runDefaultAction(actionProvider);
+				Actions.performDefaultAction(actionProvider);
 			} else if (SwingUtilities.isRightMouseButton(e)) {
 				Actions.showActionPopup(e.getComponent(), actionProvider, e);
 			}

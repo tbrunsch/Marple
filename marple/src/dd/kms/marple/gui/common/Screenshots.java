@@ -39,7 +39,7 @@ public class Screenshots
 		}
 
 		Dimension size = component.getSize();
-		BufferedImage screenshot = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
+		BufferedImage screenshot = new BufferedImage(Math.max(1, size.width), Math.max(1, size.height), BufferedImage.TYPE_INT_RGB);
 		Graphics2D g = null;
 		try {
 			g = screenshot.createGraphics();
