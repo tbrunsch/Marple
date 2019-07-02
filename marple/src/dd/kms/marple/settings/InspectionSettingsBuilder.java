@@ -1,7 +1,5 @@
 package dd.kms.marple.settings;
 
-import dd.kms.marple.evaluator.ExpressionEvaluator;
-import dd.kms.marple.inspector.ObjectInspector;
 import dd.kms.marple.components.ComponentHierarchyModel;
 import dd.kms.marple.gui.VisualSettings;
 
@@ -14,7 +12,7 @@ public interface InspectionSettingsBuilder
 	InspectionSettingsBuilder componentHierarchyModel(ComponentHierarchyModel componentHierarchyModel);
 	InspectionSettingsBuilder visualSettings(VisualSettings visualSettings);
 	InspectionSettingsBuilder responsibilityPredicate(Predicate<Component> responsibilityPredicate);
-	InspectionSettingsBuilder securitySettings(Optional<SecuritySettings> securitySettings);
+	InspectionSettingsBuilder securitySettings(SecuritySettings securitySettings);
 	InspectionSettingsBuilder inspectionKey(KeyRepresentation inspectionKey);
 	InspectionSettingsBuilder evaluationKey(KeyRepresentation evaluationKey);
 	InspectionSettingsBuilder searchKey(KeyRepresentation searchKey);

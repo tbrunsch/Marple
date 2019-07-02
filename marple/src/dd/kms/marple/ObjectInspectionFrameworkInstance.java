@@ -107,11 +107,7 @@ class ObjectInspectionFrameworkInstance
 	}
 
 	private boolean userHasPermission(InspectionSettings settings) {
-		Optional<SecuritySettings> securitySettingsOptional = settings.getSecuritySettings();
-		if (!securitySettingsOptional.isPresent()) {
-			return true;
-		}
-		SecuritySettings securitySettings = securitySettingsOptional.get();
+		SecuritySettings securitySettings = settings.getSecuritySettings();
 		try {
 			String passwordHash = securitySettings.hashPassword(securitySettings.queryPassword());
 			return Objects.equals(passwordHash, securitySettings.getPasswordHash());

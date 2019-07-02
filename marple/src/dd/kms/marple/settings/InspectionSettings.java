@@ -16,7 +16,7 @@ public interface InspectionSettings
 	ComponentHierarchyModel getComponentHierarchyModel();
 	VisualSettings getVisualSettings();
 	Predicate<Component> getResponsibilityPredicate();
-	Optional<SecuritySettings> getSecuritySettings();
+	SecuritySettings getSecuritySettings();
 
 	KeyRepresentation getInspectionKey();
 	KeyRepresentation getEvaluationKey();
