@@ -68,7 +68,34 @@ public class Screenshots
 		}
 	}
 
-	public static void copyToClipboard(BufferedImage screenshot) {
+	public static BufferedImage takeScreenshot(Image image) {
+		BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+		Graphics2D graphics = bufferedImage.createGraphics();
+		graphics.drawImage(image, 0, 0, null);
+		graphics.dispose();
+		return bufferedImage;
+	}
+
+	public static BufferedImage takeScreenshot(Icon icon) {
+		BufferedImage bufferedImage = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+		try {
+			icon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
+		} catch (Exception ignored) {
+			// occurs for some icons; currently, we just do not paint them
+		}
+		return bufferedImage;
+	}
+
+	public static BufferedImage takeScreenshot(Paint paint, int width, int height) {
+		BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D graphics = bufferedImage.createGraphics();
+		graphics.setPaint(paint);
+		graphics.fillRect(0, 0, width, height);
+		graphics.dispose();
+		return bufferedImage;
+	}
+
+	public static void copyToClipboard(Image screenshot) {
 		TransferableImage transferableImage = new TransferableImage(screenshot);
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents(transferableImage, null);

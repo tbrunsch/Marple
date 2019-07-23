@@ -11,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 import static java.awt.GridBagConstraints.*;
 
@@ -35,6 +36,8 @@ class ScreenshotPanel extends JPanel
 	private BufferedImage				screenshot;
 
 	private WeakReference<JComponent>	lastScreenshotComponent	= new WeakReference<>(null);
+	private WeakReference<Image>		lastScreenshotImage		= new WeakReference<>(null);
+	private Paint						lastScreenshotPaint		= null;
 	private long						lastScreenshotTimeMs	= 0;
 
 	ScreenshotPanel() {
@@ -80,6 +83,20 @@ class ScreenshotPanel extends JPanel
 		imagePanel.setImage(screenshot);
 	}
 
+	void takeScreenshot(Image image) {
+		lastScreenshotImage = new WeakReference<>(image);
+		lastScreenshotTimeMs = System.currentTimeMillis();
+		this.screenshot = Screenshots.takeScreenshot(image);
+		imagePanel.setImage(screenshot);
+	}
+
+	void takeScreenshot(Paint paint) {
+		lastScreenshotPaint = paint;
+		lastScreenshotTimeMs = System.currentTimeMillis();
+		this.screenshot = Screenshots.takeScreenshot(paint, imagePanel.getImageAreaWidth(), imagePanel.getImageAreaHeight());
+		imagePanel.setImage(screenshot);
+	}
+
 	void takeLiveScreenshot(JComponent component) {
 		if (!livePreviewCB.isSelected()) {
 			return;
@@ -88,6 +105,26 @@ class ScreenshotPanel extends JPanel
 			return;
 		}
 		takeScreenshot(component);
+	}
+
+	void takeLiveScreenshot(Image image) {
+		if (!livePreviewCB.isSelected()) {
+			return;
+		}
+		if (image == lastScreenshotImage.get() && System.currentTimeMillis() < lastScreenshotTimeMs + LIVE_SCREENSHOT_INTERVAL_MS) {
+			return;
+		}
+		takeScreenshot(image);
+	}
+
+	void takeLiveScreenshot(Paint paint) {
+		if (!livePreviewCB.isSelected()) {
+			return;
+		}
+		if (Objects.equals(paint, lastScreenshotPaint) && System.currentTimeMillis() < lastScreenshotTimeMs + LIVE_SCREENSHOT_INTERVAL_MS) {
+			return;
+		}
+		takeScreenshot(paint);
 	}
 
 	private void copyImageToClipboard() {
@@ -153,11 +190,20 @@ class ScreenshotPanel extends JPanel
 
 			add(imageScrollPane,	new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 
+			imageLabel.setVerticalAlignment(JLabel.TOP);
 			imageScrollPane.getViewport().setBackground(Color.WHITE);
 		}
 
 		void setImage(Image image) {
 			imageLabel.setIcon(new ImageIcon(image));
+		}
+
+		int getImageAreaWidth() {
+			return imageLabel.getWidth();
+		}
+
+		int getImageAreaHeight() {
+			return imageLabel.getHeight();
 		}
 	}
 }
