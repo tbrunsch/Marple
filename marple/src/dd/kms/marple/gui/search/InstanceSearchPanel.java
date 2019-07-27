@@ -4,8 +4,10 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseListener;
 import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseMotionListener;
 import dd.kms.marple.gui.evaluator.textfields.ClassInputTextField;
+import dd.kms.marple.gui.evaluator.textfields.CompiledExpressionInputTextField;
 import dd.kms.marple.instancesearch.InstancePath;
 import dd.kms.marple.instancesearch.InstancePathFinder;
+import dd.kms.zenodot.CompiledExpression;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.utils.wrappers.ClassInfo;
 
@@ -19,6 +21,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static java.awt.GridBagConstraints.*;
@@ -27,14 +30,17 @@ class InstanceSearchPanel extends JPanel
 {
 	private static final Insets	DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
 
-	private final JPanel				configurationPanel			= new JPanel(new GridBagLayout());
-	private final JLabel				rootLabel					= new JLabel("Root of search:");
-	private final JLabel				rootValueLabel				= new JLabel("---");
-	private final JLabel				targetLabel					= new JLabel("Instances to find:");
-	private final JRadioButton			targetAllInstancesRB		= new JRadioButton("all instances of class:");
-	private final ClassInputTextField	targetClassTF;
-	private final JRadioButton			targetConcreteInstanceRB	= new JRadioButton("concrete instance:");
-	private final JLabel				targetValueLabel			= new JLabel("---");
+	private final JPanel							configurationPanel			= new JPanel(new GridBagLayout());
+	private final JLabel							rootLabel					= new JLabel("Root of search:");
+	private final JLabel							rootValueLabel				= new JLabel("---");
+	private final JLabel							targetLabel					= new JLabel("Instances to find:");
+	private final JRadioButton						targetConcreteInstanceRB	= new JRadioButton("concrete instance:");
+	private final JLabel							targetValueLabel			= new JLabel("---");
+	private final JRadioButton						targetAllInstancesRB		= new JRadioButton("all instances of class:");
+	private final ClassInputTextField				targetClassTF;
+	private final JCheckBox							targetFilterCB				= new JCheckBox("filter:");
+	private final CompiledExpressionInputTextField	targetFilterTF;
+
 	private final ButtonGroup			targetButtonGroup			= new ButtonGroup();
 
 	private final JPanel				resultPanel					= new JPanel(new GridBagLayout());
@@ -64,6 +70,8 @@ class InstanceSearchPanel extends JPanel
 
 		targetClassTF = new ClassInputTextField(inspectionContext);
 		targetClassTF.addInputVerifier();
+		targetFilterTF = new CompiledExpressionInputTextField(inspectionContext);
+		targetFilterTF.addInputVerifier();
 
 		instancePathFinder = new InstancePathFinder(this::onPathDetected);
 
@@ -83,15 +91,20 @@ class InstanceSearchPanel extends JPanel
 	private void setupConfigurationPanel() {
 		configurationPanel.setBorder(new TitledBorder("Search Configuration"));
 
-		configurationPanel.add(rootLabel,					new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-		configurationPanel.add(rootValueLabel,				new GridBagConstraints(1, 0, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		int yPos = 0;
 
-		configurationPanel.add(targetLabel,					new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-		configurationPanel.add(targetConcreteInstanceRB,	new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-		configurationPanel.add(targetValueLabel,			new GridBagConstraints(2, 1, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		configurationPanel.add(rootLabel,					new GridBagConstraints(0, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+		configurationPanel.add(rootValueLabel,				new GridBagConstraints(1, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
-		configurationPanel.add(targetAllInstancesRB,		new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-		configurationPanel.add(targetClassTF,				new GridBagConstraints(2, 2, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		configurationPanel.add(targetLabel,					new GridBagConstraints(0, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+		configurationPanel.add(targetConcreteInstanceRB,	new GridBagConstraints(1, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+		configurationPanel.add(targetValueLabel,			new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+
+		configurationPanel.add(targetAllInstancesRB,		new GridBagConstraints(1, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+		configurationPanel.add(targetClassTF,				new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+
+		configurationPanel.add(targetFilterCB,				new GridBagConstraints(1, yPos,   1, 1, 0.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
+		configurationPanel.add(targetFilterTF,				new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
 		targetButtonGroup.add(targetAllInstancesRB);
 		targetButtonGroup.add(targetConcreteInstanceRB);
@@ -127,7 +140,13 @@ class InstanceSearchPanel extends JPanel
 		targetClassTF.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				updateEnabilities();
+				onTargetClassSpecified();
+			}
+		});
+		targetFilterTF.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				onTargetFilterSpecified();
 			}
 		});
 	}
@@ -154,20 +173,60 @@ class InstanceSearchPanel extends JPanel
 		stopSearchButton.setEnabled(!searchButton.isEnabled());
 	}
 
+	private Optional<Class<?>> getTargetClass() {
+		if (targetAllInstancesRB.isSelected()) {
+			try {
+				ClassInfo targetClassInfo = targetClassTF.evaluateText();
+				return Optional.of(Class.forName(targetClassInfo.getNormalizedName()));
+			} catch (Throwable t) {
+				/* fall through until end */
+			}
+		} else if (targetConcreteInstanceRB.isSelected()) {
+			return Optional.of(target.getClass());
+		}
+		return Optional.empty();
+	}
+
+	private Optional<Predicate<Object>> getTargetFilter() {
+		if (targetAllInstancesRB.isSelected()) {
+			Optional<Class<?>> optionalTargetClass = getTargetClass();
+			if (!optionalTargetClass.isPresent()) {
+				return Optional.empty();
+			}
+			Class<?> targetClass = optionalTargetClass.get();
+			if (targetFilterCB.isSelected()) {
+				try {
+					CompiledExpression compiledFilter = targetFilterTF.evaluateText();
+					return Optional.of(o -> targetClass.isInstance(o) && applyFilter(compiledFilter, o));
+				} catch (Throwable t) {
+					/* fall through until end */
+				}
+			} else {
+				return Optional.of(o -> targetClass.isInstance(o));
+			}
+		} else if (targetConcreteInstanceRB.isSelected()) {
+			return Optional.of(o -> o == target);
+		}
+		return Optional.empty();
+	}
+
+	private boolean applyFilter(CompiledExpression filter, Object o) {
+		try {
+			return Boolean.TRUE.equals(filter.evaluate(o));
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 	private boolean isRequiredInputSpecified() {
 		if (root == null) {
 			return false;
 		}
 		if (targetAllInstancesRB.isSelected()) {
-			try {
-				targetClassTF.evaluateText();
-				return true;
-			} catch (ParseException e) {
-				/* happens if the class name cannot be parsed */
-				return false;
-			}
-		}
-		if (targetConcreteInstanceRB.isSelected()) {
+			Optional<Class<?>> targetClass = getTargetClass();
+			return targetClass.isPresent()
+				&& (!targetFilterCB.isSelected() || getTargetFilter().isPresent());
+		} else if (targetConcreteInstanceRB.isSelected()) {
 			return target != null;
 		}
 		return false;
@@ -207,6 +266,10 @@ class InstanceSearchPanel extends JPanel
 		statusTF.repaint();
 	}
 
+	private void showError(String error) {
+		JOptionPane.showMessageDialog(this, error, "Parse Error", JOptionPane.ERROR_MESSAGE);
+	}
+
 	private void startSearch() {
 		statusTF.setText(null);
 		instanceSearchTree.setModel(new DefaultTreeModel(null));
@@ -214,27 +277,21 @@ class InstanceSearchPanel extends JPanel
 
 		InstancePath sourcePath = new InstancePath(root, "root", null);
 
-		final Class<?> targetClass;
-		final Predicate<Object> targetFilter;
-		final boolean extendPathsBeyondAcceptedInstances;
-		if (targetAllInstancesRB.isSelected()) {
-			try {
-				ClassInfo targetClassInfo = targetClassTF.evaluateText();
-				targetClass = Class.forName(targetClassInfo.getNormalizedName());
-			} catch (Throwable t) {
-				String message = "Invalid target class:\n\n" + t.getMessage();
-				JOptionPane.showMessageDialog(this, message, "Parse Error", JOptionPane.ERROR_MESSAGE);
-				return;
-			}
-			targetFilter = targetClass::isInstance;
-			extendPathsBeyondAcceptedInstances = true;
-		} else if (targetConcreteInstanceRB.isSelected()) {
-			targetClass = target.getClass();
-			targetFilter = o -> o == target;
-			extendPathsBeyondAcceptedInstances = false;
-		} else {
-			throw new IllegalStateException("None of the supported search options is selected");
+		Optional<Class<?>> optionalTargetClass = getTargetClass();
+		if (!optionalTargetClass.isPresent()) {
+			showError("Could not parse target class.");
+			return;
 		}
+		Class<?> targetClass = optionalTargetClass.get();
+
+		Optional<Predicate<Object>> optionalTargetFilter = getTargetFilter();
+		if (!optionalTargetFilter.isPresent()) {
+			showError("Could not parse target filter.");
+			return;
+		}
+		Predicate<Object> targetFilter = optionalTargetFilter.get();
+
+		boolean extendPathsBeyondAcceptedInstances = targetAllInstancesRB.isSelected();
 
 		instancePathFinder.reset();
 		new Thread(() -> instancePathFinder.search(sourcePath, targetClass, targetFilter, extendPathsBeyondAcceptedInstances)).start();
@@ -273,5 +330,18 @@ class InstanceSearchPanel extends JPanel
 	 */
 	private void onPathDetected(InstancePath path) {
 		SwingUtilities.invokeLater(() -> addInstancePath(path));
+	}
+
+	private void onTargetClassSpecified() {
+		Optional<Class<?>> optionalTargetClass = getTargetClass();
+		if (optionalTargetClass.isPresent()) {
+			Class<?> targetClass = optionalTargetClass.get();
+			targetFilterTF.setThisClass(targetClass);
+		}
+		updateEnabilities();
+	}
+
+	private void onTargetFilterSpecified() {
+		updateEnabilities();
 	}
 }
