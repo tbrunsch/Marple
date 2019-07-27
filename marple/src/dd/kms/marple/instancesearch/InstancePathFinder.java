@@ -44,6 +44,10 @@ public class InstancePathFinder
 			changeProcessingState(ProcessingState.SEARCHING_CLASSES);
 			MutableGraph<Class<?>> classSearchGraph = ClassSearchGraphGenerator.createClassSearchGraph(sourceObject.getClass(), targetClass, stopFlagSupplier);
 
+			if (!classSearchGraph.nodes().contains(targetClass)) {
+				return;
+			}
+
 			changeProcessingState(ProcessingState.EXCLUDING_CLASSES);
 			ClassBreadthFirstSearch classBreadthFirstSearch = new ClassBreadthFirstSearch(Graphs.transpose(classSearchGraph), stopFlagSupplier);
 			currentSearch = classBreadthFirstSearch;
