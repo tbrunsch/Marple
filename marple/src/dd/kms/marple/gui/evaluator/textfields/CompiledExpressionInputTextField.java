@@ -14,10 +14,13 @@ import java.util.Optional;
 
 public class CompiledExpressionInputTextField extends AbstractExpressionInputTextField<CompiledExpression>
 {
-	private final Class<?> thisClass;
+	private Class<?> thisClass = Object.class;
 
-	public CompiledExpressionInputTextField(Class<?> thisClass, InspectionContext context) {
+	public CompiledExpressionInputTextField(InspectionContext context) {
 		super(context);
+	}
+
+	public void setThisClass(Class<?> thisClass) {
 		this.thisClass = thisClass;
 	}
 

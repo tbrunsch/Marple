@@ -163,7 +163,8 @@ public class IterableView extends JPanel implements ObjectView
 
 			setBorder(BorderFactory.createTitledBorder("Operation"));
 
-			expressionTF = new CompiledExpressionInputTextField(commonElementClass, context);
+			expressionTF = new CompiledExpressionInputTextField(context);
+			expressionTF.setThisClass(commonElementClass);
 
 			initButtons(operationToButton, 	operationButtonGroup,	Operation.FILTER);
 			initButtons(resultTypeToButton, resultTypeButtonGroup,	OperationResultType.LIST);
