@@ -70,17 +70,17 @@ public class ActionProviderBuilder
 				Component component = (Component) this.object;
 				actionsBuilder.add(new HighlightComponentAction(component));
 				if (component instanceof JComponent) {
-					actionsBuilder.add(new SnapshotAction<>((JComponent) component, Snapshots::takeSnapshot));
+					actionsBuilder.add(inspectionContext.createSnapshotAction((JComponent) component, Snapshots::takeSnapshot));
 				}
 			}
 			if (object instanceof Image) {
-				actionsBuilder.add(new SnapshotAction<>((Image) object, Snapshots::takeSnapshot));
+				actionsBuilder.add(inspectionContext.createSnapshotAction((Image) object, Snapshots::takeSnapshot));
 			}
 			if (object instanceof Icon) {
-				actionsBuilder.add(new SnapshotAction<>((Icon) object, Snapshots::takeSnapshot));
+				actionsBuilder.add(inspectionContext.createSnapshotAction((Icon) object, Snapshots::takeSnapshot));
 			}
 			if (object instanceof Paint) {
-				actionsBuilder.add(new SnapshotAction<>((Paint) object, paint -> Snapshots.takeSnapshot(paint, 200, 200)));
+				actionsBuilder.add(inspectionContext.createSnapshotAction((Paint) object, paint -> Snapshots.takeSnapshot(paint, 200, 200)));
 			}
 			actionsBuilder.add(inspectionContext.createAddVariableAction(suggestedVariableName, object));
 			actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(object));

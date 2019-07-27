@@ -1,6 +1,7 @@
 package dd.kms.marple.actions.component;
 
 import com.google.common.util.concurrent.Runnables;
+import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ImmediateInspectionAction;
 import dd.kms.marple.gui.common.WindowManager;
 
@@ -14,10 +15,12 @@ public class SnapshotAction<T> implements ImmediateInspectionAction
 
 	private final T 							snapshotTarget;
 	private final Function<T, BufferedImage>	snapshotFunction;
+	private final InspectionContext				inspectionContext;
 
-	public SnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction) {
+	public SnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction, InspectionContext inspectionContext) {
 		this.snapshotTarget = snapshotTarget;
 		this.snapshotFunction = snapshotFunction;
+		this.inspectionContext = inspectionContext;
 	}
 
 	@Override
@@ -42,7 +45,7 @@ public class SnapshotAction<T> implements ImmediateInspectionAction
 
 	@Override
 	public final void perform() {
-		WindowManager.showInFrame(FRAME_TITLE, SnapshotPanel::new, panel -> panel.takeSnapshot(snapshotTarget, snapshotFunction), panel -> {});
+		WindowManager.showInFrame(FRAME_TITLE, () -> new SnapshotPanel(inspectionContext), panel -> panel.takeSnapshot(snapshotTarget, snapshotFunction), panel -> {});
 	}
 
 	@Override

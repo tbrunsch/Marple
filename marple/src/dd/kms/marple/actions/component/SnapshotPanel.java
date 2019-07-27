@@ -1,5 +1,7 @@
 package dd.kms.marple.actions.component;
 
+import dd.kms.marple.InspectionContext;
+import dd.kms.marple.gui.common.CurrentObjectPanel;
 import dd.kms.marple.gui.common.Snapshots;
 
 import javax.annotation.Nullable;
@@ -26,25 +28,32 @@ class SnapshotPanel extends JPanel
 
 	private static File				lastSelectedFile			= null;
 
-	private final ImagePanel		imagePanel			= new ImagePanel();
-	private final JCheckBox			livePreviewCB 		= new JCheckBox("live preview");
+	private final CurrentObjectPanel	currentObjectPanel;
 
-	private final JButton			saveButton			= new JButton("Save");
-	private final JButton			copyButton			= new JButton("Copy to clipboard");
+	private final ImagePanel			imagePanel			= new ImagePanel();
+	private final JCheckBox				livePreviewCB 		= new JCheckBox("live preview");
 
-	private BufferedImage			screenshot;
+	private final JButton				saveButton			= new JButton("Save");
+	private final JButton				copyButton			= new JButton("Copy to clipboard");
 
-	private WeakReference<Object>	lastSnapshotTarget	= new WeakReference<>(null);
-	private long					lastSnapshotTimeMs	= 0;
+	private BufferedImage				screenshot;
 
-	SnapshotPanel() {
+	private WeakReference<Object>		lastSnapshotTarget	= new WeakReference<>(null);
+	private long						lastSnapshotTimeMs	= 0;
+
+	SnapshotPanel(InspectionContext context) {
 		super(new GridBagLayout());
 
-		add(imagePanel,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
+		currentObjectPanel = new CurrentObjectPanel(context);
 
-		add(livePreviewCB,	new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));
-		add(saveButton,		new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
-		add(copyButton,		new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
+		int yPos = 0;
+		add(currentObjectPanel,	new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 0.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
+
+		add(imagePanel,			new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
+
+		add(livePreviewCB,		new GridBagConstraints(0, yPos,   1, 1, 0.0, 0.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));
+		add(saveButton,			new GridBagConstraints(1, yPos,   1, 1, 1.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
+		add(copyButton,			new GridBagConstraints(2, yPos++, 1, 1, 0.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
 
 		livePreviewCB.setToolTipText("Select this option if you want to take a screenshot of components when hovering over component objects in the inspector");
 
@@ -77,6 +86,7 @@ class SnapshotPanel extends JPanel
 		lastSnapshotTarget = new WeakReference<>(snapshotTarget);
 		lastSnapshotTimeMs = System.currentTimeMillis();
 		this.screenshot = snapshotFunction.apply(snapshotTarget);
+		currentObjectPanel.setCurrentObject(snapshotTarget);
 		imagePanel.setImage(screenshot);
 	}
 

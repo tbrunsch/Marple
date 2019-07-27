@@ -3,6 +3,7 @@ package dd.kms.marple;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.actions.*;
 import dd.kms.marple.actions.component.HighlightComponentAction;
+import dd.kms.marple.actions.component.SnapshotAction;
 import dd.kms.marple.actions.evaluator.EvaluateAsThisAction;
 import dd.kms.marple.actions.evaluator.EvaluateExpressionAction;
 import dd.kms.marple.actions.history.HistoryActionWrapper;
@@ -18,9 +19,11 @@ import dd.kms.marple.inspector.InspectionHistory;
 import dd.kms.marple.settings.InspectionSettings;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 class InspectionContextImpl implements InspectionContext
 {
@@ -91,6 +94,11 @@ class InspectionContextImpl implements InspectionContext
 	@Override
 	public InspectionAction createSearchInstancesFromHereAction(Object root) {
 		return new SearchInstancesFromHereAction(this, root);
+	}
+
+	@Override
+	public <T> InspectionAction createSnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction) {
+		return new SnapshotAction<>(snapshotTarget, snapshotFunction, this);
 	}
 
 	@Override

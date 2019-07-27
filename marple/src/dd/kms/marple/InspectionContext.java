@@ -6,9 +6,11 @@ import dd.kms.marple.gui.ObjectView;
 import dd.kms.marple.settings.InspectionSettings;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public interface InspectionContext
 {
@@ -23,6 +25,7 @@ public interface InspectionContext
 	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue, int caretPosition);
 	InspectionAction createEvaluateAsThisAction(Object thisValue);
 	InspectionAction createSearchInstancesFromHereAction(Object root);
+	<T> InspectionAction createSnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction);
 
 	void clearHistory();
 
