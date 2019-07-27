@@ -1,6 +1,6 @@
 package dd.kms.marple.actions.component;
 
-import dd.kms.marple.gui.common.Screenshots;
+import dd.kms.marple.gui.common.Snapshots;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -11,11 +11,11 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.ref.WeakReference;
-import java.util.Objects;
+import java.util.function.Function;
 
 import static java.awt.GridBagConstraints.*;
 
-class ScreenshotPanel extends JPanel
+class SnapshotPanel extends JPanel
 {
 	private static final Insets		DEFAULT_INSETS				= new Insets(3, 3, 3, 3);
 
@@ -26,21 +26,18 @@ class ScreenshotPanel extends JPanel
 
 	private static File				lastSelectedFile			= null;
 
-	private final ImagePanel			imagePanel				= new ImagePanel();
+	private final ImagePanel		imagePanel			= new ImagePanel();
+	private final JCheckBox			livePreviewCB 		= new JCheckBox("live preview");
 
-	private final JCheckBox				livePreviewCB = new JCheckBox("live preview");
+	private final JButton			saveButton			= new JButton("Save");
+	private final JButton			copyButton			= new JButton("Copy to clipboard");
 
-	private final JButton				saveButton				= new JButton("Save");
-	private final JButton				copyButton				= new JButton("Copy to clipboard");
+	private BufferedImage			screenshot;
 
-	private BufferedImage				screenshot;
+	private WeakReference<Object>	lastSnapshotTarget	= new WeakReference<>(null);
+	private long					lastSnapshotTimeMs	= 0;
 
-	private WeakReference<JComponent>	lastScreenshotComponent	= new WeakReference<>(null);
-	private WeakReference<Image>		lastScreenshotImage		= new WeakReference<>(null);
-	private Paint						lastScreenshotPaint		= null;
-	private long						lastScreenshotTimeMs	= 0;
-
-	ScreenshotPanel() {
+	SnapshotPanel() {
 		super(new GridBagLayout());
 
 		add(imagePanel,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
@@ -76,59 +73,25 @@ class ScreenshotPanel extends JPanel
 		});
 	}
 
-	void takeScreenshot(JComponent component) {
-		lastScreenshotComponent = new WeakReference<>(component);
-		lastScreenshotTimeMs = System.currentTimeMillis();
-		this.screenshot = Screenshots.takeScreenshot(component);
+	<T> void takeSnapshot(T snapshotTarget, Function<T, BufferedImage> snapshotFunction) {
+		lastSnapshotTarget = new WeakReference<>(snapshotTarget);
+		lastSnapshotTimeMs = System.currentTimeMillis();
+		this.screenshot = snapshotFunction.apply(snapshotTarget);
 		imagePanel.setImage(screenshot);
 	}
 
-	void takeScreenshot(Image image) {
-		lastScreenshotImage = new WeakReference<>(image);
-		lastScreenshotTimeMs = System.currentTimeMillis();
-		this.screenshot = Screenshots.takeScreenshot(image);
-		imagePanel.setImage(screenshot);
-	}
-
-	void takeScreenshot(Paint paint) {
-		lastScreenshotPaint = paint;
-		lastScreenshotTimeMs = System.currentTimeMillis();
-		this.screenshot = Screenshots.takeScreenshot(paint, imagePanel.getImageAreaWidth(), imagePanel.getImageAreaHeight());
-		imagePanel.setImage(screenshot);
-	}
-
-	void takeLiveScreenshot(JComponent component) {
+	<T> void takeLiveSnapshot(T snapshotTarget, Function<T, BufferedImage> snapshotFunction) {
 		if (!livePreviewCB.isSelected()) {
 			return;
 		}
-		if (component == lastScreenshotComponent.get() && System.currentTimeMillis() < lastScreenshotTimeMs + LIVE_SCREENSHOT_INTERVAL_MS) {
+		if (snapshotTarget == lastSnapshotTarget.get() && System.currentTimeMillis() < lastSnapshotTimeMs + LIVE_SCREENSHOT_INTERVAL_MS) {
 			return;
 		}
-		takeScreenshot(component);
-	}
-
-	void takeLiveScreenshot(Image image) {
-		if (!livePreviewCB.isSelected()) {
-			return;
-		}
-		if (image == lastScreenshotImage.get() && System.currentTimeMillis() < lastScreenshotTimeMs + LIVE_SCREENSHOT_INTERVAL_MS) {
-			return;
-		}
-		takeScreenshot(image);
-	}
-
-	void takeLiveScreenshot(Paint paint) {
-		if (!livePreviewCB.isSelected()) {
-			return;
-		}
-		if (Objects.equals(paint, lastScreenshotPaint) && System.currentTimeMillis() < lastScreenshotTimeMs + LIVE_SCREENSHOT_INTERVAL_MS) {
-			return;
-		}
-		takeScreenshot(paint);
+		takeSnapshot(snapshotTarget, snapshotFunction);
 	}
 
 	private void copyImageToClipboard() {
-		Screenshots.copyToClipboard(screenshot);
+		Snapshots.copyToClipboard(screenshot);
 	}
 
 	private void saveImage() {
@@ -138,16 +101,16 @@ class ScreenshotPanel extends JPanel
 		if (directory != null) {
 			fileChooser.setCurrentDirectory(directory);
 		}
-		for (FileFilter fileFilter : Screenshots.IMAGE_FILE_FILTERS) {
+		for (FileFilter fileFilter : Snapshots.IMAGE_FILE_FILTERS) {
 			fileChooser.addChoosableFileFilter(fileFilter);
 		}
 
 		final FileFilter fileFilter;
 		if (lastSelectedFile == null) {
-			fileFilter = Screenshots.getFileFilter("png");
+			fileFilter = Snapshots.getFileFilter("png");
 		} else {
 			fileChooser.setSelectedFile(lastSelectedFile);
-			fileFilter = Screenshots.getFileFilter(Screenshots.getExtension(lastSelectedFile));
+			fileFilter = Snapshots.getFileFilter(Snapshots.getExtension(lastSelectedFile));
 		}
 		if (fileFilter != null) {
 			fileChooser.setFileFilter(fileFilter);
@@ -159,15 +122,15 @@ class ScreenshotPanel extends JPanel
 		if (file == null) {
 			return;
 		}
-		if (!Screenshots.isSupportedImageFile(file)) {
+		if (!Snapshots.isSupportedImageFile(file)) {
 			FileFilter selectedFileFilter = fileChooser.getFileFilter();
-			String extension = Screenshots.getExtension(selectedFileFilter);
+			String extension = Snapshots.getExtension(selectedFileFilter);
 			if (extension != null) {
 				file = new File(file.getPath() + "." + extension);
 			}
 		}
 		lastSelectedFile = file;
-		Screenshots.save(screenshot, file, this);
+		Snapshots.save(screenshot, file, this);
 	}
 
 	private @Nullable File suggestDirectoryForSaving() {

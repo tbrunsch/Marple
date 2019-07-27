@@ -2,15 +2,13 @@ package dd.kms.marple.actions;
 
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.actions.component.ComponentScreenshotAction;
 import dd.kms.marple.actions.component.HighlightComponentAction;
-import dd.kms.marple.actions.component.ImageScreenshotAction;
-import dd.kms.marple.actions.component.PaintScreenshotAction;
+import dd.kms.marple.actions.component.SnapshotAction;
 import dd.kms.marple.actions.search.SearchInstanceAction;
 import dd.kms.marple.actions.search.SearchInstancesFromHereAction;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.components.ComponentHierarchyModels;
-import dd.kms.marple.gui.common.Screenshots;
+import dd.kms.marple.gui.common.Snapshots;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -72,17 +70,17 @@ public class ActionProviderBuilder
 				Component component = (Component) this.object;
 				actionsBuilder.add(new HighlightComponentAction(component));
 				if (component instanceof JComponent) {
-					actionsBuilder.add(new ComponentScreenshotAction((JComponent) component));
+					actionsBuilder.add(new SnapshotAction<>((JComponent) component, Snapshots::takeSnapshot));
 				}
 			}
 			if (object instanceof Image) {
-				actionsBuilder.add(new ImageScreenshotAction((Image) object));
+				actionsBuilder.add(new SnapshotAction<>((Image) object, Snapshots::takeSnapshot));
 			}
 			if (object instanceof Icon) {
-				actionsBuilder.add(new ImageScreenshotAction(Screenshots.takeScreenshot((Icon) object)));
+				actionsBuilder.add(new SnapshotAction<>((Icon) object, Snapshots::takeSnapshot));
 			}
 			if (object instanceof Paint) {
-				actionsBuilder.add(new PaintScreenshotAction((Paint) object));
+				actionsBuilder.add(new SnapshotAction<>((Paint) object, paint -> Snapshots.takeSnapshot(paint, 200, 200)));
 			}
 			actionsBuilder.add(inspectionContext.createAddVariableAction(suggestedVariableName, object));
 			actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(object));

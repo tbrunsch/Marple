@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Screenshots
+public class Snapshots
 {
 	public static final List<ExtensionFileFilter> IMAGE_FILE_FILTERS	= Arrays.stream(ImageIO.getWriterFileSuffixes())
 		.map(String::toLowerCase)
@@ -29,7 +29,7 @@ public class Screenshots
 	/*
 	 * Adapted from Screen Image by Rob Camick (https://tips4java.wordpress.com/2008/10/13/screen-image/)
 	 */
-	public static BufferedImage takeScreenshot(JComponent component) {
+	public static BufferedImage takeSnapshot(JComponent component) {
 		if (!component.isDisplayable()) {
 			Dimension size = component.getSize();
 			if (size.width == 0 || size.height == 0) {
@@ -68,7 +68,7 @@ public class Screenshots
 		}
 	}
 
-	public static BufferedImage takeScreenshot(Image image) {
+	public static BufferedImage takeSnapshot(Image image) {
 		BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 		Graphics2D graphics = bufferedImage.createGraphics();
 		graphics.drawImage(image, 0, 0, null);
@@ -76,7 +76,7 @@ public class Screenshots
 		return bufferedImage;
 	}
 
-	public static BufferedImage takeScreenshot(Icon icon) {
+	public static BufferedImage takeSnapshot(Icon icon) {
 		BufferedImage bufferedImage = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
 		try {
 			icon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
@@ -86,7 +86,7 @@ public class Screenshots
 		return bufferedImage;
 	}
 
-	public static BufferedImage takeScreenshot(Paint paint, int width, int height) {
+	public static BufferedImage takeSnapshot(Paint paint, int width, int height) {
 		BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D graphics = bufferedImage.createGraphics();
 		graphics.setPaint(paint);
@@ -194,7 +194,7 @@ public class Screenshots
 		@Override
 		public boolean accept(File file) {
 			return file != null
-				&& (file.isDirectory() || extension.equalsIgnoreCase(Screenshots.getExtension(file)));
+				&& (file.isDirectory() || extension.equalsIgnoreCase(Snapshots.getExtension(file)));
 		}
 
 		@Override
