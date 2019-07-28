@@ -57,41 +57,43 @@ public class ActionProviderBuilder
 
 	public ActionProvider build() {
 		ImmutableList.Builder<InspectionAction> actionsBuilder = ImmutableList.builder();
-		if (object != null) {
-			boolean isInspectable = ReflectionUtils.isObjectInspectable(object);
-			if (componentHierarchyData == null) {
-				if (isInspectable) {
-					actionsBuilder.add(inspectionContext.createInspectObjectAction(object));
-				}
-			} else {
-				actionsBuilder.add(inspectionContext.createInspectComponentAction(componentHierarchyData.getComponentHierarchy(), componentHierarchyData.getSubcomponentHierarchy()));
-			}
-			if (object instanceof Component) {
-				Component component = (Component) this.object;
-				actionsBuilder.add(new HighlightComponentAction(component));
-				if (component instanceof JComponent) {
-					actionsBuilder.add(inspectionContext.createSnapshotAction((JComponent) component, Snapshots::takeSnapshot));
-				}
-			}
-			if (object instanceof Image) {
-				actionsBuilder.add(inspectionContext.createSnapshotAction((Image) object, Snapshots::takeSnapshot));
-			}
-			if (object instanceof Icon) {
-				actionsBuilder.add(inspectionContext.createSnapshotAction((Icon) object, Snapshots::takeSnapshot));
-			}
-			if (object instanceof Paint) {
-				actionsBuilder.add(inspectionContext.createSnapshotAction((Paint) object, paint -> Snapshots.takeSnapshot(paint, 200, 200)));
-			}
-			actionsBuilder.add(inspectionContext.createAddVariableAction(suggestedVariableName, object));
-			actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(object));
-			if (evaluationData != null) {
-				String expression = evaluationData.getExpression();
-				Object expressionContext = evaluationData.getExpressionContext();
-				actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(expression, expressionContext));
-			}
-			actionsBuilder.add(new SearchInstancesFromHereAction(inspectionContext, object));
-			actionsBuilder.add(new SearchInstanceAction(inspectionContext, object));
+		if (object == null) {
+			return ActionProvider.of(displayText, actionsBuilder.build());
 		}
+		boolean isInspectable = ReflectionUtils.isObjectInspectable(object);
+		if (componentHierarchyData == null) {
+			if (isInspectable) {
+				actionsBuilder.add(inspectionContext.createInspectObjectAction(object));
+			}
+		} else {
+			actionsBuilder.add(inspectionContext.createInspectComponentAction(componentHierarchyData.getComponentHierarchy(), componentHierarchyData.getSubcomponentHierarchy()));
+		}
+		if (object instanceof Component) {
+			Component component = (Component) this.object;
+			actionsBuilder.add(new HighlightComponentAction(component));
+			if (component instanceof JComponent) {
+				actionsBuilder.add(inspectionContext.createSnapshotAction((JComponent) component, Snapshots::takeSnapshot));
+			}
+		}
+		if (object instanceof Image) {
+			actionsBuilder.add(inspectionContext.createSnapshotAction((Image) object, Snapshots::takeSnapshot));
+		}
+		if (object instanceof Icon) {
+			actionsBuilder.add(inspectionContext.createSnapshotAction((Icon) object, Snapshots::takeSnapshot));
+		}
+		if (object instanceof Paint) {
+			actionsBuilder.add(inspectionContext.createSnapshotAction((Paint) object, paint -> Snapshots.takeSnapshot(paint, 200, 200)));
+		}
+		actionsBuilder.add(inspectionContext.createAddVariableAction(suggestedVariableName, object));
+		actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(object));
+		if (evaluationData != null) {
+			String expression = evaluationData.getExpression();
+			Object expressionContext = evaluationData.getExpressionContext();
+			actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(expression, expressionContext));
+		}
+		actionsBuilder.add(new SearchInstancesFromHereAction(inspectionContext, object));
+		actionsBuilder.add(new SearchInstanceAction(inspectionContext, object));
+		actionsBuilder.add(new CopyStringRepresentationAction(object));
 		return ActionProvider.of(displayText, actionsBuilder.build());
 	}
 
