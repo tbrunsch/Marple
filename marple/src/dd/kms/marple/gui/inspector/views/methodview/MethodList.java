@@ -2,17 +2,15 @@ package dd.kms.marple.gui.inspector.views.methodview;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
-import dd.kms.marple.actions.Actions;
-import dd.kms.marple.actions.ImmediateInspectionAction;
+import dd.kms.marple.gui.actionproviders.AbstractActionProviderMouseListener;
+import dd.kms.marple.gui.actionproviders.AbstractActionProviderMouseMotionListener;
 import dd.kms.marple.gui.filters.ValueFilter;
 import dd.kms.marple.gui.filters.ValueFilters;
 import dd.kms.zenodot.common.MethodScanner;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.List;
@@ -160,32 +158,19 @@ class MethodList extends JPanel
 		}
 	}
 
-	private class ActionProviderListMouseListener extends MouseAdapter
+	private class ActionProviderListMouseListener extends AbstractActionProviderMouseListener
 	{
 		@Override
-		public void mouseReleased(MouseEvent e) {
-			ActionProvider actionProvider = getActionProvider(e);
-			if (actionProvider != null) {
-				if (SwingUtilities.isLeftMouseButton(e)) {
-					Actions.performDefaultAction(actionProvider);
-				} else if (SwingUtilities.isRightMouseButton(e)) {
-					Actions.showActionPopup(e.getComponent(), actionProvider, e);
-				}
-			}
+		protected ActionProvider getActionProvider(MouseEvent e) {
+			return MethodList.this.getActionProvider(e);
 		}
 	}
 
-	private class ActionProviderListMouseMotionListener extends MouseMotionAdapter
+	private class ActionProviderListMouseMotionListener extends AbstractActionProviderMouseMotionListener
 	{
 		@Override
-		public void mouseMoved(MouseEvent e) {
-			ActionProvider actionProvider = getActionProvider(e);
-			Cursor cursor = Actions.hasDefaultAction(actionProvider)
-				? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-				: Cursor.getDefaultCursor();
-			e.getComponent().setCursor(cursor);
-
-			Actions.performImmediateActions(actionProvider);
+		protected ActionProvider getActionProvider(MouseEvent e) {
+			return MethodList.this.getActionProvider(e);
 		}
 	}
 

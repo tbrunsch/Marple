@@ -1,7 +1,8 @@
 package dd.kms.marple.gui.table;
 
 import dd.kms.marple.actions.ActionProvider;
-import dd.kms.marple.actions.Actions;
+import dd.kms.marple.gui.actionproviders.AbstractActionProviderMouseListener;
+import dd.kms.marple.gui.actionproviders.AbstractActionProviderMouseMotionListener;
 import dd.kms.marple.gui.filters.ValueFilter;
 import dd.kms.marple.gui.filters.ValueFilters;
 
@@ -13,7 +14,6 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.util.List;
 
 /**
@@ -84,33 +84,19 @@ public class ListBasedTable<T> extends JPanel
 	}
 
 	private void addListenerForMouseCursor() {
-		table.addMouseMotionListener(new MouseMotionAdapter() {
+		table.addMouseMotionListener(new AbstractActionProviderMouseMotionListener() {
 			@Override
-			public void mouseMoved(MouseEvent e) {
-			ActionProvider actionProvider = getCellValueAsActionProvider(e.getPoint());
-			Cursor cursor = Actions.hasDefaultAction(actionProvider)
-								? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-								: Cursor.getDefaultCursor();
-			table.setCursor(cursor);
-
-			Actions.performImmediateActions(actionProvider);
+			protected ActionProvider getActionProvider(MouseEvent e) {
+				return getCellValueAsActionProvider(e.getPoint());
 			}
 		});
 	}
 
 	private void addListenerForMouseClickAction() {
-		table.addMouseListener(new MouseAdapter() {
+		table.addMouseListener(new AbstractActionProviderMouseListener() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
-				ActionProvider actionProvider = getCellValueAsActionProvider(e.getPoint());
-				if (actionProvider == null) {
-					return;
-				}
-				if (SwingUtilities.isLeftMouseButton(e)) {
-					Actions.performDefaultAction(actionProvider);
-				} else if (SwingUtilities.isRightMouseButton(e)) {
-					Actions.showActionPopup(table, actionProvider, e);
-				}
+			protected ActionProvider getActionProvider(MouseEvent e) {
+				return getCellValueAsActionProvider(e.getPoint());
 			}
 		});
 	}

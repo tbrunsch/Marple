@@ -1,23 +1,14 @@
 package dd.kms.marple.gui.actionprovidertree;
 
 import dd.kms.marple.actions.ActionProvider;
-import dd.kms.marple.actions.Actions;
+import dd.kms.marple.gui.actionproviders.AbstractActionProviderMouseListener;
 
-import javax.swing.*;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class ActionProviderTreeMouseListener extends MouseAdapter
+public class ActionProviderTreeMouseListener extends AbstractActionProviderMouseListener
 {
 	@Override
-	public void mouseReleased(MouseEvent e) {
-		ActionProvider actionProvider = ActionProviderTreeNodes.getActionProvider(e);
-		if (actionProvider != null) {
-			if (SwingUtilities.isLeftMouseButton(e)) {
-				Actions.performDefaultAction(actionProvider);
-			} else if (SwingUtilities.isRightMouseButton(e)) {
-				Actions.showActionPopup(e.getComponent(), actionProvider, e);
-			}
-		}
+	protected ActionProvider getActionProvider(MouseEvent e) {
+		return ActionProviderTreeNodes.getActionProvider(e);
 	}
 }
