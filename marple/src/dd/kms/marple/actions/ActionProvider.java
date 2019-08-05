@@ -9,16 +9,18 @@ import java.util.stream.Collectors;
 
 public class ActionProvider
 {
-	public static ActionProvider of(String displayText, List<InspectionAction> actions) {
-		return new ActionProvider(displayText, actions);
+	public static ActionProvider of(String displayText, List<InspectionAction> actions, boolean executeDefaultAction) {
+		return new ActionProvider(displayText, actions, executeDefaultAction);
 	}
 
 	private final String					displayText;
 	private final List<InspectionAction>	actions;
+	private final boolean					executeDefaultAction;
 
-	private ActionProvider(String displayText, List<InspectionAction> actions) {
+	private ActionProvider(String displayText, List<InspectionAction> actions, boolean executeDefaultAction) {
 		this.displayText = displayText;
 		this.actions = actions.stream().filter(Objects::nonNull).collect(Collectors.toList());
+		this.executeDefaultAction = executeDefaultAction;
 	}
 
 	public List<InspectionAction> getActions() {
@@ -29,7 +31,7 @@ public class ActionProvider
 		List<InspectionAction> defaultActions = actions.stream()
 			.filter(InspectionAction::isDefaultAction)
 			.collect(Collectors.toList());
-		return defaultActions.size() == 1
+		return executeDefaultAction && defaultActions.size() == 1
 				? Optional.of(Iterables.getOnlyElement(defaultActions))
 				: Optional.empty();
 	}

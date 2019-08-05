@@ -7,7 +7,6 @@ import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
-import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.components.ComponentHierarchyModels;
 import dd.kms.marple.gui.ObjectView;
 import dd.kms.marple.actions.Actions;

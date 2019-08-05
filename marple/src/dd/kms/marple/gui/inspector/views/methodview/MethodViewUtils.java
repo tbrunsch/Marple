@@ -34,7 +34,7 @@ class MethodViewUtils
 		String expression = methodName + "(" + argumentPlaceholder + ")";
 		int caretPosition = numArguments == 0 ? expression.length() : methodName.length() + 1;
 		actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(expression, object, caretPosition));
-		return ActionProvider.of(methodName, actionsBuilder.build());
+		return ActionProvider.of(methodName, actionsBuilder.build(), true);
 	}
 
 	AccessModifier getAccessModifier(Method method) {

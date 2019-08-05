@@ -5,8 +5,8 @@ import dd.kms.marple.gui.search.InstanceSearchFrame;
 
 public class SearchInstanceAction extends AbstractInstanceSearchAction
 {
-	public SearchInstanceAction(InspectionContext inspectionContext, Object thisValue) {
-		super(inspectionContext, thisValue);
+	public SearchInstanceAction(InspectionContext inspectionContext, Object target) {
+		super(inspectionContext, target);
 	}
 
 	@Override

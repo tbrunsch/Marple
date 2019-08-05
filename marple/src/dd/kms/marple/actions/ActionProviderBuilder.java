@@ -27,6 +27,7 @@ public class ActionProviderBuilder
 	private @Nullable ComponentHierarchyData	componentHierarchyData;
 	private @Nullable String					suggestedVariableName;
 	private @Nullable EvaluationData			evaluationData;
+	private boolean								executeDefaultAction	= true;
 
 	public ActionProviderBuilder(String displayText, List<Component> componentHierarchy, List<?> subcomponentHierarchy, InspectionContext inspectionContext) {
 		this.displayText = displayText;
@@ -55,10 +56,15 @@ public class ActionProviderBuilder
 		return this;
 	}
 
+	public ActionProviderBuilder executeDefaultAction(boolean executeDefaultAction) {
+		this.executeDefaultAction = executeDefaultAction;
+		return this;
+	}
+
 	public ActionProvider build() {
 		ImmutableList.Builder<InspectionAction> actionsBuilder = ImmutableList.builder();
 		if (object == null) {
-			return ActionProvider.of(displayText, actionsBuilder.build());
+			return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
 		}
 		boolean isInspectable = ReflectionUtils.isObjectInspectable(object);
 		if (componentHierarchyData == null) {
@@ -91,10 +97,10 @@ public class ActionProviderBuilder
 			Object expressionContext = evaluationData.getExpressionContext();
 			actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(expression, expressionContext));
 		}
-		actionsBuilder.add(new SearchInstancesFromHereAction(inspectionContext, object));
-		actionsBuilder.add(new SearchInstanceAction(inspectionContext, object));
+		actionsBuilder.add(inspectionContext.createSearchInstancesFromHereAction(object));
+		actionsBuilder.add(inspectionContext.createSearchInstanceAction(object));
 		actionsBuilder.add(new CopyStringRepresentationAction(object));
-		return ActionProvider.of(displayText, actionsBuilder.build());
+		return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
 	}
 
 	private static class ComponentHierarchyData

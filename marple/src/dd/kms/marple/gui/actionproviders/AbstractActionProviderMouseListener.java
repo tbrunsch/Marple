@@ -25,7 +25,7 @@ public abstract class AbstractActionProviderMouseListener extends MouseAdapter
 	public void mouseReleased(MouseEvent e) {
 		ActionProvider actionProvider = getActionProvider(e);
 		if (actionProvider != null) {
-			if (SwingUtilities.isLeftMouseButton(e)) {
+			if (SwingUtilities.isLeftMouseButton(e) && Actions.hasDefaultAction(actionProvider)) {
 				Actions.performDefaultAction(actionProvider);
 			} else if (e.isPopupTrigger()) {
 				Actions.showActionPopup(e.getComponent(), actionProvider, e);
