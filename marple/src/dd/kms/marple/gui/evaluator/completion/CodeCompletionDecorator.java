@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import dd.kms.marple.gui.common.ExceptionFormatter;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators.CompletionSuggestionProvider;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators.ExecutableArgumentInfoProvider;
-import dd.kms.marple.settings.KeyRepresentation;
+import dd.kms.marple.settings.keys.KeyRepresentation;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;

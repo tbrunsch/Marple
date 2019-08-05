@@ -8,7 +8,7 @@ import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.components.ComponentHierarchyModels;
-import dd.kms.marple.gui.ObjectView;
+import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.marple.actions.Actions;
 import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseListener;
 import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseMotionListener;

@@ -2,8 +2,10 @@ package dd.kms.marple.settings;
 
 import dd.kms.marple.components.ComponentHierarchyModel;
 import dd.kms.marple.components.ComponentHierarchyModels;
-import dd.kms.marple.gui.VisualSettings;
-import dd.kms.marple.gui.VisualSettingsUtils;
+import dd.kms.marple.settings.visual.VisualSettings;
+import dd.kms.marple.settings.visual.VisualSettingsUtils;
+import dd.kms.marple.settings.keys.KeySettings;
+import dd.kms.marple.settings.keys.KeySettingsBuilders;
 
 import java.awt.*;
 import java.util.function.Predicate;
@@ -14,12 +16,7 @@ class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 	private VisualSettings			visualSettings			= VisualSettingsUtils.createBuilder().build();
 	private Predicate<Component>	responsibilityPredicate	= component -> true;
 	private SecuritySettings 		securitySettings		= NoSecuritySettings.INSTANCE;
-
-	private KeyRepresentation		inspectionKey;
-	private KeyRepresentation		evaluationKey;
-	private KeyRepresentation		codeCompletionKey;
-	private KeyRepresentation		searchKey;
-	private KeyRepresentation		showMethodArgumentsKey;
+	private KeySettings				keySettings				= KeySettingsBuilders.create().build();
 
 	@Override
 	public InspectionSettingsBuilder componentHierarchyModel(ComponentHierarchyModel componentHierarchyModel) {
@@ -46,37 +43,13 @@ class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 	}
 
 	@Override
-	public InspectionSettingsBuilder inspectionKey(KeyRepresentation inspectionKey) {
-		this.inspectionKey = inspectionKey;
-		return this;
-	}
-
-	@Override
-	public InspectionSettingsBuilder evaluationKey(KeyRepresentation evaluationKey) {
-		this.evaluationKey = evaluationKey;
-		return this;
-	}
-
-	@Override
-	public InspectionSettingsBuilder searchKey(KeyRepresentation searchKey) {
-		this.searchKey = searchKey;
-		return this;
-	}
-
-	@Override
-	public InspectionSettingsBuilder codeCompletionKey(KeyRepresentation codeCompletionKey) {
-		this.codeCompletionKey = codeCompletionKey;
-		return this;
-	}
-
-	@Override
-	public InspectionSettingsBuilder showMethodArgumentsKey(KeyRepresentation showMethodArgumentsKey) {
-		this.showMethodArgumentsKey = showMethodArgumentsKey;
+	public InspectionSettingsBuilder keySettings(KeySettings keySettings) {
+		this.keySettings = keySettings;
 		return this;
 	}
 
 	@Override
 	public InspectionSettings build() {
-		return new InspectionSettingsImpl(componentHierarchyModel, visualSettings, responsibilityPredicate, securitySettings, inspectionKey, evaluationKey, searchKey, codeCompletionKey, showMethodArgumentsKey);
+		return new InspectionSettingsImpl(componentHierarchyModel, visualSettings, responsibilityPredicate, securitySettings, keySettings);
 	}
 }

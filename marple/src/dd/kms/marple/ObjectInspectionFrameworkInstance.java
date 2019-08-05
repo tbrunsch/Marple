@@ -3,8 +3,9 @@ package dd.kms.marple;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.components.ComponentHierarchyModels;
 import dd.kms.marple.settings.InspectionSettings;
-import dd.kms.marple.settings.KeyRepresentation;
 import dd.kms.marple.settings.SecuritySettings;
+import dd.kms.marple.settings.keys.KeyRepresentation;
+import dd.kms.marple.settings.keys.KeySettings;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -14,7 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 class ObjectInspectionFrameworkInstance
 {
@@ -75,27 +77,37 @@ class ObjectInspectionFrameworkInstance
 	 * Actions
 	 */
 	private void performInspection(InspectionContext context, Component component, Point position) {
-		List<Component> componentHierarchy = ComponentHierarchyModels.getComponentHierarchy(component);
-		List<?> subcomponentHierarchy = context.getSettings().getComponentHierarchyModel().getSubcomponentHierarchy(component, position);
-		InspectionAction inspectComponentAction = context.createInspectComponentAction(componentHierarchy, subcomponentHierarchy);
-		if (inspectComponentAction.isEnabled()) {
-			inspectComponentAction.perform();
-		}
+		Supplier<InspectionAction> actionSupplier = () -> {
+			List<Component> componentHierarchy = ComponentHierarchyModels.getComponentHierarchy(component);
+			List<?> subcomponentHierarchy = context.getSettings().getComponentHierarchyModel().getSubcomponentHierarchy(component, position);
+			return context.createInspectComponentAction(componentHierarchy, subcomponentHierarchy);
+		};
+		performAction(context, actionSupplier);
 	}
 
 	private void performEvaluation(InspectionContext context, Component component, Point position) {
-		Object componentHierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(component, position, context);
-		InspectionAction evaluationAction = context.createEvaluateAsThisAction(componentHierarchyLeaf);
-		if (evaluationAction.isEnabled()) {
-			evaluationAction.perform();
-		}
+		performAction(context, component, position, context::createEvaluateAsThisAction);
 	}
 
 	private void performSearch(InspectionContext context, Component component, Point position) {
-		Object componentHierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(component, position, context);
-		InspectionAction searchAction = context.createSearchInstancesFromHereAction(componentHierarchyLeaf);
-		if (searchAction.isEnabled()) {
-			searchAction.perform();
+		performAction(context, component, position, context::createSearchInstancesFromHereAction);
+	}
+
+	private void performAction(InspectionContext context, Component component, Point position, Function<Object, InspectionAction> actionFunction) {
+		Supplier<InspectionAction> actionSupplier = () -> {
+			Object componentHierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(component, position, context);
+			return actionFunction.apply(componentHierarchyLeaf);
+		};
+		performAction(context, actionSupplier);
+	}
+
+	private void performAction(InspectionContext context, Supplier<InspectionAction> actionProvider) {
+		if (!userHasPermission(context)) {
+			return;
+		}
+		InspectionAction action = actionProvider.get();
+		if (action.isEnabled()) {
+			action.perform();
 		}
 	}
 
@@ -106,7 +118,8 @@ class ObjectInspectionFrameworkInstance
 		return MouseInfo.getPointerInfo().getLocation();
 	}
 
-	private boolean userHasPermission(InspectionSettings settings) {
+	private boolean userHasPermission(InspectionContext context) {
+		InspectionSettings settings = context.getSettings();
 		SecuritySettings securitySettings = settings.getSecuritySettings();
 		try {
 			String passwordHash = securitySettings.hashPassword(securitySettings.queryPassword());
@@ -152,25 +165,17 @@ class ObjectInspectionFrameworkInstance
 			if (lastComponentUnderMouse != null && !settings.getResponsibilityPredicate().test(lastComponentUnderMouse)) {
 				continue;
 			}
-			KeyRepresentation inspectionKey = settings.getInspectionKey();
-			KeyRepresentation evaluationKey = settings.getEvaluationKey();
-			KeyRepresentation searchKey = settings.getSearchKey();
+			KeySettings keySettings = settings.getKeySettings();
+			KeyRepresentation inspectionKey = keySettings.getInspectionKey();
+			KeyRepresentation evaluationKey = keySettings.getEvaluationKey();
+			KeyRepresentation searchKey = keySettings.getSearchKey();
 
 			if (key.matches(inspectionKey)) {
-				if (userHasPermission(settings)) {
-					performInspection(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-					return;
-				}
+				performInspection(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 			} else if (key.matches(evaluationKey)) {
-				if (userHasPermission(settings)) {
-					performEvaluation(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-					return;
-				}
+				performEvaluation(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 			} else if (key.matches(searchKey)) {
-				if (userHasPermission(settings)) {
-					performSearch(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-					return;
-				}
+				performSearch(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 			}
 		}
 	}

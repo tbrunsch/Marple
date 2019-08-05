@@ -1,10 +1,10 @@
 package dd.kms.marple.settings;
 
 import dd.kms.marple.components.ComponentHierarchyModel;
-import dd.kms.marple.gui.VisualSettings;
+import dd.kms.marple.settings.visual.VisualSettings;
+import dd.kms.marple.settings.keys.KeySettings;
 
 import java.awt.*;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 public interface InspectionSettingsBuilder
@@ -13,10 +13,6 @@ public interface InspectionSettingsBuilder
 	InspectionSettingsBuilder visualSettings(VisualSettings visualSettings);
 	InspectionSettingsBuilder responsibilityPredicate(Predicate<Component> responsibilityPredicate);
 	InspectionSettingsBuilder securitySettings(SecuritySettings securitySettings);
-	InspectionSettingsBuilder inspectionKey(KeyRepresentation inspectionKey);
-	InspectionSettingsBuilder evaluationKey(KeyRepresentation evaluationKey);
-	InspectionSettingsBuilder searchKey(KeyRepresentation searchKey);
-	InspectionSettingsBuilder codeCompletionKey(KeyRepresentation codeCompletionKey);
-	InspectionSettingsBuilder showMethodArgumentsKey(KeyRepresentation showMethodArgumentsKey);
+	InspectionSettingsBuilder keySettings(KeySettings keySettings);
 	InspectionSettings build();
 }

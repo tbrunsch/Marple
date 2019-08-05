@@ -3,7 +3,7 @@ package dd.kms.marple.inspector;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.components.ComponentHierarchyModels;
-import dd.kms.marple.gui.ObjectView;
+import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.inspector.InspectionFrame;
 import dd.kms.marple.gui.inspector.views.ComponentHierarchyView;

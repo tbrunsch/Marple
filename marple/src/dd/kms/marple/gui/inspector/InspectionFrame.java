@@ -2,7 +2,7 @@ package dd.kms.marple.gui.inspector;
 
 import com.google.common.base.Preconditions;
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.gui.ObjectView;
+import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.marple.actions.ActionWrapper;
 import dd.kms.marple.gui.common.CurrentObjectPanel;
 

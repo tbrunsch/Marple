@@ -1,4 +1,4 @@
-package dd.kms.marple.gui;
+package dd.kms.marple.settings.visual;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

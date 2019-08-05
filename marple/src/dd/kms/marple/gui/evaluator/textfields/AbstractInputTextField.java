@@ -3,7 +3,7 @@ package dd.kms.marple.gui.evaluator.textfields;
 import com.google.common.base.Strings;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
-import dd.kms.marple.settings.InspectionSettings;
+import dd.kms.marple.settings.keys.KeySettings;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;
@@ -25,13 +25,13 @@ public abstract class AbstractInputTextField<T> extends JTextField
 	AbstractInputTextField(InspectionContext inspectionContext) {
 		this.inspectionContext = inspectionContext;
 
-		InspectionSettings settings = inspectionContext.getSettings();
+		KeySettings keySettings = inspectionContext.getSettings().getKeySettings();
 		CodeCompletionDecorators.decorate(
 			this,
 			this::suggestCodeCompletions,
-			settings.getCodeCompletionKey(),
+			keySettings.getCodeCompletionKey(),
 			this::getExecutableArgumentInfo,
-			settings.getShowMethodArgumentsKey(),
+			keySettings.getShowMethodArgumentsKey(),
 			this::consumeText
 		);
 	}

@@ -1,4 +1,4 @@
-package dd.kms.marple.gui;
+package dd.kms.marple.settings.visual;
 
 import dd.kms.marple.InspectionContext;
 

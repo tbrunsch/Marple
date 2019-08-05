@@ -1,11 +1,10 @@
-package dd.kms.marple.gui;
+package dd.kms.marple.settings.visual;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import dd.kms.marple.InspectionContext;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;

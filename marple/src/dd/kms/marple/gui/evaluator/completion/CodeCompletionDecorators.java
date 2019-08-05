@@ -1,6 +1,6 @@
 package dd.kms.marple.gui.evaluator.completion;
 
-import dd.kms.marple.settings.KeyRepresentation;
+import dd.kms.marple.settings.keys.KeyRepresentation;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;

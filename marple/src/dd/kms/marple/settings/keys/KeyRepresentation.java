@@ -1,4 +1,4 @@
-package dd.kms.marple.settings;
+package dd.kms.marple.settings.keys;
 
 public class KeyRepresentation
 {

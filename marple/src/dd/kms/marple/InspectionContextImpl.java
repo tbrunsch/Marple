@@ -1,7 +1,8 @@
 package dd.kms.marple;
 
 import com.google.common.collect.ImmutableList;
-import dd.kms.marple.actions.*;
+import dd.kms.marple.actions.AddVariableAction;
+import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.actions.component.SnapshotAction;
 import dd.kms.marple.actions.evaluator.EvaluateAsThisAction;
 import dd.kms.marple.actions.evaluator.EvaluateExpressionAction;
@@ -14,9 +15,9 @@ import dd.kms.marple.actions.search.SearchInstanceAction;
 import dd.kms.marple.actions.search.SearchInstancesFromHereAction;
 import dd.kms.marple.components.ComponentHierarchyModels;
 import dd.kms.marple.evaluator.ExpressionEvaluator;
-import dd.kms.marple.gui.ObjectView;
 import dd.kms.marple.inspector.InspectionHistory;
 import dd.kms.marple.settings.InspectionSettings;
+import dd.kms.marple.settings.visual.ObjectView;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

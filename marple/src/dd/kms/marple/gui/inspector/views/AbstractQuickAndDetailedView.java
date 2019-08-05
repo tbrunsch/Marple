@@ -1,7 +1,7 @@
 package dd.kms.marple.gui.inspector.views;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.gui.ObjectView;
+import dd.kms.marple.settings.visual.ObjectView;
 
 import javax.swing.*;
 import java.awt.*;

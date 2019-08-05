@@ -2,7 +2,7 @@ package dd.kms.marple;
 
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.evaluator.ExpressionEvaluator;
-import dd.kms.marple.gui.ObjectView;
+import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.marple.settings.InspectionSettings;
 
 import java.awt.*;

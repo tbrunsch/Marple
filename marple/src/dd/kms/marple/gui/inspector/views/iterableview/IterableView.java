@@ -3,7 +3,7 @@ package dd.kms.marple.gui.inspector.views.iterableview;
 import com.google.common.collect.ImmutableMap;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.common.ReflectionUtils;
-import dd.kms.marple.gui.ObjectView;
+import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.marple.gui.common.ExceptionFormatter;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.gui.evaluator.textfields.CompiledExpressionInputTextField;
