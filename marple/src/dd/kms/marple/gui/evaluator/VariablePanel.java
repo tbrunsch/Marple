@@ -22,6 +22,8 @@ import java.util.Objects;
 
 public class VariablePanel extends JPanel
 {
+	public static final String	WINDOW_TITLE	= "Variables";
+
 	private final JScrollPane					scrollPane;
 	private final JTable						table;
 	private final ListBasedTableModel<Variable> tableModel;

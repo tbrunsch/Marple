@@ -71,6 +71,7 @@ public class WindowManager
 					if (location != null) {
 						window.setLocation(location);
 					}
+					window.setMinimumSize(window.getSize());
 					window.setVisible(true);
 					window.toFront();
 				});

@@ -50,7 +50,7 @@ public class AddVariableAction implements InspectionAction
 		variablesBuilder.addAll(ExpressionEvaluators.getVariables(inspectionContext));
 		variablesBuilder.add(ParserSettingsUtils.createVariable(name, value, false));
 		ExpressionEvaluators.setVariables(variablesBuilder.build(), inspectionContext);
-		WindowManager.showInFrame("Variables", this::createVariablePanel, variablePanel -> variablePanel.editVariableName(name), VariablePanel::updateContent);
+		WindowManager.showInFrame(VariablePanel.WINDOW_TITLE, this::createVariablePanel, variablePanel -> variablePanel.editVariableName(name), VariablePanel::updateContent);
 	}
 
 	private String createVariableName(String suggestedName) {
