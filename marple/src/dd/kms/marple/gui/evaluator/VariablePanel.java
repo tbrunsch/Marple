@@ -109,15 +109,17 @@ public class VariablePanel extends JPanel
 		tableModel.fireTableChanged(new TableModelEvent(tableModel));
 	}
 
-	private Variable changeVariableName(Variable oldVariable, Object nameAsObject) {
+	private void changeVariableName(List<Variable> variables, int elementIndex, Object nameAsObject) {
 		if (!(nameAsObject instanceof String)) {
-			return oldVariable;
+			return;
 		}
 		String name = (String) nameAsObject;
+		Variable oldVariable = variables.get(elementIndex);
 		if (!acceptVariableName(oldVariable, name)) {
-			return oldVariable;
+			return;
 		}
-		return ParserSettingsUtils.createVariable(name, oldVariable.getValue(), oldVariable.isUseHardReference());
+		Variable newVariable = ParserSettingsUtils.createVariable(name, oldVariable.getValue(), oldVariable.isUseHardReference());
+		variables.set(elementIndex, newVariable);
 	}
 
 	private boolean acceptVariableName(Variable oldVariable, String name) {
@@ -132,12 +134,14 @@ public class VariablePanel extends JPanel
 		return true;
 	}
 
-	private Variable changeUseHardReference(Variable oldVariable, Object useHardReferenceAsObject) {
+	private void changeUseHardReference(List<Variable> variables, int elementIndex, Object useHardReferenceAsObject) {
 		if (!(useHardReferenceAsObject instanceof Boolean)) {
-			return oldVariable;
+			return;
 		}
 		boolean useHardReference = (Boolean) useHardReferenceAsObject;
-		return ParserSettingsUtils.createVariable(oldVariable.getName(), oldVariable.getValue(), useHardReference);
+		Variable oldVariable = variables.get(elementIndex);
+		Variable newVariable = ParserSettingsUtils.createVariable(oldVariable.getName(), oldVariable.getValue(), useHardReference);
+		variables.set(elementIndex, newVariable);
 	}
 
 	private void updateParserSettings() {

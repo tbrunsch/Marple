@@ -11,7 +11,7 @@ public class ColumnDescriptionBuilder<T>
 	private final Class<?>				clazz;
 	private final Function<T, Object>	valueExtractor;
 
-	private ValueFilter valueFilter		= ValueFilters.NONE;
+	private ValueFilter					valueFilter		= ValueFilters.NONE;
 	private EditorSettings<T>			editorSettings	= null;
 
 	public ColumnDescriptionBuilder(String name, Class<?> clazz, Function<T, Object> valueExtractor) {
@@ -25,17 +25,12 @@ public class ColumnDescriptionBuilder<T>
 		return this;
 	}
 
-	public ColumnDescriptionBuilder<T> editorSettings(ElementGenerator<T> elementGenerator) {
-		this.editorSettings = new EditorSettingsImpl<T>(elementGenerator);
+	public ColumnDescriptionBuilder<T> editorSettings(EditorSettings<T> editorSettings) {
+		this.editorSettings = editorSettings;
 		return this;
 	}
 
 	public ColumnDescription build() {
 		return new ColumnDescriptionImpl<>(name, clazz, valueExtractor, valueFilter, editorSettings);
-	}
-
-	@FunctionalInterface
-	public interface ElementGenerator<T> {
-		T deriveFrom(T old, Object value);
 	}
 }
