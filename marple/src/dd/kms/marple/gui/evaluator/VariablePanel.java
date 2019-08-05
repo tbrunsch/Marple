@@ -1,7 +1,8 @@
 package dd.kms.marple.gui.evaluator;
 
+import com.google.common.base.Joiner;
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.evaluator.ExpressionEvaluator;
+import dd.kms.marple.DebugSupport;
 import dd.kms.marple.evaluator.ExpressionEvaluators;
 import dd.kms.marple.gui.table.ColumnDescription;
 import dd.kms.marple.gui.table.ColumnDescriptionBuilder;
@@ -15,10 +16,10 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
+
+import static java.awt.GridBagConstraints.REMAINDER;
 
 public class VariablePanel extends JPanel
 {
@@ -27,6 +28,9 @@ public class VariablePanel extends JPanel
 	private final JScrollPane					scrollPane;
 	private final JTable						table;
 	private final ListBasedTableModel<Variable> tableModel;
+
+	private final JButton						importButton		= new JButton("Import from 'DebugSupport'");
+	private final JButton						exportButton		= new JButton("Export to 'DebugSupport'");
 	private final JButton						deleteButton		= new JButton("Delete selected variables");
 
 	private final InspectionContext				inspectionContext;
@@ -44,8 +48,11 @@ public class VariablePanel extends JPanel
 
 		table.setDefaultRenderer(Object.class, new CellRenderer(inspectionContext));
 
-		add(scrollPane,		new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
-		add(deleteButton,	new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	 	GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		add(scrollPane,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+
+		add(importButton,	new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,	 	GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		add(exportButton,	new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,	 	GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		add(deleteButton,	new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	 	GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 
 		updateContent();
 
@@ -79,7 +86,7 @@ public class VariablePanel extends JPanel
 		variables.addAll(ExpressionEvaluators.getVariables(inspectionContext));
 		tableModel.fireTableChanged(new TableModelEvent(tableModel));
 
-		updateDeleteButton();
+		updateButtons();
 	}
 
 	private List<ColumnDescription<Variable>> createColumnDescriptions() {
@@ -91,13 +98,49 @@ public class VariablePanel extends JPanel
 	}
 
 	private void addListeners() {
+		importButton.addActionListener(e -> importVariables());
+		exportButton.addActionListener(e -> exportVariables());
 		deleteButton.addActionListener(e -> deleteSelectedVariables());
-		table.getSelectionModel().addListSelectionListener(e -> updateDeleteButton());
+		table.getSelectionModel().addListSelectionListener(e -> updateButtons());
 		tableModel.addTableModelListener(e -> updateParserSettings());
 	}
 
-	private void updateDeleteButton() {
+	private void updateButtons() {
+		Collection<String> debugSupportVariableNames = DebugSupport.getSlotNames();
+		if (debugSupportVariableNames.isEmpty()) {
+			importButton.setEnabled(false);
+			importButton.setToolTipText(null);
+		} else {
+			importButton.setEnabled(true);
+			importButton.setToolTipText("Import variables " + Joiner.on(", ").join(DebugSupport.getSlotNames()));
+		}
+
+		if (variables.isEmpty()) {
+			exportButton.setEnabled(false);
+			exportButton.setToolTipText(null);
+		} else {
+			exportButton.setEnabled(true);
+			exportButton.setToolTipText("Export variables as named slots of class 'DebugSupport'");
+		}
+
 		deleteButton.setEnabled(!table.getSelectionModel().isSelectionEmpty());
+	}
+
+	private void importVariables() {
+		variables.clear();
+		for (String name : DebugSupport.getSlotNames()) {
+			Object value = DebugSupport.getSlotValue(name);
+			Variable variable = ParserSettingsUtils.createVariable(name, value, false);
+			variables.add(variable);
+		}
+		tableModel.fireTableChanged(new TableModelEvent(tableModel));
+	}
+
+	private void exportVariables() {
+		DebugSupport.clearNamedSlots();
+		for (Variable variable : variables) {
+			DebugSupport.setSlotValue(variable.getName(), variable.getValue());
+		}
 	}
 
 	private void deleteSelectedVariables() {

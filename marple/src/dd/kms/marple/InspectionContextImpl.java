@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import dd.kms.marple.actions.AddVariableAction;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.actions.component.SnapshotAction;
+import dd.kms.marple.actions.debugsupport.DebugSupportAction;
 import dd.kms.marple.actions.evaluator.EvaluateAsThisAction;
 import dd.kms.marple.actions.evaluator.EvaluateExpressionAction;
 import dd.kms.marple.actions.history.HistoryActionWrapper;
@@ -98,6 +99,11 @@ class InspectionContextImpl implements InspectionContext
 	@Override
 	public InspectionAction createSearchInstanceAction(Object target) {
 		return new SearchInstanceAction(this, target);
+	}
+
+	@Override
+	public InspectionAction createDebugSupportAction(Object thisValue) {
+		return new DebugSupportAction(this, thisValue);
 	}
 
 	@Override

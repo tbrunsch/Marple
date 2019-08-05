@@ -100,6 +100,7 @@ public class ActionProviderBuilder
 		actionsBuilder.add(inspectionContext.createSearchInstancesFromHereAction(object));
 		actionsBuilder.add(inspectionContext.createSearchInstanceAction(object));
 		actionsBuilder.add(new CopyStringRepresentationAction(object));
+		actionsBuilder.add(inspectionContext.createDebugSupportAction(object));
 		return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
 	}
 

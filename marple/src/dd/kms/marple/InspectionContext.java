@@ -24,6 +24,7 @@ public interface InspectionContext
 	InspectionAction createEvaluateAsThisAction(Object thisValue);
 	InspectionAction createSearchInstancesFromHereAction(Object root);
 	InspectionAction createSearchInstanceAction(Object target);
+	InspectionAction createDebugSupportAction(Object thisValue);
 	<T> InspectionAction createSnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction);
 
 	void clearHistory();

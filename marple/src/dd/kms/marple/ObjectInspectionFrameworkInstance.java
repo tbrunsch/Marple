@@ -93,6 +93,10 @@ class ObjectInspectionFrameworkInstance
 		performAction(context, component, position, context::createSearchInstancesFromHereAction);
 	}
 
+	private void openDebugSupportDialog(InspectionContext context, Component component, Point position) {
+		performAction(context, component, position, context::createDebugSupportAction);
+	}
+
 	private void performAction(InspectionContext context, Component component, Point position, Function<Object, InspectionAction> actionFunction) {
 		Supplier<InspectionAction> actionSupplier = () -> {
 			Object componentHierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(component, position, context);
@@ -169,6 +173,7 @@ class ObjectInspectionFrameworkInstance
 			KeyRepresentation inspectionKey = keySettings.getInspectionKey();
 			KeyRepresentation evaluationKey = keySettings.getEvaluationKey();
 			KeyRepresentation searchKey = keySettings.getSearchKey();
+			KeyRepresentation debugSupportKey = keySettings.getDebugSupportKey();
 
 			if (key.matches(inspectionKey)) {
 				performInspection(context, lastComponentUnderMouse, lastMousePositionOnComponent);
@@ -176,6 +181,8 @@ class ObjectInspectionFrameworkInstance
 				performEvaluation(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 			} else if (key.matches(searchKey)) {
 				performSearch(context, lastComponentUnderMouse, lastMousePositionOnComponent);
+			} else if (key.matches(debugSupportKey)) {
+				openDebugSupportDialog(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 			}
 		}
 	}

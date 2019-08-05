@@ -13,6 +13,7 @@ public interface InspectionSettingsBuilder
 	InspectionSettingsBuilder visualSettings(VisualSettings visualSettings);
 	InspectionSettingsBuilder responsibilityPredicate(Predicate<Component> responsibilityPredicate);
 	InspectionSettingsBuilder securitySettings(SecuritySettings securitySettings);
+	InspectionSettingsBuilder debugSettings(DebugSettings debugSettings);
 	InspectionSettingsBuilder keySettings(KeySettings keySettings);
 	InspectionSettings build();
 }

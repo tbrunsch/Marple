@@ -14,6 +14,7 @@ import dd.kms.zenodot.settings.Variable;
 import javax.annotation.Nullable;
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class TestUtils
@@ -42,6 +43,14 @@ class TestUtils
 		inspectionSettings.getEvaluator().setParserSettings(parserSettings);
 
 		ObjectInspectionFramework.register("Test", inspectionSettings);
+
+		DebugSupport.SLOT_0 = "Use these slots for data exchange between Marple and your debugger.";
+		DebugSupport.SLOT_1 = 42;
+
+		DebugSupport.setSlotValue("demo",			"Yes!");
+		DebugSupport.setSlotValue("variableImport",	42);
+		DebugSupport.setSlotValue("successful",		1.41);
+		DebugSupport.setSlotValue("expectedValues",	Arrays.asList("Yes!", 42, 1.41));
 	}
 
 	private static class PrimeNode implements ObjectTreeNode

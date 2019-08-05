@@ -17,5 +17,6 @@ public interface InspectionSettings
 	VisualSettings getVisualSettings();
 	Predicate<Component> getResponsibilityPredicate();
 	SecuritySettings getSecuritySettings();
+	DebugSettings getDebugSettings();
 	KeySettings getKeySettings();
 }
