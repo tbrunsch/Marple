@@ -13,10 +13,12 @@ class ComponentHighlighter implements Runnable
 
 	private final Component	component;
 	private final Color		originalColor;
+	private final boolean	originalOpaque;
 
 	ComponentHighlighter(Component component) {
 		this.component = component;
-		this.originalColor = getColor(component);
+		this.originalColor = component.getBackground();
+		this.originalOpaque = component.isOpaque();
 	}
 
 	@Override
@@ -24,6 +26,7 @@ class ComponentHighlighter implements Runnable
 		long startTimeMs = System.currentTimeMillis();
 		long durationMs = NUM_SEQUENCES * ANIMATION_TIME_MS;
 		try {
+			setOpaque(true);
 			long elapsedTimeMs;
 			while ((elapsedTimeMs = System.currentTimeMillis() - startTimeMs) < durationMs) {
 				Color color = computeColor(elapsedTimeMs);
@@ -34,6 +37,7 @@ class ComponentHighlighter implements Runnable
 			/* nothing we can do here */
 		} finally {
 			setColor(originalColor);
+			setOpaque(originalOpaque);
 		}
 	}
 
@@ -68,21 +72,18 @@ class ComponentHighlighter implements Runnable
 	}
 
 	private void setColorInUiThread(Color color) {
-		setColor(component, color);
+		component.setBackground(color);
 		component.revalidate();
 	}
 
-	private Color getColor(Component component) {
-		return component instanceof JLabel
-				? component.getForeground()		// background of JLabel is ignored
-				: component.getBackground();
+	private void setOpaque(boolean opaque) {
+		SwingUtilities.invokeLater(() -> setOpaqueInUiThread(opaque));
 	}
 
-	private void setColor(Component component, Color color) {
+	private void setOpaqueInUiThread(boolean opaque) {
 		if (component instanceof JLabel) {
-			component.setForeground(color);		// background of JLabel is ignored
-		} else {
-			component.setBackground(color);
+			((JLabel) component).setOpaque(opaque);
+			component.revalidate();
 		}
 	}
 }
