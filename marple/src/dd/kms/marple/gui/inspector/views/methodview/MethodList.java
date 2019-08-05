@@ -2,8 +2,7 @@ package dd.kms.marple.gui.inspector.views.methodview;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
-import dd.kms.marple.gui.actionproviders.AbstractActionProviderMouseListener;
-import dd.kms.marple.gui.actionproviders.AbstractActionProviderMouseMotionListener;
+import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.filters.ValueFilter;
 import dd.kms.marple.gui.filters.ValueFilters;
 import dd.kms.zenodot.common.MethodScanner;
@@ -72,8 +71,8 @@ class MethodList extends JPanel
 	private void addListeners() {
 		nameFilter.addFilterChangedListener(this::onFilterChanged);
 		accessLevelFilter.addFilterChangedListener(this::onFilterChanged);
-		list.addMouseListener(new ActionProviderListMouseListener());
-		list.addMouseMotionListener(new ActionProviderListMouseMotionListener());
+
+		ActionProviderListeners.addMouseListeners(list, this::getActionProvider);
 	}
 
 	private void updateListModel() {
@@ -155,22 +154,6 @@ class MethodList extends JPanel
 			}
 
 			return this;
-		}
-	}
-
-	private class ActionProviderListMouseListener extends AbstractActionProviderMouseListener
-	{
-		@Override
-		protected ActionProvider getActionProvider(MouseEvent e) {
-			return MethodList.this.getActionProvider(e);
-		}
-	}
-
-	private class ActionProviderListMouseMotionListener extends AbstractActionProviderMouseMotionListener
-	{
-		@Override
-		protected ActionProvider getActionProvider(MouseEvent e) {
-			return MethodList.this.getActionProvider(e);
 		}
 	}
 

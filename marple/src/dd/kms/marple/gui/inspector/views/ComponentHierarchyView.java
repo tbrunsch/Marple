@@ -3,24 +3,23 @@ package dd.kms.marple.gui.inspector.views;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import dd.kms.marple.actions.ActionProviderBuilder;
-import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
-import dd.kms.marple.components.ComponentHierarchyModels;
-import dd.kms.marple.settings.visual.ObjectView;
+import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.actions.Actions;
-import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseListener;
-import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseMotionListener;
+import dd.kms.marple.common.ReflectionUtils;
+import dd.kms.marple.components.ComponentHierarchyModels;
+import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeNode;
+import dd.kms.marple.settings.visual.ObjectView;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import java.awt.*;
 import java.lang.reflect.Field;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ComponentHierarchyView extends JPanel implements ObjectView
@@ -143,8 +142,7 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 		}
 		JTree tree = new JTree(root);
 
-		tree.addMouseListener(new ActionProviderTreeMouseListener());
-		tree.addMouseMotionListener(new ActionProviderTreeMouseMotionListener());
+		ActionProviderListeners.addMouseListeners(tree);
 
 		return tree;
 	}

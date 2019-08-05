@@ -1,8 +1,7 @@
 package dd.kms.marple.gui.inspector.views.fieldview;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseListener;
-import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseMotionListener;
+import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.actionprovidertree.inspectiontree.InspectionTreeNodes;
 
 import javax.swing.*;
@@ -22,7 +21,6 @@ public class FieldTree extends JPanel
 
 		add(treeScrollPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 
-		tree.addMouseListener(new ActionProviderTreeMouseListener());
-		tree.addMouseMotionListener(new ActionProviderTreeMouseMotionListener());
+		ActionProviderListeners.addMouseListeners(tree);
 	}
 }

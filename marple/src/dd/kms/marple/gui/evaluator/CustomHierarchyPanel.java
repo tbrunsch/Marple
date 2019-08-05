@@ -6,8 +6,7 @@ import com.google.common.collect.Lists;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.ActionProviderBuilder;
-import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseListener;
-import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseMotionListener;
+import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeNode;
 import dd.kms.zenodot.settings.ObjectTreeNode;
 
@@ -41,8 +40,7 @@ class CustomHierarchyPanel extends JPanel
 
 		TreeNode root = new CustomHierarchyTreeNode(inspectionContext.getEvaluator().getParserSettings().getCustomHierarchyRoot(), null, inspectionContext);
 		tree = new JTree(root);
-		tree.addMouseListener(new ActionProviderTreeMouseListener());
-		tree.addMouseMotionListener(new ActionProviderTreeMouseMotionListener());
+		ActionProviderListeners.addMouseListeners(tree);
 
 		scrollPane = new JScrollPane(tree);
 

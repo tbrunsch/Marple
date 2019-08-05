@@ -1,8 +1,6 @@
 package dd.kms.marple.gui.table;
 
-import dd.kms.marple.actions.ActionProvider;
-import dd.kms.marple.gui.actionproviders.AbstractActionProviderMouseListener;
-import dd.kms.marple.gui.actionproviders.AbstractActionProviderMouseMotionListener;
+import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.filters.ValueFilter;
 import dd.kms.marple.gui.filters.ValueFilters;
 
@@ -53,8 +51,8 @@ public class ListBasedTable<T> extends JPanel
 	private void addListeners() {
 		addListenerForFilterPopup();
 		addFilterChangedListeners();
-		addListenerForMouseCursor();
-		addListenerForMouseClickAction();
+
+		ActionProviderListeners.addMouseListeners(table);
 	}
 
 	private void addListenerForFilterPopup() {
@@ -83,42 +81,9 @@ public class ListBasedTable<T> extends JPanel
 		}
 	}
 
-	private void addListenerForMouseCursor() {
-		table.addMouseMotionListener(new AbstractActionProviderMouseMotionListener() {
-			@Override
-			protected ActionProvider getActionProvider(MouseEvent e) {
-				return getCellValueAsActionProvider(e.getPoint());
-			}
-		});
-	}
-
-	private void addListenerForMouseClickAction() {
-		table.addMouseListener(new AbstractActionProviderMouseListener() {
-			@Override
-			protected ActionProvider getActionProvider(MouseEvent e) {
-				return getCellValueAsActionProvider(e.getPoint());
-			}
-		});
-	}
-
 	private void onFilterChanged() {
 		rowSorter.sort();
 		updateColumnNames();
-	}
-
-	private ActionProvider getCellValueAsActionProvider(Point p) {
-		CellCoordinates modelCoordinates = getModelCoordinates(p);
-		if (modelCoordinates != null) {
-			int row = modelCoordinates.getRow();
-			int col = modelCoordinates.getColumn();
-			if (row >= 0 && col >= 0) {
-				Object cellValue = tableModel.getValueAt(row, col);
-				if (cellValue instanceof ActionProvider) {
-					return (ActionProvider) cellValue;
-				}
-			}
-		}
-		return null;
 	}
 
 	private void updateColumnNames() {
@@ -147,33 +112,5 @@ public class ListBasedTable<T> extends JPanel
 		JPopupMenu popupMenu = new JPopupMenu();
 		popupMenu.add(filterPanel);
 		popupMenu.show(table.getTableHeader(), mousePos.x, mousePos.y);
-	}
-
-	CellCoordinates getModelCoordinates(Point p) {
-		int row = table.rowAtPoint(p);
-		int col = table.columnAtPoint(p);
-		if (row < 0 || col < 0) {
-			return null;
-		}
-		return new CellCoordinates(table.convertRowIndexToModel(row), table.convertColumnIndexToModel(col));
-	}
-
-	private static class CellCoordinates
-	{
-		private final int row;
-		private final int column;
-
-		CellCoordinates(int row, int col) {
-			this.row = row;
-			this.column = col;
-		}
-
-		int getRow() {
-			return row;
-		}
-
-		int getColumn() {
-			return column;
-		}
 	}
 }

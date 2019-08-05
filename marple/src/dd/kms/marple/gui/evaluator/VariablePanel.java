@@ -1,9 +1,13 @@
 package dd.kms.marple.gui.evaluator;
 
 import com.google.common.base.Joiner;
-import dd.kms.marple.InspectionContext;
 import dd.kms.marple.DebugSupport;
+import dd.kms.marple.InspectionContext;
+import dd.kms.marple.actions.ActionProvider;
+import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.evaluator.ExpressionEvaluators;
+import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
+import dd.kms.marple.gui.table.ActionProviderRenderer;
 import dd.kms.marple.gui.table.ColumnDescription;
 import dd.kms.marple.gui.table.ColumnDescriptionBuilder;
 import dd.kms.marple.gui.table.ListBasedTableModel;
@@ -14,10 +18,11 @@ import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableColumnModel;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 import static java.awt.GridBagConstraints.REMAINDER;
 
@@ -46,7 +51,8 @@ public class VariablePanel extends JPanel
 		table = new JTable(tableModel);
 		scrollPane = new JScrollPane(table);
 
-		table.setDefaultRenderer(Object.class, new CellRenderer(inspectionContext));
+		TableColumnModel columnModel = table.getColumnModel();
+		columnModel.getColumn(1).setCellRenderer(new ActionProviderRenderer());
 
 		add(scrollPane,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 
@@ -91,10 +97,18 @@ public class VariablePanel extends JPanel
 
 	private List<ColumnDescription<Variable>> createColumnDescriptions() {
 		return Arrays.asList(
-			new ColumnDescriptionBuilder<>("Name",					String.class, 	Variable::getName)				.editorSettings(this::changeVariableName).build(),
-			new ColumnDescriptionBuilder<>("Value",					Object.class, 	Variable::getValue)				.build(),
-			new ColumnDescriptionBuilder<>("Use hard reference",	Boolean.class,	Variable::isUseHardReference)	.editorSettings(this::changeUseHardReference).build()
+			new ColumnDescriptionBuilder<>("Name",					String.class, 			Variable::getName)					.editorSettings(this::changeVariableName).build(),
+			new ColumnDescriptionBuilder<>("Value",					ActionProvider.class, 	this::getValueAsActionProvider).build(),
+			new ColumnDescriptionBuilder<>("Use hard reference",	Boolean.class,			Variable::isUseHardReference)		.editorSettings(this::changeUseHardReference).build()
 		);
+	}
+
+	private ActionProvider getValueAsActionProvider(Variable variable) {
+		Object value = variable.getValue();
+		return new ActionProviderBuilder(inspectionContext.getDisplayText(value), value, inspectionContext)
+			.evaluateAs(variable.getName(), null)
+			.executeDefaultAction(true)
+			.build();
 	}
 
 	private void addListeners() {
@@ -103,6 +117,8 @@ public class VariablePanel extends JPanel
 		deleteButton.addActionListener(e -> deleteSelectedVariables());
 		table.getSelectionModel().addListSelectionListener(e -> updateButtons());
 		tableModel.addTableModelListener(e -> updateParserSettings());
+
+		ActionProviderListeners.addMouseListeners(table);
 	}
 
 	private void updateButtons() {
@@ -189,24 +205,5 @@ public class VariablePanel extends JPanel
 
 	private void updateParserSettings() {
 		ExpressionEvaluators.setVariables(variables, inspectionContext);
-	}
-
-	private static class CellRenderer extends DefaultTableCellRenderer
-	{
-		private final InspectionContext inspectionContext;
-
-		private CellRenderer(InspectionContext inspectionContext) {
-			this.inspectionContext = inspectionContext;
-		}
-
-		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-			Component rendererComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			if (column == 1 && rendererComponent instanceof JLabel) {
-				JLabel rendererLabel = (JLabel) rendererComponent;
-				rendererLabel.setText(inspectionContext.getDisplayText(value));
-			}
-			return rendererComponent;
-		}
 	}
 }

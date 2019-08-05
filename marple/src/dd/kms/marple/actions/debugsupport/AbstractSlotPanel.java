@@ -2,6 +2,7 @@ package dd.kms.marple.actions.debugsupport;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
+import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.evaluator.textfields.ExpressionInputTextField;
 import dd.kms.marple.gui.table.ActionProviderRenderer;
 import dd.kms.marple.gui.table.ColumnDescription;
@@ -57,6 +58,8 @@ abstract class AbstractSlotPanel<T> extends JPanel
 
 		cellEditor = new CellEditor(inspectionContext);
 		table.setDefaultEditor(ActionProvider.class, cellEditor);
+
+		ActionProviderListeners.addMouseListeners(table);
 
 		descriptionLabel = new JLabel(description);
 

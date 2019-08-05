@@ -1,14 +1,12 @@
 package dd.kms.marple.gui.search;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseListener;
-import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeMouseMotionListener;
+import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.evaluator.textfields.ClassInputTextField;
 import dd.kms.marple.gui.evaluator.textfields.CompiledExpressionInputTextField;
 import dd.kms.marple.instancesearch.InstancePath;
 import dd.kms.marple.instancesearch.InstancePathFinder;
 import dd.kms.zenodot.CompiledExpression;
-import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.utils.wrappers.ClassInfo;
 
 import javax.swing.*;
@@ -120,8 +118,7 @@ class InstanceSearchPanel extends JPanel
 		resultPanel.add(instanceSearchScrollPane,	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		resultPanel.add(fullPathLabel,				new GridBagConstraints(0, 2, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
-		instanceSearchTree.addMouseListener(new ActionProviderTreeMouseListener());
-		instanceSearchTree.addMouseMotionListener(new ActionProviderTreeMouseMotionListener());
+		ActionProviderListeners.addMouseListeners(instanceSearchTree);
 		instanceSearchTree.addMouseMotionListener(new FullPathMouseMotionListener(fullPathLabel::setText));
 
 		statusTF.setEditable(false);

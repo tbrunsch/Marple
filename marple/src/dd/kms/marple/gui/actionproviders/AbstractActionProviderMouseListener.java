@@ -7,9 +7,9 @@ import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public abstract class AbstractActionProviderMouseListener extends MouseAdapter
+abstract class AbstractActionProviderMouseListener extends MouseAdapter
 {
-	protected abstract ActionProvider getActionProvider(MouseEvent e);
+	abstract ActionProvider getActionProvider(MouseEvent e);
 
 	@Override
 	public void mousePressed(MouseEvent e) {
