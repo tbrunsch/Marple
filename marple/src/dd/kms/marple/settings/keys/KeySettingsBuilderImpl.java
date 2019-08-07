@@ -6,7 +6,7 @@ class KeySettingsBuilderImpl implements KeySettingsBuilder
 {
 	private KeyRepresentation	inspectionKey			= new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK,	KeyEvent.VK_I);
 	private KeyRepresentation	evaluationKey			= new KeyRepresentation(KeyEvent.ALT_MASK,							KeyEvent.VK_F8);
-	private KeyRepresentation	searchKey				= new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK,	KeyEvent.VK_F);
+	private KeyRepresentation	findInstancesKey		= new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK,	KeyEvent.VK_F);
 	private KeyRepresentation	debugSupportKey			= new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK,	KeyEvent.VK_D);
 	private KeyRepresentation	codeCompletionKey		= new KeyRepresentation(KeyEvent.CTRL_MASK,							KeyEvent.VK_SPACE);
 	private KeyRepresentation	showMethodArgumentsKey	= new KeyRepresentation(KeyEvent.CTRL_MASK,							KeyEvent.VK_P);
@@ -24,8 +24,8 @@ class KeySettingsBuilderImpl implements KeySettingsBuilder
 	}
 
 	@Override
-	public KeySettingsBuilder searchKey(KeyRepresentation searchKey) {
-		this.searchKey = searchKey;
+	public KeySettingsBuilder findInstancesKey(KeyRepresentation findInstancesKey) {
+		this.findInstancesKey = findInstancesKey;
 		return this;
 	}
 
@@ -49,6 +49,6 @@ class KeySettingsBuilderImpl implements KeySettingsBuilder
 
 	@Override
 	public KeySettings build() {
-		return new KeySettingsImpl(inspectionKey, evaluationKey, searchKey, debugSupportKey, codeCompletionKey, showMethodArgumentsKey);
+		return new KeySettingsImpl(inspectionKey, evaluationKey, findInstancesKey, debugSupportKey, codeCompletionKey, showMethodArgumentsKey);
 	}
 }

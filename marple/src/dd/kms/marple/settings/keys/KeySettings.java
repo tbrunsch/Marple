@@ -4,7 +4,7 @@ public interface KeySettings
 {
 	KeyRepresentation getInspectionKey();
 	KeyRepresentation getEvaluationKey();
-	KeyRepresentation getSearchKey();
+	KeyRepresentation getFindInstancesKey();
 	KeyRepresentation getDebugSupportKey();
 	KeyRepresentation getCodeCompletionKey();
 	KeyRepresentation getShowMethodArgumentsKey();

@@ -4,15 +4,15 @@ class KeySettingsImpl implements KeySettings
 {
 	private final KeyRepresentation	inspectionKey;
 	private final KeyRepresentation	evaluationKey;
-	private final KeyRepresentation	searchKey;
+	private final KeyRepresentation findInstancesKey;
 	private final KeyRepresentation	debugSupportKey;
 	private final KeyRepresentation	codeCompletionKey;
 	private final KeyRepresentation	showMethodArgumentsKey;
 
-	KeySettingsImpl(KeyRepresentation inspectionKey, KeyRepresentation evaluationKey, KeyRepresentation searchKey, KeyRepresentation debugSupportKey, KeyRepresentation codeCompletionKey, KeyRepresentation showMethodArgumentsKey) {
+	KeySettingsImpl(KeyRepresentation inspectionKey, KeyRepresentation evaluationKey, KeyRepresentation findInstancesKey, KeyRepresentation debugSupportKey, KeyRepresentation codeCompletionKey, KeyRepresentation showMethodArgumentsKey) {
 		this.inspectionKey = inspectionKey;
 		this.evaluationKey = evaluationKey;
-		this.searchKey = searchKey;
+		this.findInstancesKey = findInstancesKey;
 		this.debugSupportKey = debugSupportKey;
 		this.codeCompletionKey = codeCompletionKey;
 		this.showMethodArgumentsKey = showMethodArgumentsKey;
@@ -29,8 +29,8 @@ class KeySettingsImpl implements KeySettings
 	}
 
 	@Override
-	public KeyRepresentation getSearchKey() {
-		return searchKey;
+	public KeyRepresentation getFindInstancesKey() {
+		return findInstancesKey;
 	}
 
 	@Override

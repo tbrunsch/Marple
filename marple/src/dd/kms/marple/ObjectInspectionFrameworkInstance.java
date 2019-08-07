@@ -172,14 +172,14 @@ class ObjectInspectionFrameworkInstance
 			KeySettings keySettings = settings.getKeySettings();
 			KeyRepresentation inspectionKey = keySettings.getInspectionKey();
 			KeyRepresentation evaluationKey = keySettings.getEvaluationKey();
-			KeyRepresentation searchKey = keySettings.getSearchKey();
+			KeyRepresentation findInstancesKey = keySettings.getFindInstancesKey();
 			KeyRepresentation debugSupportKey = keySettings.getDebugSupportKey();
 
 			if (key.matches(inspectionKey)) {
 				performInspection(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 			} else if (key.matches(evaluationKey)) {
 				performEvaluation(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-			} else if (key.matches(searchKey)) {
+			} else if (key.matches(findInstancesKey)) {
 				performSearch(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 			} else if (key.matches(debugSupportKey)) {
 				openDebugSupportDialog(context, lastComponentUnderMouse, lastMousePositionOnComponent);
