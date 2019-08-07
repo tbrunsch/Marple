@@ -4,12 +4,12 @@ import java.awt.event.KeyEvent;
 
 class KeySettingsBuilderImpl implements KeySettingsBuilder
 {
-	private KeyRepresentation	inspectionKey			= new KeyRepresentation(KeyEvent.VK_I, 		KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
-	private KeyRepresentation	evaluationKey			= new KeyRepresentation(KeyEvent.VK_F8,		KeyEvent.ALT_MASK);
-	private KeyRepresentation	searchKey				= new KeyRepresentation(KeyEvent.VK_F,		KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
-	private KeyRepresentation	debugSupportKey			= new KeyRepresentation(KeyEvent.VK_D,		KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
-	private KeyRepresentation	codeCompletionKey		= new KeyRepresentation(KeyEvent.VK_SPACE,	KeyEvent.CTRL_MASK);
-	private KeyRepresentation	showMethodArgumentsKey	= new KeyRepresentation(KeyEvent.VK_P,		KeyEvent.CTRL_MASK);
+	private KeyRepresentation	inspectionKey			= new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK,	KeyEvent.VK_I);
+	private KeyRepresentation	evaluationKey			= new KeyRepresentation(KeyEvent.ALT_MASK,							KeyEvent.VK_F8);
+	private KeyRepresentation	searchKey				= new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK,	KeyEvent.VK_F);
+	private KeyRepresentation	debugSupportKey			= new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK,	KeyEvent.VK_D);
+	private KeyRepresentation	codeCompletionKey		= new KeyRepresentation(KeyEvent.CTRL_MASK,							KeyEvent.VK_SPACE);
+	private KeyRepresentation	showMethodArgumentsKey	= new KeyRepresentation(KeyEvent.CTRL_MASK,							KeyEvent.VK_P);
 
 	@Override
 	public KeySettingsBuilder inspectionKey(KeyRepresentation inspectionKey) {

@@ -147,7 +147,7 @@ class ObjectInspectionFrameworkInstance
 
 	private void handleKeyEvent(KeyEvent e) {
 		if (e.getID() == KeyEvent.KEY_PRESSED) {
-			onKeyPressed(new KeyRepresentation(e.getKeyCode(), e.getModifiers()));
+			onKeyPressed(new KeyRepresentation(e.getModifiers(), e.getKeyCode()));
 		}
 	}
 

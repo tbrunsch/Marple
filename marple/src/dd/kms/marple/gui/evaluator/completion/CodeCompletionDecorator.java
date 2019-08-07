@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 class CodeCompletionDecorator
 {
 	private static final int				MAX_NUM_SUGGESTIONS	= 20;
-	private static final KeyRepresentation	APPLY_KEY			= new KeyRepresentation(KeyEvent.VK_ENTER, 0);
+	private static final KeyRepresentation	APPLY_KEY			= new KeyRepresentation(0, KeyEvent.VK_ENTER);
 
 	private final JTextComponent					textComponent;
 
@@ -305,7 +305,7 @@ class CodeCompletionDecorator
 	 * Listeners
 	 */
 	void handleKeyPressed(KeyEvent e) {
-		KeyRepresentation key = new KeyRepresentation(e.getKeyCode(), e.getModifiers());
+		KeyRepresentation key = new KeyRepresentation(e.getModifiers(), e.getKeyCode());
 		if (key.matches(completionSuggestionKey)) {
 			showSuggestions();
 			return;
