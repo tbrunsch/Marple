@@ -2,6 +2,8 @@ package dd.kms.marple;
 
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.components.ComponentHierarchyModels;
+import dd.kms.marple.gui.common.WindowManager;
+import dd.kms.marple.gui.help.QuickHelpPanel;
 import dd.kms.marple.settings.InspectionSettings;
 import dd.kms.marple.settings.SecuritySettings;
 import dd.kms.marple.settings.keys.KeyRepresentation;
@@ -97,6 +99,11 @@ class ObjectInspectionFrameworkInstance
 		performAction(context, component, position, context::createDebugSupportAction);
 	}
 
+	private void openQuickHelp(InspectionContext context) {
+		KeySettings keySettings = context.getSettings().getKeySettings();
+		WindowManager.showInFrame(QuickHelpPanel.TITLE, () -> new QuickHelpPanel(keySettings), p -> {}, p -> {});
+	}
+
 	private void performAction(InspectionContext context, Component component, Point position, Function<Object, InspectionAction> actionFunction) {
 		Supplier<InspectionAction> actionSupplier = () -> {
 			Object componentHierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(component, position, context);
@@ -174,6 +181,7 @@ class ObjectInspectionFrameworkInstance
 			KeyRepresentation evaluationKey = keySettings.getEvaluationKey();
 			KeyRepresentation findInstancesKey = keySettings.getFindInstancesKey();
 			KeyRepresentation debugSupportKey = keySettings.getDebugSupportKey();
+			KeyRepresentation quickHelpKey = keySettings.getQuickHelpKey();
 
 			if (key.matches(inspectionKey)) {
 				performInspection(context, lastComponentUnderMouse, lastMousePositionOnComponent);
@@ -183,6 +191,8 @@ class ObjectInspectionFrameworkInstance
 				performSearch(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 			} else if (key.matches(debugSupportKey)) {
 				openDebugSupportDialog(context, lastComponentUnderMouse, lastMousePositionOnComponent);
+			} else if (key.matches(quickHelpKey)) {
+				openQuickHelp(context);
 			}
 		}
 	}

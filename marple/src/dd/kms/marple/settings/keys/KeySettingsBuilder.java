@@ -8,5 +8,6 @@ public interface KeySettingsBuilder
 	KeySettingsBuilder debugSupportKey(KeyRepresentation debugKey);
 	KeySettingsBuilder codeCompletionKey(KeyRepresentation codeCompletionKey);
 	KeySettingsBuilder showMethodArgumentsKey(KeyRepresentation showMethodArgumentsKey);
+	KeySettingsBuilder quickHelpKey(KeyRepresentation quickHelpKey);
 	KeySettings build();
 }

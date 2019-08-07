@@ -8,4 +8,5 @@ public interface KeySettings
 	KeyRepresentation getDebugSupportKey();
 	KeyRepresentation getCodeCompletionKey();
 	KeyRepresentation getShowMethodArgumentsKey();
+	KeyRepresentation getQuickHelpKey();
 }

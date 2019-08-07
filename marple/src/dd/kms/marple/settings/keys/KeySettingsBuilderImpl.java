@@ -10,6 +10,7 @@ class KeySettingsBuilderImpl implements KeySettingsBuilder
 	private KeyRepresentation	debugSupportKey			= new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK,	KeyEvent.VK_D);
 	private KeyRepresentation	codeCompletionKey		= new KeyRepresentation(KeyEvent.CTRL_MASK,							KeyEvent.VK_SPACE);
 	private KeyRepresentation	showMethodArgumentsKey	= new KeyRepresentation(KeyEvent.CTRL_MASK,							KeyEvent.VK_P);
+	private KeyRepresentation	quickHelpKey			= new KeyRepresentation(KeyEvent.CTRL_MASK,							KeyEvent.VK_F1);
 
 	@Override
 	public KeySettingsBuilder inspectionKey(KeyRepresentation inspectionKey) {
@@ -48,7 +49,13 @@ class KeySettingsBuilderImpl implements KeySettingsBuilder
 	}
 
 	@Override
+	public KeySettingsBuilder quickHelpKey(KeyRepresentation quickHelpKey) {
+		this.quickHelpKey = quickHelpKey;
+		return this;
+	}
+
+	@Override
 	public KeySettings build() {
-		return new KeySettingsImpl(inspectionKey, evaluationKey, findInstancesKey, debugSupportKey, codeCompletionKey, showMethodArgumentsKey);
+		return new KeySettingsImpl(inspectionKey, evaluationKey, findInstancesKey, debugSupportKey, codeCompletionKey, showMethodArgumentsKey, quickHelpKey);
 	}
 }
