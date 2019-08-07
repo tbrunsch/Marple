@@ -2,13 +2,15 @@ package dd.kms.marple.gui.inspector;
 
 import com.google.common.base.Preconditions;
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.marple.actions.ActionWrapper;
 import dd.kms.marple.gui.common.CurrentObjectPanel;
+import dd.kms.marple.settings.visual.ObjectView;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 
 public class InspectionFrame extends JFrame
 {
@@ -42,9 +44,9 @@ public class InspectionFrame extends JFrame
 		mainPanel.add(navigationPanel,	BorderLayout.NORTH);
 		mainPanel.add(viewScrollPane, 	BorderLayout.CENTER);
 
-		navigationPanel.add(prevButton,   		new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		navigationPanel.add(currentObjectPanel,	new GridBagConstraints(1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
-		navigationPanel.add(nextButton,   		new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		navigationPanel.add(prevButton,   		new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+		navigationPanel.add(currentObjectPanel,	new GridBagConstraints(1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,	GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
+		navigationPanel.add(nextButton,   		new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
 	}
 
 	public void setViews(Object object, List<ObjectView> views) {

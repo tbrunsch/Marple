@@ -11,12 +11,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
 abstract class AbstractImportPanel<T> extends JPanel
 {
-	private static final Insets	DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
-
 	private final JLabel						titleLabel;
 
 	private final DefaultListModel<T>			importListModel		= new DefaultListModel<>();

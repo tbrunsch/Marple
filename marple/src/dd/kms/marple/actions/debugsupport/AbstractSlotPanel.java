@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
 abstract class AbstractSlotPanel<T> extends JPanel
@@ -70,8 +71,8 @@ abstract class AbstractSlotPanel<T> extends JPanel
 		disableTableKey(UP_KEY);
 		disableTableKey(DOWN_KEY);
 
-		add(scrollPane,			new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 1.0, NORTHWEST,	BOTH, new Insets(5, 5, 5, 5), 0, 0));
-		add(descriptionLabel,	new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 0.0, WEST,	HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+		add(scrollPane,			new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 1.0, NORTHWEST,	BOTH,		DEFAULT_INSETS, 0, 0));
+		add(descriptionLabel,	new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 0.0, WEST,			HORIZONTAL, DEFAULT_INSETS, 0, 0));
 	}
 
 	abstract List<T> createTableList();

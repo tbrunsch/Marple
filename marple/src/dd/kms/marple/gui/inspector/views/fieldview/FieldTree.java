@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.tree.TreeModel;
 import java.awt.*;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
+
 public class FieldTree extends JPanel
 {
 	private final JTree			tree			= new JTree();
@@ -19,7 +21,7 @@ public class FieldTree extends JPanel
 		TreeModel model = InspectionTreeNodes.createModel(null, object, limitTreeSize, inspectionContext);
 		tree.setModel(model);
 
-		add(treeScrollPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		add(treeScrollPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
 
 		ActionProviderListeners.addMouseListeners(tree);
 	}

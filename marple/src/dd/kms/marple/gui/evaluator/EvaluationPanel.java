@@ -11,12 +11,11 @@ import dd.kms.zenodot.ParseException;
 import javax.swing.*;
 import java.awt.*;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
 public class EvaluationPanel extends JPanel
 {
-	private static final Insets	DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
-
 	private final JPanel					expressionPanel			= new JPanel(new GridBagLayout());
 	private final ExpressionInputTextField	evaluationTextField;
 	private final JButton					settingsButton			= new JButton("...");

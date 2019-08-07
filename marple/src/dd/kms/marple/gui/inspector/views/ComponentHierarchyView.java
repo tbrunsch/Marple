@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
+
 public class ComponentHierarchyView extends JPanel implements ObjectView
 {
 	private static final String	NAME	= "Component Hierarchy";
@@ -43,7 +45,7 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 			tree.expandRow(i);
 		}
 		scrollPane  = new JScrollPane(tree);
-		add(scrollPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		add(scrollPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
 	}
 
 	@Override

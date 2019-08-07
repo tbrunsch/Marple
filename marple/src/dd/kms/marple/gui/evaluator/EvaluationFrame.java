@@ -7,6 +7,7 @@ import dd.kms.marple.gui.common.WindowManager;
 import javax.swing.*;
 import java.awt.*;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
 public class EvaluationFrame extends JFrame
@@ -27,8 +28,8 @@ public class EvaluationFrame extends JFrame
 
 		getContentPane().add(mainPanel);
 
-		mainPanel.add(currentObjectPanel, 	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-		mainPanel.add(evaluationPanel, 		new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, CENTER, BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		mainPanel.add(currentObjectPanel, 	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL,	DEFAULT_INSETS, 0, 0));
+		mainPanel.add(evaluationPanel, 		new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, CENTER, BOTH,			DEFAULT_INSETS, 0, 0));
 
 		addListeners();
 	}

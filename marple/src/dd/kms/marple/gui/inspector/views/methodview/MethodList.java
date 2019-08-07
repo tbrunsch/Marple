@@ -14,12 +14,11 @@ import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.List;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
 class MethodList extends JPanel
 {
-	private static final Insets DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
-
 	private final List<Method>				methods;
 
 	private final DefaultListModel<Method>	listModel					= new DefaultListModel<>();

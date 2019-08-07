@@ -6,6 +6,7 @@ import dd.kms.marple.settings.visual.ObjectView;
 import javax.swing.*;
 import java.awt.*;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
 public abstract class AbstractQuickAndDetailedView extends JPanel implements ObjectView
@@ -35,9 +36,9 @@ public abstract class AbstractQuickAndDetailedView extends JPanel implements Obj
 		add(viewSelectionPanel,	BorderLayout.NORTH);
 		add(viewPanel,			BorderLayout.CENTER);
 
-		viewSelectionPanel.add(quickViewToggleButton, 		new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, NORTHWEST, BOTH, new Insets(5, 5, 5, 5), 0, 0));
-		viewSelectionPanel.add(detailedViewToggleButton, 	new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, NORTHWEST, BOTH, new Insets(5, 5, 5, 5), 0, 0));
-		viewSelectionPanel.add(new JLabel(), 				new GridBagConstraints(2, 0, 1, 1, 1.0, 0.0, NORTHWEST, HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+		viewSelectionPanel.add(quickViewToggleButton, 		new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, NORTHWEST, BOTH,		DEFAULT_INSETS, 0, 0));
+		viewSelectionPanel.add(detailedViewToggleButton, 	new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, NORTHWEST, BOTH,		DEFAULT_INSETS, 0, 0));
+		viewSelectionPanel.add(new JLabel(), 				new GridBagConstraints(2, 0, 1, 1, 1.0, 0.0, NORTHWEST, HORIZONTAL,	DEFAULT_INSETS, 0, 0));
 
 		viewButtonGroup.add(quickViewToggleButton);
 		viewButtonGroup.add(detailedViewToggleButton);
@@ -77,7 +78,7 @@ public abstract class AbstractQuickAndDetailedView extends JPanel implements Obj
 		JToggleButton toggleButton = viewType == ViewType.QUICK ? quickViewToggleButton : detailedViewToggleButton;
 		toggleButton.setSelected(true);
 		viewPanel.removeAll();
-		viewPanel.add(view, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, NORTHWEST, BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		viewPanel.add(view, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, NORTHWEST, BOTH, DEFAULT_INSETS, 0, 0));
 		viewPanel.validate();
 	}
 

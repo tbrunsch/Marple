@@ -24,6 +24,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.REMAINDER;
 
 public class VariablePanel extends JPanel
@@ -54,11 +55,11 @@ public class VariablePanel extends JPanel
 		TableColumnModel columnModel = table.getColumnModel();
 		columnModel.getColumn(1).setCellRenderer(new ActionProviderRenderer());
 
-		add(scrollPane,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		add(scrollPane,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
 
-		add(importButton,	new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,	 	GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		add(exportButton,	new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,	 	GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		add(deleteButton,	new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	 	GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		add(importButton,	new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+		add(exportButton,	new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+		add(deleteButton,	new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
 
 		updateContent();
 

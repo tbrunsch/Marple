@@ -22,12 +22,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
 class InstanceSearchPanel extends JPanel
 {
-	private static final Insets	DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
-
 	private final JPanel							configurationPanel			= new JPanel(new GridBagLayout());
 	private final JLabel							rootLabel					= new JLabel("Root of search:");
 	private final JLabel							rootValueLabel				= new JLabel("---");

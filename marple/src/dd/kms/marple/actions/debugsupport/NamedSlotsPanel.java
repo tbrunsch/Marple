@@ -1,7 +1,6 @@
 package dd.kms.marple.actions.debugsupport;
 
 import com.google.common.collect.Lists;
-import com.google.common.primitives.Ints;
 import dd.kms.marple.DebugSupport;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
@@ -12,20 +11,17 @@ import dd.kms.marple.gui.table.ColumnDescription;
 import dd.kms.marple.gui.table.ColumnDescriptionBuilder;
 
 import javax.swing.*;
-import javax.swing.event.TableModelEvent;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
 class NamedSlotsPanel extends AbstractSlotPanel<String>
 {
-	private static final Insets	DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
-
 	private final JButton	addSlotButton		= new JButton("Add slot");
 	private final JButton	deleteSlotsButton	= new JButton("Delete selected slots");
 	private final JButton	variablesButton		= new JButton("Open variable dialog");

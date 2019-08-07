@@ -14,6 +14,8 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
+
 public class FieldTable extends JPanel
 {
 	private final ListBasedTable<Field>	table;
@@ -36,7 +38,7 @@ public class FieldTable extends JPanel
 		internalTable.getColumnModel().getColumn(1).setCellRenderer(new ActionProviderRenderer());
 		internalTable.setDefaultRenderer(AccessModifier.class, new AccessModifierRenderer());
 
-		add(table, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		add(table, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
 	}
 
 	private List<ColumnDescription<Field>> createColumnDescriptions() {

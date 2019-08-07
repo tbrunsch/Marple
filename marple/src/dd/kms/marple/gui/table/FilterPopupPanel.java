@@ -5,12 +5,11 @@ import dd.kms.marple.gui.filters.ValueFilter;
 import javax.swing.*;
 import java.awt.*;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
 class FilterPopupPanel extends JPanel
 {
-	private static final Insets	DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
-
 	private final JLabel	titleLabel;
 	private final Component	editor;
 

@@ -9,6 +9,7 @@ import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
 public class AccessModifierInput extends JPanel
@@ -23,7 +24,7 @@ public class AccessModifierInput extends JPanel
 	public AccessModifierInput() {
 		super(new GridBagLayout());
 
-		add(slider,					new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+		add(slider,					new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 		add(accessModifierLabel,	new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, CENTER, NONE, new Insets(3, 5, 10, 5), 0, 0));
 
 		updateLabelText();

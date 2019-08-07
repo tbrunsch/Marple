@@ -5,12 +5,11 @@ import dd.kms.marple.InspectionContext;
 import javax.swing.*;
 import java.awt.*;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
 public class GeneralSettingsPanel extends JPanel
 {
-	private static final Insets	DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
-
 	private final JLabel						minimumAccessLevelLabel		= new JLabel("Minimum access level:");
 	private final MinimumAccessLevelControls	minimumAccessLevelControls;
 

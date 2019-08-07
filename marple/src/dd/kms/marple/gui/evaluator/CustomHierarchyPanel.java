@@ -18,13 +18,12 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.CENTER;
 
 class CustomHierarchyPanel extends JPanel
 {
-	private static final Insets DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
-
 	private static final String	INFO_TEXT		= "<html><p>To access a node with the path root -> node1 -> node2 -> ... -> node" +
 		"during evaluation, write<br/>" +
 		"<br/>" +

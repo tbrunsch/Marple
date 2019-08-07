@@ -5,13 +5,12 @@ import dd.kms.marple.InspectionContext;
 import javax.swing.*;
 import java.awt.*;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.CENTER;
 
 public class ImportPanel extends JPanel
 {
-	private static final Insets	DEFAULT_INSETS	= new Insets(5, 5, 5, 5);
-
 	private final PackageImportPanel	packagesPanel;
 	private final ClassImportPanel		classesPanel;
 

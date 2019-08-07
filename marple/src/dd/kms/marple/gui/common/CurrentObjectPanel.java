@@ -8,6 +8,8 @@ import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import javax.swing.*;
 import java.awt.*;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
+
 public class CurrentObjectPanel extends JPanel
 {
 	private final JLabel			classInfoLabel		= new JLabel();
@@ -23,8 +25,8 @@ public class CurrentObjectPanel extends JPanel
 
 		setBorder(BorderFactory.createTitledBorder("Context"));
 
-		add(toStringLabel,  new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-		add(classInfoLabel, new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+		add(toStringLabel,  new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		add(classInfoLabel, new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
 		ActionProviderListeners.addMouseListeners(toStringLabel, e -> createActionProvider());
 	}

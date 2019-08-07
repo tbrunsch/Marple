@@ -5,6 +5,7 @@ import dd.kms.marple.InspectionContext;
 import javax.swing.*;
 import java.awt.*;
 
+import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.CENTER;
 
@@ -25,7 +26,7 @@ public class InstanceSearchFrame extends JFrame
 
 		getContentPane().add(mainPanel);
 
-		mainPanel.add(searchPanel, 	new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, CENTER, BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		mainPanel.add(searchPanel, 	new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 	}
 
 	public void setRoot(Object root) {
