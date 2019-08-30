@@ -177,7 +177,7 @@ class InstanceSearchPanel extends JPanel
 			} catch (Throwable t) {
 				/* fall through until end */
 			}
-		} else if (targetConcreteInstanceRB.isSelected()) {
+		} else if (targetConcreteInstanceRB.isSelected() && target != null) {
 			return Optional.of(target.getClass());
 		}
 		return Optional.empty();
