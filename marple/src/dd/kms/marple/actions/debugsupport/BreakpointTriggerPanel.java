@@ -1,6 +1,7 @@
 package dd.kms.marple.actions.debugsupport;
 
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.gui.evaluator.textfields.ExpressionInputTextField;
 import dd.kms.marple.settings.DebugSettings;
 import dd.kms.zenodot.ParseException;
@@ -20,6 +21,7 @@ class BreakpointTriggerPanel extends JPanel
 	private final ButtonGroup				methodButtonGroup		= new ButtonGroup();
 
 	private final JLabel					predefinedMethodLabel	= new JLabel("");
+	private final JPanel					customMethodPanel;
 	private final ExpressionInputTextField	customMethodTF;
 
 	private final JLabel					descriptionLabel		= new JLabel("<html><p>Set a breakpoint in the specified method and click the 'Trigger' button</p></html>");
@@ -32,7 +34,8 @@ class BreakpointTriggerPanel extends JPanel
 
 		debugSettings = inspectionContext.getSettings().getDebugSettings();
 
-		this.customMethodTF = new ExpressionInputTextField(inspectionContext);
+		customMethodTF = new ExpressionInputTextField(inspectionContext);
+		customMethodPanel = new EvaluationTextFieldPanel(customMethodTF, inspectionContext);
 
 		setBorder(BorderFactory.createTitledBorder("Breakpoint Trigger"));
 
@@ -43,7 +46,7 @@ class BreakpointTriggerPanel extends JPanel
 		add(predefinedMethodLabel,	new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
 		add(customMethodRB,			new GridBagConstraints(1, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-		add(customMethodTF,			new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		add(customMethodPanel,		new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
 		add(descriptionLabel,		new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 

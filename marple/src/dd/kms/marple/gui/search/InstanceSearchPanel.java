@@ -4,6 +4,7 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.evaluator.textfields.ClassInputTextField;
 import dd.kms.marple.gui.evaluator.textfields.CompiledExpressionInputTextField;
+import dd.kms.marple.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.instancesearch.InstancePath;
 import dd.kms.marple.instancesearch.InstancePathFinder;
 import dd.kms.zenodot.CompiledExpression;
@@ -35,8 +36,10 @@ class InstanceSearchPanel extends JPanel
 	private final JLabel							targetValueLabel			= new JLabel("---");
 	private final JRadioButton						targetAllInstancesRB		= new JRadioButton("all instances of class:");
 	private final ClassInputTextField				targetClassTF;
+	private final JPanel							targetClassPanel;
 	private final JCheckBox							targetFilterCB				= new JCheckBox("filter:");
 	private final CompiledExpressionInputTextField	targetFilterTF;
+	private final JPanel							targetFilterPanel;
 
 	private final ButtonGroup			targetButtonGroup			= new ButtonGroup();
 
@@ -67,8 +70,10 @@ class InstanceSearchPanel extends JPanel
 
 		targetClassTF = new ClassInputTextField(inspectionContext);
 		targetClassTF.addInputVerifier();
+		targetClassPanel = new EvaluationTextFieldPanel(targetClassTF, inspectionContext);
 		targetFilterTF = new CompiledExpressionInputTextField(inspectionContext);
 		targetFilterTF.addInputVerifier();
+		targetFilterPanel = new EvaluationTextFieldPanel(targetFilterTF, inspectionContext);
 
 		instancePathFinder = new InstancePathFinder(this::onPathDetected);
 
@@ -98,10 +103,10 @@ class InstanceSearchPanel extends JPanel
 		configurationPanel.add(targetValueLabel,			new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
 		configurationPanel.add(targetAllInstancesRB,		new GridBagConstraints(1, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-		configurationPanel.add(targetClassTF,				new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		configurationPanel.add(targetClassPanel,			new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
 		configurationPanel.add(targetFilterCB,				new GridBagConstraints(1, yPos,   1, 1, 0.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
-		configurationPanel.add(targetFilterTF,				new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		configurationPanel.add(targetFilterPanel,			new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
 		targetButtonGroup.add(targetAllInstancesRB);
 		targetButtonGroup.add(targetConcreteInstanceRB);

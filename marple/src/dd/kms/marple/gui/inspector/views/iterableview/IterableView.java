@@ -3,6 +3,7 @@ package dd.kms.marple.gui.inspector.views.iterableview;
 import com.google.common.collect.ImmutableMap;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.common.ReflectionUtils;
+import dd.kms.marple.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.marple.gui.common.ExceptionFormatter;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
@@ -154,6 +155,7 @@ public class IterableView extends JPanel implements ObjectView
 																							.build();
 
 		private final JLabel									expressionLabel			= new JLabel("Expression:");
+		private final JPanel									expressionPanel;
 		private final CompiledExpressionInputTextField			expressionTF;
 		private final JLabel									expressionInfoLabel		= new JLabel("'this' always refers to the element currently processed");
 		private final JButton									runButton				= new JButton("Run");
@@ -164,6 +166,7 @@ public class IterableView extends JPanel implements ObjectView
 			setBorder(BorderFactory.createTitledBorder("Operation"));
 
 			expressionTF = new CompiledExpressionInputTextField(context);
+			expressionPanel = new EvaluationTextFieldPanel(expressionTF, context);
 			expressionTF.setThisClass(commonElementClass);
 
 			initButtons(operationToButton, 	operationButtonGroup,	Operation.FILTER);
@@ -184,7 +187,7 @@ public class IterableView extends JPanel implements ObjectView
 
 			xPos = 0;
 			add(expressionLabel,		new GridBagConstraints(xPos++, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-			add(expressionTF,			new GridBagConstraints(xPos++, yPos,   3, 1, 0.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+			add(expressionPanel,		new GridBagConstraints(xPos++, yPos,   3, 1, 0.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 			xPos += 2;
 			add(expressionInfoLabel,	new GridBagConstraints(xPos++, yPos,   1, 1, 1.0, 1.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 			add(runButton,				new GridBagConstraints(xPos++, yPos++, 1, 1, 0.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));

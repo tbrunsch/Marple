@@ -6,14 +6,14 @@ import dd.kms.marple.gui.evaluator.imports.ImportPanel;
 import javax.swing.*;
 import java.awt.*;
 
-class EvaluationSettingsPane extends JTabbedPane
+public class EvaluationSettingsPane extends JTabbedPane
 {
 	private final GeneralSettingsPanel	generalSettingsPanel;
 	private final VariablePanel			variablePanel;
 	private final ImportPanel			importPanel;
 	private final CustomHierarchyPanel	customHierarchyPanel;
 
-	EvaluationSettingsPane(InspectionContext inspectionContext) {
+	public EvaluationSettingsPane(InspectionContext inspectionContext) {
 		generalSettingsPanel = new GeneralSettingsPanel(inspectionContext);
 		variablePanel = new VariablePanel(inspectionContext);
 		importPanel = new ImportPanel(inspectionContext);
@@ -27,7 +27,7 @@ class EvaluationSettingsPane extends JTabbedPane
 		setPreferredSize(new Dimension(400, 300));
 	}
 
-	void updateContent() {
+	public void updateContent() {
 		generalSettingsPanel.updateContent();
 		variablePanel.updateContent();
 		importPanel.updateContent();

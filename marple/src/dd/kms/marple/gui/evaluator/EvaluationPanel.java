@@ -2,9 +2,9 @@ package dd.kms.marple.gui.evaluator;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.common.ExceptionFormatter;
-import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.gui.evaluator.textfields.ExpressionInputTextField;
+import dd.kms.marple.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.gui.inspector.views.fieldview.FieldView;
 import dd.kms.zenodot.ParseException;
 
@@ -17,8 +17,8 @@ import static java.awt.GridBagConstraints.*;
 public class EvaluationPanel extends JPanel
 {
 	private final JPanel					expressionPanel			= new JPanel(new GridBagLayout());
+	private final JPanel					evaluationTextFieldPanel;
 	private final ExpressionInputTextField	evaluationTextField;
-	private final JButton					settingsButton			= new JButton("...");
 	private final DynamicTypingControls		dynamicTypingControls;
 
 	private final JPanel					evaluationResultPanel	= new JPanel(new GridBagLayout());
@@ -30,6 +30,7 @@ public class EvaluationPanel extends JPanel
 
 		this.inspectionContext = inspectionContext;
 		this.evaluationTextField = new ExpressionInputTextField(inspectionContext);
+		this.evaluationTextFieldPanel = new EvaluationTextFieldPanel(evaluationTextField, inspectionContext);
 		this.dynamicTypingControls = new DynamicTypingControls(inspectionContext);
 
 		evaluationTextField.setEvaluationResultConsumer(this::displayObject);
@@ -39,13 +40,10 @@ public class EvaluationPanel extends JPanel
 		add(evaluationResultPanel,	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 0.8, CENTER, BOTH, new Insets(5, 0, 0, 0), 0, 0));
 
 		expressionPanel.setBorder(BorderFactory.createTitledBorder("Expression"));
-		expressionPanel.add(evaluationTextField,								new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, DEFAULT_INSETS, 0, 0));
-		expressionPanel.add(settingsButton,										new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
-		expressionPanel.add(dynamicTypingControls.getDynamicTypingCheckBox(),	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+		expressionPanel.add(evaluationTextFieldPanel,							new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		expressionPanel.add(dynamicTypingControls.getDynamicTypingCheckBox(),	new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 
 		evaluationResultPanel.setBorder(BorderFactory.createTitledBorder("Result"));
-
-		settingsButton.addActionListener(e -> openSettingsDialog());
 	}
 
 	public void setThisValue(Object thisValue) {
@@ -58,10 +56,6 @@ public class EvaluationPanel extends JPanel
 
 	public void setCaretPosition(int caretPosition) {
 		evaluationTextField.setCaretPosition(caretPosition);
-	}
-
-	private EvaluationSettingsPane createSettingsPane() {
-		return new EvaluationSettingsPane(inspectionContext);
 	}
 
 	void updateContent() {
@@ -83,13 +77,5 @@ public class EvaluationPanel extends JPanel
 		evaluationResultPanel.add(exceptionLabel,	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, NORTH, BOTH, new Insets(3, 3, 3, 3), 0, 0));
 		evaluationResultPanel.revalidate();
 		evaluationResultPanel.repaint();
-	}
-
-	private void onShowSettings(EvaluationSettingsPane settingsPane) {
-		// currently we do nothing at all
-	}
-
-	private void openSettingsDialog() {
-		WindowManager.showInFrame("Settings", this::createSettingsPane, this::onShowSettings, EvaluationSettingsPane::updateContent);
 	}
 }
