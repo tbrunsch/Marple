@@ -15,7 +15,6 @@ public interface InspectionSettings
 	ExpressionEvaluator getEvaluator();
 	ComponentHierarchyModel getComponentHierarchyModel();
 	VisualSettings getVisualSettings();
-	Predicate<Component> getResponsibilityPredicate();
 	SecuritySettings getSecuritySettings();
 	DebugSettings getDebugSettings();
 	KeySettings getKeySettings();

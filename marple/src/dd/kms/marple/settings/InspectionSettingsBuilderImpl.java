@@ -14,7 +14,6 @@ class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 {
 	private ComponentHierarchyModel	componentHierarchyModel	= ComponentHierarchyModels.createBuilder().build();
 	private VisualSettings			visualSettings			= VisualSettingsUtils.createBuilder().build();
-	private Predicate<Component>	responsibilityPredicate	= component -> true;
 	private SecuritySettings 		securitySettings		= NoSecuritySettings.INSTANCE;
 	private DebugSettings			debugSettings			= DefaultDebugSettings.INSTANCE;
 	private KeySettings				keySettings				= KeySettingsBuilders.create().build();
@@ -28,12 +27,6 @@ class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 	@Override
 	public InspectionSettingsBuilder visualSettings(VisualSettings visualSettings) {
 		this.visualSettings = visualSettings;
-		return this;
-	}
-
-	@Override
-	public InspectionSettingsBuilder responsibilityPredicate(Predicate<Component> responsibilityPredicate) {
-		this.responsibilityPredicate = responsibilityPredicate;
 		return this;
 	}
 
@@ -57,6 +50,6 @@ class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 
 	@Override
 	public InspectionSettings build() {
-		return new InspectionSettingsImpl(componentHierarchyModel, visualSettings, responsibilityPredicate, securitySettings, debugSettings, keySettings);
+		return new InspectionSettingsImpl(componentHierarchyModel, visualSettings, securitySettings, debugSettings, keySettings);
 	}
 }

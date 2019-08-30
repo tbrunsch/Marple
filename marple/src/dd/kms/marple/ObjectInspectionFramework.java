@@ -17,18 +17,18 @@ public class ObjectInspectionFramework
 	/*
 	 * Registration/Deregistration
 	 */
-	public static void register(Object identifier, InspectionSettings inspectionSettings) {
+	public static void register(InspectionSettings inspectionSettings) {
 		synchronized (LOCK) {
 			ObjectInspectionFrameworkInstance frameworkInstance = getFrameworkInstance(true);
-			frameworkInstance.registerSettings(identifier, inspectionSettings);
+			frameworkInstance.registerSettings(inspectionSettings);
 		}
 	}
 
-	public static void unregister(Object identifier) {
+	public static void unregister() {
 		synchronized (LOCK) {
 			ObjectInspectionFrameworkInstance frameworkInstance = getFrameworkInstance(false);
 			if (frameworkInstance != null) {
-				frameworkInstance.unregisterSettings(identifier);
+				frameworkInstance.unregisterSettings();
 			}
 		}
 	}

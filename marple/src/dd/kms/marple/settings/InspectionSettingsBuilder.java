@@ -11,7 +11,6 @@ public interface InspectionSettingsBuilder
 {
 	InspectionSettingsBuilder componentHierarchyModel(ComponentHierarchyModel componentHierarchyModel);
 	InspectionSettingsBuilder visualSettings(VisualSettings visualSettings);
-	InspectionSettingsBuilder responsibilityPredicate(Predicate<Component> responsibilityPredicate);
 	InspectionSettingsBuilder securitySettings(SecuritySettings securitySettings);
 	InspectionSettingsBuilder debugSettings(DebugSettings debugSettings);
 	InspectionSettingsBuilder keySettings(KeySettings keySettings);

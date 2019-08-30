@@ -22,30 +22,28 @@ import java.util.function.Supplier;
 
 class ObjectInspectionFrameworkInstance
 {
-	private final Map<Object, InspectionContext>	managedInspectionContexts	= new HashMap<>();
+	private InspectionContext	inspectionContext;
 
-	private Component								lastComponentUnderMouse;
-	private Point									lastMousePositionOnComponent;
-	private Point									lastMousePositionOnScreen;
+	private Component			lastComponentUnderMouse;
+	private Point				lastMousePositionOnComponent;
+	private Point				lastMousePositionOnScreen;
 
 	/*
 	 * Listener registration/deregistration
 	 */
-	void registerSettings(Object identifier, InspectionSettings inspectionSettings) {
-		if (managedInspectionContexts.isEmpty()) {
+	void registerSettings(InspectionSettings inspectionSettings) {
+		if (inspectionContext == null) {
 			registerAsListener();
 		}
-		managedInspectionContexts.put(identifier, new InspectionContextImpl(inspectionSettings));
+		inspectionContext = new InspectionContextImpl(inspectionSettings);
 	}
 
-	void unregisterSettings(Object identifier) {
-		if (managedInspectionContexts.isEmpty()) {
+	void unregisterSettings() {
+		if (inspectionContext == null) {
 			return;
 		}
-		managedInspectionContexts.remove(identifier);
-		if (managedInspectionContexts.isEmpty()) {
-			unregisterAsListener();
-		}
+		inspectionContext = null;
+		unregisterAsListener();
 	}
 
 	private void registerAsListener() {
@@ -166,34 +164,32 @@ class ObjectInspectionFrameworkInstance
 	}
 
 	private void onKeyPressed(KeyRepresentation key) {
+		if (inspectionContext == null) {
+			return;
+		}
 		Point mousePosOnScreen = getMousePositionOnScreen();
 		if (!mousePosOnScreen.equals(lastMousePositionOnScreen)) {
 			return;
 		}
 
-		for (InspectionContext context : managedInspectionContexts.values()) {
-			InspectionSettings settings = context.getSettings();
-			if (lastComponentUnderMouse != null && !settings.getResponsibilityPredicate().test(lastComponentUnderMouse)) {
-				continue;
-			}
-			KeySettings keySettings = settings.getKeySettings();
-			KeyRepresentation inspectionKey = keySettings.getInspectionKey();
-			KeyRepresentation evaluationKey = keySettings.getEvaluationKey();
-			KeyRepresentation findInstancesKey = keySettings.getFindInstancesKey();
-			KeyRepresentation debugSupportKey = keySettings.getDebugSupportKey();
-			KeyRepresentation quickHelpKey = keySettings.getQuickHelpKey();
+		InspectionSettings settings = inspectionContext.getSettings();
+		KeySettings keySettings = settings.getKeySettings();
+		KeyRepresentation inspectionKey = keySettings.getInspectionKey();
+		KeyRepresentation evaluationKey = keySettings.getEvaluationKey();
+		KeyRepresentation findInstancesKey = keySettings.getFindInstancesKey();
+		KeyRepresentation debugSupportKey = keySettings.getDebugSupportKey();
+		KeyRepresentation quickHelpKey = keySettings.getQuickHelpKey();
 
-			if (key.matches(inspectionKey)) {
-				performInspection(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-			} else if (key.matches(evaluationKey)) {
-				performEvaluation(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-			} else if (key.matches(findInstancesKey)) {
-				performSearch(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-			} else if (key.matches(debugSupportKey)) {
-				openDebugSupportDialog(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-			} else if (key.matches(quickHelpKey)) {
-				openQuickHelp(context);
-			}
+		if (key.matches(inspectionKey)) {
+			performInspection(inspectionContext, lastComponentUnderMouse, lastMousePositionOnComponent);
+		} else if (key.matches(evaluationKey)) {
+			performEvaluation(inspectionContext, lastComponentUnderMouse, lastMousePositionOnComponent);
+		} else if (key.matches(findInstancesKey)) {
+			performSearch(inspectionContext, lastComponentUnderMouse, lastMousePositionOnComponent);
+		} else if (key.matches(debugSupportKey)) {
+			openDebugSupportDialog(inspectionContext, lastComponentUnderMouse, lastMousePositionOnComponent);
+		} else if (key.matches(quickHelpKey)) {
+			openQuickHelp(inspectionContext);
 		}
 	}
 

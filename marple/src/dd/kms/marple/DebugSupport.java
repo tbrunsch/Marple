@@ -12,9 +12,6 @@ public class DebugSupport
 {
 	private static final Pattern SLOT_NAME_PATTERN  = Pattern.compile("^[_\\$A-Za-z][_\\$A-Za-z0-9]*$");
 
-	private final int _a = 1;
-	private final int _$a_b$_ = 1;
-
 	/**
 	 * Set a breakpoint inside this method if you need features of your
 	 * debugger that Marple lacks.

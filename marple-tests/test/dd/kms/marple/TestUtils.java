@@ -42,7 +42,7 @@ class TestUtils
 		InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspectionSettingsBuilder().build();
 		inspectionSettings.getEvaluator().setParserSettings(parserSettings);
 
-		ObjectInspectionFramework.register("Test", inspectionSettings);
+		ObjectInspectionFramework.register(inspectionSettings);
 
 		DebugSupport.SLOT_0 = "Use these slots for data exchange between Marple and your debugger.";
 		DebugSupport.SLOT_1 = 42;

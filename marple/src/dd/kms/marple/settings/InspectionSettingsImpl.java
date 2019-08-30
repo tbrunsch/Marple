@@ -17,19 +17,17 @@ class InspectionSettingsImpl implements InspectionSettings
 	private final ExpressionEvaluator		evaluator;
 	private final ComponentHierarchyModel	componentHierarchyModel;
 	private final VisualSettings			visualSettings;
-	private final Predicate<Component>		responsibilityPredicate;
 	private final SecuritySettings			securitySettings;
 	private final DebugSettings				debugSettings;
 	private final KeySettings				keySettings;
 
-	InspectionSettingsImpl(ComponentHierarchyModel componentHierarchyModel, VisualSettings visualSettings, Predicate<Component> responsibilityPredicate,
+	InspectionSettingsImpl(ComponentHierarchyModel componentHierarchyModel, VisualSettings visualSettings,
 			SecuritySettings securitySettings, DebugSettings debugSettings, KeySettings keySettings) {
 		this.debugSettings = debugSettings;
 		this.inspector = ObjectInspectors.create();
 		this.evaluator = ExpressionEvaluators.create();
 		this.componentHierarchyModel = componentHierarchyModel;
 		this.visualSettings = visualSettings;
-		this.responsibilityPredicate = responsibilityPredicate;
 		this.securitySettings = securitySettings;
 		this.keySettings = keySettings;
 	}
@@ -52,11 +50,6 @@ class InspectionSettingsImpl implements InspectionSettings
 	@Override
 	public VisualSettings getVisualSettings() {
 		return visualSettings;
-	}
-
-	@Override
-	public Predicate<Component> getResponsibilityPredicate() {
-		return responsibilityPredicate;
 	}
 
 	@Override
