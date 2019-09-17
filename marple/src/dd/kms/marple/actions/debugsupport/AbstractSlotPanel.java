@@ -6,9 +6,9 @@ import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.evaluator.textfields.ExpressionInputTextField;
 import dd.kms.marple.gui.table.ActionProviderRenderer;
 import dd.kms.marple.gui.table.ColumnDescription;
-import dd.kms.marple.gui.table.ListBasedTable;
 import dd.kms.marple.gui.table.ListBasedTableModel;
 import dd.kms.zenodot.ParseException;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -79,7 +79,7 @@ abstract class AbstractSlotPanel<T> extends JPanel
 	abstract List<ColumnDescription<T>> createColumnDescriptions();
 	abstract void onContentChanged();
 
-	void setThisValue(Object thisValue) {
+	void setThisValue(ObjectInfo thisValue) {
 		cellEditor.setThisValue(thisValue);
 	}
 
@@ -128,7 +128,7 @@ abstract class AbstractSlotPanel<T> extends JPanel
 			});
 		}
 
-		void setThisValue(Object thisValue) {
+		void setThisValue(ObjectInfo thisValue) {
 			editorTextField.setThisValue(thisValue);
 		}
 

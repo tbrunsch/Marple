@@ -5,6 +5,7 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionWrapper;
 import dd.kms.marple.gui.common.CurrentObjectPanel;
 import dd.kms.marple.settings.visual.ObjectView;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -49,10 +50,10 @@ public class InspectionFrame extends JFrame
 		navigationPanel.add(nextButton,   		new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
 	}
 
-	public void setViews(Object object, List<ObjectView> views) {
+	public void setViews(ObjectInfo objectInfo, List<ObjectView> views) {
 		storeLastViewSettings();
 		this.views = views;
-		currentObjectPanel.setCurrentObject(object);
+		currentObjectPanel.setCurrentObject(objectInfo);
 		viewPane.removeAll();
 
 		for (ObjectView view : views) {

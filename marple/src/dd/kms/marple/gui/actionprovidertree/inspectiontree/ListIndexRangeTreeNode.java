@@ -3,12 +3,13 @@ package dd.kms.marple.gui.actionprovidertree.inspectiontree;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
+import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.function.IntFunction;
 
 import static dd.kms.marple.gui.actionprovidertree.inspectiontree.ListTreeNode.RANGE_SIZE_BASE;
 
@@ -17,28 +18,33 @@ class ListIndexRangeTreeNode extends AbstractInspectionTreeNode
 	/**
 	 * Creates a node representing the indices from rangeBeginIndex (inclusive) to rangeEndIndex (exclusive).
 	 */
-	static InspectionTreeNode createRangeNode(int childIndex, Object container, TypeInfo typeInfo, List<?> list, int rangeBeginIndex, int rangeEndIndex, InspectionContext inspectionContext) {
+	static InspectionTreeNode createRangeNode(int childIndex, ObjectInfo containerInfo, List<?> list, int rangeBeginIndex, int rangeEndIndex, InspectionContext inspectionContext) {
 		int rangeSize = rangeEndIndex - rangeBeginIndex;
 		if (rangeSize == 1) {
 			int index = rangeBeginIndex;
 			Object element = list.get(index);
-			TypeInfo elementTypeInfo = element == null ? InfoProvider.NO_TYPE : typeInfo.resolveType(element.getClass());
-			return InspectionTreeNodes.create(childIndex, "[" + index + "]", element, elementTypeInfo, true, inspectionContext);
+			ObjectInfo elementInfo = getElementInfo(containerInfo, element);
+			return InspectionTreeNodes.create(childIndex, "[" + index + "]", elementInfo, true, inspectionContext);
 		}
-		return new ListIndexRangeTreeNode(childIndex, container, typeInfo, list, rangeBeginIndex, rangeEndIndex, inspectionContext);
+		return new ListIndexRangeTreeNode(childIndex, containerInfo, list, rangeBeginIndex, rangeEndIndex, inspectionContext);
 	}
 
-	private final Object 			container;
-	private final TypeInfo			typeInfo;
+	private static ObjectInfo getElementInfo(ObjectInfo containerInfo, Object element) {
+		TypeInfo typeInfo = element == null
+			? InfoProvider.NO_TYPE
+			: ReflectionUtils.getRuntimeTypeInfo(containerInfo).resolveType(element.getClass());
+		return InfoProvider.createObjectInfo(element, typeInfo);
+	}
+
+	private final ObjectInfo		containerInfo;
 	private final List<?>			list;
 	private final int				rangeBeginIndex;
 	private final int				rangeEndIndex;
 	private final InspectionContext	inspectionContext;
 
-	ListIndexRangeTreeNode(int childIndex, Object container, TypeInfo typeInfo, List<?> list, int rangeBeginIndex, int rangeEndIndex, InspectionContext inspectionContext) {
+	ListIndexRangeTreeNode(int childIndex, ObjectInfo containerInfo, List<?> list, int rangeBeginIndex, int rangeEndIndex, InspectionContext inspectionContext) {
 		super(childIndex);
-		this.container = container;
-		this.typeInfo = typeInfo;
+		this.containerInfo = containerInfo;
 		this.list = list;
 		this.rangeBeginIndex = rangeBeginIndex;
 		this.rangeEndIndex = rangeEndIndex;
@@ -71,7 +77,7 @@ class ListIndexRangeTreeNode extends AbstractInspectionTreeNode
 	}
 
 	private InspectionTreeNode createRangeNode(int childIndex, int rangeBeginIndex, int rangeEndIndex) {
-		return createRangeNode(childIndex, container, typeInfo, list, rangeBeginIndex, rangeEndIndex, inspectionContext);
+		return createRangeNode(childIndex, containerInfo, list, rangeBeginIndex, rangeEndIndex, inspectionContext);
 	}
 
 	@Override

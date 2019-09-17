@@ -4,6 +4,8 @@ import com.google.common.primitives.Primitives;
 import dd.kms.marple.InspectionContext;
 import dd.kms.zenodot.CompiledExpression;
 import dd.kms.zenodot.ParseException;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,8 +14,8 @@ import java.util.Map;
 
 class MapOperationExecutor extends AbstractOperationExecutor
 {
-	MapOperationExecutor(Iterable<?> iterable, Class<?> commonElementClass, InspectionContext inspectionContext) {
-		super(iterable, commonElementClass, inspectionContext);
+	MapOperationExecutor(Iterable<?> iterable, TypeInfo commonElementType, InspectionContext inspectionContext) {
+		super(iterable, commonElementType, inspectionContext);
 	}
 
 	@Override
@@ -30,7 +32,7 @@ class MapOperationExecutor extends AbstractOperationExecutor
 		List<Object> result = new ArrayList<>();
 		for (Object element : iterable) {
 			try {
-				result.add(compiledExpression.evaluate(element));
+				result.add(compiledExpression.evaluate(InfoProvider.createObjectInfo(element)).getObject());
 			} catch (Exception e) {
 				throw wrapEvaluationException(e, element);
 			}

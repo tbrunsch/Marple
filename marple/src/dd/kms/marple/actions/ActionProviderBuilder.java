@@ -9,6 +9,7 @@ import dd.kms.marple.actions.search.SearchInstancesFromHereAction;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.components.ComponentHierarchyModels;
 import dd.kms.marple.gui.common.Snapshots;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -21,7 +22,7 @@ public class ActionProviderBuilder
 	private static final Pattern VARIABLE_NAME_PATTERN	= Pattern.compile("^[A-Za-z][_A-Za-z0-9]*");
 
 	private final String						displayText;
-	private final Object						object;
+	private final ObjectInfo					objectInfo;
 	private final InspectionContext				inspectionContext;
 
 	private @Nullable ComponentHierarchyData	componentHierarchyData;
@@ -31,15 +32,15 @@ public class ActionProviderBuilder
 
 	public ActionProviderBuilder(String displayText, List<Component> componentHierarchy, List<?> subcomponentHierarchy, InspectionContext inspectionContext) {
 		this.displayText = displayText;
-		this.object = ComponentHierarchyModels.getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
+		this.objectInfo = ComponentHierarchyModels.getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
 		this.inspectionContext = inspectionContext;
 
 		this.componentHierarchyData = new ComponentHierarchyData(componentHierarchy, subcomponentHierarchy);
 	}
 
-	public ActionProviderBuilder(String displayText, Object object, InspectionContext inspectionContext) {
+	public ActionProviderBuilder(String displayText, ObjectInfo objectInfo, InspectionContext inspectionContext) {
 		this.displayText = displayText;
-		this.object = object;
+		this.objectInfo = objectInfo;
 		this.inspectionContext = inspectionContext;
 	}
 
@@ -50,7 +51,7 @@ public class ActionProviderBuilder
 		return this;
 	}
 
-	public ActionProviderBuilder evaluateAs(String expression, Object expressionContext) {
+	public ActionProviderBuilder evaluateAs(String expression, ObjectInfo expressionContext) {
 		this.evaluationData = new EvaluationData(expression, expressionContext);
 		suggestVariableName(expression);
 		return this;
@@ -63,23 +64,23 @@ public class ActionProviderBuilder
 
 	public ActionProvider build() {
 		ImmutableList.Builder<InspectionAction> actionsBuilder = ImmutableList.builder();
+		Object object = objectInfo.getObject();
 		if (object == null) {
 			return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
 		}
 		boolean isInspectable = ReflectionUtils.isObjectInspectable(object);
 		if (componentHierarchyData == null) {
 			if (isInspectable) {
-				actionsBuilder.add(inspectionContext.createInspectObjectAction(object));
+				actionsBuilder.add(inspectionContext.createInspectObjectAction(objectInfo));
 			}
 		} else {
 			actionsBuilder.add(inspectionContext.createInspectComponentAction(componentHierarchyData.getComponentHierarchy(), componentHierarchyData.getSubcomponentHierarchy()));
 		}
 		if (object instanceof Component) {
-			Component component = (Component) this.object;
-			actionsBuilder.add(new HighlightComponentAction(component));
-			if (component instanceof JComponent) {
-				actionsBuilder.add(inspectionContext.createSnapshotAction((JComponent) component, Snapshots::takeSnapshot));
-			}
+			actionsBuilder.add(new HighlightComponentAction((Component) object));
+		}
+		if (object instanceof JComponent) {
+			actionsBuilder.add(inspectionContext.createSnapshotAction((JComponent) object, Snapshots::takeSnapshot));
 		}
 		if (object instanceof Image) {
 			actionsBuilder.add(inspectionContext.createSnapshotAction((Image) object, Snapshots::takeSnapshot));
@@ -90,17 +91,17 @@ public class ActionProviderBuilder
 		if (object instanceof Paint) {
 			actionsBuilder.add(inspectionContext.createSnapshotAction((Paint) object, paint -> Snapshots.takeSnapshot(paint, 200, 200)));
 		}
-		actionsBuilder.add(inspectionContext.createAddVariableAction(suggestedVariableName, object));
-		actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(object));
+		actionsBuilder.add(inspectionContext.createAddVariableAction(suggestedVariableName, objectInfo));
+		actionsBuilder.add(inspectionContext.createEvaluateAsThisAction(objectInfo));
 		if (evaluationData != null) {
 			String expression = evaluationData.getExpression();
-			Object expressionContext = evaluationData.getExpressionContext();
+			ObjectInfo expressionContext = evaluationData.getExpressionContext();
 			actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(expression, expressionContext));
 		}
 		actionsBuilder.add(inspectionContext.createSearchInstancesFromHereAction(object));
 		actionsBuilder.add(inspectionContext.createSearchInstanceAction(object));
 		actionsBuilder.add(new CopyStringRepresentationAction(object));
-		actionsBuilder.add(inspectionContext.createDebugSupportAction(object));
+		actionsBuilder.add(inspectionContext.createDebugSupportAction(objectInfo));
 		return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
 	}
 
@@ -125,10 +126,10 @@ public class ActionProviderBuilder
 
 	private static class EvaluationData
 	{
-		private final String	expression;
-		private final Object	expressionContext;
+		private final String		expression;
+		private final ObjectInfo	expressionContext;
 
-		EvaluationData(String expression, Object expressionContext) {
+		EvaluationData(String expression, ObjectInfo expressionContext) {
 			this.expression = expression;
 			this.expressionContext = expressionContext;
 		}
@@ -137,7 +138,7 @@ public class ActionProviderBuilder
 			return expression;
 		}
 
-		Object getExpressionContext() {
+		ObjectInfo getExpressionContext() {
 			return expressionContext;
 		}
 	}

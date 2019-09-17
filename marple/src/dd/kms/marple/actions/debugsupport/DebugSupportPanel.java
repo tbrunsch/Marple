@@ -2,12 +2,14 @@ package dd.kms.marple.actions.debugsupport;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.common.CurrentObjectPanel;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
 
 import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
-import static java.awt.GridBagConstraints.*;
+import static java.awt.GridBagConstraints.BOTH;
+import static java.awt.GridBagConstraints.CENTER;
 
 class DebugSupportPanel extends JPanel
 {
@@ -33,7 +35,7 @@ class DebugSupportPanel extends JPanel
 		setPreferredSize(new Dimension(640, 640));
 	}
 
-	void setThisValue(Object thisValue) {
+	void setThisValue(ObjectInfo thisValue) {
 		currentObjectPanel.setCurrentObject(thisValue);
 		unnamedSlotsPanel.setThisValue(thisValue);
 		namedSlotsPanel.setThisValue(thisValue);

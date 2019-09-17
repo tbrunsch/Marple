@@ -1,20 +1,14 @@
 package dd.kms.marple.gui.inspector.views.iterableview;
 
-import com.google.common.primitives.Primitives;
 import dd.kms.marple.InspectionContext;
 import dd.kms.zenodot.CompiledExpression;
-import dd.kms.zenodot.ParseException;
-
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 class ForEachOperationExecutor extends AbstractOperationExecutor
 {
-	ForEachOperationExecutor(Iterable<?> iterable, Class<?> commonElementClass, InspectionContext inspectionContext) {
-		super(iterable, commonElementClass, inspectionContext);
+	ForEachOperationExecutor(Iterable<?> iterable, TypeInfo commonElementType, InspectionContext inspectionContext) {
+		super(iterable, commonElementType, inspectionContext);
 	}
 
 	@Override
@@ -27,7 +21,7 @@ class ForEachOperationExecutor extends AbstractOperationExecutor
 		int count = 0;
 		for (Object element : iterable) {
 			try {
-				compiledExpression.evaluate(element);
+				compiledExpression.evaluate(InfoProvider.createObjectInfo(element));
 			} catch (Exception e) {
 				throw wrapEvaluationException(e, element);
 			}

@@ -3,10 +3,11 @@ package dd.kms.marple.gui.evaluator;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.common.ExceptionFormatter;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
-import dd.kms.marple.gui.evaluator.textfields.ExpressionInputTextField;
 import dd.kms.marple.gui.evaluator.textfields.EvaluationTextFieldPanel;
+import dd.kms.marple.gui.evaluator.textfields.ExpressionInputTextField;
 import dd.kms.marple.gui.inspector.views.fieldview.FieldView;
 import dd.kms.zenodot.ParseException;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,7 +47,7 @@ public class EvaluationPanel extends JPanel
 		evaluationResultPanel.setBorder(BorderFactory.createTitledBorder("Result"));
 	}
 
-	public void setThisValue(Object thisValue) {
+	public void setThisValue(ObjectInfo thisValue) {
 		evaluationTextField.setThisValue(thisValue);
 	}
 
@@ -62,9 +63,9 @@ public class EvaluationPanel extends JPanel
 		dynamicTypingControls.updateControls();
 	}
 
-	private void displayObject(Object object) {
+	private void displayObject(ObjectInfo objectInfo) {
 		evaluationResultPanel.removeAll();
-		FieldView objectView = new FieldView(object, inspectionContext);
+		FieldView objectView = new FieldView(objectInfo, inspectionContext);
 		evaluationResultPanel.add(objectView,		new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, CENTER, BOTH, new Insets(3, 3, 3, 3), 0, 0));
 		evaluationResultPanel.revalidate();
 		evaluationResultPanel.repaint();

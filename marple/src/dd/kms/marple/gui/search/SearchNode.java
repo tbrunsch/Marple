@@ -5,6 +5,7 @@ import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeNode;
 import dd.kms.marple.instancesearch.InstancePath;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
 
 import javax.annotation.Nullable;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -20,7 +21,7 @@ class SearchNode extends DefaultMutableTreeNode implements ActionProviderTreeNod
 
 	@Override
 	public @Nullable ActionProvider getActionProvider() {
-		return new ActionProviderBuilder(getDisplayText(), getObject(), inspectionContext).build();
+		return new ActionProviderBuilder(getDisplayText(), InfoProvider.createObjectInfo(getObject()), inspectionContext).build();
 	}
 
 	String getFullPathAsString() {

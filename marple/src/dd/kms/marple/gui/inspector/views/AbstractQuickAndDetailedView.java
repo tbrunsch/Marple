@@ -2,6 +2,7 @@ package dd.kms.marple.gui.inspector.views;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.settings.visual.ObjectView;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,15 +21,15 @@ public abstract class AbstractQuickAndDetailedView extends JPanel implements Obj
 
 	private final String			name;
 
-	private final Object			object;
+	private final ObjectInfo		objectInfo;
 	private final InspectionContext	inspectionContext;
 
-	public AbstractQuickAndDetailedView(String name, Object object, InspectionContext inspectionContext) {
+	public AbstractQuickAndDetailedView(String name, ObjectInfo objectInfo, InspectionContext inspectionContext) {
 		super(new BorderLayout());
 
 		this.name = name;
 
-		this.object = object;
+		this.objectInfo = objectInfo;
 		this.inspectionContext = inspectionContext;
 
 		setName(name);
@@ -49,7 +50,7 @@ public abstract class AbstractQuickAndDetailedView extends JPanel implements Obj
 		detailedViewToggleButton.addActionListener(e -> setViewType(ViewType.DETAILED));
 	}
 
-	protected abstract Component createView(ViewType viewType, Object object, InspectionContext inspectionContext);
+	protected abstract Component createView(ViewType viewType, ObjectInfo objectInfo, InspectionContext inspectionContext);
 
 	@Override
 	public String getViewName() {
@@ -74,7 +75,7 @@ public abstract class AbstractQuickAndDetailedView extends JPanel implements Obj
 	}
 
 	private void setViewType(ViewType viewType) {
-		Component view = createView(viewType, object, inspectionContext);
+		Component view = createView(viewType, objectInfo, inspectionContext);
 		JToggleButton toggleButton = viewType == ViewType.QUICK ? quickViewToggleButton : detailedViewToggleButton;
 		toggleButton.setSelected(true);
 		viewPanel.removeAll();

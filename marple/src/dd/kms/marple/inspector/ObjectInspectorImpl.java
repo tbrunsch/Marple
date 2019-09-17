@@ -7,6 +7,7 @@ import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.inspector.InspectionFrame;
 import dd.kms.marple.gui.inspector.views.ComponentHierarchyView;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.awt.*;
 import java.util.List;
@@ -22,7 +23,7 @@ class ObjectInspectorImpl implements ObjectInspector
 
 	@Override
 	public void inspectComponent(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
-		Object hierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
+		ObjectInfo hierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
 		ImmutableList.Builder<ObjectView> viewBuilder = ImmutableList.<ObjectView>builder()
 			.add(new ComponentHierarchyView(componentHierarchy, subcomponentHierarchy, inspectionContext))
 			.addAll(inspectionContext.getInspectionViews(hierarchyLeaf));
@@ -30,18 +31,18 @@ class ObjectInspectorImpl implements ObjectInspector
 	}
 
 	@Override
-	public void inspectObject(Object object) {
+	public void inspectObject(ObjectInfo objectInfo) {
 		ImmutableList.Builder<ObjectView> viewBuilder = ImmutableList.<ObjectView>builder()
-			.addAll(inspectionContext.getInspectionViews(object));
-		showViews(object, viewBuilder.build());
+			.addAll(inspectionContext.getInspectionViews(objectInfo));
+		showViews(objectInfo, viewBuilder.build());
 	}
 
 	/*
 	 * Inspection Frame Handling
 	 */
-	private void showViews(Object object, List<ObjectView> views) {
+	private void showViews(ObjectInfo objectInfo, List<ObjectView> views) {
 		InspectionFrame inspectionFrame = WindowManager.getWindow(ObjectInspector.class, this::createInspectionFrame, this::onCloseInspectionFrame);
-		inspectionFrame.setViews(object, views);
+		inspectionFrame.setViews(objectInfo, views);
 	}
 
 	private InspectionFrame createInspectionFrame() {

@@ -8,6 +8,7 @@ import dd.kms.marple.settings.InspectionSettings;
 import dd.kms.marple.settings.SecuritySettings;
 import dd.kms.marple.settings.keys.KeyRepresentation;
 import dd.kms.marple.settings.keys.KeySettings;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -102,9 +103,9 @@ class ObjectInspectionFrameworkInstance
 		WindowManager.showInFrame(QuickHelpPanel.TITLE, () -> new QuickHelpPanel(keySettings), p -> {}, p -> {});
 	}
 
-	private void performAction(InspectionContext context, Component component, Point position, Function<Object, InspectionAction> actionFunction) {
+	private void performAction(InspectionContext context, Component component, Point position, Function<ObjectInfo, InspectionAction> actionFunction) {
 		Supplier<InspectionAction> actionSupplier = () -> {
-			Object componentHierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(component, position, context);
+			ObjectInfo componentHierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(component, position, context);
 			return actionFunction.apply(componentHierarchyLeaf);
 		};
 		performAction(context, actionSupplier);

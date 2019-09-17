@@ -6,6 +6,7 @@ import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.evaluator.EvaluationFrame;
 import dd.kms.zenodot.settings.ParserSettings;
 import dd.kms.zenodot.settings.ParserSettingsUtils;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -32,19 +33,19 @@ class ExpressionEvaluatorImpl implements ExpressionEvaluator
 	}
 
 	@Override
-	public void evaluate(String expression, Object thisValue) {
+	public void evaluate(String expression, ObjectInfo thisValue) {
 		evaluate(expression, thisValue, expression.length());
 	}
 
 	@Override
-	public void evaluate(String expression, Object thisValue, int caretPosition) {
+	public void evaluate(String expression, ObjectInfo thisValue, int caretPosition) {
 		showEvaluationFrame(expression, thisValue, caretPosition);
 	}
 
 	/*
 	 * Evaluation Frame Handling
 	 */
-	private void showEvaluationFrame(String expression, Object thisValue, int caretPosition) {
+	private void showEvaluationFrame(String expression, ObjectInfo thisValue, int caretPosition) {
 		EvaluationFrame evaluationFrame = WindowManager.getWindow(ExpressionEvaluator.class, this::createEvaluationFrame, Runnables.doNothing());
 		evaluationFrame.setThisValue(thisValue);
 		evaluationFrame.setExpression(expression);

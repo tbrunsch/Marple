@@ -4,6 +4,8 @@ import com.google.common.primitives.Primitives;
 import dd.kms.marple.InspectionContext;
 import dd.kms.zenodot.CompiledExpression;
 import dd.kms.zenodot.ParseException;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -13,8 +15,8 @@ import java.util.Map;
 
 class FilterOperationExecutor extends AbstractOperationExecutor
 {
-	FilterOperationExecutor(Iterable<?> iterable, Class<?> commonElementClass, InspectionContext inspectionContext) {
-		super(iterable, commonElementClass, inspectionContext);
+	FilterOperationExecutor(Iterable<?> iterable, TypeInfo commonElementType, InspectionContext inspectionContext) {
+		super(iterable, commonElementType, inspectionContext);
 	}
 
 	@Override
@@ -43,17 +45,17 @@ class FilterOperationExecutor extends AbstractOperationExecutor
 		displayResult(filterResult);
 	}
 
-	private boolean filter(CompiledExpression compiledFilterExpression, Object object) throws Exception {
-		Object result = compiledFilterExpression.evaluate(object);
+	private boolean filter(CompiledExpression compiledFilterExpression, Object element) throws Exception {
+		Object result = compiledFilterExpression.evaluate(InfoProvider.createObjectInfo(element)).getObject();
 		if (result == null) {
 			throw new NullPointerException();
 		}
 		Class<?> resultClass = result.getClass();
 		if (Primitives.unwrap(resultClass) != boolean.class) {
 			String error = MessageFormat.format(
-				"Predicate does not yield a boolean, but an object of type '{0}' for object '{1}'",
+				"Predicate does not yield a boolean, but an element of type {0} for element {1}",
 				resultClass.getName(),
-				inspectionContext.getDisplayText(object)
+				inspectionContext.getDisplayText(InfoProvider.createObjectInfo(element))
 			);
 			throw new IllegalStateException(error);
 		}

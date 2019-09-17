@@ -2,10 +2,14 @@ package dd.kms.marple.gui.inspector.views.methodview;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
+import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.filters.ValueFilter;
 import dd.kms.marple.gui.filters.ValueFilters;
 import dd.kms.zenodot.common.MethodScanner;
+import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,27 +23,26 @@ import static java.awt.GridBagConstraints.*;
 
 class MethodList extends JPanel
 {
-	private final List<Method>				methods;
+	private final DefaultListModel<ExecutableInfo>	listModel					= new DefaultListModel<>();
+	private final JList<ExecutableInfo>				list						= new JList<>(listModel);
+	private final JScrollPane						listScrollPane				= new JScrollPane(list);
 
-	private final DefaultListModel<Method>	listModel					= new DefaultListModel<>();
-	private final JList<Method>				list						= new JList<>(listModel);
-	private final JScrollPane				listScrollPane				= new JScrollPane(list);
+	private final JPanel							filterPanel					= new JPanel(new GridBagLayout());
+	private final JLabel							nameLabel					= new JLabel("Name:");
+	private final Component							nameFilterEditor;
+	private final JLabel							accessLevelLabel			= new JLabel("Access level:");
+	private final Component							accessLevelFilterEditor;
 
-	private final JPanel					filterPanel					= new JPanel(new GridBagLayout());
-	private final JLabel					nameLabel					= new JLabel("Name:");
-	private final Component					nameFilterEditor;
-	private final JLabel					accessLevelLabel			= new JLabel("Access level:");
-	private final Component					accessLevelFilterEditor;
+	private final List<ExecutableInfo>				methodInfos;
+	private final MethodViewUtils					methodViewUtils;
 
-	private final MethodViewUtils			methodViewUtils;
+	private final ValueFilter						nameFilter					= ValueFilters.createWildcardFilter();
+	private final ValueFilter						accessLevelFilter			= ValueFilters.createMinimumAccessLevelFilter();
 
-	private final ValueFilter				nameFilter					= ValueFilters.createWildcardFilter();
-	private final ValueFilter				accessLevelFilter			= ValueFilters.createMinimumAccessLevelFilter();
-
-	public MethodList(Object object, InspectionContext inspectionContext) {
+	public MethodList(ObjectInfo objectInfo, InspectionContext inspectionContext) {
 		super(new GridBagLayout());
 
-		this.methodViewUtils = new MethodViewUtils(object, inspectionContext);
+		this.methodViewUtils = new MethodViewUtils(objectInfo, inspectionContext);
 
 		this.nameFilterEditor = nameFilter.getEditor();
 		this.accessLevelFilterEditor = accessLevelFilter.getEditor();
@@ -59,10 +62,10 @@ class MethodList extends JPanel
 			((JTextField) nameFilterEditor).setColumns(20);
 		}
 
-		this.methods = new MethodScanner().getMethods(object.getClass());
+		this.methodInfos = InfoProvider.getMethodInfos(ReflectionUtils.getRuntimeTypeInfo(objectInfo), new MethodScanner());
 		updateListModel();
 		list.setSelectionModel(new NoItemSelectionModel());
-		list.setCellRenderer(new ActionProviderRenderer(methodViewUtils));
+		list.setCellRenderer(new ActionProviderRenderer());
 
 		addListeners();
 	}
@@ -76,14 +79,14 @@ class MethodList extends JPanel
 
 	private void updateListModel() {
 		listModel.clear();
-		methods.stream().filter(this::isMethodVisible).forEach(listModel::addElement);
+		methodInfos.stream().filter(this::isMethodVisible).forEach(listModel::addElement);
 	}
 
-	private boolean isMethodVisible(Method method) {
-		if (nameFilter.isActive() && !nameFilter.test(method.getName())) {
+	private boolean isMethodVisible(ExecutableInfo methodInfo) {
+		if (nameFilter.isActive() && !nameFilter.test(methodInfo.getName())) {
 			return false;
 		}
-		if (accessLevelFilter.isActive() && !accessLevelFilter.test(methodViewUtils.getAccessModifier(method))) {
+		if (accessLevelFilter.isActive() && !accessLevelFilter.test(methodInfo.getAccessModifier())) {
 			return false;
 		}
 		return true;
@@ -91,11 +94,11 @@ class MethodList extends JPanel
 
 	private ActionProvider getActionProvider(MouseEvent e) {
 		int row = list.locationToIndex(e.getPoint());
-		if (row < 0 || row >= methods.size()) {
+		if (row < 0 || row >= methodInfos.size()) {
 			return null;
 		}
-		Method method = methods.get(row);
-		return methodViewUtils.getMethodActionProvider(method);
+		ExecutableInfo methodInfo = methodInfos.get(row);
+		return methodViewUtils.getMethodActionProvider(methodInfo);
 	}
 
 	/*
@@ -105,18 +108,14 @@ class MethodList extends JPanel
 		updateListModel();
 	}
 
-	private static class ActionProviderRenderer extends JPanel implements ListCellRenderer<Method>
+	private static class ActionProviderRenderer extends JPanel implements ListCellRenderer<ExecutableInfo>
 	{
 		private final JLabel			returnTypeLabel	= new JLabel();
 		private final JLabel			methodNameLabel	= new JLabel();
 		private final JLabel			argumentsLabel	= new JLabel();
 
-		private final MethodViewUtils	methodViewUtils;
-
-		ActionProviderRenderer(MethodViewUtils methodViewUtils) {
+		ActionProviderRenderer() {
 			super(new GridBagLayout());
-
-			this.methodViewUtils = methodViewUtils;
 
 			int xPos = 0;
 			add(methodNameLabel,	new GridBagConstraints(xPos++, 0, 1, 1, 0.0, 0.0, WEST, NONE, new Insets(1, 1, 1, 1), 0, 0));
@@ -138,10 +137,10 @@ class MethodList extends JPanel
 		}
 
 		@Override
-		public Component getListCellRendererComponent(JList<? extends Method> list, Method method, int index, boolean isSelected, boolean cellHasFocus) {
-			returnTypeLabel.setText(method.getReturnType().getSimpleName());
-			methodNameLabel.setText(method.getName());
-			argumentsLabel.setText(MessageFormat.format("({0})", methodViewUtils.getArgumentsAsString(method)));
+		public Component getListCellRendererComponent(JList<? extends ExecutableInfo> list, ExecutableInfo methodInfo, int index, boolean isSelected, boolean cellHasFocus) {
+			returnTypeLabel.setText(methodInfo.getReturnType().getSimpleName());
+			methodNameLabel.setText(methodInfo.getName());
+			argumentsLabel.setText(MessageFormat.format("({0})", methodInfo.formatArguments()));
 
 			if (isSelected) {
 				setBackground(list.getSelectionBackground());

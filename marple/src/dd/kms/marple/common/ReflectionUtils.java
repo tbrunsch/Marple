@@ -1,16 +1,27 @@
 package dd.kms.marple.common;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.google.common.primitives.Primitives;
 import dd.kms.zenodot.common.FieldScanner;
+import dd.kms.zenodot.common.MethodScanner;
+import dd.kms.zenodot.utils.EvaluationMode;
+import dd.kms.zenodot.utils.dataProviders.ObjectInfoProvider;
+import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ReflectionUtils
 {
+	public static final ObjectInfoProvider OBJECT_INFO_PROVIDER	= new ObjectInfoProvider(EvaluationMode.DYNAMICALLY_TYPED);
+
 	/**
 	 * We consider an object worth being inspected if it is
 	 * <ul>
@@ -95,5 +106,36 @@ public class ReflectionUtils
 			}
 		}
 		return fieldsByValue;
+	}
+
+	public static ExecutableInfo getUniqueMethodInfo(TypeInfo type, String methodName) {
+		List<ExecutableInfo> methodInfos = InfoProvider.getMethodInfos(type, new MethodScanner().name(methodName));
+		return Iterables.getOnlyElement(methodInfos);
+	}
+
+	public static TypeInfo getRuntimeTypeInfo(TypeInfo declaredType, Class<?> runtimeClass) {
+		if (declaredType == InfoProvider.UNKNOWN_TYPE) {
+			return InfoProvider.createTypeInfo(runtimeClass);
+		}
+		try {
+			return declaredType.isPrimitive() ? declaredType : declaredType.getSubtype(runtimeClass);
+		} catch (Exception e) {
+			/*
+			 * Sometimes exceptions like
+			 *
+			 *     javax.swing.plaf.basic.BasicComboBoxRenderer$UIResource does not appear to be a subtype of javax.swing.ListCellRenderer<? super E>
+			 *
+			 * are thrown. This seems to be incorrect and we handle it by ignoring the declared type.
+			 *
+			 * We also get an exception if the declared type has unresolved parameters.
+			 */
+			return InfoProvider.createTypeInfo(runtimeClass);
+		}
+	}
+
+	public static TypeInfo getRuntimeTypeInfo(ObjectInfo objectInfo) {
+		Object object = objectInfo.getObject();
+		TypeInfo declaredType = objectInfo.getDeclaredType();
+		return object == null ? declaredType : getRuntimeTypeInfo(declaredType, object.getClass());
 	}
 }

@@ -1,6 +1,8 @@
 package dd.kms.marple.common;
 
 import com.google.common.collect.ImmutableList;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -26,7 +28,8 @@ public class UniformView
 
 	private static final List<ListReflectionData> LIST_REFLECTION_DATA = LIST_REFLECTION_DATA_BUILDER.build();
 
-	public static boolean canViewAsList(Object object) {
+	public static boolean canViewAsList(ObjectInfo objectInfo) {
+		Object object = objectInfo.getObject();
 		if (object == null) {
 			return false;
 		}
@@ -35,60 +38,73 @@ public class UniformView
 			|| getListReflectionData(object).isPresent();
 	}
 
-	public static List<?> asList(Object object) {
+	public static TypedObjectInfo<List<?>> asList(ObjectInfo objectInfo) {
+		Object object = objectInfo.getObject();
 		if (object == null) {
 			throw new IllegalArgumentException("Null cannot be converted to a list.");
 		}
 
 		if (object instanceof List<?>) {
-			return (List<?>) object;
+			return new TypedObjectInfo<>(objectInfo);
 		}
 
 		if (object.getClass().isArray()) {
-			return new AbstractList<Object>()
-			{
-				@Override
-				public Object get(int index) {
-					return Array.get(object, index);
-				}
-
-				@Override
-				public int size() {
-					return Array.getLength(object);
-				}
-			};
+			return getListViewOfArray(objectInfo);
 		}
 
 		Optional<ListReflectionData> listReflectionData = getListReflectionData(object);
 		if (listReflectionData.isPresent()) {
 			ListReflectionData data = listReflectionData.get();
-			return new AbstractList<Object>()
-			{
-				@Override
-				public Object get(int index) {
-					return data.getElement(object, index);
-				}
-
-				@Override
-				public int size() {
-					return data.getSize(object);
-				}
-			};
+			return getListViewOfListReflectionData(objectInfo, data);
 		}
 
 		throw new IllegalArgumentException("Object '" + object + "' cannot be converted to a List.");
 	}
 
-	public static boolean canViewAsIterable(Object object) {
-		return object instanceof Iterable<?> || canViewAsList(object);
+	private static TypedObjectInfo<List<?>> getListViewOfArray(ObjectInfo objectInfo) {
+		Object object = objectInfo.getObject();
+		AbstractList<Object> listView = new AbstractList<Object>() {
+			@Override
+			public Object get(int index) {
+				return Array.get(object, index);
+			}
+
+			@Override
+			public int size() {
+				return Array.getLength(object);
+			}
+		};
+		return new TypedObjectInfo<>(InfoProvider.createObjectInfo(listView));
 	}
 
-	public static Iterable<?> asIterable(Object object) {
+	private static TypedObjectInfo<List<?>> getListViewOfListReflectionData(ObjectInfo objectInfo, ListReflectionData data) {
+		Object object = objectInfo.getObject();
+		List<Object> listView = new AbstractList<Object>() {
+			@Override
+			public Object get(int index) {
+				return data.getElement(object, index);
+			}
+
+			@Override
+			public int size() {
+				return data.getSize(object);
+			}
+		};
+		return new TypedObjectInfo<>(InfoProvider.createObjectInfo(listView));
+	}
+
+	public static boolean canViewAsIterable(ObjectInfo objectInfo) {
+		Object object = objectInfo.getObject();
+		return object instanceof Iterable<?> || canViewAsList(objectInfo);
+	}
+
+	public static TypedObjectInfo<? extends Iterable<?>> asIterable(ObjectInfo objectInfo) {
+		Object object = objectInfo.getObject();
 		if (object instanceof Iterable<?>) {
-			return (Iterable<?>) object;
+			return new TypedObjectInfo<>(objectInfo);
 		}
-		if (canViewAsList(object)) {
-			return asList(object);
+		if (canViewAsList(objectInfo)) {
+			return asList(objectInfo);
 		}
 		throw new IllegalArgumentException("Object '" + object + "' cannot be converted to an Iterable.");
 	}

@@ -8,20 +8,22 @@ import dd.kms.zenodot.Parsers;
 import dd.kms.zenodot.matching.MatchRating;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import java.util.Map;
 import java.util.Optional;
 
 public class CompiledExpressionInputTextField extends AbstractExpressionInputTextField<CompiledExpression>
 {
-	private Class<?> thisClass = Object.class;
+	private TypeInfo thisType = InfoProvider.createTypeInfo(Object.class);
 
 	public CompiledExpressionInputTextField(InspectionContext context) {
 		super(context);
 	}
 
-	public void setThisClass(Class<?> thisClass) {
-		this.thisClass = thisClass;
+	public void setThisType(TypeInfo thisType) {
+		this.thisType = thisType;
 	}
 
 	@Override
@@ -44,6 +46,6 @@ public class CompiledExpressionInputTextField extends AbstractExpressionInputTex
 	}
 
 	private ExpressionCompiler createCompiler(String text) {
-		return Parsers.createExpressionCompiler(text, getParserSettings(), thisClass);
+		return Parsers.createExpressionCompiler(text, getParserSettings(), thisType);
 	}
 }

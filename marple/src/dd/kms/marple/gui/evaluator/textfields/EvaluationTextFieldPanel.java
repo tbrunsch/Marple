@@ -12,15 +12,13 @@ import static java.awt.GridBagConstraints.*;
 
 public class EvaluationTextFieldPanel extends JPanel
 {
-	private final AbstractInputTextField<?>	inputTextField;
-	private final JButton					settingsButton	= new JButton("...");
+	private final JButton	settingsButton	= new JButton("...");
 
 	private final InspectionContext	context;
 
 	public EvaluationTextFieldPanel(AbstractInputTextField<?> inputTextField, InspectionContext context) {
 		super(new GridBagLayout());
 
-		this.inputTextField = inputTextField;
 		this.context = context;
 
 		add(inputTextField,	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(0, 0, 0, DEFAULT_DISTANCE/2), 0, 0));

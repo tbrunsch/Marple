@@ -10,6 +10,8 @@ import dd.kms.zenodot.settings.ObjectTreeNode;
 import dd.kms.zenodot.settings.ParserSettings;
 import dd.kms.zenodot.settings.ParserSettingsUtils;
 import dd.kms.zenodot.settings.Variable;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -78,9 +80,8 @@ class TestUtils
 		}
 
 		@Override
-		public @Nullable
-		Object getUserObject() {
-			return numbers;
+		public @Nullable ObjectInfo getUserObject() {
+			return InfoProvider.createObjectInfo(numbers);
 		}
 
 		private int getNumber() {

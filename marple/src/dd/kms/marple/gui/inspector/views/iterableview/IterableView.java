@@ -3,13 +3,17 @@ package dd.kms.marple.gui.inspector.views.iterableview;
 import com.google.common.collect.ImmutableMap;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.common.ReflectionUtils;
-import dd.kms.marple.gui.evaluator.textfields.EvaluationTextFieldPanel;
-import dd.kms.marple.settings.visual.ObjectView;
+import dd.kms.marple.common.TypedObjectInfo;
 import dd.kms.marple.gui.common.ExceptionFormatter;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.gui.evaluator.textfields.CompiledExpressionInputTextField;
+import dd.kms.marple.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.gui.inspector.views.fieldview.FieldTree;
+import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.zenodot.ParseException;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,22 +29,22 @@ public class IterableView extends JPanel implements ObjectView
 	private static final Insets	DEFAULT_INSETS	= new Insets(3, 3, 3, 3);
 
 	private final Iterable<?>		iterable;
-	private final Class<?>			commonElementClass;
+	private final TypeInfo			commonElementType;
 	private final InspectionContext	inspectionContext;
 
 	private final JPanel			contextPanel;
 	private final OperationPanel	operationPanel;
 	private final ResultPanel		resultPanel;
 
-	public IterableView(Iterable<?> iterable, InspectionContext context) {
+	public IterableView(TypedObjectInfo<? extends Iterable<?>> iterableInfo, InspectionContext context) {
 		super(new GridBagLayout());
 
-		this.iterable = iterable;
-		this.commonElementClass = ReflectionUtils.getCommonSuperClass(iterable);
+		this.iterable = iterableInfo.getObject();
+		this.commonElementType = determineCommonElementType(iterableInfo);
 		this.inspectionContext = context;
 
-		this.contextPanel = new ContextPanel(iterable, commonElementClass, context);
-		this.operationPanel = new OperationPanel(commonElementClass, context);
+		this.contextPanel = new ContextPanel(iterableInfo, commonElementType, context);
+		this.operationPanel = new OperationPanel(commonElementType, context);
 		this.resultPanel = new ResultPanel(context);
 
 		setName(NAME);
@@ -52,6 +56,14 @@ public class IterableView extends JPanel implements ObjectView
 
 		operationPanel.setExceptionConsumer(e -> resultPanel.displayException(operationPanel.getSettings().getExpression(), e));
 		operationPanel.setAction(this::onRunOperation);
+	}
+
+	private TypeInfo determineCommonElementType(TypedObjectInfo<? extends Iterable<?>> iterableInfo) {
+		TypeInfo iterableType = ReflectionUtils.getRuntimeTypeInfo(iterableInfo);
+		TypeInfo iteratorResultTypeInfo = ReflectionUtils.getUniqueMethodInfo(iterableType, "iterator").getReturnType();
+		TypeInfo declaredElementType = ReflectionUtils.getUniqueMethodInfo(iteratorResultTypeInfo, "next").getReturnType();
+		Class<?> commonElementClass = ReflectionUtils.getCommonSuperClass(iterable);
+		return ReflectionUtils.getRuntimeTypeInfo(declaredElementType, commonElementClass);
 	}
 
 	@Override
@@ -84,13 +96,13 @@ public class IterableView extends JPanel implements ObjectView
 		AbstractOperationExecutor executor;
 		switch (operation) {
 			case FILTER:
-				executor = new FilterOperationExecutor(iterable, commonElementClass, inspectionContext);
+				executor = new FilterOperationExecutor(iterable, commonElementType, inspectionContext);
 				break;
 			case MAP:
-				executor = new MapOperationExecutor(iterable, commonElementClass, inspectionContext);
+				executor = new MapOperationExecutor(iterable, commonElementType, inspectionContext);
 				break;
 			case FOR_EACH:
-				executor = new ForEachOperationExecutor(iterable, commonElementClass, inspectionContext);
+				executor = new ForEachOperationExecutor(iterable, commonElementType, inspectionContext);
 				break;
 			default:
 				throw new IllegalStateException("Unsupported operation: " + operation);
@@ -104,10 +116,6 @@ public class IterableView extends JPanel implements ObjectView
 		}
 	}
 
-	private void forEach(String expression) throws ParseException {
-// TODO:		compile
-	}
-
 	private static class ContextPanel extends JPanel
 	{
 		private final JLabel		commonElementClassInfoLabel	= new JLabel("Element class:");
@@ -115,15 +123,15 @@ public class IterableView extends JPanel implements ObjectView
 
 		private final JComponent	fieldTree;
 
-		ContextPanel(Iterable<?> iterable, Class<?> commonElementClass, InspectionContext context) {
+		ContextPanel(TypedObjectInfo<? extends Iterable<?>> iterableInfo, TypeInfo commonElementType, InspectionContext context) {
 			super(new GridBagLayout());
 
 			setBorder(BorderFactory.createTitledBorder("Iterable"));
 
-			fieldTree = new FieldTree(iterable, true, context);
+			fieldTree = new FieldTree(iterableInfo, true, context);
 			fieldTree.setPreferredSize(new Dimension(fieldTree.getPreferredSize().width, 100));
 
-			commonElementClassLabel.setText(commonElementClass.getName());
+			commonElementClassLabel.setText(commonElementType.toString());
 
 			add(commonElementClassInfoLabel,	new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 			add(commonElementClassLabel,		new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
@@ -160,14 +168,14 @@ public class IterableView extends JPanel implements ObjectView
 		private final JLabel									expressionInfoLabel		= new JLabel("'this' always refers to the element currently processed");
 		private final JButton									runButton				= new JButton("Run");
 
-		OperationPanel(Class<?> commonElementClass, InspectionContext context) {
+		OperationPanel(TypeInfo commonElementType, InspectionContext context) {
 			super(new GridBagLayout());
 
 			setBorder(BorderFactory.createTitledBorder("Operation"));
 
 			expressionTF = new CompiledExpressionInputTextField(context);
 			expressionPanel = new EvaluationTextFieldPanel(expressionTF, context);
-			expressionTF.setThisClass(commonElementClass);
+			expressionTF.setThisType(commonElementType);
 
 			initButtons(operationToButton, 	operationButtonGroup,	Operation.FILTER);
 			initButtons(resultTypeToButton, resultTypeButtonGroup,	OperationResultType.LIST);
@@ -272,7 +280,8 @@ public class IterableView extends JPanel implements ObjectView
 		}
 
 		void displayResult(Object result) {
-			FieldTree fieldTree = new FieldTree(result, false, context);
+			ObjectInfo resultInfo = InfoProvider.createObjectInfo(result);
+			FieldTree fieldTree = new FieldTree(resultInfo, false, context);
 			displayComponent(fieldTree);
 		}
 

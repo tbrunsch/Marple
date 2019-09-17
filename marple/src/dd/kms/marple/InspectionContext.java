@@ -2,8 +2,9 @@ package dd.kms.marple;
 
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.evaluator.ExpressionEvaluator;
-import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.marple.settings.InspectionSettings;
+import dd.kms.marple.settings.visual.ObjectView;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -17,19 +18,19 @@ public interface InspectionContext
 	InspectionAction createHistoryBackAction();
 	InspectionAction createHistoryForwardAction();
 	InspectionAction createInspectComponentAction(List<Component> componentHierarchy, List<?> subcomponentHierarchy);
-	InspectionAction createInspectObjectAction(Object object);
-	InspectionAction createAddVariableAction(String suggestedName, Object value);
-	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue);
-	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue, int caretPosition);
-	InspectionAction createEvaluateAsThisAction(Object thisValue);
+	InspectionAction createInspectObjectAction(ObjectInfo objectInfo);
+	InspectionAction createAddVariableAction(String suggestedName, ObjectInfo value);
+	InspectionAction createEvaluateExpressionAction(String expression, ObjectInfo thisValue);
+	InspectionAction createEvaluateExpressionAction(String expression, ObjectInfo thisValue, int caretPosition);
+	InspectionAction createEvaluateAsThisAction(ObjectInfo thisValue);
 	InspectionAction createSearchInstancesFromHereAction(Object root);
 	InspectionAction createSearchInstanceAction(Object target);
-	InspectionAction createDebugSupportAction(Object thisValue);
+	InspectionAction createDebugSupportAction(ObjectInfo thisValue);
 	<T> InspectionAction createSnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction);
 
 	void clearHistory();
 
-	String getDisplayText(Object object);
-	List<ObjectView> getInspectionViews(Object object);
+	String getDisplayText(ObjectInfo objectInfo);
+	List<ObjectView> getInspectionViews(ObjectInfo objectInfo);
 	ExpressionEvaluator getEvaluator();
 }

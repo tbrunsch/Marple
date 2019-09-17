@@ -9,6 +9,7 @@ import dd.kms.marple.instancesearch.InstancePath;
 import dd.kms.marple.instancesearch.InstancePathFinder;
 import dd.kms.zenodot.CompiledExpression;
 import dd.kms.zenodot.utils.wrappers.ClassInfo;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -213,7 +214,7 @@ class InstanceSearchPanel extends JPanel
 
 	private boolean applyFilter(CompiledExpression filter, Object o) {
 		try {
-			return Boolean.TRUE.equals(filter.evaluate(o));
+			return Boolean.TRUE.equals(filter.evaluate(InfoProvider.createObjectInfo(o)));
 		} catch (Exception e) {
 			return false;
 		}
@@ -257,7 +258,7 @@ class InstanceSearchPanel extends JPanel
 	}
 
 	private String getDisplayText(Object object) {
-		return object == null ? "<none>" : inspectionContext.getDisplayText(object);
+		return object == null ? "<none>" : inspectionContext.getDisplayText(InfoProvider.createObjectInfo(object));
 	}
 
 	private void updateStatusText() {
@@ -337,7 +338,7 @@ class InstanceSearchPanel extends JPanel
 		Optional<Class<?>> optionalTargetClass = getTargetClass();
 		if (optionalTargetClass.isPresent()) {
 			Class<?> targetClass = optionalTargetClass.get();
-			targetFilterTF.setThisClass(targetClass);
+			targetFilterTF.setThisType(InfoProvider.createTypeInfo(targetClass));
 		}
 		updateEnabilities();
 	}

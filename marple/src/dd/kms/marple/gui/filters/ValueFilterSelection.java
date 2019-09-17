@@ -1,6 +1,7 @@
 package dd.kms.marple.gui.filters;
 
 import dd.kms.marple.InspectionContext;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
 
 import javax.swing.*;
 import java.awt.*;
@@ -66,7 +67,7 @@ class ValueFilterSelection extends AbstractValueFilter
 	}
 
 	private JCheckBox createCheckbox(Object value, boolean allowed) {
-		JCheckBox checkBox = new JCheckBox(inspectionContext.getDisplayText(value));
+		JCheckBox checkBox = new JCheckBox(inspectionContext.getDisplayText(InfoProvider.createObjectInfo(value)));
 		checkBox.setSelected(allowed);
 		checkBox.addItemListener(e -> setAllowed(value, e.getStateChange() == ItemEvent.SELECTED));
 		return checkBox;

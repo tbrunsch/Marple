@@ -5,7 +5,7 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.actions.Actions;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -17,17 +17,15 @@ class ListTreeNode extends AbstractInspectionTreeNode
 {
 	static final int	RANGE_SIZE_BASE	= 10;
 
-	private final @Nullable String		displayKey;
-	private final Object 				container;
-	private final TypeInfo				typeInfo;
-	private final List<?>				list;
-	private final InspectionContext		inspectionContext;
+	private final @Nullable String	displayKey;
+	private final ObjectInfo		containerInfo;
+	private final List<?>			list;
+	private final InspectionContext	inspectionContext;
 
-	ListTreeNode(int childIndex, @Nullable String displayKey, Object container, TypeInfo typeInfo, List<?> list, InspectionContext inspectionContext) {
+	ListTreeNode(int childIndex, @Nullable String displayKey, ObjectInfo containerInfo, List<?> list, InspectionContext inspectionContext) {
 		super(childIndex);
 		this.displayKey = displayKey;
-		this.container = container;
-		this.typeInfo = typeInfo;
+		this.containerInfo = containerInfo;
 		this.list = list;
 		this.inspectionContext = inspectionContext;
 	}
@@ -56,19 +54,19 @@ class ListTreeNode extends AbstractInspectionTreeNode
 	}
 
 	private InspectionTreeNode createRangeNode(int childIndex, int rangeBeginIndex, int rangeEndIndex) {
-		return ListIndexRangeTreeNode.createRangeNode(childIndex, container, typeInfo, list, rangeBeginIndex, rangeEndIndex, inspectionContext);
+		return ListIndexRangeTreeNode.createRangeNode(childIndex, containerInfo, list, rangeBeginIndex, rangeEndIndex, inspectionContext);
 	}
 
 	@Override
 	public ActionProvider getActionProvider() {
-		return new ActionProviderBuilder(toString(), container, inspectionContext)
+		return new ActionProviderBuilder(toString(), containerInfo, inspectionContext)
 			.suggestVariableName(displayKey)
 			.build();
 	}
 
 	@Override
 	public String toString() {
-		String valueDisplayText = Actions.trimName(inspectionContext.getDisplayText(container)) + " size = " + list.size();
+		String valueDisplayText = Actions.trimName(inspectionContext.getDisplayText(containerInfo)) + " size = " + list.size();
 		return displayKey == null ? valueDisplayText : displayKey + " = " + valueDisplayText;
 	}
 }

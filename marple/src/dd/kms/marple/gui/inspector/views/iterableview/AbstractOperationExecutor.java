@@ -6,21 +6,23 @@ import dd.kms.zenodot.CompiledExpression;
 import dd.kms.zenodot.ExpressionCompiler;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.Parsers;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import java.util.function.Consumer;
 
 abstract class AbstractOperationExecutor
 {
 	final Iterable<?>			iterable;
-	private final Class<?>		commonElementClass;
+	private final TypeInfo		commonElementType;
 	final InspectionContext		inspectionContext;
 
 	private Consumer<Object>	resultConsumer;
 	private Consumer<String>	textConsumer;
 
-	AbstractOperationExecutor(Iterable<?> iterable, Class<?> commonElementClass, InspectionContext inspectionContext) {
+	AbstractOperationExecutor(Iterable<?> iterable, TypeInfo commonElementType, InspectionContext inspectionContext) {
 		this.iterable = iterable;
-		this.commonElementClass = commonElementClass;
+		this.commonElementType = commonElementType;
 		this.inspectionContext = inspectionContext;
 	}
 
@@ -45,11 +47,11 @@ abstract class AbstractOperationExecutor
 	}
 
 	Exception wrapEvaluationException(Exception e, Object element) {
-		return new Exception("Error evaluating exception for '" + inspectionContext.getDisplayText(element) + "'", e);
+		return new Exception("Error evaluating exception for '" + inspectionContext.getDisplayText(InfoProvider.createObjectInfo(element)) + "'", e);
 	}
 
 	CompiledExpression compile(String expression) throws ParseException {
-		ExpressionCompiler compiler = Parsers.createExpressionCompiler(expression, inspectionContext.getEvaluator().getParserSettings(), commonElementClass);
+		ExpressionCompiler compiler = Parsers.createExpressionCompiler(expression, inspectionContext.getEvaluator().getParserSettings(), commonElementType);
 		return compiler.compile();
 	}
 }

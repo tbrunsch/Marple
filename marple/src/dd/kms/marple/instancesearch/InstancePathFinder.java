@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.google.common.graph.Graphs;
 import com.google.common.graph.MutableGraph;
 import dd.kms.marple.InspectionContext;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -90,7 +91,7 @@ public class InstancePathFinder
 	private String getDisplayString(Object object) {
 		return inspectionContext == null
 				? (object == null ? "null" : object.toString())
-				: inspectionContext.getDisplayText(object);
+				: inspectionContext.getDisplayText(InfoProvider.createObjectInfo(object));
 	}
 
 	private void changeProcessingState(ProcessingState newState) {

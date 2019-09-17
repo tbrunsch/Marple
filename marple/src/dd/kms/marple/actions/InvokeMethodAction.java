@@ -1,18 +1,23 @@
 package dd.kms.marple.actions;
 
+import com.google.common.collect.ImmutableList;
+import dd.kms.marple.common.ReflectionUtils;
+import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
 public class InvokeMethodAction implements InspectionAction
 {
-	private final Object				object;
-	private final Method				method;
-	private final Consumer<Object>		returnValueConsumer;
+	private final ObjectInfo			objectInfo;
+	private final ExecutableInfo		methodInfo;
+	private final Consumer<ObjectInfo>	returnValueConsumer;
 	private final Consumer<Exception>	exceptionConsumer;
 
-	public InvokeMethodAction(Object object, Method method, Consumer<Object> returnValueConsumer, Consumer<Exception> exceptionConsumer) {
-		this.object = object;
-		this.method = method;
+	public InvokeMethodAction(ObjectInfo objectInfo, ExecutableInfo methodInfo, Consumer<ObjectInfo> returnValueConsumer, Consumer<Exception> exceptionConsumer) {
+		this.objectInfo = objectInfo;
+		this.methodInfo = methodInfo;
 		this.returnValueConsumer = returnValueConsumer;
 		this.exceptionConsumer = exceptionConsumer;
 	}
@@ -29,7 +34,7 @@ public class InvokeMethodAction implements InspectionAction
 
 	@Override
 	public String getDescription() {
-		return "Invoke method '" + method.getName() + "' and inspect the result in the object inspector";
+		return "Invoke method '" + methodInfo.getName() + "' and inspect the result in the object inspector";
 	}
 
 	@Override
@@ -39,11 +44,10 @@ public class InvokeMethodAction implements InspectionAction
 
 	@Override
 	public void perform() {
-		method.setAccessible(true);
 		try {
-			Object returnValue = method.invoke(object);
-			if (!method.getReturnType().equals(Void.TYPE)) {
-				returnValueConsumer.accept(returnValue);
+			ObjectInfo returnValueInfo = ReflectionUtils.OBJECT_INFO_PROVIDER.getExecutableReturnInfo(objectInfo.getObject(), methodInfo, ImmutableList.of());
+			if (!methodInfo.getReturnType().getRawType().equals(Void.TYPE)) {
+				returnValueConsumer.accept(returnValueInfo);
 			}
 		} catch (Exception e) {
 			exceptionConsumer.accept(e);

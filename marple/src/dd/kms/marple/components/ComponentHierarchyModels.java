@@ -2,6 +2,8 @@ package dd.kms.marple.components;
 
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -31,19 +33,21 @@ public class ComponentHierarchyModels
 		return componentHierarchyBuilder.build().reverse();
 	}
 
-	public static Object getHierarchyLeaf(Component component, Point position, InspectionContext context) {
+	public static ObjectInfo getHierarchyLeaf(Component component, Point position, InspectionContext context) {
 		if (component == null) {
-			return null;
+			return InfoProvider.NULL_LITERAL;
 		}
 		List<Component> componentHierarchy = Arrays.asList(component);
 		List<?> subcomponentHierarchy = context.getSettings().getComponentHierarchyModel().getSubcomponentHierarchy(component, position);
 		return getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
 	}
 
-	public static Object getHierarchyLeaf(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
+	public static ObjectInfo getHierarchyLeaf(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
 		List<?> lastNonEmptyList =	!subcomponentHierarchy.isEmpty()	? subcomponentHierarchy :
 									!componentHierarchy.isEmpty()		? componentHierarchy
 																		: null;
-		return lastNonEmptyList == null ? null : lastNonEmptyList.get(lastNonEmptyList.size()-1);
+		return lastNonEmptyList == null
+				? InfoProvider.NULL_LITERAL
+				: InfoProvider.createObjectInfo(lastNonEmptyList.get(lastNonEmptyList.size()-1));
 	}
 }

@@ -3,15 +3,16 @@ package dd.kms.marple.actions.debugsupport;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.gui.common.WindowManager;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 public class DebugSupportAction implements InspectionAction
 {
 	private static final String	FRAME_TITLE	= "Debug Support";
 
 	private final InspectionContext inspectionContext;
-	private final Object			thisValue;
+	private final ObjectInfo		thisValue;
 
-	public DebugSupportAction(InspectionContext inspectionContext, Object thisValue) {
+	public DebugSupportAction(InspectionContext inspectionContext, ObjectInfo thisValue) {
 		this.inspectionContext = inspectionContext;
 		this.thisValue = thisValue;
 	}

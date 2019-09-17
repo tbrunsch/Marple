@@ -3,6 +3,7 @@ package dd.kms.marple.gui.evaluator;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.common.CurrentObjectPanel;
 import dd.kms.marple.gui.common.WindowManager;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,7 +39,7 @@ public class EvaluationFrame extends JFrame
 		WindowManager.updateFrameOnFocusGained(this, evaluationPanel::updateContent);
 	}
 
-	public void setThisValue(Object thisValue) {
+	public void setThisValue(ObjectInfo thisValue) {
 		currentObjectPanel.setCurrentObject(thisValue);
 		evaluationPanel.setThisValue(thisValue);
 	}

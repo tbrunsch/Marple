@@ -2,6 +2,7 @@ package dd.kms.marple.gui.inspector.views.methodview;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.inspector.views.AbstractQuickAndDetailedView;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.awt.*;
 
@@ -9,14 +10,14 @@ public class MethodView extends AbstractQuickAndDetailedView
 {
 	private static final String	NAME	= "Methods";
 
-	public MethodView(Object object, InspectionContext inspectionContext) {
-		super(NAME, object, inspectionContext);
+	public MethodView(ObjectInfo objectInfo, InspectionContext inspectionContext) {
+		super(NAME, objectInfo, inspectionContext);
 	}
 
 	@Override
-	protected Component createView(ViewType viewType, Object object, InspectionContext inspectionContext) {
+	protected Component createView(ViewType viewType, ObjectInfo objectInfo, InspectionContext inspectionContext) {
 		return viewType == ViewType.QUICK
-			? new MethodList(object, inspectionContext)
-			: new MethodTable(object, inspectionContext);
+			? new MethodList(objectInfo, inspectionContext)
+			: new MethodTable(objectInfo, inspectionContext);
 	}
 }

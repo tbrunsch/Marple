@@ -9,6 +9,8 @@ import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.evaluator.VariablePanel;
 import dd.kms.marple.gui.table.ColumnDescription;
 import dd.kms.marple.gui.table.ColumnDescriptionBuilder;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -67,7 +69,8 @@ class NamedSlotsPanel extends AbstractSlotPanel<String>
 
 	private ActionProvider getSlotValueAsActionProvider(String slotName) {
 		Object slotValue = DebugSupport.getSlotValue(slotName);
-		return new ActionProviderBuilder(inspectionContext.getDisplayText(slotValue), slotValue, inspectionContext)
+		ObjectInfo slotValueInfo = InfoProvider.createObjectInfo(slotValue);
+		return new ActionProviderBuilder(inspectionContext.getDisplayText(slotValueInfo), slotValueInfo, inspectionContext)
 			.evaluateAs("DebugSupport.getSlotValue(\"" + slotName + "\")", null)
 			.suggestVariableName(slotName)
 			.executeDefaultAction(false)
@@ -84,7 +87,9 @@ class NamedSlotsPanel extends AbstractSlotPanel<String>
 		}
 	}
 
-	private void setSlotValue(List<String> slotNames, int slotIndex, Object value) {
+	private void setSlotValue(List<String> slotNames, int slotIndex, Object valueInfoAsObject) {
+		ObjectInfo valueInfo = (ObjectInfo) valueInfoAsObject;
+		Object value = valueInfo.getObject();
 		String slotName = slotNames.get(slotIndex);
 		DebugSupport.setSlotValue(slotName, value);
 	}

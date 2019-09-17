@@ -1,6 +1,5 @@
 package dd.kms.marple.gui.help;
 
-import dd.kms.marple.gui.common.GuiCommons;
 import dd.kms.marple.settings.keys.KeyRepresentation;
 import dd.kms.marple.settings.keys.KeySettings;
 

@@ -7,7 +7,9 @@ import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.actions.Actions;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.zenodot.common.FieldScanner;
+import dd.kms.zenodot.utils.wrappers.FieldInfo;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
@@ -17,38 +19,27 @@ import java.util.List;
 class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 {
 	private final @Nullable String	displayKey;
-	private final @Nullable Object	object;
-	private final TypeInfo			typeInfo;
+	private final ObjectInfo		objectInfo;
 	private final InspectionContext	inspectionContext;
 
-	DefaultObjectTreeNode(int childIndex, @Nullable String displayKey, Object object, TypeInfo typeInfo, InspectionContext inspectionContext) {
+	DefaultObjectTreeNode(int childIndex, @Nullable String displayKey, ObjectInfo objectInfo, InspectionContext inspectionContext) {
 		super(childIndex);
 		this.displayKey = displayKey;
-		this.object = object;
-		this.typeInfo = typeInfo;
+		this.objectInfo = objectInfo;
 		this.inspectionContext = inspectionContext;
 	}
 
 	@Override
 	List<? extends InspectionTreeNode> doGetChildren() {
-		if (!ReflectionUtils.isObjectInspectable(object)) {
+		if (!ReflectionUtils.isObjectInspectable(objectInfo.getObject())) {
 			return ImmutableList.of();
 		}
-		List<Field> fields = new FieldScanner().getFields(typeInfo.getRawType(), false);
+		List<FieldInfo> fieldInfos = InfoProvider.getFieldInfos(ReflectionUtils.getRuntimeTypeInfo(objectInfo), new FieldScanner());
 		ImmutableList.Builder<InspectionTreeNode> childBuilder = ImmutableList.builder();
 		int childIndex = 0;
-		for (int i = 0; i < fields.size(); i++) {
-			Field field = fields.get(i);
-			field.setAccessible(true);
-			Object fieldValue;
-			try {
-				fieldValue = field.get(object);
-			} catch (IllegalAccessException e) {
-				System.err.println(e.getMessage());
-				fieldValue = null;
-			}
-			TypeInfo childTypeInfo = fieldValue == null ? InfoProvider.NO_TYPE : typeInfo.resolveType(fieldValue.getClass());
-			InspectionTreeNode child = InspectionTreeNodes.create(childIndex++, field.getName(), fieldValue, childTypeInfo, true, inspectionContext);
+		for (FieldInfo fieldInfo : fieldInfos) {
+			ObjectInfo fieldValueInfo = ReflectionUtils.OBJECT_INFO_PROVIDER.getFieldValueInfo(objectInfo.getObject(), fieldInfo);
+			InspectionTreeNode child = InspectionTreeNodes.create(childIndex++, fieldInfo.getName(), fieldValueInfo, true, inspectionContext);
 			childBuilder.add(child);
 		}
 		return childBuilder.build();
@@ -56,16 +47,16 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 
 	@Override
 	public ActionProvider getActionProvider() {
-		return new ActionProviderBuilder(toString(), object, inspectionContext)
+		return new ActionProviderBuilder(toString(), objectInfo, inspectionContext)
 			.suggestVariableName(displayKey)
 			.build();
 	}
 
 	@Override
 	public String toString() {
-		String valueDisplayText = inspectionContext.getDisplayText(object);
+		String valueDisplayText = inspectionContext.getDisplayText(objectInfo);
 		String fullNodeDisplayText = displayKey == null
-			? valueDisplayText + " (" + typeInfo.getType() + ")"
+			? valueDisplayText + " (" + ReflectionUtils.getRuntimeTypeInfo(objectInfo) + ")"
 			: displayKey + " = " + valueDisplayText;
 		return Actions.trimName(fullNodeDisplayText);
 	}

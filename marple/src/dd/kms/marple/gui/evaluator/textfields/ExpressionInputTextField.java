@@ -7,19 +7,21 @@ import dd.kms.zenodot.Parsers;
 import dd.kms.zenodot.matching.MatchRating;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.util.Map;
 import java.util.Optional;
 
-public class ExpressionInputTextField extends AbstractExpressionInputTextField<Object>
+public class ExpressionInputTextField extends AbstractExpressionInputTextField<ObjectInfo>
 {
-	private Object	thisValue;
+	private ObjectInfo	thisValue = InfoProvider.NULL_LITERAL;
 
 	public ExpressionInputTextField(InspectionContext context) {
 		super(context);
 	}
 
-	public void setThisValue(Object thisValue) {
+	public void setThisValue(ObjectInfo thisValue) {
 		this.thisValue = thisValue;
 	}
 
@@ -36,7 +38,7 @@ public class ExpressionInputTextField extends AbstractExpressionInputTextField<O
 	}
 
 	@Override
-	Object evaluate(String text) throws ParseException {
+	ObjectInfo evaluate(String text) throws ParseException {
 		ExpressionParser parser = createParser(text);
 		return parser.evaluate();
 

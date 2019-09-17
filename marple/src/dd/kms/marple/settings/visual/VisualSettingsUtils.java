@@ -6,6 +6,7 @@ import dd.kms.marple.common.UniformView;
 import dd.kms.marple.gui.inspector.views.fieldview.FieldView;
 import dd.kms.marple.gui.inspector.views.iterableview.IterableView;
 import dd.kms.marple.gui.inspector.views.methodview.MethodView;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -20,14 +21,14 @@ public class VisualSettingsUtils
 
 	public static void addDefaultDisplayTextFunctions(VisualSettingsBuilder builder) {
 		builder
-			.displayText(String.class,			s -> '"' + s + '"')
-			.displayText(char.class,			c -> "'" + c + "'")
-			.displayText(Character.class,		c -> "'" + c + "'")
-			.displayText(Object.class, 			object -> getObjectDisplayText(object))
-			.displayText(Frame.class, 			frame -> getDisplayText(frame, Frame::getTitle))
-			.displayText(AbstractButton.class,	button -> getDisplayText(button, AbstractButton::getText))
-			.displayText(JLabel.class,			label -> getDisplayText(label, JLabel::getText))
-			.displayText(JTextComponent.class, 	textComponent -> getDisplayText(textComponent, JTextComponent::getText));
+			.displayText(String.class,			s -> '"' + s.getObject() + '"')
+			.displayText(char.class,			c -> "'" + c.getObject() + "'")
+			.displayText(Character.class,		c -> "'" + c.getObject() + "'")
+			.displayText(Object.class, 			objectInfo -> getObjectDisplayText(objectInfo.getObject()))
+			.displayText(Frame.class, 			frameInfo -> getDisplayText(frameInfo.getObject(), Frame::getTitle))
+			.displayText(AbstractButton.class,	buttonInfo -> getDisplayText(buttonInfo.getObject(), AbstractButton::getText))
+			.displayText(JLabel.class,			labelInfo -> getDisplayText(labelInfo.getObject(), JLabel::getText))
+			.displayText(JTextComponent.class, 	textComponentInfo -> getDisplayText(textComponentInfo.getObject(), JTextComponent::getText));
 	}
 
 	public static void addDefaultViews(VisualSettingsBuilder builder) {
@@ -55,9 +56,9 @@ public class VisualSettingsUtils
 			+ ")";
 	}
 
-	private static ObjectView createIterableView(Object object, InspectionContext context) {
-		return UniformView.canViewAsIterable(object)
-				? new IterableView(UniformView.asIterable(object), context)
+	private static ObjectView createIterableView(ObjectInfo objectInfo, InspectionContext context) {
+		return UniformView.canViewAsIterable(objectInfo)
+				? new IterableView(UniformView.asIterable(objectInfo), context)
 				: null;
 	}
 }

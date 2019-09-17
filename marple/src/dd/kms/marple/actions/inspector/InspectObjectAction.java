@@ -2,16 +2,17 @@ package dd.kms.marple.actions.inspector;
 
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.inspector.ObjectInspector;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 public class InspectObjectAction implements InspectionAction
 {
 	private final ObjectInspector	inspector;
-	private final Object			object;
+	private final ObjectInfo		objectInfo;
 	private final String			objectDisplayText;
 
-	public InspectObjectAction(ObjectInspector inspector, Object object, String objectDisplayText) {
+	public InspectObjectAction(ObjectInspector inspector, ObjectInfo objectInfo, String objectDisplayText) {
 		this.inspector = inspector;
-		this.object = object;
+		this.objectInfo = objectInfo;
 		this.objectDisplayText = objectDisplayText;
 	}
 
@@ -37,6 +38,6 @@ public class InspectObjectAction implements InspectionAction
 
 	@Override
 	public void perform() {
-		inspector.inspectObject(object);
+		inspector.inspectObject(objectInfo);
 	}
 }

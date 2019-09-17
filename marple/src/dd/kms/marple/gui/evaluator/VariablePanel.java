@@ -13,6 +13,7 @@ import dd.kms.marple.gui.table.ColumnDescriptionBuilder;
 import dd.kms.marple.gui.table.ListBasedTableModel;
 import dd.kms.zenodot.settings.ParserSettingsUtils;
 import dd.kms.zenodot.settings.Variable;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -105,8 +106,8 @@ public class VariablePanel extends JPanel
 	}
 
 	private ActionProvider getValueAsActionProvider(Variable variable) {
-		Object value = variable.getValue();
-		return new ActionProviderBuilder(inspectionContext.getDisplayText(value), value, inspectionContext)
+		ObjectInfo valueInfo = variable.getValue();
+		return new ActionProviderBuilder(inspectionContext.getDisplayText(valueInfo), valueInfo, inspectionContext)
 			.evaluateAs(variable.getName(), null)
 			.executeDefaultAction(true)
 			.build();
@@ -156,7 +157,7 @@ public class VariablePanel extends JPanel
 	private void exportVariables() {
 		DebugSupport.clearNamedSlots();
 		for (Variable variable : variables) {
-			DebugSupport.setSlotValue(variable.getName(), variable.getValue());
+			DebugSupport.setSlotValue(variable.getName(), variable.getValue().getObject());
 		}
 	}
 

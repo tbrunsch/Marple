@@ -12,6 +12,7 @@ import dd.kms.marple.components.ComponentHierarchyModels;
 import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeNode;
 import dd.kms.marple.settings.visual.ObjectView;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -105,16 +106,13 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 	 * Action Providers
 	 */
 	private ActionProvider createActionProvider(List<Component> componentHierarchy, List<?> subcomponentHierarchy, Collection<Field> detectedFields) {
-		Object hierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
+		ObjectInfo hierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
 		String displayText = createActionProviderDisplayText(hierarchyLeaf, detectedFields);
 		return new ActionProviderBuilder(displayText, componentHierarchy, subcomponentHierarchy, inspectionContext).build();
 	}
 
-	private String createActionProviderDisplayText(Object object, Collection<Field> fields) {
-		String displayText = object.getClass().getSimpleName();
-		if (displayText.isEmpty()) {
-			displayText = object.getClass().getName();
-		}
+	private String createActionProviderDisplayText(ObjectInfo objectInfo, Collection<Field> fields) {
+		String displayText = ReflectionUtils.getRuntimeTypeInfo(objectInfo).getSimpleName();
 		if (fields.isEmpty()) {
 			return displayText;
 		}
