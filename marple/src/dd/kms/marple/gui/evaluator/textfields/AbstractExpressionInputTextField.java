@@ -5,11 +5,15 @@ import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.matching.MatchRating;
 import dd.kms.zenodot.matching.StringMatch;
 import dd.kms.zenodot.result.CompletionSuggestion;
+import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 abstract class AbstractExpressionInputTextField<T> extends AbstractInputTextField<T>
 {
@@ -25,12 +29,8 @@ abstract class AbstractExpressionInputTextField<T> extends AbstractInputTextFiel
 	abstract Map<CompletionSuggestion, MatchRating> suggestCodeCompletion(String text, int caretPosition) throws ParseException;
 
 	@Override
-	List<CompletionSuggestion> suggestCodeCompletions(String text, int caretPosition) throws ParseException {
+	Map<CompletionSuggestion, Integer> provideRatedSuggestions(String text, int caretPosition) throws ParseException {
 		Map<CompletionSuggestion, MatchRating> ratedSuggestions = suggestCodeCompletion(text, caretPosition);
-		List<CompletionSuggestion> suggestions = new ArrayList<>(ratedSuggestions.keySet());
-		suggestions.removeIf(suggestion -> ratedSuggestions.get(suggestion).getNameMatch() == StringMatch.NONE);
-		suggestions.sort(Comparator.comparing(CompletionSuggestion::getType));
-		suggestions.sort(Comparator.comparing(ratedSuggestions::get));
-		return suggestions;
+		return Ratings.filterAndTransformMatchRatings(ratedSuggestions);
 	}
 }

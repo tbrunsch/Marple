@@ -4,12 +4,17 @@ import javax.swing.*;
 
 public class Test
 {
-	public static void main(String[] args) throws ClassNotFoundException {
-		JFrame testFrame = new TestFrame();
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(() -> {
+			JFrame testFrame = new TestFrame();
 
-		TestUtils.setupInspectionFramework(testFrame);
+			try {
+				TestUtils.setupInspectionFramework(testFrame);
+			} catch (ClassNotFoundException ignored) {
+			}
 
-		testFrame.pack();
-		testFrame.setVisible(true);
+			testFrame.pack();
+			testFrame.setVisible(true);
+		});
 	}
 }

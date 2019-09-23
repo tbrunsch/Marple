@@ -8,7 +8,9 @@ import dd.kms.zenodot.matching.StringMatch;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;
 import dd.kms.zenodot.utils.wrappers.PackageInfo;
+import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -19,14 +21,10 @@ public class PackageInputTextField extends AbstractInputTextField<PackageInfo>
 	}
 
 	@Override
-	List<CompletionSuggestion> suggestCodeCompletions(String text, int caretPosition) throws ParseException {
+	Map<CompletionSuggestion, Integer> provideRatedSuggestions(String text, int caretPosition) throws ParseException {
 		PackageParser parser = createParser(text);
 		Map<CompletionSuggestion, StringMatch> ratedSuggestions = parser.suggestCodeCompletion(caretPosition);
-		List<CompletionSuggestion> suggestions = new ArrayList<>(ratedSuggestions.keySet());
-		suggestions.removeIf(suggestion -> ratedSuggestions.get(suggestion) == StringMatch.NONE);
-		suggestions.sort(Comparator.comparing(CompletionSuggestion::toString));
-		suggestions.sort(Comparator.comparing(ratedSuggestions::get));
-		return suggestions;
+		return Ratings.filterAndTransformStringMatches(ratedSuggestions);
 	}
 
 	@Override

@@ -5,13 +5,17 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.settings.keys.KeySettings;
 import dd.kms.zenodot.ParseException;
+import dd.kms.zenodot.matching.MatchRating;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;
 import dd.kms.zenodot.settings.ParserSettings;
+import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -20,7 +24,7 @@ public abstract class AbstractInputTextField<T> extends JTextField
 	private final InspectionContext		inspectionContext;
 
 	private Consumer<T>					evaluationResultConsumer	= result -> {};
-	private Consumer<ParseException>	exceptionConsumer			= e -> {};
+	private Consumer<Throwable>			exceptionConsumer			= e -> {};
 
 	AbstractInputTextField(InspectionContext inspectionContext) {
 		this.inspectionContext = inspectionContext;
@@ -28,15 +32,16 @@ public abstract class AbstractInputTextField<T> extends JTextField
 		KeySettings keySettings = inspectionContext.getSettings().getKeySettings();
 		CodeCompletionDecorators.decorate(
 			this,
-			this::suggestCodeCompletions,
+			this::provideRatedSuggestions,
 			keySettings.getCodeCompletionKey(),
 			this::getExecutableArgumentInfo,
 			keySettings.getShowMethodArgumentsKey(),
-			this::consumeText
+			this::consumeText,
+			this::consumeException
 		);
 	}
 
-	abstract List<CompletionSuggestion> suggestCodeCompletions(String text, int caretPosition) throws ParseException;
+	abstract Map<CompletionSuggestion, Integer> provideRatedSuggestions(String text, int caretPosition) throws ParseException;
 	abstract Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String text, int caretPosition) throws ParseException;
 	abstract T evaluate(String text) throws ParseException;
 
@@ -44,7 +49,7 @@ public abstract class AbstractInputTextField<T> extends JTextField
 		this.evaluationResultConsumer = evaluationResultConsumer;
 	}
 
-	public void setExceptionConsumer(Consumer<ParseException> exceptionConsumer) {
+	public void setExceptionConsumer(Consumer<Throwable> exceptionConsumer) {
 		this.exceptionConsumer = exceptionConsumer;
 	}
 
@@ -64,9 +69,13 @@ public abstract class AbstractInputTextField<T> extends JTextField
 		try {
 			T evaluationResult = evaluate(text);
 			evaluationResultConsumer.accept(evaluationResult);
-		} catch (ParseException e) {
-			exceptionConsumer.accept(e);
+		} catch (Throwable t) {
+			consumeException(t);
 		}
+	}
+
+	private void consumeException(Throwable t) {
+		exceptionConsumer.accept(t);
 	}
 
 	private class ParserVerifier extends InputVerifier

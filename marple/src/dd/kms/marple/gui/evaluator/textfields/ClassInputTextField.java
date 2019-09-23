@@ -1,16 +1,22 @@
 package dd.kms.marple.gui.evaluator.textfields;
 
+import com.google.common.collect.Maps;
 import dd.kms.marple.InspectionContext;
 import dd.kms.zenodot.ClassParser;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.Parsers;
+import dd.kms.zenodot.matching.MatchRating;
 import dd.kms.zenodot.matching.StringMatch;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;
 import dd.kms.zenodot.utils.wrappers.ClassInfo;
+import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ClassInputTextField extends AbstractInputTextField<ClassInfo>
 {
@@ -19,14 +25,10 @@ public class ClassInputTextField extends AbstractInputTextField<ClassInfo>
 	}
 
 	@Override
-	List<CompletionSuggestion> suggestCodeCompletions(String text, int caretPosition) throws ParseException {
+	Map<CompletionSuggestion, Integer> provideRatedSuggestions(String text, int caretPosition) throws ParseException {
 		ClassParser parser = createParser(text);
 		Map<CompletionSuggestion, StringMatch> ratedSuggestions = parser.suggestCodeCompletion(caretPosition);
-		List<CompletionSuggestion> suggestions = new ArrayList<>(ratedSuggestions.keySet());
-		suggestions.removeIf(suggestion -> ratedSuggestions.get(suggestion) == StringMatch.NONE);
-		suggestions.sort(Comparator.comparing(CompletionSuggestion::toString));
-		suggestions.sort(Comparator.comparing(ratedSuggestions::get));
-		return suggestions;
+		return Ratings.filterAndTransformStringMatches(ratedSuggestions);
 	}
 
 	@Override

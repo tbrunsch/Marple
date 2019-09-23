@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
+import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -81,6 +82,10 @@ public class KeyRepresentation
 
 	public boolean matches(KeyRepresentation expectedKey) {
 		return expectedKey != null && keyCode == expectedKey.keyCode && modifiers == expectedKey.modifiers;
+	}
+
+	public KeyStroke asKeyStroke() {
+		return KeyStroke.getKeyStroke(keyCode, modifiers);
 	}
 
 	@Override

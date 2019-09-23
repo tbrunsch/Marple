@@ -205,7 +205,7 @@ public class IterableView extends JPanel implements ObjectView
 			}
 		}
 
-		void setExceptionConsumer(Consumer<ParseException> exceptionConsumer) {
+		void setExceptionConsumer(Consumer<Throwable> exceptionConsumer) {
 			expressionTF.setExceptionConsumer(exceptionConsumer);
 		}
 
@@ -270,10 +270,8 @@ public class IterableView extends JPanel implements ObjectView
 			setBorder(BorderFactory.createTitledBorder("Result"));
 		}
 
-		void displayException(String expression, Exception e) {
-			String error = e instanceof ParseException
-							? ExceptionFormatter.formatParseException(expression, (ParseException) e)
-							: ExceptionFormatter.formatException(e, true);
+		void displayException(String expression, Throwable t) {
+			String error = ExceptionFormatter.formatParseException(expression, t);
 			JLabel exceptionLabel = new JLabel(error);
 			CodeCompletionDecorators.configureExceptionComponent(exceptionLabel);
 			displayComponent(exceptionLabel);

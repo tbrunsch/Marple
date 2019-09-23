@@ -25,7 +25,10 @@ public class AccessModifierInput extends JPanel
 		super(new GridBagLayout());
 
 		add(slider,					new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
-		add(accessModifierLabel,	new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, CENTER, NONE, new Insets(3, 5, 10, 5), 0, 0));
+		add(accessModifierLabel,	new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(3, 5, 10, 5), 0, 0));
+
+		accessModifierLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		accessModifierLabel.setOpaque(true);
 
 		updateLabelText();
 
@@ -37,7 +40,9 @@ public class AccessModifierInput extends JPanel
 	}
 
 	private void updateLabelText() {
-		accessModifierLabel.setText(getAccessModifier().toString());
+		AccessModifier accessModifier = getAccessModifier();
+		accessModifierLabel.setText(accessModifier.toString());
+		accessModifierLabel.setBackground(GuiCommons.getAccessModifierColor(accessModifier));
 	}
 
 	public AccessModifier getAccessModifier() {

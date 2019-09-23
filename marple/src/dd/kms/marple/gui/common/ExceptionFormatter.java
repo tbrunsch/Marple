@@ -4,15 +4,14 @@ import dd.kms.zenodot.ParseException;
 
 public class ExceptionFormatter
 {
-
-	public static String formatParseException(String expression, ParseException e) {
+	public static String formatParseException(String expression, Throwable t) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("<html><p><b>").append(e.getMessage().replace("\n", "<br/>")).append("</b></p>");
-		Throwable cause = e.getCause();
+		builder.append("<html><p><b>").append(t.getMessage().replace("\n", "<br/>")).append("</b></p>");
+		Throwable cause = t.getCause();
 		if (cause != null) {
 			builder.append("<br/>").append(formatException(cause, false));
 		}
-		int position = e.getPosition();
+		int position = t instanceof ParseException ? ((ParseException) t).getPosition() : -1;
 		if (0 <= position && position < expression.length()) {
 			builder.append("<br/>").append(expression.substring(0, position)).append('^').append(expression.substring(position));
 		}
@@ -20,17 +19,17 @@ public class ExceptionFormatter
 		return builder.toString();
 	}
 
-	public static String formatException(Throwable e, boolean encloseInHtml) {
+	public static String formatException(Throwable t, boolean encloseInHtml) {
 		StringBuilder builder = new StringBuilder();
 		if (encloseInHtml) {
 			builder.append("<html>");
 		}
-		builder.append("<p>").append(e.getClass().getSimpleName());
-		String message = e.getMessage();
+		builder.append("<p>").append(t.getClass().getSimpleName());
+		String message = t.getMessage();
 		if (message != null) {
 			builder.append(": ").append(message);
 		}
-		Throwable cause = e.getCause();
+		Throwable cause = t.getCause();
 		if (cause != null) {
 			builder.append("<br/>  Cause: ").append(formatException(cause, false));
 		}
