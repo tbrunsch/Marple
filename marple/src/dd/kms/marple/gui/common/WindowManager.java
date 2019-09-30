@@ -55,6 +55,7 @@ public class WindowManager
 				if (window == null) {
 					return null;
 				}
+				window.setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
 				window.addWindowListener(new WindowAdapter() {
 					@Override
 					public void windowClosing(WindowEvent e) {

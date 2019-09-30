@@ -54,6 +54,8 @@ public class TestFrame extends JFrame
 
 	private final JPopupMenuButton		popupMenuButton		= new JPopupMenuButton("I create a popup");
 
+	private final JButton				openDialogButton	= new JButton("Open dialog");
+
 	private final JButton				closeButton			= new JButton("Close");
 
 	private final TestData				demoData			= new TestData();
@@ -77,6 +79,7 @@ public class TestFrame extends JFrame
 		mainPanel.add(splitPane,		new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 		mainPanel.add(comboBox,			new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 		mainPanel.add(popupMenuButton,	new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		mainPanel.add(openDialogButton,	new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 		mainPanel.add(closeButton,		new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
 		add(labelPanel, label1, label2, label3);
@@ -122,6 +125,11 @@ public class TestFrame extends JFrame
 		comboBoxModel.addElement(new TestTableModelRow("Key 9", 9, 9.0));
 		comboBox.setModel(comboBoxModel);
 
+		openDialogButton.addActionListener(e -> {
+			Dialog dialog = new ModalTestDialog(this);
+			dialog.pack();
+			dialog.setVisible(true);
+		});
 		closeButton.addActionListener(e -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
 	}
 
