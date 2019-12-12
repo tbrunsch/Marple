@@ -50,8 +50,11 @@ public class WindowManager
 
 	public static <T extends Window> T getWindow(Object identifier, Supplier<T> windowCreator, Runnable windowDestructor) {
 		synchronized (LOCK) {
-			if (!MANAGED_WINDOWS.containsKey(identifier)) {
-				T window = windowCreator.get();
+			final T window;
+			if (MANAGED_WINDOWS.containsKey(identifier)) {
+				window = (T) MANAGED_WINDOWS.get(identifier);
+			} else {
+				window = windowCreator.get();
 				if (window == null) {
 					return null;
 				}
@@ -73,11 +76,16 @@ public class WindowManager
 						window.setLocation(location);
 					}
 					window.setMinimumSize(window.getSize());
-					window.setVisible(true);
-					window.toFront();
 				});
 			}
-			return (T) MANAGED_WINDOWS.get(identifier);
+			SwingUtilities.invokeLater(() -> {
+				if (window instanceof Frame) {
+					((Frame) window).setExtendedState(Frame.NORMAL);
+				}
+				window.setVisible(true);
+				window.toFront();
+			});
+			return window;
 		}
 	}
 
