@@ -162,6 +162,9 @@ public class VariablePanel extends JPanel
 	}
 
 	private void deleteSelectedVariables() {
+		if (table.isEditing()) {
+			table.getCellEditor().cancelCellEditing();
+		}
 		int[] rowIndicesToDelete = table.getSelectedRows();
 		for (int i = rowIndicesToDelete.length - 1; i >= 0; i--) {
 			int index = rowIndicesToDelete[i];
@@ -179,7 +182,8 @@ public class VariablePanel extends JPanel
 		if (!acceptVariableName(oldVariable, name)) {
 			return;
 		}
-		Variable newVariable = ParserSettingsUtils.createVariable(name, oldVariable.getValue(), oldVariable.isUseHardReference());
+		ObjectInfo oldValue = oldVariable.getValue();
+		Variable newVariable = ParserSettingsUtils.createVariable(name, oldValue.getObject(), oldValue.getDeclaredType(), oldVariable.isUseHardReference());
 		variables.set(elementIndex, newVariable);
 	}
 
@@ -201,7 +205,8 @@ public class VariablePanel extends JPanel
 		}
 		boolean useHardReference = (Boolean) useHardReferenceAsObject;
 		Variable oldVariable = variables.get(elementIndex);
-		Variable newVariable = ParserSettingsUtils.createVariable(oldVariable.getName(), oldVariable.getValue(), useHardReference);
+		ObjectInfo oldValue = oldVariable.getValue();
+		Variable newVariable = ParserSettingsUtils.createVariable(oldVariable.getName(), oldValue.getObject(), oldValue.getDeclaredType(), useHardReference);
 		variables.set(elementIndex, newVariable);
 	}
 

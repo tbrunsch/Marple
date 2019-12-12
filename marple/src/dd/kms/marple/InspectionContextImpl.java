@@ -94,12 +94,12 @@ class InspectionContextImpl implements InspectionContext
 	}
 
 	@Override
-	public InspectionAction createSearchInstancesFromHereAction(Object root) {
+	public InspectionAction createSearchInstancesFromHereAction(ObjectInfo root) {
 		return new SearchInstancesFromHereAction(this, root);
 	}
 
 	@Override
-	public InspectionAction createSearchInstanceAction(Object target) {
+	public InspectionAction createSearchInstanceAction(ObjectInfo target) {
 		return new SearchInstanceAction(this, target);
 	}
 

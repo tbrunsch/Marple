@@ -23,8 +23,8 @@ public interface InspectionContext
 	InspectionAction createEvaluateExpressionAction(String expression, ObjectInfo thisValue);
 	InspectionAction createEvaluateExpressionAction(String expression, ObjectInfo thisValue, int caretPosition);
 	InspectionAction createEvaluateAsThisAction(ObjectInfo thisValue);
-	InspectionAction createSearchInstancesFromHereAction(Object root);
-	InspectionAction createSearchInstanceAction(Object target);
+	InspectionAction createSearchInstancesFromHereAction(ObjectInfo root);
+	InspectionAction createSearchInstanceAction(ObjectInfo target);
 	InspectionAction createDebugSupportAction(ObjectInfo thisValue);
 	<T> InspectionAction createSnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction);
 

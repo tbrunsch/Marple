@@ -98,8 +98,8 @@ public class ActionProviderBuilder
 			ObjectInfo expressionContext = evaluationData.getExpressionContext();
 			actionsBuilder.add(inspectionContext.createEvaluateExpressionAction(expression, expressionContext));
 		}
-		actionsBuilder.add(inspectionContext.createSearchInstancesFromHereAction(object));
-		actionsBuilder.add(inspectionContext.createSearchInstanceAction(object));
+		actionsBuilder.add(inspectionContext.createSearchInstancesFromHereAction(objectInfo));
+		actionsBuilder.add(inspectionContext.createSearchInstanceAction(objectInfo));
 		actionsBuilder.add(new CopyStringRepresentationAction(object));
 		actionsBuilder.add(inspectionContext.createDebugSupportAction(objectInfo));
 		return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
