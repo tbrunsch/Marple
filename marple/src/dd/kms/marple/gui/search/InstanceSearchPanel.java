@@ -7,9 +7,12 @@ import dd.kms.marple.gui.evaluator.textfields.CompiledExpressionInputTextField;
 import dd.kms.marple.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.instancesearch.InstancePath;
 import dd.kms.marple.instancesearch.InstancePathFinder;
+import dd.kms.marple.instancesearch.settings.SearchSettings;
+import dd.kms.marple.instancesearch.settings.SearchSettingsBuilders;
 import dd.kms.zenodot.CompiledExpression;
 import dd.kms.zenodot.utils.wrappers.ClassInfo;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -284,7 +287,6 @@ class InstanceSearchPanel extends JPanel
 			showError("Could not parse target class.");
 			return;
 		}
-		Class<?> targetClass = optionalTargetClass.get();
 
 		Optional<Predicate<Object>> optionalTargetFilter = getTargetFilter();
 		if (!optionalTargetFilter.isPresent()) {
@@ -293,10 +295,14 @@ class InstanceSearchPanel extends JPanel
 		}
 		Predicate<Object> targetFilter = optionalTargetFilter.get();
 
-		boolean extendPathsBeyondAcceptedInstances = targetAllInstancesRB.isSelected();
+		SearchSettings settings = SearchSettingsBuilders.create()
+			.extendPathsBeyondAcceptedInstances(targetAllInstancesRB.isSelected())
+			.addClassesToExclude(getClass(), ObjectInfo.class)
+			.addExclusionFilter(clazz -> "sun.awt.AppContext".equals(clazz.getName()))
+			.build();
 
 		instancePathFinder.reset();
-		new Thread(() -> instancePathFinder.search(sourcePath, targetClass, targetFilter, extendPathsBeyondAcceptedInstances)).start();
+		new Thread(() -> instancePathFinder.search(sourcePath, targetFilter, settings)).start();
 		new Thread(this::updateDisplayWhileSearching).start();
 	}
 

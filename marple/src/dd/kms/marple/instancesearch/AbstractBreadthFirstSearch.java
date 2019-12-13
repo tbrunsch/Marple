@@ -13,11 +13,17 @@ import java.util.Set;
  */
 abstract class AbstractBreadthFirstSearch<N, P>
 {
+	private final int		maxSearchDepth;
+
 	private final Set<N>	visitedNodes		= Sets.newHashSet();
 	private final Queue<P>	pathInfosToConsider	= Lists.newLinkedList();
 
 	// redundant variable to avoid concurrency problems
 	private int				numVisitedNodes;
+
+	AbstractBreadthFirstSearch(int maxSearchDepth) {
+		this.maxSearchDepth = maxSearchDepth;
+	}
 
 	abstract boolean isStopExecution();
 	abstract Iterable<P> getChildren(P parentPathInfo);
@@ -29,12 +35,20 @@ abstract class AbstractBreadthFirstSearch<N, P>
 		pathInfosToConsider.clear();
 		numVisitedNodes = 0;
 
+		int curDepth = 0;
+		int countUntilHigherDepth = 1;
 		onDiscoveredEdge(null, startPathInfo);
-		while (!pathInfosToConsider.isEmpty() && !isStopExecution()) {
+		while (!pathInfosToConsider.isEmpty() && !isStopExecution() && curDepth < maxSearchDepth) {
 			P pathInfo = pathInfosToConsider.poll();
 			Iterable<P> childPathInfos = getChildren(pathInfo);
 			for (P childPathInfo : childPathInfos) {
 				onDiscoveredEdge(pathInfo, childPathInfo);
+			}
+
+			countUntilHigherDepth--;
+			if (countUntilHigherDepth == 0) {
+				countUntilHigherDepth = pathInfosToConsider.size();
+				curDepth++;
 			}
 		}
 		return visitedNodes;

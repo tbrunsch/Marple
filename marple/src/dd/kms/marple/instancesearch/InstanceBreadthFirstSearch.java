@@ -4,28 +4,34 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.instancesearch.elementcollectors.*;
+import dd.kms.marple.instancesearch.settings.SearchSettings;
 import dd.kms.zenodot.common.FieldScanner;
 
 import java.lang.reflect.Field;
-import java.util.*;
-import java.util.function.*;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 class InstanceBreadthFirstSearch extends AbstractBreadthFirstSearch<Integer, InstancePath>
 {
-	private final Set<Class<?>>				classesToExcludeFromSearch;
 	private final Predicate<Object>			searchFilter;
 	private final Consumer<InstancePath>	pathConsumer;
 	private final BooleanSupplier			stopExecutionFlagSupplier;
-	private final boolean					extendPathsBeyondAcceptedInstances;
+	private final SearchSettings			settings;
 
 	private final Function<Object, String>	toStringFunction;
 
-	InstanceBreadthFirstSearch(Set<Class<?>> classesToExcludeFromSearch, Predicate<Object> searchFilter, Consumer<InstancePath> pathConsumer, BooleanSupplier stopExecutionFlagSupplier, boolean extendPathsBeyondAcceptedInstances, Function<Object, String> toStringFunction) {
-		this.classesToExcludeFromSearch = classesToExcludeFromSearch;
+	InstanceBreadthFirstSearch(Predicate<Object> searchFilter, Consumer<InstancePath> pathConsumer, BooleanSupplier stopExecutionFlagSupplier, SearchSettings settings, Function<Object, String> toStringFunction) {
+		super(settings.getEffectiveMaxSearchDepth());
 		this.searchFilter = searchFilter;
 		this.pathConsumer = pathConsumer;
 		this.stopExecutionFlagSupplier = stopExecutionFlagSupplier;
-		this.extendPathsBeyondAcceptedInstances = extendPathsBeyondAcceptedInstances;
+		this.settings = settings;
 		this.toStringFunction = toStringFunction;
 	}
 
@@ -40,20 +46,22 @@ class InstanceBreadthFirstSearch extends AbstractBreadthFirstSearch<Integer, Ins
 		if (!ReflectionUtils.isObjectInspectable(object) || object == this || object instanceof InstancePath) {
 			return ImmutableList.of();
 		}
-		if (object.getClass().isArray()) {
-			return ArrayElementCollector.collect(object, parentPath);
-		}
-		if (object instanceof List<?>) {
-			return ListElementCollector.collect((List<?>) object, parentPath);
-		}
-		if (object instanceof Iterable<?>) {
-			return IterableElementCollector.collect((Iterable<?>) object, parentPath);
-		}
-		if (object instanceof Map<?, ?>) {
-			return MapElementCollector.collect((Map<?, ?>) object, parentPath, toStringFunction);
-		}
-		if (object instanceof Multimap<?, ?>) {
-			return MultimapElementCollector.collect((Multimap<?, ?>) object, parentPath, toStringFunction);
+		if (!settings.isSearchOnlyPureFields()) {
+			if (object.getClass().isArray()) {
+				return ArrayElementCollector.collect(object, parentPath);
+			}
+			if (object instanceof List<?>) {
+				return ListElementCollector.collect((List<?>) object, parentPath);
+			}
+			if (object instanceof Iterable<?>) {
+				return IterableElementCollector.collect((Iterable<?>) object, parentPath);
+			}
+			if (object instanceof Map<?, ?>) {
+				return MapElementCollector.collect((Map<?, ?>) object, parentPath, toStringFunction);
+			}
+			if (object instanceof Multimap<?, ?>) {
+				return MultimapElementCollector.collect((Multimap<?, ?>) object, parentPath, toStringFunction);
+			}
 		}
 
 		/*
@@ -62,6 +70,9 @@ class InstanceBreadthFirstSearch extends AbstractBreadthFirstSearch<Integer, Ins
 		List<Field> fields = new FieldScanner().getFields(object.getClass(), false);
 		List<InstancePath> children = new ArrayList<>();
 		for (Field field : fields) {
+			if (settings.isSearchOnlyNonStaticFields() && Modifier.isStatic(field.getModifiers())) {
+				continue;
+			}
 			try {
 				field.setAccessible(true);
 				InstancePath child = new InstancePath(field.get(object), "." + field.getName(), parentPath);
@@ -78,16 +89,13 @@ class InstanceBreadthFirstSearch extends AbstractBreadthFirstSearch<Integer, Ins
 		Object lastNodeObject = path.getLastNodeObject();
 		if (searchFilter.test(lastNodeObject)) {
 			pathConsumer.accept(path);
-			return extendPathsBeyondAcceptedInstances;
+			return settings.isExtendPathsBeyondAcceptedInstances();
 		}
 		if (lastNodeObject == null) {
 			return false;
 		}
 		Class<?> childObjectClass = lastNodeObject.getClass();
-		if (classesToExcludeFromSearch.contains(childObjectClass)) {
-			return false;
-		}
-		return true;
+		return settings.getClassFilter().test(childObjectClass);
 	}
 
 	@Override
