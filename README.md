@@ -296,4 +296,6 @@ https://github.com/google/guava
 Guava is licensed under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
 ## Zenodot
+https://github.com/tbrunsch/Zenodot
+
 Zenodot is licensed under the [MIT License](https://opensource.org/licenses/MIT).
