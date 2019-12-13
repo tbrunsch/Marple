@@ -4,10 +4,13 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.instancesearch.settings.SearchSettings;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class InstancePathFinder
 {
@@ -17,11 +20,15 @@ public class InstancePathFinder
 	private final Object					lock				= new Object();
 
 	private ProcessingState					processingState		= ProcessingState.NOT_RUNNING;
+	private int								pathCounter;
 
 	private InstanceBreadthFirstSearch		instanceSearch = null;
 
 	public InstancePathFinder(Consumer<InstancePath> pathConsumer) {
-		this.pathConsumer = pathConsumer;
+		this.pathConsumer = path -> {
+			pathCounter++;
+			pathConsumer.accept(path);
+		};
 	}
 
 	public void setInspectionContext(InspectionContext inspectionContext) {
@@ -41,6 +48,7 @@ public class InstancePathFinder
 
 			changeProcessingState(ProcessingState.SEARCHING);
 			instanceSearch = new InstanceBreadthFirstSearch(targetFilter, pathConsumer, stopFlagSupplier, settings, this::getDisplayString);
+			pathCounter = 0;
 			instanceSearch.search(sourcePath);
 		} finally {
 			changeProcessingState(ProcessingState.FINISHED);
@@ -54,12 +62,24 @@ public class InstancePathFinder
 
 	public String getStatusText() {
 		synchronized (lock) {
-			String status = processingState.toString();
+			StringBuilder statusBuilder = new StringBuilder(processingState.toString());
+			List<String> additionalInformation = new ArrayList<>();
 			if (instanceSearch != null) {
 				int numVisitedObjects = instanceSearch.getNumberOfVisitedNodes();
-				status += (" (" + numVisitedObjects + " objects visited)");
+				additionalInformation.add(numVisitedObjects + " objects visited");
 			}
-			return status;
+			if (processingState != ProcessingState.NOT_RUNNING) {
+				String pathSingularPlural = pathCounter == 1 ? "path" : "paths";
+				additionalInformation.add(pathCounter + " " + pathSingularPlural + " found");
+			}
+			if (additionalInformation.isEmpty()) {
+				return statusBuilder.toString();
+			}
+			return statusBuilder
+				.append(" (")
+				.append(additionalInformation.stream().collect(Collectors.joining(", ")))
+				.append(")")
+				.toString();
 		}
 	}
 

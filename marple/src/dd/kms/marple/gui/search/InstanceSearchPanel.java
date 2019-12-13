@@ -44,6 +44,11 @@ class InstanceSearchPanel extends JPanel
 	private final JCheckBox							targetFilterCB				= new JCheckBox("filter:");
 	private final CompiledExpressionInputTextField	targetFilterTF;
 	private final JPanel							targetFilterPanel;
+	private final JLabel							optionsLabel				= new JLabel("Options:");
+	private final JCheckBox							onlyNonStaticFieldsCB		= new JCheckBox("non-static fields only");
+	private final JCheckBox							onlyPureFieldsCB			= new JCheckBox("pure fields only");
+	private final JCheckBox							limitSearchDepthCB			= new JCheckBox("limit search depth:");
+	private final JTextField						maxSearchDepthTF			= new JTextField();
 
 	private final ButtonGroup			targetButtonGroup			= new ButtonGroup();
 
@@ -112,10 +117,29 @@ class InstanceSearchPanel extends JPanel
 		configurationPanel.add(targetFilterCB,				new GridBagConstraints(1, yPos,   1, 1, 0.0, 0.0, EAST, NONE, DEFAULT_INSETS, 0, 0));
 		configurationPanel.add(targetFilterPanel,			new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
+		configurationPanel.add(optionsLabel,				new GridBagConstraints(0, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+		configurationPanel.add(onlyNonStaticFieldsCB,		new GridBagConstraints(1, yPos++, REMAINDER, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+
+		configurationPanel.add(onlyPureFieldsCB,			new GridBagConstraints(1, yPos++, REMAINDER, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+
+		// Hack: We need this panel to prevent the textfield from collapsing
+		JPanel maxSearchDepthPanel = new JPanel(new GridBagLayout());
+		maxSearchDepthPanel.add(maxSearchDepthTF,			new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, WEST, NONE, new Insets(0, 0, 0, 0), 0, 0));
+
+		configurationPanel.add(limitSearchDepthCB,			new GridBagConstraints(1, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+		configurationPanel.add(maxSearchDepthPanel,			new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+
 		targetButtonGroup.add(targetAllInstancesRB);
 		targetButtonGroup.add(targetConcreteInstanceRB);
 
 		targetConcreteInstanceRB.setSelected(true);
+
+		onlyNonStaticFieldsCB.setToolTipText("If selected, then static fields will be ignored for the search");
+		onlyPureFieldsCB.setToolTipText("If selected, then only field values will be considered. The content of arrays, collections, maps etc. will be ignored.");
+		maxSearchDepthTF.setColumns(3);
+
+		SearchSettings defaultSettings = SearchSettingsBuilders.create().build();
+		setSearchSettings(defaultSettings);
 	}
 
 	private void setupResultPanel() {
@@ -154,6 +178,7 @@ class InstanceSearchPanel extends JPanel
 				onTargetFilterSpecified();
 			}
 		});
+		limitSearchDepthCB.addItemListener(e -> maxSearchDepthTF.setEnabled(limitSearchDepthCB.isSelected()));
 	}
 
 	void setRoot(Object root) {
@@ -176,6 +201,34 @@ class InstanceSearchPanel extends JPanel
 		boolean searching = processingState != InstancePathFinder.ProcessingState.NOT_RUNNING && processingState != InstancePathFinder.ProcessingState.FINISHED;
 		searchButton.setEnabled(!searching && isRequiredInputSpecified());
 		stopSearchButton.setEnabled(!searchButton.isEnabled());
+	}
+
+	private void setSearchSettings(SearchSettings settings) {
+		onlyNonStaticFieldsCB.setSelected(settings.isSearchOnlyNonStaticFields());
+		onlyPureFieldsCB.setSelected(settings.isSearchOnlyPureFields());
+		limitSearchDepthCB.setSelected(settings.isLimitSearchDepth());
+		maxSearchDepthTF.setText(Integer.toString(settings.getMaximumSearchDepth()));
+		maxSearchDepthTF.setEnabled(settings.isLimitSearchDepth());
+	}
+
+	private Optional<SearchSettings> getSearchSettings() {
+		String maxSearchDepthText = maxSearchDepthTF.getText();
+		int maxSearchDepth = 0;
+		try {
+			maxSearchDepth = Integer.parseInt(maxSearchDepthText);
+		} catch (NumberFormatException e) {
+			return Optional.empty();
+		}
+		SearchSettings settings = SearchSettingsBuilders.create()
+			.extendPathsBeyondAcceptedInstances(targetAllInstancesRB.isSelected())
+			.searchOnlyNonStaticFields(onlyNonStaticFieldsCB.isSelected())
+			.searchOnlyPureFields(onlyPureFieldsCB.isSelected())
+			.limitSearchDepth(limitSearchDepthCB.isSelected())
+			.maximumSearchDepth(maxSearchDepth)
+			.addClassesToExclude(getClass(), ObjectInfo.class)
+			.addExclusionFilter(clazz -> "sun.awt.AppContext".equals(clazz.getName()))
+			.build();
+		return Optional.of(settings);
 	}
 
 	private Optional<Class<?>> getTargetClass() {
@@ -225,6 +278,9 @@ class InstanceSearchPanel extends JPanel
 
 	private boolean isRequiredInputSpecified() {
 		if (root == null) {
+			return false;
+		}
+		if (!getSearchSettings().isPresent()) {
 			return false;
 		}
 		if (targetAllInstancesRB.isSelected()) {
@@ -295,14 +351,14 @@ class InstanceSearchPanel extends JPanel
 		}
 		Predicate<Object> targetFilter = optionalTargetFilter.get();
 
-		SearchSettings settings = SearchSettingsBuilders.create()
-			.extendPathsBeyondAcceptedInstances(targetAllInstancesRB.isSelected())
-			.addClassesToExclude(getClass(), ObjectInfo.class)
-			.addExclusionFilter(clazz -> "sun.awt.AppContext".equals(clazz.getName()))
-			.build();
+		Optional<SearchSettings> settings = getSearchSettings();
+		if (!settings.isPresent()) {
+			showError("Invalid search settings.");
+			return;
+		}
 
 		instancePathFinder.reset();
-		new Thread(() -> instancePathFinder.search(sourcePath, targetFilter, settings)).start();
+		new Thread(() -> instancePathFinder.search(sourcePath, targetFilter, settings.get())).start();
 		new Thread(this::updateDisplayWhileSearching).start();
 	}
 

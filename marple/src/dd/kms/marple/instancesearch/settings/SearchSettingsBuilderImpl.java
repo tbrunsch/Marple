@@ -13,7 +13,7 @@ class SearchSettingsBuilderImpl implements SearchSettingsBuilder
 	private boolean						searchOnlyNonStaticFields			= true;
 	private boolean						searchOnlyPureFields				= false;
 	private List<Predicate<Class<?>>>	exclusionFilters					= new ArrayList<>();
-	private boolean						limitSearchDepth					= false;
+	private boolean						limitSearchDepth					= true;
 	private int							maximumSearchDepth					= 10;
 
 	@Override
