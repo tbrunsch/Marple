@@ -11,17 +11,17 @@ import static java.awt.GridBagConstraints.*;
 
 public class QuickHelpPanel extends JPanel
 {
-	public static final String	TITLE						= "Quick Help";
+	public static final String	TITLE						= "Marple Quick Help";
 
 	private static final String INSPECTION_TITLE			= "Inspect";
-	private static final String INSPECTION_DESCRIPTION		= "Opens the inspection dialog for the component under the mouse";
-	private static final String INSPECTION_INFO				= "Use this feature to analyze your GUI and any data that is connected to your GUI.";
+	private static final String INSPECTION_DESCRIPTION		= "Open the inspection dialog for the component under the mouse";
+	private static final String INSPECTION_INFO				= "Use this feature to analyze your GUI and any data that is connected to it.";
 	private static final String EVALUATION_TITLE			= "Evaluate";
 	private static final String EVALUATION_DESCRIPTION		= "Evaluate an expression";
 	private static final String EVALUATION_INFO				= "Use the literal \"this\" to refer to the component under the mouse.";
 	private static final String FIND_INSTANCES_TITLE		= "Find Instances";
 	private static final String FIND_INSTANCES_DESCRIPTION	= "Find a concrete instance or all instances of a class that match a certain filter";
-	private static final String FIND_INSTANCES_INFO			= "The search starts a the component under the mouse.";
+	private static final String FIND_INSTANCES_INFO			= "The search starts at the component under the mouse.";
 	private static final String DEBUG_SUPPORT_TITLE			= "Debug Support";
 	private static final String DEBUG_SUPPORT_DESCRIPTION	= "Open the debug support dialog";
 	private static final String DEBUG_SUPPORT_INFO			= "Use this feature for exchanging data with your debugger or to trigger breakpoints.";
