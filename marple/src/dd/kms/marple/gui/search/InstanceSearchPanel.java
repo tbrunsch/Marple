@@ -50,27 +50,27 @@ class InstanceSearchPanel extends JPanel
 	private final JCheckBox							limitSearchDepthCB			= new JCheckBox("limit search depth:");
 	private final JTextField						maxSearchDepthTF			= new JTextField();
 
-	private final ButtonGroup			targetButtonGroup			= new ButtonGroup();
+	private final ButtonGroup						targetButtonGroup			= new ButtonGroup();
 
-	private final JPanel				resultPanel					= new JPanel(new GridBagLayout());
-	private final JLabel				statusLabel					= new JLabel("Status:");
-	private final JTextField			statusTF					= new JTextField();
-	private final JTree					instanceSearchTree			= new JTree((TreeNode) null);
-	private final JScrollPane			instanceSearchScrollPane	= new JScrollPane(instanceSearchTree);
-	private final JLabel				fullPathLabel				= new JLabel();
+	private final JPanel							resultPanel					= new JPanel(new GridBagLayout());
+	private final JLabel							statusLabel					= new JLabel("Status:");
+	private final JTextField						statusTF					= new JTextField();
+	private final JTree								instanceSearchTree			= new JTree((TreeNode) null);
+	private final JScrollPane						instanceSearchScrollPane	= new JScrollPane(instanceSearchTree);
+	private final JLabel							fullPathLabel				= new JLabel();
 
-	private final JPanel				controlPanel				= new JPanel(new GridBagLayout());
-	private final JButton				searchButton				= new JButton("Find");
-	private final JButton				stopSearchButton			= new JButton("Stop");
+	private final JPanel							controlPanel				= new JPanel(new GridBagLayout());
+	private final JButton							searchButton				= new JButton("Find");
+	private final JButton							stopSearchButton			= new JButton("Stop");
 
-	private final InspectionContext		inspectionContext;
+	private final InspectionContext					inspectionContext;
 
-	private Object						root;
-	private Object						target;
+	private Object									root;
+	private Object									target;
 
-	private final InstancePathFinder	instancePathFinder;
+	private final InstancePathFinder				instancePathFinder;
 
-	private final Map<InstancePath, SearchNode>	instanceSearchNodes	= new HashMap<>();
+	private final Map<InstancePath, SearchNode>		instanceSearchNodes			= new HashMap<>();
 
 	InstanceSearchPanel(InspectionContext inspectionContext) {
 		super(new GridBagLayout());
@@ -200,7 +200,7 @@ class InstanceSearchPanel extends JPanel
 		InstancePathFinder.ProcessingState processingState = instancePathFinder.getProcessingState();
 		boolean searching = processingState != InstancePathFinder.ProcessingState.NOT_RUNNING && processingState != InstancePathFinder.ProcessingState.FINISHED;
 		searchButton.setEnabled(!searching && isRequiredInputSpecified());
-		stopSearchButton.setEnabled(!searchButton.isEnabled());
+		stopSearchButton.setEnabled(searching);
 	}
 
 	private void setSearchSettings(SearchSettings settings) {
