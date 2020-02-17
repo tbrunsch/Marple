@@ -6,13 +6,21 @@ import dd.kms.marple.gui.evaluator.EvaluationSettingsPane;
 
 import javax.swing.*;
 import java.awt.*;
+import java.net.URL;
 
 import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_DISTANCE;
 import static java.awt.GridBagConstraints.*;
 
 public class EvaluationTextFieldPanel extends JPanel
 {
-	private final JButton	settingsButton	= new JButton("...");
+	private static final Icon	SETTINGS_ICON;
+
+	static {
+		URL imageUrl = EvaluationTextFieldPanel.class.getResource("/dd/kms/marple/settings.png");
+		SETTINGS_ICON = new ImageIcon(imageUrl);
+	}
+
+	private final JButton	settingsButton	= new JButton(SETTINGS_ICON);
 
 	private final InspectionContext	context;
 
@@ -23,8 +31,6 @@ public class EvaluationTextFieldPanel extends JPanel
 
 		add(inputTextField,	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(0, 0, 0, DEFAULT_DISTANCE/2), 0, 0));
 		add(settingsButton,	new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, EAST, NONE, new Insets(0, DEFAULT_DISTANCE/2, 0, 0), 0, 0));
-
-		settingsButton.setPreferredSize(new Dimension(settingsButton.getPreferredSize().width, inputTextField.getPreferredSize().height));
 
 		settingsButton.addActionListener(e -> openSettingsDialog());
 	}
