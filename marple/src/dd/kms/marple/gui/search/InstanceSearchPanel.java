@@ -1,5 +1,6 @@
 package dd.kms.marple.gui.search;
 
+import com.google.common.base.Strings;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.evaluator.textfields.ClassInputTextField;
@@ -10,10 +11,12 @@ import dd.kms.marple.instancesearch.InstancePathFinder;
 import dd.kms.marple.instancesearch.settings.SearchSettings;
 import dd.kms.marple.instancesearch.settings.SearchSettingsBuilders;
 import dd.kms.zenodot.CompiledExpression;
+import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.utils.wrappers.ClassInfo;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.tree.DefaultTreeModel;
@@ -49,6 +52,7 @@ class InstanceSearchPanel extends JPanel
 	private final JCheckBox							onlyPureFieldsCB			= new JCheckBox("pure fields only");
 	private final JCheckBox							limitSearchDepthCB			= new JCheckBox("limit search depth:");
 	private final JTextField						maxSearchDepthTF			= new JTextField();
+	private final JLabel							errorLabel					= new JLabel();
 
 	private final ButtonGroup						targetButtonGroup			= new ButtonGroup();
 
@@ -129,6 +133,8 @@ class InstanceSearchPanel extends JPanel
 		configurationPanel.add(limitSearchDepthCB,			new GridBagConstraints(1, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 		configurationPanel.add(maxSearchDepthPanel,			new GridBagConstraints(2, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
+		configurationPanel.add(errorLabel,					new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 0.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
+
 		targetButtonGroup.add(targetAllInstancesRB);
 		targetButtonGroup.add(targetConcreteInstanceRB);
 
@@ -137,6 +143,8 @@ class InstanceSearchPanel extends JPanel
 		onlyNonStaticFieldsCB.setToolTipText("If selected, then static fields will be ignored for the search");
 		onlyPureFieldsCB.setToolTipText("If selected, then only field values will be considered. The content of arrays, collections, maps etc. will be ignored.");
 		maxSearchDepthTF.setColumns(3);
+
+		errorLabel.setForeground(Color.RED);
 
 		SearchSettings defaultSettings = SearchSettingsBuilders.create().build();
 		setSearchSettings(defaultSettings);
@@ -179,6 +187,7 @@ class InstanceSearchPanel extends JPanel
 			}
 		});
 		limitSearchDepthCB.addItemListener(e -> maxSearchDepthTF.setEnabled(limitSearchDepthCB.isSelected()));
+
 	}
 
 	void setRoot(Object root) {
@@ -211,61 +220,73 @@ class InstanceSearchPanel extends JPanel
 		maxSearchDepthTF.setEnabled(settings.isLimitSearchDepth());
 	}
 
-	private Optional<SearchSettings> getSearchSettings() {
-		String maxSearchDepthText = maxSearchDepthTF.getText();
+	private SearchSettings getSearchSettings() throws SettingsException {
+		boolean limitSearchDepth = limitSearchDepthCB.isSelected();
 		int maxSearchDepth = 0;
-		try {
-			maxSearchDepth = Integer.parseInt(maxSearchDepthText);
-		} catch (NumberFormatException e) {
-			return Optional.empty();
+		if (limitSearchDepth) {
+			String maxSearchDepthText = maxSearchDepthTF.getText();
+			try {
+				maxSearchDepth = Integer.parseInt(maxSearchDepthText);
+			} catch (NumberFormatException e) {
+				throw new SettingsException("Could not parse maximum search depth '" + maxSearchDepthText + "': " + e.getMessage());
+			}
+			if (maxSearchDepth < 0) {
+				throw new SettingsException("Maximum search depth must not be negative");
+			}
 		}
-		SearchSettings settings = SearchSettingsBuilders.create()
+		return SearchSettingsBuilders.create()
 			.extendPathsBeyondAcceptedInstances(targetAllInstancesRB.isSelected())
 			.searchOnlyNonStaticFields(onlyNonStaticFieldsCB.isSelected())
 			.searchOnlyPureFields(onlyPureFieldsCB.isSelected())
-			.limitSearchDepth(limitSearchDepthCB.isSelected())
+			.limitSearchDepth(limitSearchDepth)
 			.maximumSearchDepth(maxSearchDepth)
 			.addClassesToExclude(getClass(), ObjectInfo.class)
 			.addExclusionFilter(clazz -> "sun.awt.AppContext".equals(clazz.getName()))
 			.build();
-		return Optional.of(settings);
 	}
 
-	private Optional<Class<?>> getTargetClass() {
+	private Class<?> getTargetClass() throws SettingsException {
 		if (targetAllInstancesRB.isSelected()) {
+			String targetClassName = targetClassTF.getText();
+			if (Strings.isNullOrEmpty(targetClassName)) {
+				throw new SettingsException("No target class specified");
+			}
 			try {
 				ClassInfo targetClassInfo = targetClassTF.evaluateText();
-				return Optional.of(Class.forName(targetClassInfo.getNormalizedName()));
+				return Class.forName(targetClassInfo.getNormalizedName());
+			} catch (ParseException e) {
+				throw new SettingsException("Error parsing target class '" + targetClassName + "' at position " + e.getPosition() + ": " + e.getMessage());
 			} catch (Throwable t) {
-				/* fall through until end */
+				throw new SettingsException("Unknown target class '" + targetClassName + "'");
 			}
 		} else if (targetConcreteInstanceRB.isSelected() && target != null) {
-			return Optional.of(target.getClass());
+			return target.getClass();
+		} else {
+			throw createNoSearchOptionSelectedException();
 		}
-		return Optional.empty();
 	}
 
-	private Optional<Predicate<Object>> getTargetFilter() {
+	private Predicate<Object> getTargetFilter() throws SettingsException {
 		if (targetAllInstancesRB.isSelected()) {
-			Optional<Class<?>> optionalTargetClass = getTargetClass();
-			if (!optionalTargetClass.isPresent()) {
-				return Optional.empty();
-			}
-			Class<?> targetClass = optionalTargetClass.get();
+			Class<?> targetClass = getTargetClass();
 			if (targetFilterCB.isSelected()) {
+				String targetFilterExpression = targetFilterTF.getText();
 				try {
 					CompiledExpression compiledFilter = targetFilterTF.evaluateText();
-					return Optional.of(o -> targetClass.isInstance(o) && applyFilter(compiledFilter, o));
+					return o -> targetClass.isInstance(o) && applyFilter(compiledFilter, o);
+				} catch (ParseException e) {
+					throw new SettingsException("Error parsing target class '" + targetFilterExpression + "' at position " + e.getPosition() + ": " + e.getMessage());
 				} catch (Throwable t) {
-					/* fall through until end */
+					throw new SettingsException("Cannot compile filter expression '" + targetFilterExpression + "'");
 				}
 			} else {
-				return Optional.of(o -> targetClass.isInstance(o));
+				return targetClass::isInstance;
 			}
 		} else if (targetConcreteInstanceRB.isSelected()) {
-			return Optional.of(o -> o == target);
+			return o -> o == target;
+		} else {
+			throw createNoSearchOptionSelectedException();
 		}
-		return Optional.empty();
 	}
 
 	private boolean applyFilter(CompiledExpression filter, Object o) {
@@ -277,20 +298,33 @@ class InstanceSearchPanel extends JPanel
 	}
 
 	private boolean isRequiredInputSpecified() {
+		try {
+			checkInput();
+			showError(null);
+			return true;
+		} catch (SettingsException e) {
+			showError(e.getMessage());
+			return false;
+		}
+	}
+
+	private void checkInput() throws SettingsException {
 		if (root == null) {
-			return false;
+			throw new SettingsException("No root specified for search");
 		}
-		if (!getSearchSettings().isPresent()) {
-			return false;
-		}
+		getSearchSettings();
 		if (targetAllInstancesRB.isSelected()) {
-			Optional<Class<?>> targetClass = getTargetClass();
-			return targetClass.isPresent()
-				&& (!targetFilterCB.isSelected() || getTargetFilter().isPresent());
+			getTargetClass();
+			if (targetFilterCB.isSelected()) {
+				getTargetFilter();
+			}
 		} else if (targetConcreteInstanceRB.isSelected()) {
-			return target != null;
+			if (target == null) {
+				throw new SettingsException("No instance to search for specified");
+			}
+		} else {
+			onNoSearchOptionSelected();
 		}
-		return false;
 	}
 
 	private void updateDisplayWhileSearching() {
@@ -327,8 +361,8 @@ class InstanceSearchPanel extends JPanel
 		statusTF.repaint();
 	}
 
-	private void showError(String error) {
-		JOptionPane.showMessageDialog(this, error, "Parse Error", JOptionPane.ERROR_MESSAGE);
+	private void showError(@Nullable String error) {
+		errorLabel.setText(error == null ? null : "<html><p>" + error + "</p></html>");
 	}
 
 	private void startSearch() {
@@ -338,27 +372,19 @@ class InstanceSearchPanel extends JPanel
 
 		InstancePath sourcePath = new InstancePath(root, "root", null);
 
-		Optional<Class<?>> optionalTargetClass = getTargetClass();
-		if (!optionalTargetClass.isPresent()) {
-			showError("Could not parse target class.");
+		Predicate<Object> targetFilter;
+		SearchSettings settings;
+		try {
+			targetFilter = getTargetFilter();
+			settings = getSearchSettings();
+		} catch (SettingsException e) {
+			showError(e.getMessage());
 			return;
 		}
-
-		Optional<Predicate<Object>> optionalTargetFilter = getTargetFilter();
-		if (!optionalTargetFilter.isPresent()) {
-			showError("Could not parse target filter.");
-			return;
-		}
-		Predicate<Object> targetFilter = optionalTargetFilter.get();
-
-		Optional<SearchSettings> settings = getSearchSettings();
-		if (!settings.isPresent()) {
-			showError("Invalid search settings.");
-			return;
-		}
+		showError(null);
 
 		instancePathFinder.reset();
-		new Thread(() -> instancePathFinder.search(sourcePath, targetFilter, settings.get())).start();
+		new Thread(() -> instancePathFinder.search(sourcePath, targetFilter, settings)).start();
 		new Thread(this::updateDisplayWhileSearching).start();
 	}
 
@@ -389,6 +415,14 @@ class InstanceSearchPanel extends JPanel
 		}
 	}
 
+	private void onNoSearchOptionSelected() throws SettingsException {
+		throw createNoSearchOptionSelectedException();
+	}
+
+	private SettingsException createNoSearchOptionSelectedException() {
+		return new SettingsException("Neither option 'concrete instance' nor option 'all instances of class' is selected");
+	}
+
 	/*
 	 * Listeners
 	 */
@@ -397,11 +431,14 @@ class InstanceSearchPanel extends JPanel
 	}
 
 	private void onTargetClassSpecified() {
-		Optional<Class<?>> optionalTargetClass = getTargetClass();
-		if (optionalTargetClass.isPresent()) {
-			Class<?> targetClass = optionalTargetClass.get();
-			targetFilterTF.setThisType(InfoProvider.createTypeInfo(targetClass));
+		Class<?> targetClass;
+		try {
+			targetClass = getTargetClass();
+		} catch (SettingsException e) {
+			showError(e.getMessage());
+			return;
 		}
+		targetFilterTF.setThisType(InfoProvider.createTypeInfo(targetClass));
 		updateEnabilities();
 	}
 
