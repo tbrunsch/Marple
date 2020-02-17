@@ -63,6 +63,9 @@ public class ActionProviderBuilder
 	}
 
 	public ActionProvider build() {
+		if (objectInfo == null) {
+			return null;
+		}
 		ImmutableList.Builder<InspectionAction> actionsBuilder = ImmutableList.builder();
 		Object object = objectInfo.getObject();
 		if (object == null) {
