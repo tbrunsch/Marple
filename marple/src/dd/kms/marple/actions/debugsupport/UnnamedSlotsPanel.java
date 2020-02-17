@@ -57,7 +57,7 @@ class UnnamedSlotsPanel extends AbstractSlotPanel<Integer>
 		ObjectInfo slotValueInfo = InfoProvider.createObjectInfo(slotValue);
 		String unnamedSlotName = getUnnamedSlotName(slotIndex);
 		return new ActionProviderBuilder(inspectionContext.getDisplayText(slotValueInfo), slotValueInfo, inspectionContext)
-			.evaluateAs("DebugSupport." + unnamedSlotName, null)
+			.evaluateAs("DebugSupport." + unnamedSlotName)
 			.suggestVariableName(unnamedSlotName)
 			.executeDefaultAction(false)
 			.build();

@@ -108,7 +108,7 @@ public class VariablePanel extends JPanel
 	private ActionProvider getValueAsActionProvider(Variable variable) {
 		ObjectInfo valueInfo = variable.getValue();
 		return new ActionProviderBuilder(inspectionContext.getDisplayText(valueInfo), valueInfo, inspectionContext)
-			.evaluateAs(variable.getName(), null)
+			.evaluateAs(variable.getName())
 			.executeDefaultAction(true)
 			.build();
 	}

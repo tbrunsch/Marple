@@ -71,7 +71,7 @@ class NamedSlotsPanel extends AbstractSlotPanel<String>
 		Object slotValue = DebugSupport.getSlotValue(slotName);
 		ObjectInfo slotValueInfo = InfoProvider.createObjectInfo(slotValue);
 		return new ActionProviderBuilder(inspectionContext.getDisplayText(slotValueInfo), slotValueInfo, inspectionContext)
-			.evaluateAs("DebugSupport.getSlotValue(\"" + slotName + "\")", null)
+			.evaluateAs("DebugSupport.getSlotValue(\"" + slotName + "\")")
 			.suggestVariableName(slotName)
 			.executeDefaultAction(false)
 			.build();

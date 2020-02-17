@@ -9,6 +9,7 @@ import dd.kms.marple.actions.search.SearchInstancesFromHereAction;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.components.ComponentHierarchyModels;
 import dd.kms.marple.gui.common.Snapshots;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
@@ -49,6 +50,10 @@ public class ActionProviderBuilder
 			this.suggestedVariableName = suggestedVariableName;
 		}
 		return this;
+	}
+
+	public ActionProviderBuilder evaluateAs(String expression) {
+		return evaluateAs(expression, InfoProvider.NULL_LITERAL);
 	}
 
 	public ActionProviderBuilder evaluateAs(String expression, ObjectInfo expressionContext) {
