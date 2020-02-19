@@ -21,7 +21,7 @@ public class PackageInputTextField extends AbstractInputTextField<PackageInfo>
 	}
 
 	@Override
-	Map<CompletionSuggestion, Integer> provideRatedSuggestions(String text, int caretPosition) throws ParseException {
+	Map<CompletionSuggestion, Integer> doProvideRatedSuggestions(String text, int caretPosition) throws ParseException {
 		PackageParser parser = createParser(text);
 		Map<CompletionSuggestion, StringMatch> ratedSuggestions = parser.suggestCodeCompletion(caretPosition);
 		return Ratings.filterAndTransformStringMatches(ratedSuggestions);

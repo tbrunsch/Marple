@@ -29,7 +29,7 @@ abstract class AbstractExpressionInputTextField<T> extends AbstractInputTextFiel
 	abstract Map<CompletionSuggestion, MatchRating> suggestCodeCompletion(String text, int caretPosition) throws ParseException;
 
 	@Override
-	Map<CompletionSuggestion, Integer> provideRatedSuggestions(String text, int caretPosition) throws ParseException {
+	Map<CompletionSuggestion, Integer> doProvideRatedSuggestions(String text, int caretPosition) throws ParseException {
 		Map<CompletionSuggestion, MatchRating> ratedSuggestions = suggestCodeCompletion(text, caretPosition);
 		return Ratings.filterAndTransformMatchRatings(ratedSuggestions);
 	}
