@@ -26,6 +26,7 @@ class IconFactory
 	private static final Color	COLOR_OBJECT_TREE_NODE	= COLOR_VARIABLE;
 	private static final Color	COLOR_PACKAGE			= Color.ORANGE;
 	private static final Color	COLOR_KEYWORD			= Color.BLUE;
+	private static final Color	COLOR_CLASS				= Color.LIGHT_GRAY;
 
 	private static final Table<CompletionSuggestionType, Color, Icon> CACHED_ICONS	= HashBasedTable.create();
 
@@ -59,17 +60,8 @@ class IconFactory
 				AccessModifier accessModifier = methodInfo.getAccessModifier();
 				return getColor(accessModifier);
 			}
-			case CLASS: {
-				CompletionSuggestionClass classSuggestion = (CompletionSuggestionClass) completionSuggestion;
-				ClassInfo classInfo = classSuggestion.getClassInfo();
-				try {
-					Class<?> clazz = Class.forName(classInfo.getNormalizedName());
-					AccessModifier accessModifier = AccessModifier.getValue(clazz.getModifiers());
-					return getColor(accessModifier);
-				} catch (ClassNotFoundException e) {
-					return Color.LIGHT_GRAY;
-				}
-			}
+			case CLASS:
+				return COLOR_CLASS;
 			case PACKAGE:
 				return COLOR_PACKAGE;
 			case KEYWORD:
