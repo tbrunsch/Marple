@@ -302,7 +302,8 @@ class InstanceSearchPanel extends JPanel
 
 	private boolean applyFilter(CompiledExpression filter, Object o) {
 		try {
-			return Boolean.TRUE.equals(filter.evaluate(InfoProvider.createObjectInfo(o)));
+			ObjectInfo resultInfo = filter.evaluate(InfoProvider.createObjectInfo(o));
+			return resultInfo != null && Boolean.TRUE.equals(resultInfo.getObject());
 		} catch (Exception e) {
 			return false;
 		}
