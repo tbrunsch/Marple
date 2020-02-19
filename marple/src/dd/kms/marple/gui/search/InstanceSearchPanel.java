@@ -28,6 +28,7 @@ import java.awt.event.FocusEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
@@ -186,8 +187,15 @@ class InstanceSearchPanel extends JPanel
 				onTargetFilterSpecified();
 			}
 		});
-		limitSearchDepthCB.addItemListener(e -> maxSearchDepthTF.setEnabled(limitSearchDepthCB.isSelected()));
-
+		limitSearchDepthCB.addItemListener(e -> {
+			updateEnabilities();
+		});
+		maxSearchDepthTF.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				updateEnabilities();
+			}
+		});
 	}
 
 	void setRoot(Object root) {
@@ -206,6 +214,7 @@ class InstanceSearchPanel extends JPanel
 	}
 
 	private void updateEnabilities() {
+		maxSearchDepthTF.setEnabled(limitSearchDepthCB.isSelected());
 		InstancePathFinder.ProcessingState processingState = instancePathFinder.getProcessingState();
 		boolean searching = processingState != InstancePathFinder.ProcessingState.NOT_RUNNING && processingState != InstancePathFinder.ProcessingState.FINISHED;
 		searchButton.setEnabled(!searching && isRequiredInputSpecified());
@@ -384,8 +393,8 @@ class InstanceSearchPanel extends JPanel
 		showError(null);
 
 		instancePathFinder.reset();
-		new Thread(() -> instancePathFinder.search(sourcePath, targetFilter, settings)).start();
-		new Thread(this::updateDisplayWhileSearching).start();
+		CompletableFuture.runAsync(() -> instancePathFinder.search(sourcePath, targetFilter, settings));
+		CompletableFuture.runAsync(this::updateDisplayWhileSearching);
 	}
 
 	private void stopSearch() {
