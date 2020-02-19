@@ -49,6 +49,10 @@ public abstract class AbstractInputTextField<T> extends JTextField
 		this.evaluationResultConsumer = evaluationResultConsumer;
 	}
 
+	/**
+	 * The exception consumer will also be called with {@code null} to notify the consumer
+	 * that currently there is no exception.
+	 */
 	public void setExceptionConsumer(Consumer<Throwable> exceptionConsumer) {
 		this.exceptionConsumer = exceptionConsumer;
 	}
@@ -69,6 +73,7 @@ public abstract class AbstractInputTextField<T> extends JTextField
 		try {
 			T evaluationResult = evaluate(text);
 			evaluationResultConsumer.accept(evaluationResult);
+			consumeException(null);
 		} catch (Throwable t) {
 			consumeException(t);
 		}

@@ -9,6 +9,7 @@ import dd.kms.marple.gui.inspector.views.fieldview.FieldView;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 
@@ -71,7 +72,7 @@ public class EvaluationPanel extends JPanel
 		evaluationResultPanel.repaint();
 	}
 
-	private void displayException(Throwable t) {
+	private void displayException(@Nullable Throwable t) {
 		evaluationResultPanel.removeAll();
 		JLabel exceptionLabel = new JLabel(ExceptionFormatter.formatParseException(evaluationTextField.getText(), t));
 		CodeCompletionDecorators.configureExceptionComponent(exceptionLabel);

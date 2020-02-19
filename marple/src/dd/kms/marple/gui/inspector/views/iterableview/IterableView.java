@@ -15,6 +15,7 @@ import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
@@ -270,7 +271,7 @@ public class IterableView extends JPanel implements ObjectView
 			setBorder(BorderFactory.createTitledBorder("Result"));
 		}
 
-		void displayException(String expression, Throwable t) {
+		void displayException(String expression, @Nullable Throwable t) {
 			String error = ExceptionFormatter.formatParseException(expression, t);
 			JLabel exceptionLabel = new JLabel(error);
 			CodeCompletionDecorators.configureExceptionComponent(exceptionLabel);

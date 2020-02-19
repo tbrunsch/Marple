@@ -3,6 +3,8 @@ package dd.kms.marple.gui.search;
 import com.google.common.base.Strings;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
+import dd.kms.marple.gui.common.ExceptionFormatter;
+import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.gui.evaluator.textfields.ClassInputTextField;
 import dd.kms.marple.gui.evaluator.textfields.CompiledExpressionInputTextField;
 import dd.kms.marple.gui.evaluator.textfields.EvaluationTextFieldPanel;
@@ -83,13 +85,15 @@ class InstanceSearchPanel extends JPanel
 		this.inspectionContext = inspectionContext;
 
 		targetClassTF = new ClassInputTextField(inspectionContext);
-		targetClassTF.addInputVerifier();
+		targetClassTF.setExceptionConsumer(t -> showError(ExceptionFormatter.formatParseException(targetClassTF.getText(), t)));
 		targetClassPanel = new EvaluationTextFieldPanel(targetClassTF, inspectionContext);
 		targetFilterTF = new CompiledExpressionInputTextField(inspectionContext);
-		targetFilterTF.addInputVerifier();
+		targetFilterTF.setExceptionConsumer(t -> showError(ExceptionFormatter.formatParseException(targetFilterTF.getText(), t)));
 		targetFilterPanel = new EvaluationTextFieldPanel(targetFilterTF, inspectionContext);
 
 		instancePathFinder = new InstancePathFinder(this::onPathDetected);
+
+		CodeCompletionDecorators.configureExceptionComponent(errorLabel);
 
 		add(configurationPanel,	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.1, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		add(resultPanel,		new GridBagConstraints(0, 1, 1, 1, 1.0, 0.9, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
@@ -144,8 +148,6 @@ class InstanceSearchPanel extends JPanel
 		onlyNonStaticFieldsCB.setToolTipText("If selected, then static fields will be ignored for the search");
 		onlyPureFieldsCB.setToolTipText("If selected, then only field values will be considered. The content of arrays, collections, maps etc. will be ignored.");
 		maxSearchDepthTF.setColumns(3);
-
-		errorLabel.setForeground(Color.RED);
 
 		SearchSettings defaultSettings = SearchSettingsBuilders.create().build();
 		setSearchSettings(defaultSettings);
@@ -264,7 +266,7 @@ class InstanceSearchPanel extends JPanel
 				ClassInfo targetClassInfo = targetClassTF.evaluateText();
 				return Class.forName(targetClassInfo.getNormalizedName());
 			} catch (ParseException e) {
-				throw new SettingsException("Error parsing target class '" + targetClassName + "' at position " + e.getPosition() + ": " + e.getMessage());
+				throw new SettingsException(ExceptionFormatter.formatParseException(targetClassName, e));
 			} catch (Throwable t) {
 				throw new SettingsException("Unknown target class '" + targetClassName + "'");
 			}
@@ -284,7 +286,7 @@ class InstanceSearchPanel extends JPanel
 					CompiledExpression compiledFilter = targetFilterTF.evaluateText();
 					return o -> targetClass.isInstance(o) && applyFilter(compiledFilter, o);
 				} catch (ParseException e) {
-					throw new SettingsException("Error parsing target class '" + targetFilterExpression + "' at position " + e.getPosition() + ": " + e.getMessage());
+					throw new SettingsException(ExceptionFormatter.formatParseException(targetFilterExpression, e));
 				} catch (Throwable t) {
 					throw new SettingsException("Cannot compile filter expression '" + targetFilterExpression + "'");
 				}

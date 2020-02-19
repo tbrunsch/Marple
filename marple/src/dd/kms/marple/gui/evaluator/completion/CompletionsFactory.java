@@ -48,14 +48,18 @@ class CompletionsFactory
 	}
 
 	private Map<CompletionSuggestion, Integer> getRatedSuggestions(String text, int caretPosition) {
+		Map<CompletionSuggestion, Integer> ratedSuggestions;
+		Throwable throwable = null;
 		try {
-			return suggestionProvider.provideRatedSuggestions(text, caretPosition);
+			ratedSuggestions = suggestionProvider.provideRatedSuggestions(text, caretPosition);
 		} catch (Throwable t) {
-			if (exceptionConsumer != null) {
-				exceptionConsumer.accept(t);
-			}
-			return ImmutableMap.of();
+			throwable = t;
+			ratedSuggestions = ImmutableMap.of();
 		}
+		if (exceptionConsumer != null) {
+			exceptionConsumer.accept(throwable);
+		}
+		return ratedSuggestions;
 	}
 
 	private Completion createCompletion(CompletionSuggestion suggestion, int rating) {
