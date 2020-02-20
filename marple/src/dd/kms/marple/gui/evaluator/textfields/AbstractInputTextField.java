@@ -100,7 +100,6 @@ public abstract class AbstractInputTextField<T> extends JTextField
 		try {
 			T evaluationResult = evaluate(text);
 			evaluationResultConsumer.accept(evaluationResult);
-			consumeException(null);
 		} catch (Throwable t) {
 			consumeException(t);
 		}
