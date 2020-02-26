@@ -9,6 +9,7 @@ import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import java.util.Map;
 import java.util.Optional;
@@ -40,7 +41,18 @@ public class ExpressionInputTextField extends AbstractExpressionInputTextField<O
 	@Override
 	ObjectInfo evaluate(String text) throws ParseException {
 		ExpressionParser parser = createParser(text);
-		return parser.evaluate();
+		ObjectInfo result = parser.evaluate();
+		Object resultObject = result.getObject();
+		if (resultObject != null) {
+			Class<?> resultObjectClass = resultObject.getClass();
+			try {
+				TypeInfo resultObjectType = result.getDeclaredType().getSubtype(resultObjectClass);
+				return InfoProvider.createObjectInfo(resultObject, resultObjectType, result.getValueSetter());
+			} catch (Throwable ignored) {
+				/* fall through to default case */
+			}
+		}
+		return result;
 
 	}
 
