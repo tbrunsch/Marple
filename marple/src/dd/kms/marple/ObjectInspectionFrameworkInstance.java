@@ -2,6 +2,7 @@ package dd.kms.marple;
 
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.components.ComponentHierarchyModels;
+import dd.kms.marple.gui.common.GuiCommons;
 import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.help.QuickHelpPanel;
 import dd.kms.marple.settings.InspectionSettings;
@@ -124,10 +125,6 @@ class ObjectInspectionFrameworkInstance
 	/*
 	 * GUI
 	 */
-	private Point getMousePositionOnScreen() {
-		return MouseInfo.getPointerInfo().getLocation();
-	}
-
 	private boolean userHasPermission(InspectionContext context) {
 		InspectionSettings settings = context.getSettings();
 		SecuritySettings securitySettings = settings.getSecuritySettings();
@@ -168,7 +165,7 @@ class ObjectInspectionFrameworkInstance
 		if (inspectionContext == null) {
 			return;
 		}
-		Point mousePosOnScreen = getMousePositionOnScreen();
+		Point mousePosOnScreen = GuiCommons.getMousePositionOnScreen();
 		if (!mousePosOnScreen.equals(lastMousePositionOnScreen)) {
 			return;
 		}
@@ -197,6 +194,6 @@ class ObjectInspectionFrameworkInstance
 	private void onMouseOverComponentAction(Component component, Point mousePosOnComponent) {
 		lastComponentUnderMouse = component;
 		lastMousePositionOnComponent = mousePosOnComponent;
-		lastMousePositionOnScreen = getMousePositionOnScreen();
+		lastMousePositionOnScreen = GuiCommons.getMousePositionOnScreen();
 	}
 }
