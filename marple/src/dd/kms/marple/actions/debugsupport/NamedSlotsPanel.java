@@ -17,6 +17,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
@@ -28,8 +29,11 @@ class NamedSlotsPanel extends AbstractSlotPanel<String>
 	private final JButton	deleteSlotsButton	= new JButton("Delete selected slots");
 	private final JButton	variablesButton		= new JButton("Open variable dialog");
 
-	NamedSlotsPanel(InspectionContext inspectionContext) {
-		super("Named Slots", "<html><p>Access named slots via DebugSupport.getSlotValue and DebugSupport.setSlotValue<br/>Import named slots as variables or export variables as named slots</p></html>", inspectionContext);
+	NamedSlotsPanel(Consumer<Throwable> exceptionConsumer, InspectionContext inspectionContext) {
+		super("Named Slots",
+				"<html><p>Access named slots via DebugSupport.getSlotValue and DebugSupport.setSlotValue<br/>Import named slots as variables or export variables as named slots</p></html>",
+				exceptionConsumer,
+				inspectionContext);
 
 		int xPos = 0;
 		add(addSlotButton,		new GridBagConstraints(xPos++, yPos, 1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));

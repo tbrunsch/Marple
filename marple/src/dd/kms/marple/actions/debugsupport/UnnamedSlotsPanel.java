@@ -26,8 +26,11 @@ class UnnamedSlotsPanel extends AbstractSlotPanel<Integer>
 		new SlotData(() -> DebugSupport.SLOT_4, o -> DebugSupport.SLOT_4 = o)
 	};
 
-	UnnamedSlotsPanel(InspectionContext inspectionContext) {
-		super("Unnamed Slots", "<html><p>Access unnamed slots via DebugSupport.SLOT_0, DebugSupport.SLOT_1 etc.</p></html>", inspectionContext);
+	UnnamedSlotsPanel(Consumer<Throwable> exceptionConsumer, InspectionContext inspectionContext) {
+		super("Unnamed Slots",
+				"<html><p>Access unnamed slots via DebugSupport.SLOT_0, DebugSupport.SLOT_1 etc.</p></html>",
+				exceptionConsumer,
+				inspectionContext);
 	}
 
 	@Override
