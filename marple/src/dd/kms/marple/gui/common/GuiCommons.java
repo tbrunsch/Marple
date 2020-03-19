@@ -46,4 +46,8 @@ public class GuiCommons
 		ActionMap actionMap = component.getActionMap();
 		actionMap.put(actionName, action);
 	}
+
+	public static Point getMousePositionOnScreen() {
+		return MouseInfo.getPointerInfo().getLocation();
+	}
 }

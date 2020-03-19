@@ -2,13 +2,11 @@ package dd.kms.marple.gui.common;
 
 import com.google.common.util.concurrent.Runnables;
 
-import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.*;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -69,13 +67,12 @@ public class WindowManager
 					}
 				});
 				window.pack();
-				Point location = determineWindowLocation(window.getWidth(), window.getHeight());
+				Point location = GuiCommons.getMousePositionOnScreen();
 				MANAGED_WINDOWS.put(identifier, window);
 				SwingUtilities.invokeLater(() -> {
-					if (location != null) {
-						window.setLocation(location);
-					}
 					window.setMinimumSize(window.getSize());
+					Point correctedLocation = getValidScreenLocation(new Rectangle(location.x, location.y, window.getWidth(), window.getHeight()));
+					window.setLocation(correctedLocation);
 				});
 			}
 			SwingUtilities.invokeLater(() -> {
@@ -97,107 +94,52 @@ public class WindowManager
 		return frame;
 	}
 
-	private static @Nullable Point determineWindowLocation(int width, int height) {
-		Alignment[] priorizedAlignments = { Alignment.RIGHT_TO, Alignment.BELOW, Alignment.LEFT_TO, Alignment.ABOVE };
-		List<Window> potentialDockingWindows = getPotentialDockingWindows();
-		for (Window dockingWindow : potentialDockingWindows) {
-			for (Alignment alignment : priorizedAlignments) {
-				for (SecondaryCoordinate secondaryCoordinate : SecondaryCoordinate.values()) {
-					Rectangle windowBounds = determineBounds(dockingWindow.getBounds(), alignment, secondaryCoordinate, width, height);
-					if (areBoundsValid(windowBounds)) {
-						return windowBounds.getLocation();
-					}
-				}
-			}
+	private static Point getValidScreenLocation(Rectangle bounds) {
+		Point location = bounds.getLocation();
+		Rectangle screenBounds = getBoundsOfScreen(location);
+		if (screenBounds.contains(bounds)) {
+			return location;
 		}
-		return null;
+		int xMin = screenBounds.x;
+		int xMax = screenBounds.x + screenBounds.width - bounds.width;
+		int yMin = screenBounds.y;
+		int yMax = screenBounds.y + screenBounds.height - bounds.height;
+		int x = Math.max(Math.min(location.x, xMax), xMin);
+		int y = Math.max(Math.min(location.y, yMax), yMin);
+		return new Point(x, y);
 	}
 
-	private static List<Window> getPotentialDockingWindows() {
-		List<Window> candidates = new ArrayList<>();
-		Window focusedWindow = FocusManager.getCurrentManager().getFocusedWindow();
-		candidates.add(focusedWindow);
-		candidates.addAll(MANAGED_WINDOWS.values());
-		candidates.addAll(Arrays.asList(JFrame.getFrames()));
-		candidates.addAll(Arrays.asList(Window.getWindows()));
-		candidates.removeIf(window -> !window.isVisible());
-		return candidates;
+	private static Rectangle getBoundsOfScreen(Point location) {
+		GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice[] screenDevices = graphicsEnvironment.getScreenDevices();
+		if (screenDevices.length == 0) {
+			throw new IllegalStateException("No screen devices found");
+		}
+		for (GraphicsDevice device : screenDevices) {
+			GraphicsConfiguration defaultConfiguration = device.getDefaultConfiguration();
+			Rectangle screenBounds = defaultConfiguration.getBounds();
+			if (screenBounds.contains(location)) {
+				return getEffectiveScreenBounds(device);
+			}
+		}
+		return getEffectiveScreenBounds(screenDevices[0]);
 	}
 
-	private static Rectangle determineBounds(Rectangle dockingRectangle, Alignment alignment, SecondaryCoordinate secondaryCoordinate, int width, int height) {
-		int x = 0, y = 0;
-		switch (alignment) {
-			case LEFT_TO: {
-				int right = dockingRectangle.x;
-				x = right - width;
-				break;
-			}
-			case RIGHT_TO: {
-				x = dockingRectangle.x + dockingRectangle.width;
-				break;
-			}
-			case ABOVE: {
-				int bottom = dockingRectangle.y;
-				y = bottom - height;
-				break;
-			}
-			case BELOW: {
-				y = dockingRectangle.y + dockingRectangle.height;
-				break;
-			}
-			default:
-				throw new IllegalArgumentException("Unsupported alignment: " + alignment);
-		}
-
-		switch (secondaryCoordinate) {
-			case LOWER: {
-				if (alignment == Alignment.LEFT_TO || alignment == Alignment.RIGHT_TO) {
-					y = dockingRectangle.y;
-				} else {
-					x = dockingRectangle.x;
-				}
-				break;
-			}
-			case UPPER: {
-				if (alignment == Alignment.LEFT_TO || alignment == Alignment.RIGHT_TO) {
-					int bottom = dockingRectangle.y + dockingRectangle.height;
-					y = bottom - height;
-				} else {
-					int right = dockingRectangle.x + dockingRectangle.width;
-					x = right - width;
-				}
-				break;
-			}
-			default:
-				throw new IllegalArgumentException("Unsupported secondary coordinate: " + secondaryCoordinate);
-		}
-
+	/**
+	 * @return The screen size without the task bar
+	 */
+	private static Rectangle getEffectiveScreenBounds(GraphicsDevice device) {
+		GraphicsConfiguration defaultConfiguration = device.getDefaultConfiguration();
+		Rectangle screenBounds = defaultConfiguration.getBounds();
+		Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(defaultConfiguration);
+		/*
+		 * The screen insets seem to describe how much space the task bar occupies in the left,
+		 * the right, the top, and the bottom part of the screen.
+		 */
+		int x = screenBounds.x + screenInsets.left;
+		int y = screenBounds.y + screenInsets.top;
+		int width = screenBounds.width - (screenInsets.left + screenInsets.right);
+		int height = screenBounds.height - (screenInsets.top + screenInsets.bottom);
 		return new Rectangle(x, y, width, height);
 	}
-
-	private static boolean areBoundsValid(Rectangle bounds) {
-		return !boundsIntersectWithWindows(bounds) && boundsAreOnOneScreen(bounds);
-	}
-
-	private static boolean boundsIntersectWithWindows(Rectangle bounds) {
-		for (Window window : MANAGED_WINDOWS.values()) {
-			if (bounds.intersects(window.getBounds())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private static boolean boundsAreOnOneScreen(Rectangle bounds) {
-		GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		for (GraphicsDevice device : graphicsEnvironment.getScreenDevices()) {
-			if (device.getDefaultConfiguration().getBounds().contains(bounds)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private enum Alignment { LEFT_TO, RIGHT_TO, ABOVE, BELOW };
-	private enum SecondaryCoordinate { LOWER, UPPER };
 }

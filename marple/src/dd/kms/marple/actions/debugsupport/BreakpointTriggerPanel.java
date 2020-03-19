@@ -9,6 +9,7 @@ import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.function.Consumer;
 
 import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
@@ -30,12 +31,13 @@ class BreakpointTriggerPanel extends JPanel
 
 	private final DebugSettings				debugSettings;
 
-	BreakpointTriggerPanel(InspectionContext inspectionContext) {
+	BreakpointTriggerPanel(Consumer<Throwable> exceptionConsumer, InspectionContext inspectionContext) {
 		super(new GridBagLayout());
 
 		debugSettings = inspectionContext.getSettings().getDebugSettings();
 
 		customMethodTF = new ExpressionInputTextField(inspectionContext);
+		customMethodTF.setExceptionConsumer(exceptionConsumer);
 		customMethodPanel = new EvaluationTextFieldPanel(customMethodTF, inspectionContext);
 
 		setBorder(BorderFactory.createTitledBorder("Breakpoint Trigger"));

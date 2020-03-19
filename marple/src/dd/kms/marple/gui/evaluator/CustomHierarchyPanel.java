@@ -64,7 +64,7 @@ class CustomHierarchyPanel extends JPanel
 		public ActionProvider getActionProvider() {
 			ActionProviderBuilder actionProviderBuilder = new ActionProviderBuilder(toString(), wrappedNode.getUserObject(), inspectionContext);
 			if (!isRoot()) {
-				actionProviderBuilder.evaluateAs(createExpression(), null);
+				actionProviderBuilder.evaluateAs(createExpression());
 			}
 			return actionProviderBuilder.build();
 		}

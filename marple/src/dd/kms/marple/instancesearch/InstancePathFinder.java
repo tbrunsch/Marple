@@ -19,7 +19,7 @@ public class InstancePathFinder
 
 	private final Object					lock				= new Object();
 
-	private ProcessingState					processingState		= ProcessingState.NOT_RUNNING;
+	private volatile ProcessingState		processingState		= ProcessingState.NOT_RUNNING;
 	private int								pathCounter;
 
 	private InstanceBreadthFirstSearch		instanceSearch = null;

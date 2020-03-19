@@ -19,6 +19,7 @@ import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
@@ -41,7 +42,7 @@ abstract class AbstractSlotPanel<T> extends JPanel
 
 	int										yPos;
 
-	AbstractSlotPanel(String title, String description, InspectionContext inspectionContext) {
+	AbstractSlotPanel(String title, String description, Consumer<Throwable> exceptionConsumer, InspectionContext inspectionContext) {
 		super(new GridBagLayout());
 
 		this.tableList = createTableList();
@@ -57,7 +58,7 @@ abstract class AbstractSlotPanel<T> extends JPanel
 		TableColumnModel columnModel = table.getColumnModel();
 		columnModel.getColumn(1).setCellRenderer(new ActionProviderRenderer());
 
-		cellEditor = new CellEditor(inspectionContext);
+		cellEditor = new CellEditor(exceptionConsumer, inspectionContext);
 		table.setDefaultEditor(ActionProvider.class, cellEditor);
 
 		ActionProviderListeners.addMouseListeners(table);
@@ -118,7 +119,7 @@ abstract class AbstractSlotPanel<T> extends JPanel
 		private boolean							editingFinished	= false;
 		private int								currentRow		= -1;
 
-		CellEditor(InspectionContext inspectionContext) {
+		CellEditor(Consumer<Throwable> exceptionConsumer, InspectionContext inspectionContext) {
 			editorTextField = new ExpressionInputTextField(inspectionContext);
 			editorTextField.requestFocus();
 			editorTextField.setEvaluationResultConsumer(o -> {
@@ -126,6 +127,7 @@ abstract class AbstractSlotPanel<T> extends JPanel
 				rowToExpression.put(currentRow, editorTextField.getText());
 				stopCellEditing();
 			});
+			editorTextField.setExceptionConsumer(exceptionConsumer);
 		}
 
 		void setThisValue(ObjectInfo thisValue) {

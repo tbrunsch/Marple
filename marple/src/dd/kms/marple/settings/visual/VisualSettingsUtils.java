@@ -52,7 +52,9 @@ public class VisualSettingsUtils
 		String text = textExtractionFunction.apply(object);
 		return getObjectHashText(object)
 			+ " ("
-			+ (text == null ? "null" : text)
+			+ (	text == null	? "<null>" :
+				text.isEmpty()	? "<empty>"
+								: '"' + text + "'")
 			+ ")";
 	}
 

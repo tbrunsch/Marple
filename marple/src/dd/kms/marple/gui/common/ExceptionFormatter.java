@@ -1,10 +1,18 @@
 package dd.kms.marple.gui.common;
 
+import javax.annotation.Nullable;
+
 import dd.kms.zenodot.ParseException;
 
 public class ExceptionFormatter
 {
-	public static String formatParseException(String expression, Throwable t) {
+	/**
+	 * Returns null of the throwable is null.
+	 */
+	public static String formatParseException(String expression, @Nullable Throwable t) {
+		if (t == null) {
+			return null;
+		}
 		StringBuilder builder = new StringBuilder();
 		builder.append("<html><p><b>").append(t.getMessage().replace("\n", "<br/>")).append("</b></p>");
 		Throwable cause = t.getCause();

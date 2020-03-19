@@ -14,13 +14,18 @@
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>resources</directory>
+			</resource>
+		</resources>
 	</build>
 
 	<dependencies>
 		<dependency>
 			<groupId>dd.kms.zenodot</groupId>
 			<artifactId>zenodot</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1</version>
 		</dependency>
 	</dependencies>
 

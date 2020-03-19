@@ -17,6 +17,7 @@ class TestData
 	private final Map<Double, String>		largeDemoMap	= IntStream.range(0, 12345).mapToObj(i -> Math.random()).collect(Collectors.toMap(d -> d, d -> d.toString()));
 	private final Set<String>				demoSet			= IntStream.range(0, 32).mapToObj(i -> String.valueOf(Math.random())).collect(Collectors.toSet());
 	private final Set<String>				largeDemoSet	= IntStream.range(0, 12345).mapToObj(i -> String.valueOf(Math.random())).collect(Collectors.toSet());
+	private final Object					testObject		= demoList;
 	private final Multimap<String, Integer> demoMultimap;
 
 	TestData() {
