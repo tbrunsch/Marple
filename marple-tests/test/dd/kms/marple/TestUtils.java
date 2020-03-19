@@ -38,6 +38,7 @@ class TestUtils
 			.minimumAccessLevel(AccessModifier.PRIVATE)
 			.importPackagesByName(ImmutableSet.of(importPackage1, importPackage2))
 			.importClassesByName(ImmutableSet.of(importClass1, importClass2))
+			.considerAllClassesForClassSuggestions(true)
 			.customHierarchyRoot(customHierarchyRoot)
 			.build();
 
