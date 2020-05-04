@@ -1,22 +1,16 @@
 package dd.kms.marple.gui.evaluator.textfields;
 
-import com.google.common.collect.Maps;
 import dd.kms.marple.InspectionContext;
 import dd.kms.zenodot.ClassParser;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.Parsers;
-import dd.kms.zenodot.matching.MatchRating;
 import dd.kms.zenodot.matching.StringMatch;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;
 import dd.kms.zenodot.utils.wrappers.ClassInfo;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Optional;
 
 public class ClassInputTextField extends AbstractInputTextField<ClassInfo>
 {

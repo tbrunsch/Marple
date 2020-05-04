@@ -6,7 +6,6 @@ import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.actions.Actions;
 import dd.kms.marple.common.ReflectionUtils;
-import dd.kms.marple.common.TypedObjectInfo;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 import dd.kms.zenodot.utils.wrappers.TypeInfo;

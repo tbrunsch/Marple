@@ -4,12 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import dd.kms.marple.common.ReflectionUtils;
 
-import javax.annotation.Nullable;
 import java.awt.*;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 class ComponentHierarchyModelImpl implements ComponentHierarchyModel
 {

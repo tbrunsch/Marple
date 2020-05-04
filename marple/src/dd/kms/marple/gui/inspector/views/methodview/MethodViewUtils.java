@@ -5,13 +5,10 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.actions.InvokeMethodAction;
-import dd.kms.zenodot.common.AccessModifier;
 import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
-import dd.kms.zenodot.utils.wrappers.FieldInfo;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
-import java.lang.reflect.Method;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 

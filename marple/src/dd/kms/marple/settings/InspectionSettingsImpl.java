@@ -3,13 +3,10 @@ package dd.kms.marple.settings;
 import dd.kms.marple.components.ComponentHierarchyModel;
 import dd.kms.marple.evaluator.ExpressionEvaluator;
 import dd.kms.marple.evaluator.ExpressionEvaluators;
-import dd.kms.marple.settings.visual.VisualSettings;
 import dd.kms.marple.inspector.ObjectInspector;
 import dd.kms.marple.inspector.ObjectInspectors;
 import dd.kms.marple.settings.keys.KeySettings;
-
-import java.awt.*;
-import java.util.function.Predicate;
+import dd.kms.marple.settings.visual.VisualSettings;
 
 class InspectionSettingsImpl implements InspectionSettings
 {

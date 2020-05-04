@@ -9,8 +9,6 @@ import dd.kms.zenodot.settings.ParserSettingsUtils;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 class ExpressionEvaluatorImpl implements ExpressionEvaluator
 {

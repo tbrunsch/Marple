@@ -6,7 +6,6 @@ import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.gui.evaluator.textfields.ExpressionInputTextField;
 import dd.kms.marple.gui.inspector.views.fieldview.FieldView;
-import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;

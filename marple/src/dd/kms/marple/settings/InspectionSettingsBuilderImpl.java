@@ -2,13 +2,10 @@ package dd.kms.marple.settings;
 
 import dd.kms.marple.components.ComponentHierarchyModel;
 import dd.kms.marple.components.ComponentHierarchyModels;
-import dd.kms.marple.settings.visual.VisualSettings;
-import dd.kms.marple.settings.visual.VisualSettingsUtils;
 import dd.kms.marple.settings.keys.KeySettings;
 import dd.kms.marple.settings.keys.KeySettingsBuilders;
-
-import java.awt.*;
-import java.util.function.Predicate;
+import dd.kms.marple.settings.visual.VisualSettings;
+import dd.kms.marple.settings.visual.VisualSettingsUtils;
 
 class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 {

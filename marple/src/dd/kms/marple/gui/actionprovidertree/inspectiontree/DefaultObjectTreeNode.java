@@ -10,10 +10,8 @@ import dd.kms.zenodot.common.FieldScanner;
 import dd.kms.zenodot.utils.wrappers.FieldInfo;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
 import java.util.List;
 
 class DefaultObjectTreeNode extends AbstractInspectionTreeNode

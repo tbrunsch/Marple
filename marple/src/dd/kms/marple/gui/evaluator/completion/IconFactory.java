@@ -6,19 +6,14 @@ import dd.kms.marple.gui.common.GuiCommons;
 import dd.kms.zenodot.common.AccessModifier;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.CompletionSuggestionType;
-import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionClass;
 import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionField;
 import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionMethod;
-import dd.kms.zenodot.utils.wrappers.ClassInfo;
 import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
 import dd.kms.zenodot.utils.wrappers.FieldInfo;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
 
 class IconFactory
 {

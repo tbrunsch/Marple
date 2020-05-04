@@ -8,11 +8,9 @@ import dd.kms.zenodot.matching.StringMatch;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;
 import dd.kms.zenodot.utils.wrappers.PackageInfo;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.Optional;
 
 public class PackageInputTextField extends AbstractInputTextField<PackageInfo>
 {

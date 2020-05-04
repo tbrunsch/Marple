@@ -7,7 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 
 import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
-import static java.awt.GridBagConstraints.*;
+import static java.awt.GridBagConstraints.NONE;
+import static java.awt.GridBagConstraints.WEST;
 
 class CategoryPanel extends JPanel
 {

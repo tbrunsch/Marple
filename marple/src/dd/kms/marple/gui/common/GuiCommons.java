@@ -5,12 +5,10 @@ import dd.kms.zenodot.common.AccessModifier;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
-import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class GuiCommons
 {

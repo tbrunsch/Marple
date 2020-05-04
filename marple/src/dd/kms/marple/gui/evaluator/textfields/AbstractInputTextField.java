@@ -6,16 +6,12 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.settings.keys.KeySettings;
 import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.matching.MatchRating;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;
 import dd.kms.zenodot.settings.ParserSettings;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
 
-import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;

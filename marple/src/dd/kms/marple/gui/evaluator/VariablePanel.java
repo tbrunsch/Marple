@@ -17,7 +17,6 @@ import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.JTextComponent;

@@ -8,7 +8,6 @@ import javax.swing.*;
 import java.awt.*;
 
 import static dd.kms.marple.gui.common.GuiCommons.DEFAULT_INSETS;
-import static java.awt.GridBagConstraints.REMAINDER;
 import static java.awt.GridBagConstraints.*;
 
 class EvaluationKeysPanel extends JPanel

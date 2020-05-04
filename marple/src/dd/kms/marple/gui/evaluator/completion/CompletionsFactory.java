@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import dd.kms.zenodot.result.CompletionSuggestion;
 import dd.kms.zenodot.result.CompletionSuggestionType;
 import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionMethod;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.ParameterizedCompletion;

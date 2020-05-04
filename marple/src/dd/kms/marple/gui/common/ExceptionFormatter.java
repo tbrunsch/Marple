@@ -1,8 +1,8 @@
 package dd.kms.marple.gui.common;
 
-import javax.annotation.Nullable;
-
 import dd.kms.zenodot.ParseException;
+
+import javax.annotation.Nullable;
 
 public class ExceptionFormatter
 {

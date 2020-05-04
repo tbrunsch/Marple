@@ -5,7 +5,6 @@ import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
-import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
 public class InvokeMethodAction implements InspectionAction

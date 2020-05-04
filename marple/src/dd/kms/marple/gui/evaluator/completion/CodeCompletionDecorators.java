@@ -2,8 +2,6 @@ package dd.kms.marple.gui.evaluator.completion;
 
 import dd.kms.marple.gui.common.GuiCommons;
 import dd.kms.marple.settings.keys.KeyRepresentation;
-import dd.kms.zenodot.ParseException;
-
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 
@@ -13,7 +11,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.function.Consumer;
 

@@ -1,14 +1,10 @@
 package dd.kms.marple.gui.evaluator.completion;
 
 import com.google.common.collect.ImmutableList;
-import dd.kms.marple.gui.common.ExceptionFormatter;
-import dd.kms.marple.gui.common.GuiCommons;
-import dd.kms.marple.settings.keys.KeyRepresentation;
 import dd.kms.zenodot.ParseException;
 import dd.kms.zenodot.result.ExecutableArgumentInfo;
 import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
 
-import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
