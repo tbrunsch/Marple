@@ -1,12 +1,13 @@
 package dd.kms.marple.inspector;
 
 import com.google.common.collect.ImmutableList;
+import dd.kms.marple.ComponentHierarchy;
 import dd.kms.marple.InspectionContext;
-import dd.kms.marple.components.ComponentHierarchyModels;
-import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.inspector.InspectionFrame;
 import dd.kms.marple.gui.inspector.views.ComponentHierarchyView;
+import dd.kms.marple.settings.visual.ObjectView;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.awt.*;
@@ -22,12 +23,12 @@ class ObjectInspectorImpl implements ObjectInspector
 	}
 
 	@Override
-	public void inspectComponent(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
-		ObjectInfo hierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
+	public void inspectComponent(ComponentHierarchy componentHierarchy) {
+		ObjectInfo objectToInspect = InfoProvider.createObjectInfo(componentHierarchy.getSelectedComponent());
 		ImmutableList.Builder<ObjectView> viewBuilder = ImmutableList.<ObjectView>builder()
-			.add(new ComponentHierarchyView(componentHierarchy, subcomponentHierarchy, inspectionContext))
-			.addAll(inspectionContext.getInspectionViews(hierarchyLeaf));
-		showViews(hierarchyLeaf, viewBuilder.build());
+			.add(new ComponentHierarchyView(componentHierarchy, inspectionContext))
+			.addAll(inspectionContext.getInspectionViews(objectToInspect));
+		showViews(objectToInspect, viewBuilder.build());
 	}
 
 	@Override

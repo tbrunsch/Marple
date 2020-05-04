@@ -6,7 +6,6 @@ import dd.kms.marple.settings.InspectionSettings;
 import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.function.Function;
@@ -17,7 +16,7 @@ public interface InspectionContext
 
 	InspectionAction createHistoryBackAction();
 	InspectionAction createHistoryForwardAction();
-	InspectionAction createInspectComponentAction(List<Component> componentHierarchy, List<?> subcomponentHierarchy);
+	InspectionAction createInspectComponentAction(ComponentHierarchy componentHierarchy);
 	InspectionAction createInspectObjectAction(ObjectInfo objectInfo);
 	InspectionAction createAddVariableAction(String suggestedName, ObjectInfo value);
 	InspectionAction createEvaluateExpressionAction(String expression, ObjectInfo thisValue);

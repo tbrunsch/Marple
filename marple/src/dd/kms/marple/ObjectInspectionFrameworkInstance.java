@@ -9,15 +9,13 @@ import dd.kms.marple.settings.InspectionSettings;
 import dd.kms.marple.settings.SecuritySettings;
 import dd.kms.marple.settings.keys.KeyRepresentation;
 import dd.kms.marple.settings.keys.KeySettings;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.security.AccessControlException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -80,9 +78,8 @@ class ObjectInspectionFrameworkInstance
 	 */
 	private void performInspection(InspectionContext context, Component component, Point position) {
 		Supplier<InspectionAction> actionSupplier = () -> {
-			List<Component> componentHierarchy = ComponentHierarchyModels.getComponentHierarchy(component);
-			List<?> subcomponentHierarchy = context.getSettings().getComponentHierarchyModel().getSubcomponentHierarchy(component, position);
-			return context.createInspectComponentAction(componentHierarchy, subcomponentHierarchy);
+			ComponentHierarchy componentHierarchy = ComponentHierarchyModels.getComponentHierarchy(component, position, context);
+			return context.createInspectComponentAction(componentHierarchy);
 		};
 		performAction(context, actionSupplier);
 	}
@@ -106,7 +103,8 @@ class ObjectInspectionFrameworkInstance
 
 	private void performAction(InspectionContext context, Component component, Point position, Function<ObjectInfo, InspectionAction> actionFunction) {
 		Supplier<InspectionAction> actionSupplier = () -> {
-			ObjectInfo componentHierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(component, position, context);
+			ComponentHierarchy componentHierarchy = ComponentHierarchyModels.getComponentHierarchy(component, position, context);
+			ObjectInfo componentHierarchyLeaf = InfoProvider.createObjectInfo(componentHierarchy.getSelectedComponent());
 			return actionFunction.apply(componentHierarchyLeaf);
 		};
 		performAction(context, actionSupplier);

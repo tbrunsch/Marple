@@ -1,10 +1,10 @@
 package dd.kms.marple.actions;
 
 import com.google.common.collect.ImmutableList;
+import dd.kms.marple.ComponentHierarchy;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.component.HighlightComponentAction;
 import dd.kms.marple.common.ReflectionUtils;
-import dd.kms.marple.components.ComponentHierarchyModels;
 import dd.kms.marple.gui.common.Snapshots;
 import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
@@ -19,21 +19,21 @@ public class ActionProviderBuilder
 {
 	private static final Pattern VARIABLE_NAME_PATTERN	= Pattern.compile("^[A-Za-z][_A-Za-z0-9]*");
 
-	private final String						displayText;
-	private final ObjectInfo					objectInfo;
-	private final InspectionContext				inspectionContext;
+	private final String					displayText;
+	private final ObjectInfo				objectInfo;
+	private final InspectionContext			inspectionContext;
 
-	private @Nullable ComponentHierarchyData	componentHierarchyData;
-	private @Nullable String					suggestedVariableName;
-	private @Nullable EvaluationData			evaluationData;
-	private boolean								executeDefaultAction	= true;
+	private @Nullable ComponentHierarchy	componentHierarchy;
+	private @Nullable String				suggestedVariableName;
+	private @Nullable EvaluationData		evaluationData;
+	private boolean							executeDefaultAction	= true;
 
-	public ActionProviderBuilder(String displayText, List<Component> componentHierarchy, List<?> subcomponentHierarchy, InspectionContext inspectionContext) {
+	public ActionProviderBuilder(String displayText, ComponentHierarchy componentHierarchy, InspectionContext inspectionContext) {
 		this.displayText = displayText;
-		this.objectInfo = ComponentHierarchyModels.getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
+		this.objectInfo = InfoProvider.createObjectInfo(componentHierarchy.getSelectedComponent());
 		this.inspectionContext = inspectionContext;
 
-		this.componentHierarchyData = new ComponentHierarchyData(componentHierarchy, subcomponentHierarchy);
+		this.componentHierarchy = componentHierarchy;
 	}
 
 	public ActionProviderBuilder(String displayText, ObjectInfo objectInfo, InspectionContext inspectionContext) {
@@ -74,12 +74,12 @@ public class ActionProviderBuilder
 			return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
 		}
 		boolean isInspectable = ReflectionUtils.isObjectInspectable(object);
-		if (componentHierarchyData == null) {
+		if (componentHierarchy == null) {
 			if (isInspectable) {
 				actionsBuilder.add(inspectionContext.createInspectObjectAction(objectInfo));
 			}
 		} else {
-			actionsBuilder.add(inspectionContext.createInspectComponentAction(componentHierarchyData.getComponentHierarchy(), componentHierarchyData.getSubcomponentHierarchy()));
+			actionsBuilder.add(inspectionContext.createInspectComponentAction(componentHierarchy));
 		}
 		if (object instanceof Component) {
 			actionsBuilder.add(new HighlightComponentAction((Component) object));

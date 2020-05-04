@@ -1,16 +1,13 @@
 package dd.kms.marple.components;
 
-import com.google.common.collect.ImmutableList;
+import dd.kms.marple.ComponentHierarchy;
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.awt.*;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class ComponentHierarchyModels
 {
@@ -25,29 +22,24 @@ public class ComponentHierarchyModels
 		};
 	}
 
-	public static List<Component> getComponentHierarchy(Component component) {
-		ImmutableList.Builder<Component> componentHierarchyBuilder = ImmutableList.builder();
-		for (Component curComponent = component; curComponent != null; curComponent = curComponent.getParent()) {
-			componentHierarchyBuilder.add(curComponent);
-		}
-		return componentHierarchyBuilder.build().reverse();
+	public static ComponentHierarchy getComponentHierarchy(Component component) {
+		List<Object> components = getComponentWithParents(component);
+		return new ComponentHierarchy(components);
 	}
 
-	public static ObjectInfo getHierarchyLeaf(Component component, Point position, InspectionContext context) {
-		if (component == null) {
-			return InfoProvider.NULL_LITERAL;
-		}
-		List<Component> componentHierarchy = Arrays.asList(component);
+	public static ComponentHierarchy getComponentHierarchy(Component component, Point position, InspectionContext context) {
+		List<Object> components = getComponentWithParents(component);
 		List<?> subcomponentHierarchy = context.getSettings().getComponentHierarchyModel().getSubcomponentHierarchy(component, position);
-		return getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
+		components.addAll(subcomponentHierarchy);
+		return new ComponentHierarchy(components);
 	}
 
-	public static ObjectInfo getHierarchyLeaf(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
-		List<?> lastNonEmptyList =	!subcomponentHierarchy.isEmpty()	? subcomponentHierarchy :
-									!componentHierarchy.isEmpty()		? componentHierarchy
-																		: null;
-		return lastNonEmptyList == null
-				? InfoProvider.NULL_LITERAL
-				: InfoProvider.createObjectInfo(lastNonEmptyList.get(lastNonEmptyList.size()-1));
+	private static List<Object> getComponentWithParents(Component component) {
+		List<Object> componentsWithParents = new ArrayList<>();
+		for (Component curComponent = component; curComponent != null; curComponent = curComponent.getParent()) {
+			componentsWithParents.add(curComponent);
+		}
+		Collections.reverse(componentsWithParents);
+		return componentsWithParents;
 	}
 }

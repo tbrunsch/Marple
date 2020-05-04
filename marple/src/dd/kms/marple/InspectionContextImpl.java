@@ -1,6 +1,5 @@
 package dd.kms.marple;
 
-import com.google.common.collect.ImmutableList;
 import dd.kms.marple.actions.AddVariableAction;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.actions.component.SnapshotAction;
@@ -19,6 +18,7 @@ import dd.kms.marple.evaluator.ExpressionEvaluator;
 import dd.kms.marple.inspector.InspectionHistory;
 import dd.kms.marple.settings.InspectionSettings;
 import dd.kms.marple.settings.visual.ObjectView;
+import dd.kms.zenodot.utils.wrappers.InfoProvider;
 import dd.kms.zenodot.utils.wrappers.ObjectInfo;
 
 import java.awt.*;
@@ -54,10 +54,9 @@ class InspectionContextImpl implements InspectionContext
 	}
 
 	@Override
-	public InspectionAction createInspectComponentAction(List<Component> componentHierarchy, List<?> subcomponentHierarchy) {
-		ObjectInfo hierarchyLeaf = ComponentHierarchyModels.getHierarchyLeaf(componentHierarchy, subcomponentHierarchy);
-		String leafDisplayText = getDisplayText(hierarchyLeaf);
-		InspectionAction action = new InspectComponentAction(settings.getInspector(), componentHierarchy, subcomponentHierarchy, leafDisplayText);
+	public InspectionAction createInspectComponentAction(ComponentHierarchy componentHierarchy) {
+		String componentDisplayText = getDisplayText(InfoProvider.createObjectInfo(componentHierarchy.getSelectedComponent()));
+		InspectionAction action = new InspectComponentAction(settings.getInspector(), componentHierarchy, componentDisplayText);
 		return new HistoryActionWrapper(inspectionHistory, action);
 	}
 
@@ -66,8 +65,8 @@ class InspectionContextImpl implements InspectionContext
 		Object object = objectInfo.getObject();
 		if (object instanceof Component) {
 			Component component = (Component) object;
-			List<Component> componentHierarchy = ComponentHierarchyModels.getComponentHierarchy(component);
-			return createInspectComponentAction(componentHierarchy, ImmutableList.of());
+			ComponentHierarchy componentHierarchy = ComponentHierarchyModels.getComponentHierarchy(component);
+			return createInspectComponentAction(componentHierarchy);
 		}
 		InspectionAction action = new InspectObjectAction(settings.getInspector(), objectInfo, getDisplayText(objectInfo));
 		return new HistoryActionWrapper(inspectionHistory, action);
