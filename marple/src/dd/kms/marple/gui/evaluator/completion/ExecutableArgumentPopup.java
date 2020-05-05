@@ -41,6 +41,8 @@ class ExecutableArgumentPopup extends JPopupMenu
 	ExecutableArgumentPopup(JTextComponent textComponent, ExecutableArgumentInfoProvider executableArgumentInfoProvider) {
 		this.textComponent = textComponent;
 		this.executableArgumentInfoProvider = executableArgumentInfoProvider;
+		setInvoker(textComponent);
+		setFocusable(false);
 	}
 
 	private void register() {
