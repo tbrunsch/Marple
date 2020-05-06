@@ -53,6 +53,7 @@ abstract class AbstractSlotPanel<T> extends JPanel
 		List<ColumnDescription<T>> columnDescriptions = createColumnDescriptions();
 		tableModel = new ListBasedTableModel<>(this.tableList, columnDescriptions);
 		table = new JTable(tableModel);
+		table.setRowHeight(20);
 		scrollPane = new JScrollPane(table);
 
 		TableColumnModel columnModel = table.getColumnModel();

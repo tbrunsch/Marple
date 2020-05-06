@@ -38,6 +38,7 @@ public class ListBasedTable<T> extends JPanel
 		rowSorter.setRowFilter(rowFilter);
 
 		table = new JTable(tableModel);
+		table.setRowHeight(20);
 		table.setRowSorter(rowSorter);
 		table.getTableHeader().setReorderingAllowed(false);
 

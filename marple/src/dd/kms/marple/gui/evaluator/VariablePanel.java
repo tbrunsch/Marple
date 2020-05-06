@@ -50,6 +50,7 @@ public class VariablePanel extends JPanel
 		List<ColumnDescription<Variable>> columnDescriptions = createColumnDescriptions();
 		tableModel = new ListBasedTableModel<>(this.variables, columnDescriptions);
 		table = new JTable(tableModel);
+		table.setRowHeight(20);
 		scrollPane = new JScrollPane(table);
 
 		TableColumnModel columnModel = table.getColumnModel();
