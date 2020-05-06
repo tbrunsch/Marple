@@ -35,7 +35,7 @@ public class ExceptionFormatter
 		builder.append("<p>").append(t.getClass().getSimpleName());
 		String message = t.getMessage();
 		if (message != null) {
-			builder.append(": ").append(message);
+			builder.append(": ").append(message.replace("\n", "<br/>"));
 		}
 		Throwable cause = t.getCause();
 		if (cause != null) {
