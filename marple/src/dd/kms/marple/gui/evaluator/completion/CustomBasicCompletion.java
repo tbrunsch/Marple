@@ -37,4 +37,9 @@ class CustomBasicCompletion extends BasicCompletion implements CustomCompletion
 	public CompletionSuggestion getCompletionSuggestion() {
 		return suggestion;
 	}
+
+	@Override
+	public String toString() {
+		return suggestion.toString();
+	}
 }
