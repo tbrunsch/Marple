@@ -8,6 +8,8 @@ import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.ParameterizedCompletion;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -33,9 +35,14 @@ class CompletionsFactory
 
 	List<Completion> getCompletions(String text, int caretPosition) {
 		Map<CompletionSuggestion, Integer> ratedSuggestions = getRatedSuggestions(text, caretPosition);
-		return ratedSuggestions.keySet().stream()
+		List<Completion> completions = ratedSuggestions.keySet().stream()
 			.map(suggestion -> createCompletion(suggestion, ratedSuggestions.get(suggestion)))
 			.collect(Collectors.toList());
+		Collections.sort(completions,
+			Comparator.comparing(Completion::getRelevance)
+				.reversed()
+				.thenComparing(completion -> completion.toString().toLowerCase()));
+		return completions;
 	}
 
 	List<ParameterizedCompletion> getParameterizedCompletions(String text, int caretPosition) {
