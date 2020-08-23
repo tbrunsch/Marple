@@ -5,13 +5,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.math.IntMath;
 import dd.kms.marple.settings.InspectionSettings;
-import dd.kms.zenodot.common.AccessModifier;
-import dd.kms.zenodot.settings.ObjectTreeNode;
-import dd.kms.zenodot.settings.ParserSettings;
-import dd.kms.zenodot.settings.ParserSettingsUtils;
-import dd.kms.zenodot.settings.Variable;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.common.AccessModifier;
+import dd.kms.zenodot.api.settings.ObjectTreeNode;
+import dd.kms.zenodot.api.settings.ParserSettings;
+import dd.kms.zenodot.api.settings.ParserSettingsUtils;
+import dd.kms.zenodot.api.settings.Variable;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -35,10 +35,10 @@ class TestUtils
 
 		ParserSettings parserSettings = ParserSettingsUtils.createBuilder()
 			.variables(ImmutableList.of(variable1, variable2))
-			.minimumAccessLevel(AccessModifier.PRIVATE)
+			.minimumAccessModifier(AccessModifier.PRIVATE)
 			.importPackagesByName(ImmutableSet.of(importPackage1, importPackage2))
 			.importClassesByName(ImmutableSet.of(importClass1, importClass2))
-			.considerAllClassesForClassSuggestions(true)
+			.considerAllClassesForClassCompletions(true)
 			.customHierarchyRoot(customHierarchyRoot)
 			.build();
 

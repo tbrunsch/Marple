@@ -5,7 +5,7 @@ import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeNode;
 import dd.kms.marple.instancesearch.InstancePath;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
 
 import javax.annotation.Nullable;
 import javax.swing.tree.DefaultMutableTreeNode;

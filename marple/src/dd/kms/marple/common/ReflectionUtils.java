@@ -4,21 +4,20 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.primitives.Primitives;
-import dd.kms.zenodot.common.FieldScanner;
-import dd.kms.zenodot.common.MethodScanner;
-import dd.kms.zenodot.utils.EvaluationMode;
-import dd.kms.zenodot.utils.dataProviders.ObjectInfoProvider;
-import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
+import dd.kms.zenodot.api.common.FieldScanner;
+import dd.kms.zenodot.api.common.MethodScanner;
+import dd.kms.zenodot.api.wrappers.ExecutableInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.TypeInfo;
+import dd.kms.zenodot.impl.utils.dataproviders.ObjectInfoProvider;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
 public class ReflectionUtils
 {
-	public static final ObjectInfoProvider OBJECT_INFO_PROVIDER	= new ObjectInfoProvider(EvaluationMode.DYNAMICALLY_TYPED);
+	public static final ObjectInfoProvider OBJECT_INFO_PROVIDER	= new ObjectInfoProvider(true);
 
 	/**
 	 * We consider an object worth being inspected if it is
@@ -112,9 +111,6 @@ public class ReflectionUtils
 	}
 
 	public static TypeInfo getRuntimeTypeInfo(TypeInfo declaredType, Class<?> runtimeClass) {
-		if (declaredType == InfoProvider.UNKNOWN_TYPE) {
-			return InfoProvider.createTypeInfo(runtimeClass);
-		}
 		try {
 			return declaredType.isPrimitive() ? declaredType : declaredType.getSubtype(runtimeClass);
 		} catch (Exception e) {

@@ -16,7 +16,7 @@ public class ValueFilters
 		return new ValueFilterWildcard();
 	}
 
-	public static ValueFilter createMinimumAccessLevelFilter() { return new ValueFilterMinimumAccessLevel(); }
+	public static ValueFilter createMinimumAccessModifierFilter() { return new ValueFilterMinimumAccessModifier(); }
 
 	private static class NoTableValueFilter implements ValueFilter
 	{

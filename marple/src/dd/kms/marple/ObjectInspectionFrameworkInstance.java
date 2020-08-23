@@ -9,8 +9,8 @@ import dd.kms.marple.settings.InspectionSettings;
 import dd.kms.marple.settings.SecuritySettings;
 import dd.kms.marple.settings.keys.KeyRepresentation;
 import dd.kms.marple.settings.keys.KeySettings;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;

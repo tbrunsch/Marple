@@ -1,11 +1,10 @@
 package dd.kms.marple.gui.evaluator.textfields;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.matching.MatchRating;
-import dd.kms.zenodot.result.CompletionSuggestion;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.result.CodeCompletion;
 
-import java.util.Map;
+import java.util.List;
 
 abstract class AbstractExpressionInputTextField<T> extends AbstractInputTextField<T>
 {
@@ -18,11 +17,11 @@ abstract class AbstractExpressionInputTextField<T> extends AbstractInputTextFiel
 		setCaretPosition(expression == null ? 0 : expression.length());
 	}
 
-	abstract Map<CompletionSuggestion, MatchRating> suggestCodeCompletion(String text, int caretPosition) throws ParseException;
+	abstract List<CodeCompletion> suggestCodeCompletion(String text, int caretPosition) throws ParseException;
 
 	@Override
-	Map<CompletionSuggestion, Integer> doProvideRatedSuggestions(String text, int caretPosition) throws ParseException {
-		Map<CompletionSuggestion, MatchRating> ratedSuggestions = suggestCodeCompletion(text, caretPosition);
-		return Ratings.filterAndTransformMatchRatings(ratedSuggestions);
+	List<CodeCompletion> doProvideCompletions(String text, int caretPosition) throws ParseException {
+		List<CodeCompletion> completions = suggestCodeCompletion(text, caretPosition);
+		return filterCompletions(completions);
 	}
 }

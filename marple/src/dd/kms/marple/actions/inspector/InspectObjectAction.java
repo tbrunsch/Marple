@@ -2,7 +2,7 @@ package dd.kms.marple.actions.inspector;
 
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.inspector.ObjectInspector;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 public class InspectObjectAction implements InspectionAction
 {

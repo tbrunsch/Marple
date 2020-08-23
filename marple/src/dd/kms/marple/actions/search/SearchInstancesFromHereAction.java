@@ -2,7 +2,7 @@ package dd.kms.marple.actions.search;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.search.InstanceSearchFrame;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 public class SearchInstancesFromHereAction extends AbstractInstanceSearchAction
 {

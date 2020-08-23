@@ -8,7 +8,7 @@ import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.actionprovidertree.ActionProviderTreeNode;
-import dd.kms.zenodot.settings.ObjectTreeNode;
+import dd.kms.zenodot.api.settings.ObjectTreeNode;
 
 import javax.swing.*;
 import javax.swing.tree.TreeNode;

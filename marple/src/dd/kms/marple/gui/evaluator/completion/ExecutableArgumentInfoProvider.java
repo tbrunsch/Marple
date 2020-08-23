@@ -1,7 +1,7 @@
 package dd.kms.marple.gui.evaluator.completion;
 
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.result.ExecutableArgumentInfo;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
 
 import java.util.Optional;
 

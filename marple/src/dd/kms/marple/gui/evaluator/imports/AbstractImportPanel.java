@@ -2,8 +2,8 @@ package dd.kms.marple.gui.evaluator.imports;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.evaluator.textfields.AbstractInputTextField;
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.settings.ParserSettings;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.settings.ParserSettings;
 
 import javax.swing.*;
 import java.awt.*;

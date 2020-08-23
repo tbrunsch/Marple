@@ -6,9 +6,9 @@ import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.evaluator.ExpressionEvaluators;
 import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.evaluator.VariablePanel;
-import dd.kms.zenodot.settings.ParserSettingsUtils;
-import dd.kms.zenodot.settings.Variable;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.settings.ParserSettingsUtils;
+import dd.kms.zenodot.api.settings.Variable;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.util.Set;
 import java.util.stream.Collectors;

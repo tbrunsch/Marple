@@ -1,7 +1,7 @@
 package dd.kms.marple.gui.filters;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
 
 import javax.swing.*;
 import java.awt.*;

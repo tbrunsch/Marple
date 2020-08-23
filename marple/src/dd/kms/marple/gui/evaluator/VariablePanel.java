@@ -11,9 +11,9 @@ import dd.kms.marple.gui.table.ActionProviderRenderer;
 import dd.kms.marple.gui.table.ColumnDescription;
 import dd.kms.marple.gui.table.ColumnDescriptionBuilder;
 import dd.kms.marple.gui.table.ListBasedTableModel;
-import dd.kms.zenodot.settings.ParserSettingsUtils;
-import dd.kms.zenodot.settings.Variable;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.settings.ParserSettingsUtils;
+import dd.kms.zenodot.api.settings.Variable;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -33,7 +33,7 @@ public class VariablePanel extends JPanel
 
 	private final JScrollPane					scrollPane;
 	private final JTable						table;
-	private final ListBasedTableModel<Variable> tableModel;
+	private final ListBasedTableModel<Variable>	tableModel;
 
 	private final JButton						importButton		= new JButton("Import from 'DebugSupport'");
 	private final JButton						exportButton		= new JButton("Export to 'DebugSupport'");

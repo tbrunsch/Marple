@@ -1,9 +1,9 @@
 package dd.kms.marple.evaluator;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.settings.ParserSettings;
-import dd.kms.zenodot.settings.ParserSettingsBuilder;
-import dd.kms.zenodot.settings.Variable;
+import dd.kms.zenodot.api.settings.ParserSettings;
+import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
+import dd.kms.zenodot.api.settings.Variable;
 
 import java.util.List;
 import java.util.function.BiConsumer;

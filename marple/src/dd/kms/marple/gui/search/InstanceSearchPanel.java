@@ -12,11 +12,11 @@ import dd.kms.marple.instancesearch.InstancePath;
 import dd.kms.marple.instancesearch.InstancePathFinder;
 import dd.kms.marple.instancesearch.settings.SearchSettings;
 import dd.kms.marple.instancesearch.settings.SearchSettingsBuilders;
-import dd.kms.zenodot.CompiledExpression;
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.utils.wrappers.ClassInfo;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.CompiledExpression;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.wrappers.ClassInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;

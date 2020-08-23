@@ -66,7 +66,7 @@ public class CodeCompletionDecorators
 					String text = textComponent.getText();
 					int caretPosition = textComponent.getCaretPosition();
 					try {
-						completionSuggestionProvider.provideRatedSuggestions(text, caretPosition);
+						completionSuggestionProvider.provideCodeCompletions(text, caretPosition);
 						exceptionConsumer.accept(null);
 					} catch (Throwable t) {
 						exceptionConsumer.accept(t);

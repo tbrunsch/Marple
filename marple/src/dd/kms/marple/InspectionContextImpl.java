@@ -18,8 +18,8 @@ import dd.kms.marple.evaluator.ExpressionEvaluator;
 import dd.kms.marple.inspector.InspectionHistory;
 import dd.kms.marple.settings.InspectionSettings;
 import dd.kms.marple.settings.visual.ObjectView;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

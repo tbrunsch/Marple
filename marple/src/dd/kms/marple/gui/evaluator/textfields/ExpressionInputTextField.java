@@ -1,17 +1,16 @@
 package dd.kms.marple.gui.evaluator.textfields;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.ExpressionParser;
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.Parsers;
-import dd.kms.zenodot.matching.MatchRating;
-import dd.kms.zenodot.result.CompletionSuggestion;
-import dd.kms.zenodot.result.ExecutableArgumentInfo;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
+import dd.kms.zenodot.api.ExpressionParser;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.Parsers;
+import dd.kms.zenodot.api.result.CodeCompletion;
+import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.TypeInfo;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 public class ExpressionInputTextField extends AbstractExpressionInputTextField<ObjectInfo>
@@ -27,21 +26,21 @@ public class ExpressionInputTextField extends AbstractExpressionInputTextField<O
 	}
 
 	@Override
-	Map<CompletionSuggestion, MatchRating> suggestCodeCompletion(String text, int caretPosition) throws ParseException {
-		ExpressionParser parser = createParser(text);
-		return parser.suggestCodeCompletion(caretPosition);
+	List<CodeCompletion> suggestCodeCompletion(String text, int caretPosition) throws ParseException {
+		ExpressionParser parser = createParser();
+		return parser.getCompletions(text, caretPosition, thisValue);
 	}
 
 	@Override
 	Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String text, int caretPosition) throws ParseException  {
-		ExpressionParser parser = createParser(text);
-		return parser.getExecutableArgumentInfo(caretPosition);
+		ExpressionParser parser = createParser();
+		return parser.getExecutableArgumentInfo(text, caretPosition, thisValue);
 	}
 
 	@Override
 	ObjectInfo evaluate(String text) throws ParseException {
-		ExpressionParser parser = createParser(text);
-		ObjectInfo result = parser.evaluate();
+		ExpressionParser parser = createParser();
+		ObjectInfo result = parser.evaluate(text, thisValue);
 		Object resultObject = result.getObject();
 		if (resultObject != null) {
 			Class<?> resultObjectClass = resultObject.getClass();
@@ -56,7 +55,7 @@ public class ExpressionInputTextField extends AbstractExpressionInputTextField<O
 
 	}
 
-	private ExpressionParser createParser(String text) {
-		return Parsers.createExpressionParser(text, getParserSettings(), thisValue);
+	private ExpressionParser createParser() {
+		return Parsers.createExpressionParser(getParserSettings());
 	}
 }

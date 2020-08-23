@@ -1,7 +1,7 @@
 package dd.kms.marple.common;
 
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 public class TypedObjectInfo<T> implements ObjectInfo
 {

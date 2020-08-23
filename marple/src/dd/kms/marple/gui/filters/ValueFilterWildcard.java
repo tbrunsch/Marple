@@ -1,6 +1,6 @@
 package dd.kms.marple.gui.filters;
 
-import dd.kms.zenodot.common.RegexUtils;
+import dd.kms.zenodot.api.common.RegexUtils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

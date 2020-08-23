@@ -1,10 +1,10 @@
 package dd.kms.marple.gui.evaluator.completion;
 
-import dd.kms.zenodot.result.CompletionSuggestion;
-import dd.kms.zenodot.result.IntRange;
-import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionMethod;
-import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
+import dd.kms.zenodot.api.result.CodeCompletion;
+import dd.kms.zenodot.api.result.IntRange;
+import dd.kms.zenodot.api.result.codecompletions.CodeCompletionMethod;
+import dd.kms.zenodot.api.wrappers.ExecutableInfo;
+import dd.kms.zenodot.api.wrappers.TypeInfo;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.FunctionCompletion;
@@ -16,14 +16,14 @@ import java.util.List;
 
 class CustomFunctionCompletion extends FunctionCompletion implements CustomCompletion
 {
-	private final CompletionSuggestion	suggestion;
-	private final ExecutableInfo		methodInfo;
+	private final CodeCompletion	completion;
+	private final ExecutableInfo	methodInfo;
 
-	CustomFunctionCompletion(CompletionSuggestionMethod suggestion, int relevance, CompletionProvider completionProvider) {
-		super(completionProvider, suggestion.getMethodInfo().getName(), suggestion.getMethodInfo().getReturnType().toString());
+	CustomFunctionCompletion(CodeCompletionMethod completion, int relevance, CompletionProvider completionProvider) {
+		super(completionProvider, completion.getMethodInfo().getName(), completion.getMethodInfo().getReturnType().toString());
 
-		this.suggestion = suggestion;
-		this.methodInfo = suggestion.getMethodInfo();
+		this.completion = completion;
+		this.methodInfo = completion.getMethodInfo();
 
 		List<Parameter> params = new ArrayList<>();
 		int numArguments = methodInfo.getNumberOfArguments();
@@ -33,12 +33,12 @@ class CustomFunctionCompletion extends FunctionCompletion implements CustomCompl
 			ParameterizedCompletion.Parameter param = new ParameterizedCompletion.Parameter(type, name, i == numArguments - 1);
 			params.add(param);
 		}
-		setShortDescription(suggestion.getType().toString());
+		setShortDescription(completion.getType().toString());
 		setParams(params);
 		setRelevance(relevance);
 		setReturnValueDescription(methodInfo.getReturnType().getSimpleName());
-		setShortDescription(suggestion.getType().toString());
-		setIcon(IconFactory.getIcon(suggestion));
+		setShortDescription(completion.getType().toString());
+		setIcon(IconFactory.getIcon(completion));
 	}
 
 	@Override
@@ -49,22 +49,22 @@ class CustomFunctionCompletion extends FunctionCompletion implements CustomCompl
 	@Override
 	public String getAlreadyEntered(JTextComponent textComponent) {
 		String text = textComponent.getText();
-		IntRange insertionRange = suggestion.getInsertionRange();
+		IntRange insertionRange = completion.getInsertionRange();
 		return text.substring(insertionRange.getBegin(), insertionRange.getEnd());
 	}
 
 	@Override
 	public String getReplacementText() {
-		return suggestion.getTextToInsert();
+		return completion.getTextToInsert();
 	}
 
 	@Override
 	public String toString() {
-		return suggestion.toString();
+		return completion.toString();
 	}
 
 	@Override
-	public CompletionSuggestion getCompletionSuggestion() {
-		return suggestion;
+	public CodeCompletion getCodeCompletion() {
+		return completion;
 	}
 }

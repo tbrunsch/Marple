@@ -1,9 +1,9 @@
 package dd.kms.marple.gui.evaluator.completion;
 
-import com.google.common.collect.ImmutableMap;
-import dd.kms.zenodot.result.CompletionSuggestion;
-import dd.kms.zenodot.result.CompletionSuggestionType;
-import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionMethod;
+import com.google.common.collect.ImmutableList;
+import dd.kms.zenodot.api.result.CodeCompletion;
+import dd.kms.zenodot.api.result.CodeCompletionType;
+import dd.kms.zenodot.api.result.codecompletions.CodeCompletionMethod;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.ParameterizedCompletion;
@@ -11,16 +11,16 @@ import org.fife.ui.autocomplete.ParameterizedCompletion;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 class CompletionsFactory
 {
-	private static final int NUM_SUGGESTION_TYPES = CompletionSuggestionType.values().length;
+	private static final int NUM_COMPLETION_TYPES = CodeCompletionType.values().length;
 
-	static int getRelevance(CompletionSuggestion suggestion, int rating) {
-		return rating * NUM_SUGGESTION_TYPES + (NUM_SUGGESTION_TYPES - 1 - suggestion.getType().ordinal());
+	static int getRelevance(CodeCompletion completion) {
+		int rating = completion.getRating().getRatingValue();
+		return rating * NUM_COMPLETION_TYPES + (NUM_COMPLETION_TYPES - 1 - completion.getType().ordinal());
 	}
 
 	private final CompletionProvider			completionProvider;
@@ -34,9 +34,9 @@ class CompletionsFactory
 	}
 
 	List<Completion> getCompletions(String text, int caretPosition) {
-		Map<CompletionSuggestion, Integer> ratedSuggestions = getRatedSuggestions(text, caretPosition);
-		List<Completion> completions = ratedSuggestions.keySet().stream()
-			.map(suggestion -> createCompletion(suggestion, ratedSuggestions.get(suggestion)))
+		List<CodeCompletion> codeCompletions = getCodeCompletions(text, caretPosition);
+		List<Completion> completions = codeCompletions.stream()
+			.map(this::createCompletion)
 			.collect(Collectors.toList());
 		Collections.sort(completions,
 			Comparator.comparing(Completion::getRelevance)
@@ -46,38 +46,39 @@ class CompletionsFactory
 	}
 
 	List<ParameterizedCompletion> getParameterizedCompletions(String text, int caretPosition) {
-		Map<CompletionSuggestion, Integer> ratedSuggestions = getRatedSuggestions(text, caretPosition);
-		return ratedSuggestions.keySet().stream()
-			.filter(suggestion -> suggestion.getType() == CompletionSuggestionType.METHOD)
-			.map(suggestion -> createParameterizedCompletion((CompletionSuggestionMethod) suggestion, ratedSuggestions.get(suggestion)))
+		List<CodeCompletion> completions = getCodeCompletions(text, caretPosition);
+		return completions.stream()
+			.filter(completion -> completion.getType() == CodeCompletionType.METHOD)
+			.sorted(Comparator.comparingInt(CompletionsFactory::getRelevance))
+			.map(completion -> createParameterizedCompletion((CodeCompletionMethod) completion))
 			.collect(Collectors.toList());
 	}
 
-	private Map<CompletionSuggestion, Integer> getRatedSuggestions(String text, int caretPosition) {
-		Map<CompletionSuggestion, Integer> ratedSuggestions;
+	private List<CodeCompletion> getCodeCompletions(String text, int caretPosition) {
+		List<CodeCompletion> completions;
 		Throwable throwable = null;
 		try {
-			ratedSuggestions = suggestionProvider.provideRatedSuggestions(text, caretPosition);
+			completions = suggestionProvider.provideCodeCompletions(text, caretPosition);
 		} catch (Throwable t) {
 			throwable = t;
-			ratedSuggestions = ImmutableMap.of();
+			completions = ImmutableList.of();
 		}
 		if (exceptionConsumer != null) {
 			exceptionConsumer.accept(throwable);
 		}
-		return ratedSuggestions;
+		return completions;
 	}
 
-	private Completion createCompletion(CompletionSuggestion suggestion, int rating) {
-		if (suggestion.getType() == CompletionSuggestionType.METHOD) {
-			return createParameterizedCompletion((CompletionSuggestionMethod) suggestion, rating);
+	private Completion createCompletion(CodeCompletion completion) {
+		if (completion.getType() == CodeCompletionType.METHOD) {
+			return createParameterizedCompletion((CodeCompletionMethod) completion);
 		}
-		int relevance = getRelevance(suggestion, rating);
-		return new CustomBasicCompletion(suggestion, relevance, completionProvider);
+		int relevance = getRelevance(completion);
+		return new CustomBasicCompletion(completion, relevance, completionProvider);
 	}
 
-	private ParameterizedCompletion createParameterizedCompletion(CompletionSuggestionMethod suggestion, int rating) {
-		int relevance = getRelevance(suggestion, rating);
-		return new CustomFunctionCompletion(suggestion, relevance, completionProvider);
+	private ParameterizedCompletion createParameterizedCompletion(CodeCompletionMethod completion) {
+		int relevance = getRelevance(completion);
+		return new CustomFunctionCompletion(completion, relevance, completionProvider);
 	}
 }

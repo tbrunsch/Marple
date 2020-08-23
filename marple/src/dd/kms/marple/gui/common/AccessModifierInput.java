@@ -1,6 +1,6 @@
 package dd.kms.marple.gui.common;
 
-import dd.kms.zenodot.common.AccessModifier;
+import dd.kms.zenodot.api.common.AccessModifier;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;

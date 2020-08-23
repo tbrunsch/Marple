@@ -6,8 +6,8 @@ import dd.kms.marple.actions.ActionProvider;
 import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.gui.table.ColumnDescription;
 import dd.kms.marple.gui.table.ColumnDescriptionBuilder;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.util.Arrays;
 import java.util.List;

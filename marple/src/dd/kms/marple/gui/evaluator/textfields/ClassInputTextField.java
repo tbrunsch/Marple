@@ -1,15 +1,14 @@
 package dd.kms.marple.gui.evaluator.textfields;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.ClassParser;
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.Parsers;
-import dd.kms.zenodot.matching.StringMatch;
-import dd.kms.zenodot.result.CompletionSuggestion;
-import dd.kms.zenodot.result.ExecutableArgumentInfo;
-import dd.kms.zenodot.utils.wrappers.ClassInfo;
+import dd.kms.zenodot.api.ClassParser;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.Parsers;
+import dd.kms.zenodot.api.result.CodeCompletion;
+import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
+import dd.kms.zenodot.api.wrappers.ClassInfo;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 public class ClassInputTextField extends AbstractInputTextField<ClassInfo>
@@ -19,10 +18,10 @@ public class ClassInputTextField extends AbstractInputTextField<ClassInfo>
 	}
 
 	@Override
-	Map<CompletionSuggestion, Integer> doProvideRatedSuggestions(String text, int caretPosition) throws ParseException {
-		ClassParser parser = createParser(text);
-		Map<CompletionSuggestion, StringMatch> ratedSuggestions = parser.suggestCodeCompletion(caretPosition);
-		return Ratings.filterAndTransformStringMatches(ratedSuggestions);
+	List<CodeCompletion> doProvideCompletions(String text, int caretPosition) throws ParseException {
+		ClassParser parser = createParser();
+		List<CodeCompletion> completions = parser.getCompletions(text, caretPosition);
+		return filterCompletions(completions);
 	}
 
 	@Override
@@ -32,11 +31,11 @@ public class ClassInputTextField extends AbstractInputTextField<ClassInfo>
 
 	@Override
 	ClassInfo evaluate(String text) throws ParseException {
-		ClassParser parser = createParser(text);
-		return parser.evaluate();
+		ClassParser parser = createParser();
+		return parser.evaluate(text);
 	}
 
-	private ClassParser createParser(String text) {
-		return Parsers.createClassParser(text, getParserSettings());
+	private ClassParser createParser() {
+		return Parsers.createClassParser(getParserSettings());
 	}
 }

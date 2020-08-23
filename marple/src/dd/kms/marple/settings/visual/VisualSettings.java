@@ -1,7 +1,7 @@
 package dd.kms.marple.settings.visual;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.util.List;
 

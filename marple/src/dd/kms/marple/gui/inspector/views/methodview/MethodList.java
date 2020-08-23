@@ -6,10 +6,10 @@ import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.filters.ValueFilter;
 import dd.kms.marple.gui.filters.ValueFilters;
-import dd.kms.zenodot.common.MethodScanner;
-import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.common.MethodScanner;
+import dd.kms.zenodot.api.wrappers.ExecutableInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,14 +29,14 @@ class MethodList extends JPanel
 	private final JPanel							filterPanel					= new JPanel(new GridBagLayout());
 	private final JLabel							nameLabel					= new JLabel("Name:");
 	private final Component							nameFilterEditor;
-	private final JLabel							accessLevelLabel			= new JLabel("Access level:");
-	private final Component							accessLevelFilterEditor;
+	private final JLabel							accessModifierLabel			= new JLabel("Minimum access modifier:");
+	private final Component							accessModifierFilterEditor;
 
 	private final List<ExecutableInfo>				methodInfos;
 	private final MethodViewUtils					methodViewUtils;
 
 	private final ValueFilter						nameFilter					= ValueFilters.createWildcardFilter();
-	private final ValueFilter						accessLevelFilter			= ValueFilters.createMinimumAccessLevelFilter();
+	private final ValueFilter						accessModifierFilter		= ValueFilters.createMinimumAccessModifierFilter();
 
 	public MethodList(ObjectInfo objectInfo, InspectionContext inspectionContext) {
 		super(new GridBagLayout());
@@ -44,7 +44,7 @@ class MethodList extends JPanel
 		this.methodViewUtils = new MethodViewUtils(objectInfo, inspectionContext);
 
 		this.nameFilterEditor = nameFilter.getEditor();
-		this.accessLevelFilterEditor = accessLevelFilter.getEditor();
+		this.accessModifierFilterEditor = accessModifierFilter.getEditor();
 
 		add(filterPanel,	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		add(listScrollPane,	new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
@@ -52,8 +52,8 @@ class MethodList extends JPanel
 		int xPos = 0;
 		filterPanel.add(nameLabel,					new GridBagConstraints(xPos++, 0, 1, 1, 0.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
 		filterPanel.add(nameFilterEditor,			new GridBagConstraints(xPos++, 0, 1, 1, 0.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
-		filterPanel.add(accessLevelLabel,			new GridBagConstraints(xPos++, 0, 1, 1, 0.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
-		filterPanel.add(accessLevelFilterEditor,	new GridBagConstraints(xPos++, 0, 1, 1, 1.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
+		filterPanel.add(accessModifierLabel,		new GridBagConstraints(xPos++, 0, 1, 1, 0.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
+		filterPanel.add(accessModifierFilterEditor,	new GridBagConstraints(xPos++, 0, 1, 1, 1.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
 
 		filterPanel.setBorder(BorderFactory.createTitledBorder("Filters"));
 
@@ -71,7 +71,7 @@ class MethodList extends JPanel
 
 	private void addListeners() {
 		nameFilter.addFilterChangedListener(this::onFilterChanged);
-		accessLevelFilter.addFilterChangedListener(this::onFilterChanged);
+		accessModifierFilter.addFilterChangedListener(this::onFilterChanged);
 
 		ActionProviderListeners.addMouseListeners(list, this::getActionProvider);
 	}
@@ -85,7 +85,7 @@ class MethodList extends JPanel
 		if (nameFilter.isActive() && !nameFilter.test(methodInfo.getName())) {
 			return false;
 		}
-		if (accessLevelFilter.isActive() && !accessLevelFilter.test(methodInfo.getAccessModifier())) {
+		if (accessModifierFilter.isActive() && !accessModifierFilter.test(methodInfo.getAccessModifier())) {
 			return false;
 		}
 		return true;

@@ -1,7 +1,7 @@
 package dd.kms.marple.gui.evaluator.completion;
 
 import dd.kms.marple.settings.keys.KeyRepresentation;
-import dd.kms.zenodot.result.CompletionSuggestion;
+import dd.kms.zenodot.api.result.CodeCompletion;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
@@ -27,9 +27,9 @@ class CustomAutoCompletion extends AutoCompletion
 		super.insertCompletion(completion, typedParamListStartChar);
 		if (completion instanceof CustomCompletion) {
 			CustomCompletion customCompletion = (CustomCompletion) completion;
-			CompletionSuggestion completionSuggestion = customCompletion.getCompletionSuggestion();
+			CodeCompletion codeCompletion = customCompletion.getCodeCompletion();
 			JTextComponent textComponent = getTextComponent();
-			int caretPositionAfterInsertion = completionSuggestion.getCaretPositionAfterInsertion();
+			int caretPositionAfterInsertion = codeCompletion.getCaretPositionAfterInsertion();
 			textComponent.setCaretPosition(caretPositionAfterInsertion);
 		}
 		if (completion instanceof CustomFunctionCompletion) {

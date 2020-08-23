@@ -5,7 +5,7 @@ import com.google.common.collect.Multimap;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.instancesearch.elementcollectors.*;
 import dd.kms.marple.instancesearch.settings.SearchSettings;
-import dd.kms.zenodot.common.FieldScanner;
+import dd.kms.zenodot.api.common.FieldScanner;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

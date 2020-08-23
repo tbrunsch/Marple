@@ -2,7 +2,7 @@ package dd.kms.marple.gui.inspector.views.fieldview;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.inspector.views.AbstractQuickAndDetailedView;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.awt.*;
 

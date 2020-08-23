@@ -3,13 +3,13 @@ package dd.kms.marple.gui.evaluator.completion;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import dd.kms.marple.gui.common.GuiCommons;
-import dd.kms.zenodot.common.AccessModifier;
-import dd.kms.zenodot.result.CompletionSuggestion;
-import dd.kms.zenodot.result.CompletionSuggestionType;
-import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionField;
-import dd.kms.zenodot.result.completionSuggestions.CompletionSuggestionMethod;
-import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
-import dd.kms.zenodot.utils.wrappers.FieldInfo;
+import dd.kms.zenodot.api.common.AccessModifier;
+import dd.kms.zenodot.api.result.CodeCompletion;
+import dd.kms.zenodot.api.result.CodeCompletionType;
+import dd.kms.zenodot.api.result.codecompletions.CodeCompletionField;
+import dd.kms.zenodot.api.result.codecompletions.CodeCompletionMethod;
+import dd.kms.zenodot.api.wrappers.ExecutableInfo;
+import dd.kms.zenodot.api.wrappers.FieldInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,11 +23,11 @@ class IconFactory
 	private static final Color	COLOR_KEYWORD			= Color.BLUE;
 	private static final Color	COLOR_CLASS				= Color.LIGHT_GRAY;
 
-	private static final Table<CompletionSuggestionType, Color, Icon> CACHED_ICONS	= HashBasedTable.create();
+	private static final Table<CodeCompletionType, Color, Icon> CACHED_ICONS	= HashBasedTable.create();
 
-	static synchronized Icon getIcon(CompletionSuggestion completionSuggestion) {
-		CompletionSuggestionType type = completionSuggestion.getType();
-		Color color = determineColor(completionSuggestion);
+	static synchronized Icon getIcon(CodeCompletion completion) {
+		CodeCompletionType type = completion.getType();
+		Color color = determineColor(completion);
 
 		Icon icon = CACHED_ICONS.get(type, color);
 		if (icon == null) {
@@ -37,21 +37,21 @@ class IconFactory
 		return icon;
 	}
 
-	private static Color determineColor(CompletionSuggestion completionSuggestion) {
-		switch (completionSuggestion.getType()) {
+	private static Color determineColor(CodeCompletion completion) {
+		switch (completion.getType()) {
 			case VARIABLE:
 				return COLOR_VARIABLE;
 			case OBJECT_TREE_NODE:
 				return COLOR_OBJECT_TREE_NODE;
 			case FIELD: {
-				CompletionSuggestionField fieldSuggestion = (CompletionSuggestionField) completionSuggestion;
-				FieldInfo fieldInfo = fieldSuggestion.getFieldInfo();
+				CodeCompletionField fieldCompletion = (CodeCompletionField) completion;
+				FieldInfo fieldInfo = fieldCompletion.getFieldInfo();
 				AccessModifier accessModifier = fieldInfo.getAccessModifier();
 				return getColor(accessModifier);
 			}
 			case METHOD: {
-				CompletionSuggestionMethod methodSuggestion = (CompletionSuggestionMethod) completionSuggestion;
-				ExecutableInfo methodInfo = methodSuggestion.getMethodInfo();
+				CodeCompletionMethod methodCompletion = (CodeCompletionMethod) completion;
+				ExecutableInfo methodInfo = methodCompletion.getMethodInfo();
 				AccessModifier accessModifier = methodInfo.getAccessModifier();
 				return getColor(accessModifier);
 			}
@@ -83,10 +83,10 @@ class IconFactory
 		private static final int WIDTH	= 16;
 		private static final int HEIGHT	= 16;
 
-		private final CompletionSuggestionType	type;
-		private final Color						color;
+		private final CodeCompletionType	type;
+		private final Color					color;
 
-		private TypeIcon(CompletionSuggestionType type, Color color) {
+		private TypeIcon(CodeCompletionType type, Color color) {
 			this.type = type;
 			this.color = color;
 		}

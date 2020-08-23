@@ -1,15 +1,14 @@
 package dd.kms.marple.gui.evaluator.textfields;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.PackageParser;
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.Parsers;
-import dd.kms.zenodot.matching.StringMatch;
-import dd.kms.zenodot.result.CompletionSuggestion;
-import dd.kms.zenodot.result.ExecutableArgumentInfo;
-import dd.kms.zenodot.utils.wrappers.PackageInfo;
+import dd.kms.zenodot.api.PackageParser;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.Parsers;
+import dd.kms.zenodot.api.result.CodeCompletion;
+import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
+import dd.kms.zenodot.api.wrappers.PackageInfo;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 public class PackageInputTextField extends AbstractInputTextField<PackageInfo>
@@ -19,10 +18,10 @@ public class PackageInputTextField extends AbstractInputTextField<PackageInfo>
 	}
 
 	@Override
-	Map<CompletionSuggestion, Integer> doProvideRatedSuggestions(String text, int caretPosition) throws ParseException {
-		PackageParser parser = createParser(text);
-		Map<CompletionSuggestion, StringMatch> ratedSuggestions = parser.suggestCodeCompletion(caretPosition);
-		return Ratings.filterAndTransformStringMatches(ratedSuggestions);
+	List<CodeCompletion> doProvideCompletions(String text, int caretPosition) throws ParseException {
+		PackageParser parser = createParser();
+		List<CodeCompletion> completions = parser.getCompletions(text, caretPosition);
+		return filterCompletions(completions);
 	}
 
 	@Override
@@ -32,11 +31,11 @@ public class PackageInputTextField extends AbstractInputTextField<PackageInfo>
 
 	@Override
 	PackageInfo evaluate(String text) throws ParseException {
-		PackageParser parser = createParser(text);
-		return parser.evaluate();
+		PackageParser parser = createParser();
+		return parser.evaluate(text);
 	}
 
-	private PackageParser createParser(String text) {
-		return Parsers.createPackageParser(text, getParserSettings());
+	private PackageParser createParser() {
+		return Parsers.createPackageParser(getParserSettings());
 	}
 }

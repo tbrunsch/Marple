@@ -3,7 +3,7 @@ package dd.kms.marple.actions.debugsupport;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.common.CurrentObjectPanel;
 import dd.kms.marple.gui.common.ExceptionFormatter;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;

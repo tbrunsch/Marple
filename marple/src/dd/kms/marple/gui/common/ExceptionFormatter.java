@@ -1,6 +1,6 @@
 package dd.kms.marple.gui.common;
 
-import dd.kms.zenodot.ParseException;
+import dd.kms.zenodot.api.ParseException;
 
 import javax.annotation.Nullable;
 

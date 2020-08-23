@@ -3,7 +3,7 @@ package dd.kms.marple.gui.inspector.views.fieldview;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.gui.actionprovidertree.inspectiontree.InspectionTreeNodes;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import javax.swing.tree.TreeModel;

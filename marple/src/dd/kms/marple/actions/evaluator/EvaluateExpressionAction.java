@@ -2,7 +2,7 @@ package dd.kms.marple.actions.evaluator;
 
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.evaluator.ExpressionEvaluator;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 public class EvaluateExpressionAction implements InspectionAction
 {

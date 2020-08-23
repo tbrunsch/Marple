@@ -1,8 +1,8 @@
 package dd.kms.marple.gui.evaluator.completion;
 
-import dd.kms.zenodot.result.CompletionSuggestion;
+import dd.kms.zenodot.api.result.CodeCompletion;
 
 interface CustomCompletion
 {
-	CompletionSuggestion getCompletionSuggestion();
+	CodeCompletion getCodeCompletion();
 }

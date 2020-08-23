@@ -3,8 +3,8 @@ package dd.kms.marple.gui.evaluator.imports;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.evaluator.textfields.AbstractInputTextField;
 import dd.kms.marple.gui.evaluator.textfields.ClassInputTextField;
-import dd.kms.zenodot.settings.ParserSettings;
-import dd.kms.zenodot.utils.wrappers.ClassInfo;
+import dd.kms.zenodot.api.settings.ParserSettings;
+import dd.kms.zenodot.api.wrappers.ClassInfo;
 
 import java.util.Collection;
 import java.util.List;

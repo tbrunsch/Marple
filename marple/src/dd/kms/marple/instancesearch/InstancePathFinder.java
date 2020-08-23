@@ -2,7 +2,7 @@ package dd.kms.marple.instancesearch;
 
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.instancesearch.settings.SearchSettings;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;

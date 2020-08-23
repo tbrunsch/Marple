@@ -1,8 +1,8 @@
 package dd.kms.marple.evaluator;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.settings.ParserSettings;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.settings.ParserSettings;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 public interface ExpressionEvaluator
 {

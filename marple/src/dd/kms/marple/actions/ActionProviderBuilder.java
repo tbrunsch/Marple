@@ -6,8 +6,8 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.component.HighlightComponentAction;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.gui.common.Snapshots;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;

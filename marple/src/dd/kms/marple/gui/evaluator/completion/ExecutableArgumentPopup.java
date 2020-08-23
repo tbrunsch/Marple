@@ -1,9 +1,9 @@
 package dd.kms.marple.gui.evaluator.completion;
 
 import com.google.common.collect.ImmutableList;
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.result.ExecutableArgumentInfo;
-import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
+import dd.kms.zenodot.api.wrappers.ExecutableInfo;
 
 import javax.swing.*;
 import javax.swing.event.CaretEvent;

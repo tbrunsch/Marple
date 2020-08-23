@@ -1,7 +1,7 @@
 package dd.kms.marple.gui.table;
 
 import dd.kms.marple.gui.common.GuiCommons;
-import dd.kms.zenodot.common.AccessModifier;
+import dd.kms.zenodot.api.common.AccessModifier;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;

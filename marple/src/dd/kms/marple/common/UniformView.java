@@ -1,8 +1,8 @@
 package dd.kms.marple.common;
 
 import com.google.common.collect.ImmutableList;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;

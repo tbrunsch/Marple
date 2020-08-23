@@ -2,8 +2,8 @@ package dd.kms.marple.actions;
 
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.common.ReflectionUtils;
-import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ExecutableInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.util.function.Consumer;
 

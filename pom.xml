@@ -7,7 +7,7 @@
 	<groupId>dd.kms.marple</groupId>
 	<artifactId>marple-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.2-SNAPSHOT</version>
 	<modules>
 		<module>marple</module>
 		<module>marple-tests</module>
@@ -22,6 +22,11 @@
 			<groupId>com.fifesoft</groupId>
 			<artifactId>autocomplete</artifactId>
 			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>dd.kms.zenodot</groupId>
+			<artifactId>zenodot</artifactId>
+			<version>0.2.0</version>
 		</dependency>
 	</dependencies>
 

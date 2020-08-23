@@ -7,8 +7,8 @@ import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.inspector.InspectionFrame;
 import dd.kms.marple.gui.inspector.views.ComponentHierarchyView;
 import dd.kms.marple.settings.visual.ObjectView;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.awt.*;
 import java.util.List;

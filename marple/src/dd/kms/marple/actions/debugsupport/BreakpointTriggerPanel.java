@@ -4,8 +4,8 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.gui.evaluator.textfields.ExpressionInputTextField;
 import dd.kms.marple.settings.DebugSettings;
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;

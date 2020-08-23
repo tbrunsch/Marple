@@ -4,7 +4,7 @@ import com.google.common.collect.Multimap;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.common.TypedObjectInfo;
 import dd.kms.marple.common.UniformView;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.tree.TreeModel;

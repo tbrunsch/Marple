@@ -1,12 +1,12 @@
 package dd.kms.marple.gui.evaluator.completion;
 
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.result.CompletionSuggestion;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.result.CodeCompletion;
 
-import java.util.Map;
+import java.util.List;
 
 @FunctionalInterface
 public interface CompletionSuggestionProvider
 {
-	Map<CompletionSuggestion, Integer> provideRatedSuggestions(String text, int caretPosition) throws ParseException;
+	List<CodeCompletion> provideCodeCompletions(String text, int caretPosition) throws ParseException;
 }

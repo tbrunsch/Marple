@@ -1,9 +1,9 @@
 package dd.kms.marple.gui.inspector.views.iterableview;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.CompiledExpression;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
+import dd.kms.zenodot.api.CompiledExpression;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 class ForEachOperationExecutor extends AbstractOperationExecutor
 {

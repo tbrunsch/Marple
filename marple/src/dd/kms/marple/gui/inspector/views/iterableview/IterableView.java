@@ -10,9 +10,9 @@ import dd.kms.marple.gui.evaluator.textfields.CompiledExpressionInputTextField;
 import dd.kms.marple.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.gui.inspector.views.fieldview.FieldTree;
 import dd.kms.marple.settings.visual.ObjectView;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;

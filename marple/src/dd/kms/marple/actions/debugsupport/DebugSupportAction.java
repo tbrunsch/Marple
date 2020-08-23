@@ -3,7 +3,7 @@ package dd.kms.marple.actions.debugsupport;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.gui.common.WindowManager;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 public class DebugSupportAction implements InspectionAction
 {

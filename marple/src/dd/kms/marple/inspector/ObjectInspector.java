@@ -2,7 +2,7 @@ package dd.kms.marple.inspector;
 
 import dd.kms.marple.ComponentHierarchy;
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 public interface ObjectInspector
 {

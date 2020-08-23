@@ -1,36 +1,44 @@
 package dd.kms.marple.gui.evaluator.textfields;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.settings.keys.KeySettings;
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.result.CompletionSuggestion;
-import dd.kms.zenodot.result.ExecutableArgumentInfo;
-import dd.kms.zenodot.settings.ParserSettings;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.matching.StringMatch;
+import dd.kms.zenodot.api.result.CodeCompletion;
+import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
+import dd.kms.zenodot.api.settings.ParserSettings;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public abstract class AbstractInputTextField<T> extends JTextField
 {
-	private final InspectionContext				inspectionContext;
+	static List<CodeCompletion> filterCompletions(List<CodeCompletion> completions) {
+		return completions.stream()
+			.filter(completion -> completion.getRating().getNameMatch() != StringMatch.NONE)
+			.collect(Collectors.toList());
+	}
 
-	private Consumer<T>							evaluationResultConsumer	= result -> {};
-	private Consumer<Throwable>					exceptionConsumer			= e -> {};
+	private final InspectionContext		inspectionContext;
+
+	private Consumer<T>					evaluationResultConsumer	= result -> {};
+	private Consumer<Throwable>			exceptionConsumer			= e -> {};
 
 	/*
 	 * Cached Data
 	 */
-	private String								cachedText					= null;
-	private int									cachedCaretPosition			= -1;
-	private Map<CompletionSuggestion, Integer>	cachedRatedSuggestions		= ImmutableMap.of();
-	private ParseException						cachedParseException		= null;
+	private String						cachedText					= null;
+	private int							cachedCaretPosition			= -1;
+	private List<CodeCompletion>		cachedRatedSuggestions		= ImmutableList.of();
+	private ParseException				cachedParseException		= null;
 
 	AbstractInputTextField(InspectionContext inspectionContext) {
 		this.inspectionContext = inspectionContext;
@@ -38,7 +46,7 @@ public abstract class AbstractInputTextField<T> extends JTextField
 		KeySettings keySettings = inspectionContext.getSettings().getKeySettings();
 		CodeCompletionDecorators.decorate(
 			this,
-			this::provideRatedSuggestions,
+			this::provideCodeCompletions,
 			keySettings.getCodeCompletionKey(),
 			this::getExecutableArgumentInfo,
 			keySettings.getShowMethodArgumentsKey(),
@@ -47,7 +55,7 @@ public abstract class AbstractInputTextField<T> extends JTextField
 		);
 	}
 
-	abstract Map<CompletionSuggestion, Integer> doProvideRatedSuggestions(String text, int caretPosition) throws ParseException;
+	abstract List<CodeCompletion> doProvideCompletions(String text, int caretPosition) throws ParseException;
 	abstract Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String text, int caretPosition) throws ParseException;
 	abstract T evaluate(String text) throws ParseException;
 
@@ -75,12 +83,12 @@ public abstract class AbstractInputTextField<T> extends JTextField
 		return inspectionContext.getEvaluator().getParserSettings();
 	}
 
-	private Map<CompletionSuggestion, Integer> provideRatedSuggestions(String text, int caretPosition) throws ParseException {
+	private List<CodeCompletion> provideCodeCompletions(String text, int caretPosition) throws ParseException {
 		if (!Objects.equals(text, cachedText) || caretPosition != cachedCaretPosition) {
 			cachedText = text;
 			cachedCaretPosition = caretPosition;
 			try {
-				cachedRatedSuggestions = doProvideRatedSuggestions(text, caretPosition);
+				cachedRatedSuggestions = doProvideCompletions(text, caretPosition);
 				cachedParseException = null;
 			} catch (ParseException e) {
 				cachedParseException = e;

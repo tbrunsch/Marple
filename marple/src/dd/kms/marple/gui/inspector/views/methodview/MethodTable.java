@@ -4,11 +4,11 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.gui.filters.ValueFilters;
 import dd.kms.marple.gui.table.*;
-import dd.kms.zenodot.common.AccessModifier;
-import dd.kms.zenodot.common.MethodScanner;
-import dd.kms.zenodot.utils.wrappers.ExecutableInfo;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.common.AccessModifier;
+import dd.kms.zenodot.api.common.MethodScanner;
+import dd.kms.zenodot.api.wrappers.ExecutableInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -49,7 +49,7 @@ class MethodTable extends JPanel
 			new ColumnDescriptionBuilder<ExecutableInfo>("Name",		Object.class, 			methodInfo -> methodViewUtils.getMethodActionProvider(methodInfo)	).valueFilter(ValueFilters.createWildcardFilter()).build(),
 			new ColumnDescriptionBuilder<ExecutableInfo>("Arguments",	String.class, 			methodInfo -> methodInfo.formatArguments()							).valueFilter(ValueFilters.createWildcardFilter()).build(),
 			new ColumnDescriptionBuilder<ExecutableInfo>("Class",		String.class, 			methodInfo -> methodInfo.getDeclaringType().toString()				).valueFilter(ValueFilters.createSelectionFilter(inspectionContext)).build(),
-			new ColumnDescriptionBuilder<ExecutableInfo>("Modifier",	AccessModifier.class,	methodInfo -> methodInfo.getAccessModifier()						).valueFilter(ValueFilters.createMinimumAccessLevelFilter()).build()
+			new ColumnDescriptionBuilder<ExecutableInfo>("Modifier",	AccessModifier.class,	methodInfo -> methodInfo.getAccessModifier()						).valueFilter(ValueFilters.createMinimumAccessModifierFilter()).build()
 		);
 	}
 }

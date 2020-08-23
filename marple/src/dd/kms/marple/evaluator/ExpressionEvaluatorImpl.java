@@ -4,9 +4,9 @@ import com.google.common.util.concurrent.Runnables;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.evaluator.EvaluationFrame;
-import dd.kms.zenodot.settings.ParserSettings;
-import dd.kms.zenodot.settings.ParserSettingsUtils;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.settings.ParserSettings;
+import dd.kms.zenodot.api.settings.ParserSettingsUtils;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.awt.*;
 

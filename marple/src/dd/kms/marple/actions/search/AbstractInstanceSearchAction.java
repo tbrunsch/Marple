@@ -5,7 +5,7 @@ import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.InspectionAction;
 import dd.kms.marple.gui.common.WindowManager;
 import dd.kms.marple.gui.search.InstanceSearchFrame;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.awt.*;
 

@@ -6,12 +6,12 @@ import dd.kms.marple.actions.ActionProviderBuilder;
 import dd.kms.marple.common.ReflectionUtils;
 import dd.kms.marple.gui.filters.ValueFilters;
 import dd.kms.marple.gui.table.*;
-import dd.kms.zenodot.common.AccessModifier;
-import dd.kms.zenodot.common.FieldScanner;
-import dd.kms.zenodot.utils.wrappers.FieldInfo;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
+import dd.kms.zenodot.api.common.AccessModifier;
+import dd.kms.zenodot.api.common.FieldScanner;
+import dd.kms.zenodot.api.wrappers.FieldInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -50,7 +50,7 @@ public class FieldTable extends JPanel
 			new ColumnDescriptionBuilder<FieldInfo>("Value",	ActionProvider.class, 	fieldInfo -> getFieldValueActionProvider(fieldInfo))	.valueFilter(ValueFilters.createWildcardFilter()).build(),
 			new ColumnDescriptionBuilder<FieldInfo>("Type",		TypeInfo.class,			fieldInfo -> fieldInfo.getType())						.valueFilter(ValueFilters.createWildcardFilter()).build(),
 			new ColumnDescriptionBuilder<FieldInfo>("Class",	TypeInfo.class,			fieldInfo -> fieldInfo.getDeclaringType())				.valueFilter(ValueFilters.createSelectionFilter(inspectionContext)).build(),
-			new ColumnDescriptionBuilder<FieldInfo>("Modifier",	AccessModifier.class,	fieldInfo -> fieldInfo.getAccessModifier())				.valueFilter(ValueFilters.createMinimumAccessLevelFilter()).build()
+			new ColumnDescriptionBuilder<FieldInfo>("Modifier",	AccessModifier.class,	fieldInfo -> fieldInfo.getAccessModifier())				.valueFilter(ValueFilters.createMinimumAccessModifierFilter()).build()
 		);
 	}
 

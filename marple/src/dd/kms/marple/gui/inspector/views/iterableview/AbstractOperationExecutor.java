@@ -2,12 +2,13 @@ package dd.kms.marple.gui.inspector.views.iterableview;
 
 import com.google.common.base.Preconditions;
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.CompiledExpression;
-import dd.kms.zenodot.ExpressionCompiler;
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.Parsers;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
+import dd.kms.zenodot.api.CompiledExpression;
+import dd.kms.zenodot.api.ExpressionParser;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.Parsers;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import java.util.function.Consumer;
 
@@ -51,7 +52,8 @@ abstract class AbstractOperationExecutor
 	}
 
 	CompiledExpression compile(String expression) throws ParseException {
-		ExpressionCompiler compiler = Parsers.createExpressionCompiler(expression, inspectionContext.getEvaluator().getParserSettings(), commonElementType);
-		return compiler.compile();
+		ExpressionParser parser = Parsers.createExpressionParser(inspectionContext.getEvaluator().getParserSettings());
+		ObjectInfo commonElementRepresentative = InfoProvider.createObjectInfo(InfoProvider.INDETERMINATE_VALUE, commonElementType);
+		return parser.compile(expression, commonElementRepresentative);
 	}
 }

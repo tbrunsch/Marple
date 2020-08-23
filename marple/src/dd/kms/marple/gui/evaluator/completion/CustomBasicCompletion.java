@@ -1,7 +1,7 @@
 package dd.kms.marple.gui.evaluator.completion;
 
-import dd.kms.zenodot.result.CompletionSuggestion;
-import dd.kms.zenodot.result.IntRange;
+import dd.kms.zenodot.api.result.CodeCompletion;
+import dd.kms.zenodot.api.result.IntRange;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
@@ -10,15 +10,15 @@ import javax.swing.text.JTextComponent;
 
 class CustomBasicCompletion extends BasicCompletion implements CustomCompletion
 {
-	private final CompletionSuggestion suggestion;
+	private final CodeCompletion	completion;
 
-	CustomBasicCompletion(CompletionSuggestion suggestion, int relevance, CompletionProvider completionProvider) {
-		super(completionProvider, suggestion.getTextToInsert(), suggestion.getType().toString());
+	CustomBasicCompletion(CodeCompletion completion, int relevance, CompletionProvider completionProvider) {
+		super(completionProvider, completion.getTextToInsert(), completion.getType().toString());
 
-		this.suggestion = suggestion;
+		this.completion = completion;
 
 		setRelevance(relevance);
-		setIcon(IconFactory.getIcon(suggestion));
+		setIcon(IconFactory.getIcon(completion));
 	}
 
 	@Override
@@ -29,17 +29,17 @@ class CustomBasicCompletion extends BasicCompletion implements CustomCompletion
 	@Override
 	public String getAlreadyEntered(JTextComponent textComponent) {
 		String text = textComponent.getText();
-		IntRange insertionRange = suggestion.getInsertionRange();
+		IntRange insertionRange = completion.getInsertionRange();
 		return text.substring(insertionRange.getBegin(), insertionRange.getEnd());
 	}
 
 	@Override
-	public CompletionSuggestion getCompletionSuggestion() {
-		return suggestion;
+	public CodeCompletion getCodeCompletion() {
+		return completion;
 	}
 
 	@Override
 	public String toString() {
-		return suggestion.toString();
+		return completion.toString();
 	}
 }

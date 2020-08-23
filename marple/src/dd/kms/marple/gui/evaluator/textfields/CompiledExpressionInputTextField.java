@@ -1,17 +1,17 @@
 package dd.kms.marple.gui.evaluator.textfields;
 
 import dd.kms.marple.InspectionContext;
-import dd.kms.zenodot.CompiledExpression;
-import dd.kms.zenodot.ExpressionCompiler;
-import dd.kms.zenodot.ParseException;
-import dd.kms.zenodot.Parsers;
-import dd.kms.zenodot.matching.MatchRating;
-import dd.kms.zenodot.result.CompletionSuggestion;
-import dd.kms.zenodot.result.ExecutableArgumentInfo;
-import dd.kms.zenodot.utils.wrappers.InfoProvider;
-import dd.kms.zenodot.utils.wrappers.TypeInfo;
+import dd.kms.zenodot.api.CompiledExpression;
+import dd.kms.zenodot.api.ExpressionParser;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.Parsers;
+import dd.kms.zenodot.api.result.CodeCompletion;
+import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.TypeInfo;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 public class CompiledExpressionInputTextField extends AbstractExpressionInputTextField<CompiledExpression>
@@ -27,25 +27,31 @@ public class CompiledExpressionInputTextField extends AbstractExpressionInputTex
 	}
 
 	@Override
-	Map<CompletionSuggestion, MatchRating> suggestCodeCompletion(String text, int caretPosition) throws ParseException {
-		ExpressionCompiler compiler = createCompiler(text);
-		return compiler.suggestCodeCompletion(caretPosition);
+	List<CodeCompletion> suggestCodeCompletion(String text, int caretPosition) throws ParseException {
+		ExpressionParser parser = createParser();
+		ObjectInfo thisValue = getThisValue();
+		return parser.getCompletions(text, caretPosition, thisValue);
 	}
 
 	@Override
 	Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String text, int caretPosition) throws ParseException  {
-		ExpressionCompiler compiler = createCompiler(text);
-		return compiler.getExecutableArgumentInfo(caretPosition);
+		ExpressionParser parser = createParser();
+		ObjectInfo thisValue = getThisValue();
+		return parser.getExecutableArgumentInfo(text, caretPosition, thisValue);
 	}
 
 	@Override
 	CompiledExpression evaluate(String text) throws ParseException {
-		ExpressionCompiler compiler = createCompiler(text);
-		return compiler.compile();
-
+		ExpressionParser parser = createParser();
+		ObjectInfo thisValue = getThisValue();
+		return parser.compile(text, thisValue);
 	}
 
-	private ExpressionCompiler createCompiler(String text) {
-		return Parsers.createExpressionCompiler(text, getParserSettings(), thisType);
+	private ExpressionParser createParser() {
+		return Parsers.createExpressionParser(getParserSettings());
+	}
+
+	private ObjectInfo getThisValue() {
+		return InfoProvider.createObjectInfo(InfoProvider.INDETERMINATE_VALUE, thisType);
 	}
 }

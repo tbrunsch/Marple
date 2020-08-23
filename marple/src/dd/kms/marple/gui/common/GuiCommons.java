@@ -1,7 +1,7 @@
 package dd.kms.marple.gui.common;
 
 import dd.kms.marple.settings.keys.KeyRepresentation;
-import dd.kms.zenodot.common.AccessModifier;
+import dd.kms.zenodot.api.common.AccessModifier;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -15,7 +15,7 @@ public class GuiCommons
 	public static final int		DEFAULT_DISTANCE	= 5;
 	public static final Insets	DEFAULT_INSETS		= new Insets(DEFAULT_DISTANCE, DEFAULT_DISTANCE, DEFAULT_DISTANCE, DEFAULT_DISTANCE);
 
-	private static final Map<AccessModifier, Color> MODIFIER_COLORS = new HashMap<>();
+	private static final Map<AccessModifier, Color>	MODIFIER_COLORS = new HashMap<>();
 
 	static {
 		MODIFIER_COLORS.put(AccessModifier.PUBLIC,			Color.GREEN);

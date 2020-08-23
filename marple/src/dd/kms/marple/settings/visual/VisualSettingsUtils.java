@@ -6,7 +6,7 @@ import dd.kms.marple.common.UniformView;
 import dd.kms.marple.gui.inspector.views.fieldview.FieldView;
 import dd.kms.marple.gui.inspector.views.iterableview.IterableView;
 import dd.kms.marple.gui.inspector.views.methodview.MethodView;
-import dd.kms.zenodot.utils.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;

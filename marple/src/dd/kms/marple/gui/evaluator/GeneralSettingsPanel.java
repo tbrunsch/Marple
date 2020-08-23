@@ -10,20 +10,20 @@ import static java.awt.GridBagConstraints.*;
 
 public class GeneralSettingsPanel extends JPanel
 {
-	private final JLabel						minimumAccessLevelLabel		= new JLabel("Minimum access level:");
-	private final MinimumAccessLevelControls	minimumAccessLevelControls;
+	private final JLabel						minimumAccessModifierLabel		= new JLabel("Minimum access modifier:");
+	private final MinimumAccessModifierControls	minimumAccessModifierControls;
 
-	private final JLabel						dynamicTypingLabel			= new JLabel("Dynamic typing:");
+	private final JLabel						dynamicTypingLabel				= new JLabel("Dynamic typing:");
 	private final DynamicTypingControls			dynamicTypingControls;
 
 	public GeneralSettingsPanel(InspectionContext inspectionContext) {
 		super(new GridBagLayout());
 
-		minimumAccessLevelControls = new MinimumAccessLevelControls(inspectionContext);
+		minimumAccessModifierControls = new MinimumAccessModifierControls(inspectionContext);
 		dynamicTypingControls = new DynamicTypingControls(inspectionContext);
 
-		add(minimumAccessLevelLabel,									new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
-		add(minimumAccessLevelControls.getInput(),						new GridBagConstraints(1, 0, REMAINDER, 1, 1.0, 0.0, NORTHWEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		add(minimumAccessModifierLabel,									new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
+		add(minimumAccessModifierControls.getInput(),						new GridBagConstraints(1, 0, REMAINDER, 1, 1.0, 0.0, NORTHWEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
 		add(dynamicTypingLabel,											new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
 		add(dynamicTypingControls.getDynamicTypingOffRadioButton(),		new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
@@ -31,12 +31,12 @@ public class GeneralSettingsPanel extends JPanel
 
 		add(dynamicTypingControls.getDynamicTypingInfo(),				new GridBagConstraints(0, 2, REMAINDER, 1, 1.0, 0.0, NORTHWEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
-		minimumAccessLevelControls.updateControls();
+		minimumAccessModifierControls.updateControls();
 		dynamicTypingControls.updateControls();
 	}
 
 	public void updateContent() {
-		minimumAccessLevelControls.updateControls();
+		minimumAccessModifierControls.updateControls();
 		dynamicTypingControls.updateControls();
 	}
 }
