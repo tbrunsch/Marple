@@ -2,10 +2,12 @@ package dd.kms.marple.gui.evaluator.completion;
 
 import dd.kms.marple.settings.keys.KeyRepresentation;
 import dd.kms.zenodot.api.result.CodeCompletion;
+import dd.kms.zenodot.api.result.IntRange;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
 
+import javax.swing.text.Caret;
 import javax.swing.text.JTextComponent;
 
 class CustomAutoCompletion extends AutoCompletion
@@ -24,14 +26,34 @@ class CustomAutoCompletion extends AutoCompletion
 
 	@Override
 	protected void insertCompletion(Completion completion, boolean typedParamListStartChar) {
-		super.insertCompletion(completion, typedParamListStartChar);
-		if (completion instanceof CustomCompletion) {
-			CustomCompletion customCompletion = (CustomCompletion) completion;
-			CodeCompletion codeCompletion = customCompletion.getCodeCompletion();
-			JTextComponent textComponent = getTextComponent();
-			int caretPositionAfterInsertion = codeCompletion.getCaretPositionAfterInsertion();
-			textComponent.setCaretPosition(caretPositionAfterInsertion);
+		/*
+		 * Do not call super.insertCompletion(completion, typedParamListStartChar) because
+		 * this method can only replace text until the caret.
+		 */
+		hidePopupWindow();
+		if (!(completion instanceof CustomCompletion)) {
+			throw new UnsupportedOperationException("Unsupported code completion class: " + completion.getClass());
 		}
+		CustomCompletion customCompletion = (CustomCompletion) completion;
+		CodeCompletion codeCompletion = customCompletion.getCodeCompletion();
+		JTextComponent textComponent = getTextComponent();
+		String text = textComponent.getText();
+
+		IntRange insertionRange = codeCompletion.getInsertionRange();
+		StringBuilder builder = new StringBuilder();
+		if (insertionRange.getBegin() > 0) {
+			builder.append(text, 0, insertionRange.getBegin());
+		}
+		builder.append(codeCompletion.getTextToInsert());
+		if (insertionRange.getEnd() < text.length()) {
+			builder.append(text.substring(insertionRange.getEnd()));
+		}
+		textComponent.setCaretPosition(0);	// must reset caret to avoid "invalid caret" exception when setting text
+		textComponent.setText(builder.toString());
+
+		int caretPositionAfterInsertion = codeCompletion.getCaretPositionAfterInsertion();
+		textComponent.setCaretPosition(caretPositionAfterInsertion);
+
 		if (completion instanceof CustomFunctionCompletion) {
 			onShowExecutableArguments.run();
 		}
