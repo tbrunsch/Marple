@@ -5,6 +5,7 @@
   - changed to Zenodot 0.2.0
   - components in hierarchy tree can now be selected without losing the subtree
   - fixed focus problems
+  - fixed problem with infinitely waiting thread in instance search
   - order code completions intuitively
   - added changelog
   

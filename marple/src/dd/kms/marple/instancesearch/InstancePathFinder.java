@@ -99,26 +99,24 @@ public class InstancePathFinder
 
 	private void changeProcessingState(ProcessingState newState) {
 		synchronized (lock) {
-			final ProcessingState[] validPredecessorStates;
+			final ProcessingState validPredecessorState;
 			switch (newState) {
 				case NOT_RUNNING:
-					validPredecessorStates = new ProcessingState[]{ ProcessingState.FINISHED };
+					validPredecessorState = ProcessingState.FINISHED;
 					break;
 				case SEARCHING:
-					validPredecessorStates = new ProcessingState[]{ ProcessingState.NOT_RUNNING };
+					validPredecessorState = ProcessingState.NOT_RUNNING;
 					break;
 				case WAITING_FOR_TERMINATION:
-					if (processingState != ProcessingState.NOT_RUNNING) {
-						processingState = newState;
-					}
-					return;
+					validPredecessorState = ProcessingState.SEARCHING;
+					break;
 				case FINISHED:
 					processingState = newState;
 					return;
 				default:
 					throw new IllegalArgumentException("Unsupported state: " + newState);
 			}
-			if (Arrays.asList(validPredecessorStates).contains(processingState)) {
+			if (validPredecessorState == processingState) {
 				processingState = newState;
 			}
 		}
