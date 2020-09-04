@@ -25,9 +25,10 @@ class MapSettingsPanel extends AbstractOperationSettingsPanel
 		mappingTF = new CompiledExpressionInputTextField(context);
 		mappingPanel = new EvaluationTextFieldPanel(mappingTF, context);
 		mappingTF.setThisType(commonElementType);
+		mappingTF.setExpression("this");
 
-		int xPos = 0;
 		int yPos = 0;
+		int xPos = 0;
 		add(mappingLabel,		new GridBagConstraints(xPos++, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 		add(mappingPanel,		new GridBagConstraints(xPos++, yPos++, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 

@@ -37,6 +37,7 @@ class FilterSettingsPanel extends AbstractOperationSettingsPanel
 		filterTF = new CompiledExpressionInputTextField(context);
 		filterPanel = new EvaluationTextFieldPanel(filterTF, context);
 		filterTF.setThisType(commonElementType);
+		filterTF.setExpression("true");
 
 		for (FilterResultType resultType : resultTypeToButton.keySet()) {
 			JToggleButton button = resultTypeToButton.get(resultType);
@@ -53,7 +54,7 @@ class FilterSettingsPanel extends AbstractOperationSettingsPanel
 
 		xPos = 0;
 		add(filterLabel,		new GridBagConstraints(xPos++, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-		add(filterPanel,		new GridBagConstraints(xPos++, yPos++,  2, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		add(filterPanel,		new GridBagConstraints(xPos++, yPos++, 2, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
 		xPos = 0;
 		add(filterInfoLabel,	new GridBagConstraints(xPos++, yPos++, REMAINDER, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));

@@ -3,6 +3,7 @@ package dd.kms.marple.common;
 import com.google.common.collect.ImmutableList;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -107,6 +108,14 @@ public class UniformView
 			return asList(objectInfo);
 		}
 		throw new IllegalArgumentException("Object '" + object + "' cannot be converted to an Iterable.");
+	}
+
+	public static TypeInfo getCommonElementType(TypedObjectInfo<? extends Iterable<?>> iterableInfo) {
+		TypeInfo iterableType = ReflectionUtils.getRuntimeTypeInfo(iterableInfo);
+		TypeInfo iteratorResultTypeInfo = ReflectionUtils.getUniqueMethodInfo(iterableType, "iterator").getReturnType();
+		TypeInfo declaredElementType = ReflectionUtils.getUniqueMethodInfo(iteratorResultTypeInfo, "next").getReturnType();
+		Class<?> commonElementClass = ReflectionUtils.getCommonSuperClass(iterableInfo.getObject());
+		return ReflectionUtils.getRuntimeTypeInfo(declaredElementType, commonElementClass);
 	}
 
 	private static Optional<ListReflectionData> getListReflectionData(Object object) {

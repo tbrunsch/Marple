@@ -25,9 +25,10 @@ class ForEachSettingsPanel extends AbstractOperationSettingsPanel
 		consumerTF = new CompiledExpressionInputTextField(context);
 		consumerPanel = new EvaluationTextFieldPanel(consumerTF, context);
 		consumerTF.setThisType(commonElementType);
+		consumerTF.setExpression("System.out.println(this)");
 
-		int xPos = 0;
 		int yPos = 0;
+		int xPos = 0;
 		add(consumerLabel,		new GridBagConstraints(xPos++, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 		add(consumerPanel,		new GridBagConstraints(xPos++, yPos++, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 

@@ -25,9 +25,10 @@ class CollectSettingsPanel extends AbstractOperationSettingsPanel
 		constructorTF = new CompiledExpressionInputTextField(context);
 		constructorPanel = new EvaluationTextFieldPanel(constructorTF, context);
 		constructorTF.setThisType(commonElementType);
+		constructorTF.setExpression("new java.util.ArrayList()");
 
-		int xPos = 0;
 		int yPos = 0;
+		int xPos = 0;
 		add(constructorLabel,		new GridBagConstraints(xPos++, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 		add(constructorPanel,		new GridBagConstraints(xPos++, yPos++, 1, 1, 1.0, 1.0, NORTHWEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
