@@ -9,7 +9,7 @@ public class ExceptionFormatter
 	/**
 	 * Returns null of the throwable is null.
 	 */
-	public static String formatParseException(String expression, @Nullable Throwable t) {
+	public static String formatParseException(@Nullable Throwable t) {
 		if (t == null) {
 			return null;
 		}
@@ -19,9 +19,13 @@ public class ExceptionFormatter
 		if (cause != null) {
 			builder.append("<br/>").append(formatException(cause, false));
 		}
-		int position = t instanceof ParseException ? ((ParseException) t).getPosition() : -1;
-		if (0 <= position && position < expression.length()) {
-			builder.append("<br/>").append(expression.substring(0, position)).append('^').append(expression.substring(position));
+		if (t instanceof ParseException) {
+			ParseException e = (ParseException) t;
+			String expression = e.getExpression();
+			int position = e.getPosition();
+			if (0 <= position && position <= expression.length()) {
+				builder.append("<br/>").append(expression, 0, position).append('^').append(expression.substring(position));
+			}
 		}
 		builder.append("</html>");
 		return builder.toString();

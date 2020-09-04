@@ -73,7 +73,7 @@ public class EvaluationPanel extends JPanel
 
 	private void displayException(@Nullable Throwable t) {
 		evaluationResultPanel.removeAll();
-		JLabel exceptionLabel = new JLabel(ExceptionFormatter.formatParseException(evaluationTextField.getText(), t));
+		JLabel exceptionLabel = new JLabel(ExceptionFormatter.formatParseException(t));
 		CodeCompletionDecorators.configureExceptionComponent(exceptionLabel);
 		evaluationResultPanel.add(exceptionLabel,	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, NORTH, BOTH, new Insets(3, 3, 3, 3), 0, 0));
 		evaluationResultPanel.revalidate();

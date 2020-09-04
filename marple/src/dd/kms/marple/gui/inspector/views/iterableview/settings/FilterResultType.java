@@ -1,13 +1,13 @@
-package dd.kms.marple.gui.inspector.views.iterableview;
+package dd.kms.marple.gui.inspector.views.iterableview.settings;
 
-enum OperationResultType
+public enum FilterResultType
 {
 	LIST	("List"),
 	INDEX_MAP("Map: index => value");
 
 	private final String	displayText;
 
-	OperationResultType(String displayText) {
+	FilterResultType(String displayText) {
 		this.displayText = displayText;
 	}
 

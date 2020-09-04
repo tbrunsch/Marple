@@ -2,6 +2,7 @@ package dd.kms.marple.gui.inspector.views.iterableview;
 
 import com.google.common.base.Preconditions;
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.gui.inspector.views.iterableview.settings.OperationSettings;
 import dd.kms.zenodot.api.CompiledExpression;
 import dd.kms.zenodot.api.ExpressionParser;
 import dd.kms.zenodot.api.ParseException;
@@ -12,22 +13,24 @@ import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import java.util.function.Consumer;
 
-abstract class AbstractOperationExecutor
+abstract class AbstractOperationExecutor<T extends OperationSettings>
 {
 	final Iterable<?>			iterable;
 	private final TypeInfo		commonElementType;
+	final T						settings;
 	final InspectionContext		inspectionContext;
 
 	private Consumer<Object>	resultConsumer;
 	private Consumer<String>	textConsumer;
 
-	AbstractOperationExecutor(Iterable<?> iterable, TypeInfo commonElementType, InspectionContext inspectionContext) {
+	AbstractOperationExecutor(Iterable<?> iterable, TypeInfo commonElementType, T settings, InspectionContext inspectionContext) {
 		this.iterable = iterable;
 		this.commonElementType = commonElementType;
+		this.settings = settings;
 		this.inspectionContext = inspectionContext;
 	}
 
-	abstract void execute(String expression, OperationResultType resultType) throws Exception;
+	abstract void execute() throws Exception;
 
 	void setResultConsumer(Consumer<Object> resultConsumer) {
 		this.resultConsumer = resultConsumer;

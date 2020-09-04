@@ -1,10 +1,12 @@
-package dd.kms.marple.gui.inspector.views.iterableview;
+package dd.kms.marple.gui.inspector.views.iterableview.settings;
 
-enum Operation
+public enum Operation
 {
 	FILTER		("Filter"),
 	MAP			("Map"),
-	FOR_EACH	("ForEach");
+	FOR_EACH	("ForEach"),
+	COLLECT		("Collect"),
+	TO_MAP		("ToMap");
 
 	private final String	displayText;
 

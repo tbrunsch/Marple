@@ -2,6 +2,8 @@ package dd.kms.marple.gui.inspector.views.iterableview;
 
 import com.google.common.primitives.Primitives;
 import dd.kms.marple.InspectionContext;
+import dd.kms.marple.gui.inspector.views.iterableview.settings.FilterResultType;
+import dd.kms.marple.gui.inspector.views.iterableview.settings.FilterSettings;
 import dd.kms.zenodot.api.CompiledExpression;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
@@ -13,25 +15,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-class FilterOperationExecutor extends AbstractOperationExecutor
+class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 {
-	FilterOperationExecutor(Iterable<?> iterable, TypeInfo commonElementType, InspectionContext inspectionContext) {
-		super(iterable, commonElementType, inspectionContext);
+	FilterOperationExecutor(Iterable<?> iterable, TypeInfo commonElementType, FilterSettings settings, InspectionContext inspectionContext) {
+		super(iterable, commonElementType, settings, inspectionContext);
 	}
 
 	@Override
-	void execute(String expression, OperationResultType resultType) throws Exception {
-		filter(expression, resultType);
-	}
-
-	private void filter(String expression, OperationResultType resultType) throws Exception {
-		CompiledExpression compiledExpression = compile(expression);
+	void execute() throws Exception {
+		String filterExpression = settings.getFilterExpression();
+		CompiledExpression compiledExpression = compile(filterExpression);
 		Class<?> resultClass = compiledExpression.getResultType().getRawType();
 		if (Primitives.unwrap(resultClass) != boolean.class) {
-			throw new ParseException(expression.length(), "The expression must be a predicate");
+			throw new ParseException(filterExpression, filterExpression.length(), "The filter expression must be a predicate", null);
 		}
 		PredicateWithException filter = o -> filter(compiledExpression, o);
 		final Object filterResult;
+		FilterResultType resultType = settings.getResultType();
 		switch (resultType) {
 			case LIST:
 				filterResult = filterToList(filter);

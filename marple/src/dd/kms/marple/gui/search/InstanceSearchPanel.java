@@ -84,10 +84,10 @@ class InstanceSearchPanel extends JPanel
 		this.inspectionContext = inspectionContext;
 
 		targetClassTF = new ClassInputTextField(inspectionContext);
-		targetClassTF.setExceptionConsumer(t -> showError(ExceptionFormatter.formatParseException(targetClassTF.getText(), t)));
+		targetClassTF.setExceptionConsumer(t -> showError(ExceptionFormatter.formatParseException(t)));
 		targetClassPanel = new EvaluationTextFieldPanel(targetClassTF, inspectionContext);
 		targetFilterTF = new CompiledExpressionInputTextField(inspectionContext);
-		targetFilterTF.setExceptionConsumer(t -> showError(ExceptionFormatter.formatParseException(targetFilterTF.getText(), t)));
+		targetFilterTF.setExceptionConsumer(t -> showError(ExceptionFormatter.formatParseException(t)));
 		targetFilterPanel = new EvaluationTextFieldPanel(targetFilterTF, inspectionContext);
 
 		instancePathFinder = new InstancePathFinder(this::onPathDetected);
@@ -265,7 +265,7 @@ class InstanceSearchPanel extends JPanel
 				ClassInfo targetClassInfo = targetClassTF.evaluateText();
 				return Class.forName(targetClassInfo.getNormalizedName());
 			} catch (ParseException e) {
-				throw new SettingsException(ExceptionFormatter.formatParseException(targetClassName, e));
+				throw new SettingsException(ExceptionFormatter.formatParseException(e));
 			} catch (Throwable t) {
 				throw new SettingsException("Unknown target class '" + targetClassName + "'");
 			}
@@ -285,7 +285,7 @@ class InstanceSearchPanel extends JPanel
 					CompiledExpression compiledFilter = targetFilterTF.evaluateText();
 					return o -> targetClass.isInstance(o) && applyFilter(compiledFilter, o);
 				} catch (ParseException e) {
-					throw new SettingsException(ExceptionFormatter.formatParseException(targetFilterExpression, e));
+					throw new SettingsException(ExceptionFormatter.formatParseException(e));
 				} catch (Throwable t) {
 					throw new SettingsException("Cannot compile filter expression '" + targetFilterExpression + "'");
 				}

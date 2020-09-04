@@ -4,6 +4,7 @@
 
   - changed to Zenodot 0.2.0
   - components in hierarchy tree can now be selected without losing the subtree
+  - iterables tab now supports converting iterables to other collections and arrays and creating maps
   - fixed focus problems
   - fixed problem with infinitely waiting thread in instance search
   - order code completions intuitively
