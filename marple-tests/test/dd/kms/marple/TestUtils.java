@@ -2,8 +2,6 @@ package dd.kms.marple;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.math.IntMath;
 import dd.kms.marple.settings.InspectionSettings;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.settings.ObjectTreeNode;
@@ -15,9 +13,10 @@ import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
-import java.util.ArrayList;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class TestUtils
 {
@@ -31,7 +30,7 @@ class TestUtils
 		String importClass1 = "com.google.common.collect.ImmutableList";
 		String importClass2 = "com.google.common.collect.ImmutableSet";
 
-		ObjectTreeNode customHierarchyRoot = new PrimeNode(0);
+		ObjectTreeNode customHierarchyRoot = new FileNode(new File(System.getProperty("user.home")));
 
 		ParserSettings parserSettings = ParserSettingsUtils.createBuilder()
 			.variables(ImmutableList.of(variable1, variable2))
@@ -56,51 +55,54 @@ class TestUtils
 		DebugSupport.setSlotValue("expectedValues",	Arrays.asList("Yes!", 42, 1.41));
 	}
 
-	private static class PrimeNode implements ObjectTreeNode
+	private static class FileNode implements ObjectTreeNode
 	{
-		// Use single-element int[] instead of an int to demonstrate action providers
-		private final int[]		numbers;
+		private final File file;
 
-		private List<PrimeNode> primeChildren	= null;
+		private List<FileNode> children	= null;
 
-		PrimeNode(int number) {
-			this.numbers = new int[]{ number };
+		FileNode(File file) {
+			this.file = file;
 		}
 
 		@Override
 		public String getName() {
-			return String.valueOf(getNumber());
+			return getFile().getName();
 		}
 
 		@Override
 		public Iterable<? extends ObjectTreeNode> getChildNodes() {
-			if (primeChildren == null) {
-				primeChildren = createChildren();
+			if (children == null) {
+				children = createChildren();
 			}
-			return primeChildren;
+			return children;
 		}
 
 		@Override
 		public @Nullable ObjectInfo getUserObject() {
-			return InfoProvider.createObjectInfo(numbers);
+			return InfoProvider.createObjectInfo(file);
 		}
 
-		private int getNumber() {
-			return numbers[0];
+		private File getFile() {
+			return file;
 		}
 
-		private List<PrimeNode> createChildren() {
-			int base = 10*getNumber();
-			List<Integer> potentialSummands = base == 0 ? Lists.newArrayList(2, 3, 5, 7) : Lists.newArrayList(1, 3, 7, 9);
-			List<PrimeNode> children = new ArrayList<>();
-			for (int summand : potentialSummands) {
-				int number = base + summand;
-				if (IntMath.isPrime(number)) {
-					PrimeNode child = new PrimeNode(number);
-					children.add(child);
-				}
+		private List<FileNode> createChildren() {
+			if (!file.isDirectory()) {
+				return ImmutableList.of();
 			}
-			return children;
+			File[] files = file.listFiles();
+			if (files == null) {
+				return ImmutableList.of();
+			}
+			ImmutableList.Builder<FileNode> builder = ImmutableList.builder();
+			for (boolean isDirectory : new boolean[]{ true, false }) {
+				builder.addAll(Arrays.stream(files)
+					.filter(file -> file.isDirectory() == isDirectory)
+					.map(FileNode::new)
+					.collect(Collectors.toList()));
+			}
+			return builder.build();
 		}
 	}
 }
