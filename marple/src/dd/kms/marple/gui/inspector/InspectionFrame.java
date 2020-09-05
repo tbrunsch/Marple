@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import dd.kms.marple.InspectionContext;
 import dd.kms.marple.actions.ActionWrapper;
 import dd.kms.marple.gui.common.CurrentObjectPanel;
+import dd.kms.marple.gui.inspector.views.iterableview.IterableView;
+import dd.kms.marple.gui.inspector.views.mapview.MapView;
 import dd.kms.marple.settings.visual.ObjectView;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
@@ -65,6 +67,13 @@ public class InspectionFrame extends JFrame
 			if (indexOfLastSelectedView >= 0) {
 				viewPane.setSelectedIndex(indexOfLastSelectedView);
 				views.get(indexOfLastSelectedView).applyViewSettings(lastSelectedViewSettings);
+			}
+			// Switch from "Iterables" tab to "Maps" tab and vice versa
+			int indexOfAlternativeView =	IterableView.NAME.equals(lastSelectedViewName)	? viewPane.indexOfTab(MapView.NAME) :
+											MapView.NAME.equals(lastSelectedViewName)		? viewPane.indexOfTab(IterableView.NAME)
+																							: -1;
+			if (indexOfAlternativeView >= 0) {
+				viewPane.setSelectedIndex(indexOfAlternativeView);
 			}
 		}
 		setVisible(true);
