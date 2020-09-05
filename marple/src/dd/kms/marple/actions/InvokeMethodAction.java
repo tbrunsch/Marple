@@ -33,7 +33,7 @@ public class InvokeMethodAction implements InspectionAction
 
 	@Override
 	public String getDescription() {
-		return "Invoke method '" + methodInfo.getName() + "' and inspect the result in the object inspector";
+		return "Invoke method '" + methodInfo.getName() + "' and inspect the result in the inspection dialog";
 	}
 
 	@Override

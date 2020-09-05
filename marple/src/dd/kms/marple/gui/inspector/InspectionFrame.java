@@ -38,7 +38,7 @@ public class InspectionFrame extends JFrame
 	}
 
 	private void configure() {
-		setTitle("Object Inspection Manager");
+		setTitle("Inspect");
 
 		getContentPane().add(mainPanel);
 

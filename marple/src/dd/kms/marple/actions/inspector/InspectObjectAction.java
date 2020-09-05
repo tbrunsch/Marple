@@ -28,7 +28,7 @@ public class InspectObjectAction implements InspectionAction
 
 	@Override
 	public String getDescription() {
-		return "Inspect object '" + objectDisplayText + "' in the object inspector";
+		return "Inspect object '" + objectDisplayText + "' in the inspection dialog";
 	}
 
 	@Override

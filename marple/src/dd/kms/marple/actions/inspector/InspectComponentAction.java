@@ -28,7 +28,7 @@ public class InspectComponentAction implements InspectionAction
 
 	@Override
 	public String getDescription() {
-		return "Inspect the (sub)component hierarchy of '" + componentDisplayText + "' in the object inspector";
+		return "Inspect the (sub)component hierarchy of '" + componentDisplayText + "' in the inspection dialog";
 	}
 
 	@Override
