@@ -47,7 +47,7 @@ class MapOperationExecutor extends AbstractOperationExecutor<MapSettings>
 
 			result.put(mappedKey, mappedValue);
 		}
-		displayResult(result);
+		displayResult(InfoProvider.createObjectInfo(result));
 	}
 
 	private void checkMappingExpression(String mappingExpression, CompiledExpression compiledExpression) throws ParseException {

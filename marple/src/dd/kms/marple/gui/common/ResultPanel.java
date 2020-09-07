@@ -31,8 +31,7 @@ public class ResultPanel extends JPanel
 		displayComponent(exceptionLabel);
 	}
 
-	public void displayResult(Object result) {
-		ObjectInfo resultInfo = InfoProvider.createObjectInfo(result);
+	public void displayResult(ObjectInfo resultInfo) {
 		FieldTree fieldTree = new FieldTree(resultInfo, false, context);
 		displayComponent(fieldTree);
 	}

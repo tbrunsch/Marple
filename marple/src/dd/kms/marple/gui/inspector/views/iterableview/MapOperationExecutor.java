@@ -33,6 +33,6 @@ class MapOperationExecutor extends AbstractOperationExecutor<MapSettings>
 				throw wrapEvaluationException(e, element);
 			}
 		}
-		displayResult(result);
+		displayResult(InfoProvider.createObjectInfo(result));
 	}
 }

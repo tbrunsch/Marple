@@ -15,13 +15,13 @@ import java.util.function.Consumer;
 
 abstract class AbstractOperationExecutor<T extends OperationSettings>
 {
-	final Iterable<?>			iterable;
-	private final TypeInfo		commonElementType;
-	final T						settings;
-	final InspectionContext		inspectionContext;
+	final Iterable<?>				iterable;
+	private final TypeInfo			commonElementType;
+	final T							settings;
+	final InspectionContext			inspectionContext;
 
-	private Consumer<Object>	resultConsumer;
-	private Consumer<String>	textConsumer;
+	private Consumer<ObjectInfo>	resultConsumer;
+	private Consumer<String>		textConsumer;
 
 	AbstractOperationExecutor(Iterable<?> iterable, TypeInfo commonElementType, T settings, InspectionContext inspectionContext) {
 		this.iterable = iterable;
@@ -32,7 +32,7 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 
 	abstract void execute() throws Exception;
 
-	void setResultConsumer(Consumer<Object> resultConsumer) {
+	void setResultConsumer(Consumer<ObjectInfo> resultConsumer) {
 		this.resultConsumer = resultConsumer;
 	}
 
@@ -40,7 +40,7 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 		this.textConsumer = textConsumer;
 	}
 
-	void displayResult(Object result) {
+	void displayResult(ObjectInfo result) {
 		Preconditions.checkNotNull(resultConsumer);
 		resultConsumer.accept(result);
 	}

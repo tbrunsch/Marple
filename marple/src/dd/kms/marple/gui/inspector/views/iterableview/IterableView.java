@@ -25,8 +25,8 @@ public class IterableView extends JPanel implements ObjectView
 	private final InspectionContext	inspectionContext;
 
 	private final JPanel			contextPanel;
-	private final OperationPanel operationPanel;
-	private final ResultPanel resultPanel;
+	private final OperationPanel	operationPanel;
+	private final ResultPanel		resultPanel;
 
 	public IterableView(TypedObjectInfo<? extends Iterable<?>> iterableInfo, InspectionContext context) {
 		super(new GridBagLayout());
@@ -46,7 +46,7 @@ public class IterableView extends JPanel implements ObjectView
 		add(operationPanel,	new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		add(resultPanel,	new GridBagConstraints(0, yPos++, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 
-		operationPanel.setExceptionConsumer(e -> resultPanel.displayException(e));
+		operationPanel.setExceptionConsumer(resultPanel::displayException);
 		operationPanel.setAction(this::onRunOperation);
 	}
 

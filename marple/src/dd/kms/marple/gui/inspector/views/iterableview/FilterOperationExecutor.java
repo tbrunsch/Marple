@@ -42,7 +42,7 @@ class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 			default:
 				throw new IllegalArgumentException("Unsupported operation result type: " + resultType);
 		}
-		displayResult(filterResult);
+		displayResult(InfoProvider.createObjectInfo(filterResult));
 	}
 
 	private boolean filter(CompiledExpression compiledFilterExpression, Object element) throws Exception {

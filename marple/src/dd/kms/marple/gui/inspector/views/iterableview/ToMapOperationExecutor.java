@@ -47,6 +47,6 @@ class ToMapOperationExecutor extends AbstractOperationExecutor<ToMapSettings>
 				throw wrapEvaluationException(e, element);
 			}
 		}
-		displayResult(result);
+		displayResult(InfoProvider.createObjectInfo(result));
 	}
 }

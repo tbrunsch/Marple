@@ -51,7 +51,7 @@ class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 			}
 			result.put(key, value);
 		}
-		displayResult(result);
+		displayResult(InfoProvider.createObjectInfo(result));
 	}
 
 	private void checkFilterExpression(String filterExpression, CompiledExpression compiledExpression) throws ParseException {

@@ -39,7 +39,7 @@ class CollectOperationExecutor extends AbstractOperationExecutor<CollectSettings
 					throw wrapEvaluationException(e, element);
 				}
 			}
-			displayResult(collection);
+			displayResult(collectionInfo);
 		} else if (resultClass.isArray()) {
 			ObjectInfo arrayInfo = compiledExpression.evaluate(InfoProvider.NULL_LITERAL);
 			Object array = arrayInfo.getObject();
@@ -54,6 +54,7 @@ class CollectOperationExecutor extends AbstractOperationExecutor<CollectSettings
 			int length = list.size();
 			if (Array.getLength(array) != length) {
 				array = Array.newInstance(array.getClass().getComponentType(), length);
+				arrayInfo = InfoProvider.createObjectInfo(array, arrayInfo.getDeclaredType());
 			}
 			for (int i = 0; i < length; i++) {
 				Object element = list.get(i);
@@ -63,7 +64,7 @@ class CollectOperationExecutor extends AbstractOperationExecutor<CollectSettings
 					throw wrapEvaluationException(e, element);
 				}
 			}
-			displayResult(array);
+			displayResult(arrayInfo);
 		} else {
 			throw new ParseException(constructorExpression, constructorExpression.length(), "The constructor expression must evaluate to a Collection or to an appropriate array", null);
 		}

@@ -16,14 +16,14 @@ import java.util.function.Consumer;
 
 abstract class AbstractOperationExecutor<T extends OperationSettings>
 {
-	final Map<?, ?>				map;
-	private final TypeInfo		commonKeyType;
-	private final TypeInfo		commonValueType;
-	final T						settings;
-	final InspectionContext		inspectionContext;
+	final Map<?, ?>					map;
+	private final TypeInfo			commonKeyType;
+	private final TypeInfo			commonValueType;
+	final T							settings;
+	final InspectionContext			inspectionContext;
 
-	private Consumer<Object>	resultConsumer;
-	private Consumer<String>	textConsumer;
+	private Consumer<ObjectInfo>	resultConsumer;
+	private Consumer<String>		textConsumer;
 
 	AbstractOperationExecutor(Map<?, ?> map, TypeInfo commonKeyType, TypeInfo commonValueType, T settings, InspectionContext inspectionContext) {
 		this.map = map;
@@ -35,7 +35,7 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 
 	abstract void execute() throws Exception;
 
-	void setResultConsumer(Consumer<Object> resultConsumer) {
+	void setResultConsumer(Consumer<ObjectInfo> resultConsumer) {
 		this.resultConsumer = resultConsumer;
 	}
 
@@ -43,7 +43,7 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 		this.textConsumer = textConsumer;
 	}
 
-	void displayResult(Object result) {
+	void displayResult(ObjectInfo result) {
 		Preconditions.checkNotNull(resultConsumer);
 		resultConsumer.accept(result);
 	}
