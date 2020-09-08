@@ -45,11 +45,7 @@ public class DebugSupport
 	 * You can also set these slots programmatically from your debugger to
 	 * access them from Marple.
 	 */
-	public static Object	SLOT_0;
-	public static Object	SLOT_1;
-	public static Object	SLOT_2;
-	public static Object	SLOT_3;
-	public static Object	SLOT_4;
+	public static Object[]	SLOTS	= new Object[5];
 
 	/**
 	 * Named slots for data exchange between Marple and a debugger

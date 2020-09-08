@@ -11,7 +11,9 @@
   - order code completions intuitively
   - added changelog
   
-API changes: see API changes of Zenodot 0.2.0  
+API changes:
+  - API changes of Zenodot 0.2.0
+  - replaced unnamed slots `DebugSupport.SLOT_0`, `DebugSupport.SLOT_1`, etc. by array `DebugSupport.SLOTS`  
 
 ## v0.1.1
 

@@ -46,8 +46,8 @@ class TestUtils
 
 		ObjectInspectionFramework.register(inspectionSettings);
 
-		DebugSupport.SLOT_0 = "Use these slots for data exchange between Marple and your debugger.";
-		DebugSupport.SLOT_1 = 42;
+		DebugSupport.SLOTS[0] = "Use these slots for data exchange between Marple and your debugger.";
+		DebugSupport.SLOTS[1] = 42;
 
 		DebugSupport.setSlotValue("demo",			"Yes!");
 		DebugSupport.setSlotValue("variableImport",	42);
