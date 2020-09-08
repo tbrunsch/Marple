@@ -67,7 +67,7 @@ class FilterSettingsPanel extends AbstractOperationSettingsPanel
 
 	@Override
 	void setAction(Runnable action) {
-		filterTF.addActionListener(e -> action.run());
+		filterTF.setEvaluationResultConsumer(ignored -> action.run());
 	}
 
 	@Override

@@ -43,7 +43,7 @@ class ForEachSettingsPanel extends AbstractOperationSettingsPanel
 
 	@Override
 	void setAction(Runnable action) {
-		consumerTF.addActionListener(e -> action.run());
+		consumerTF.setEvaluationResultConsumer(ignored -> action.run());
 	}
 
 	@Override

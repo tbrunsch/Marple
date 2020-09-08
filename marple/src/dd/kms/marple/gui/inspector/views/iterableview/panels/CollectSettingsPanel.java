@@ -43,7 +43,7 @@ class CollectSettingsPanel extends AbstractOperationSettingsPanel
 
 	@Override
 	void setAction(Runnable action) {
-		constructorTF.addActionListener(e -> action.run());
+		constructorTF.setEvaluationResultConsumer(ignored -> action.run());
 	}
 
 	@Override

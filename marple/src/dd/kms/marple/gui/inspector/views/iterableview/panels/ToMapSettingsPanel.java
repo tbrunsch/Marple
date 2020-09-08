@@ -58,8 +58,8 @@ class ToMapSettingsPanel extends AbstractOperationSettingsPanel
 
 	@Override
 	void setAction(Runnable action) {
-		keyMappingTF.addActionListener(e -> action.run());
-		valueMappingTF.addActionListener(e -> action.run());
+		keyMappingTF.setEvaluationResultConsumer(ignored -> action.run());
+		valueMappingTF.setEvaluationResultConsumer(ignored -> action.run());
 	}
 
 	@Override

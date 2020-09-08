@@ -43,7 +43,7 @@ class MapSettingsPanel extends AbstractOperationSettingsPanel
 
 	@Override
 	void setAction(Runnable action) {
-		mappingTF.addActionListener(e -> action.run());
+		mappingTF.setEvaluationResultConsumer(ignored -> action.run());
 	}
 
 	@Override
