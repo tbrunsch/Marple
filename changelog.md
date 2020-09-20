@@ -13,6 +13,7 @@
   
 API changes:
   - API changes of Zenodot 0.2.0
+  - changed package structure: all API classes are now in the package `dd.kms.marple.api`
   - replaced unnamed slots `DebugSupport.SLOT_0`, `DebugSupport.SLOT_1`, etc. by array `DebugSupport.SLOTS`  
 
 ## v0.1.1

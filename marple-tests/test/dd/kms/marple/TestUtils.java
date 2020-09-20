@@ -2,7 +2,9 @@ package dd.kms.marple;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import dd.kms.marple.settings.InspectionSettings;
+import dd.kms.marple.api.DebugSupport;
+import dd.kms.marple.api.ObjectInspectionFramework;
+import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.settings.ObjectTreeNode;
 import dd.kms.zenodot.api.settings.ParserSettings;
