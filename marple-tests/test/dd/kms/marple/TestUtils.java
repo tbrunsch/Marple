@@ -6,10 +6,7 @@ import dd.kms.marple.api.DebugSupport;
 import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.zenodot.api.common.AccessModifier;
-import dd.kms.zenodot.api.settings.ObjectTreeNode;
-import dd.kms.zenodot.api.settings.ParserSettings;
-import dd.kms.zenodot.api.settings.ParserSettingsUtils;
-import dd.kms.zenodot.api.settings.Variable;
+import dd.kms.zenodot.api.settings.*;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
@@ -34,7 +31,7 @@ class TestUtils
 
 		ObjectTreeNode customHierarchyRoot = new FileNode(new File(System.getProperty("user.home")));
 
-		ParserSettings parserSettings = ParserSettingsUtils.createBuilder()
+		ParserSettings parserSettings = ParserSettingsBuilder.create()
 			.variables(ImmutableList.of(variable1, variable2))
 			.minimumAccessModifier(AccessModifier.PRIVATE)
 			.importPackagesByName(ImmutableSet.of(importPackage1, importPackage2))

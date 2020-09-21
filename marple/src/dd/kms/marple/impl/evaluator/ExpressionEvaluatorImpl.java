@@ -6,14 +6,14 @@ import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.impl.gui.common.WindowManager;
 import dd.kms.marple.impl.gui.evaluator.EvaluationFrame;
 import dd.kms.zenodot.api.settings.ParserSettings;
-import dd.kms.zenodot.api.settings.ParserSettingsUtils;
+import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.awt.*;
 
 public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 {
-	private ParserSettings		parserSettings	= ParserSettingsUtils.createBuilder().build();
+	private ParserSettings		parserSettings	= ParserSettingsBuilder.create().build();
 	private InspectionContext	context;
 
 	@Override
