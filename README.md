@@ -9,8 +9,75 @@ Marple is a Swing-based Java library for analyzing Swing applications. Notable f
   - An instance-based search
   - Support for data exchange with debuggers
 
-<!-- START doctoc -->
-<!-- END doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+# Table of Contents
+
+- [Target](#target)
+- [Features](#features)
+  - [Hierarchical Structure Analysis](#hierarchical-structure-analysis)
+  - [Component, Image, and Color Previews](#component-image-and-color-previews)
+  - [Highlighting of Components](#highlighting-of-components)
+  - [Analysis Support for Iterables, Arrays, and Maps](#analysis-support-for-iterables-arrays-and-maps)
+  - [Expression Evaluation](#expression-evaluation)
+  - [Instance-based Search](#instance-based-search)
+  - [Data Exchange With Debuggers](#data-exchange-with-debuggers)
+  - [Generic Type Tracking](#generic-type-tracking)
+  - [Navigation](#navigation)
+- [Default Shortcuts](#default-shortcuts)
+- [ObjectInfo](#objectinfo)
+- [Setup and Configuration](#setup-and-configuration)
+  - [Component Hierarchy Model](#component-hierarchy-model)
+  - [Visual Settings](#visual-settings)
+  - [Security Settings](#security-settings)
+  - [Debug Settings](#debug-settings)
+  - [Key Settings](#key-settings)
+  - [Parser Settings](#parser-settings)
+- [Navigable Elements](#navigable-elements)
+- [Actions](#actions)
+  - [Inspect Action](#inspect-action)
+  - [Highlight Component Action](#highlight-component-action)
+  - [Snapshot Action](#snapshot-action)
+  - [Add to Variables Action](#add-to-variables-action)
+  - [Evaluate and Evaluate as Action](#evaluate-and-evaluate-as-action)
+  - [Search Instances from Here and Search this Instance Action](#search-instances-from-here-and-search-this-instance-action)
+  - [Copy String Representation Action](#copy-string-representation-action)
+  - [Debug Support Action](#debug-support-action)
+  - [Invoke Action](#invoke-action)
+- [Inspection Dialog](#inspection-dialog)
+  - [Component Hierarchy Tab](#component-hierarchy-tab)
+  - [Fields Tab](#fields-tab)
+  - [Methods Tab](#methods-tab)
+  - [Iterables Tab](#iterables-tab)
+    - [Lambdas](#lambdas)
+    - [Filter](#filter)
+    - [Map](#map)
+    - [ForEach](#foreach)
+    - [Collect](#collect)
+    - [ToMap](#tomap)
+    - [Stream-like Analysis](#stream-like-analysis)
+  - [Maps Tab](#maps-tab)
+    - [Filter](#filter-1)
+    - [Map](#map-1)
+- [Evaluation Dialog](#evaluation-dialog)
+  - [Evaluation Settings](#evaluation-settings)
+    - [Dynamic Typing](#dynamic-typing)
+    - [Variables](#variables)
+    - [Imports](#imports)
+    - [Custom Hierarchy](#custom-hierarchy)
+- [Snapshot Dialog](#snapshot-dialog)
+- [Debug Support](#debug-support)
+    - [Unnamed Slots](#unnamed-slots)
+    - [Named Slots](#named-slots)
+    - [Importing and Exporting Variables](#importing-and-exporting-variables)
+    - [Breakpoint Trigger](#breakpoint-trigger)
+- [Search Dialog](#search-dialog)
+- [Open Source License Acknowledgement](#open-source-license-acknowledgement)
+  - [AutoComplete](#autocomplete)
+  - [Guava: Google Core Libraries for Java](#guava-google-core-libraries-for-java)
+  - [Zenodot](#zenodot)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Target
 Marple has been developed for two reasons:
