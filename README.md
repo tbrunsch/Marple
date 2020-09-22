@@ -9,6 +9,9 @@ Marple is a Swing-based Java library for analyzing Swing applications. Notable f
   - An instance-based search
   - Support for data exchange with debuggers
 
+<!-- START doctoc -->
+<!-- END doctoc -->
+
 # Target
 Marple has been developed for two reasons:
 
