@@ -13,14 +13,14 @@ public class CollectionElementCollector extends AbstractElementCollector
 	/**
 	 * Warning: not thread-safe
 	 */
-	public static List<InstancePath> collect(Collection<?> collection, InstancePath parentPath) {
+	public static List<InstancePath> collect(Collection<?> collection, InstancePath parent) {
 		COLLECTOR.collection = collection;
-		COLLECTOR.parentPath = parentPath;
+		COLLECTOR.parent = parent;
 		return COLLECTOR.collect();
 	}
 
 	private Collection<?>	collection;
-	private InstancePath	parentPath;
+	private InstancePath	parent;
 
 	@Override
 	void doCollect() {
@@ -29,8 +29,8 @@ public class CollectionElementCollector extends AbstractElementCollector
 		int i = 0;
 		for (Object object : collection) {
 			String name = isList ? ".get(" + i + ")" : "{" + i + "}";
-			InstancePath childPath = new InstancePath(object, name, parentPath);
-			children.add(childPath);
+			InstancePath child = new InstancePath(object, name, parent);
+			children.add(child);
 			i++;
 		}
 	}
