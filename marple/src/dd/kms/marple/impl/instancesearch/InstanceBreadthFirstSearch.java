@@ -1,21 +1,25 @@
 package dd.kms.marple.impl.instancesearch;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
-import dd.kms.marple.impl.common.ReflectionUtils;
-import dd.kms.marple.impl.instancesearch.elementcollectors.*;
-import dd.kms.marple.impl.instancesearch.settings.SearchSettings;
-import dd.kms.zenodot.api.common.FieldScanner;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
+import dd.kms.marple.impl.common.ReflectionUtils;
+import dd.kms.marple.impl.instancesearch.elementcollectors.ArrayElementCollector;
+import dd.kms.marple.impl.instancesearch.elementcollectors.CollectionElementCollector;
+import dd.kms.marple.impl.instancesearch.elementcollectors.MapElementCollector;
+import dd.kms.marple.impl.instancesearch.elementcollectors.MultimapElementCollector;
+import dd.kms.marple.impl.instancesearch.settings.SearchSettings;
+import dd.kms.zenodot.api.common.FieldScanner;
 
 class InstanceBreadthFirstSearch extends AbstractBreadthFirstSearch<Integer, InstancePath>
 {
@@ -50,11 +54,8 @@ class InstanceBreadthFirstSearch extends AbstractBreadthFirstSearch<Integer, Ins
 			if (object.getClass().isArray()) {
 				return ArrayElementCollector.collect(object, parentPath);
 			}
-			if (object instanceof List<?>) {
-				return ListElementCollector.collect((List<?>) object, parentPath);
-			}
-			if (object instanceof Iterable<?>) {
-				return IterableElementCollector.collect((Iterable<?>) object, parentPath);
+			if (object instanceof Collection<?>) {
+				return CollectionElementCollector.collect((Collection<?>) object, parentPath);
 			}
 			if (object instanceof Map<?, ?>) {
 				return MapElementCollector.collect((Map<?, ?>) object, parentPath, toStringFunction);
