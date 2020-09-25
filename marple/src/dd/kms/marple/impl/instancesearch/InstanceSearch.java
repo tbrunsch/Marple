@@ -27,6 +27,7 @@ class InstanceSearch
 	private final int						maxSearchDepth;
 
 	private final Set<Integer>				visitedNodeIdentityHashes	= Sets.newHashSet();
+	private final Set<Class<?>>				visitedClasses	 			= Sets.newHashSet();
 	private final Queue<InstancePath>		nodesToConsider				= Lists.newLinkedList();
 
 	// redundant variable to avoid concurrency problems
@@ -50,6 +51,7 @@ class InstanceSearch
 
 	void search(InstancePath startPathInfo) {
 		visitedNodeIdentityHashes.clear();
+		visitedClasses.clear();
 		nodesToConsider.clear();
 		numVisitedNodes = 0;
 
@@ -61,6 +63,10 @@ class InstanceSearch
 			Iterable<InstancePath> children = getChildren(node);
 			for (InstancePath child : children) {
 				onDiscoveredEdge(node, child);
+			}
+			Object lastNodeObject = node.getLastNodeObject();
+			if (lastNodeObject != null) {
+				visitedClasses.add(lastNodeObject.getClass());
 			}
 
 			countUntilHigherDepth--;
@@ -79,7 +85,11 @@ class InstanceSearch
 		if (!shouldProcessDiscoveredNode(to)) {
 			return;
 		}
-		Integer identityHash = System.identityHashCode(to.getLastNodeObject());
+		Object lastNodeObject = to.getLastNodeObject();
+		if (lastNodeObject == null) {
+			return;
+		}
+		Integer identityHash = System.identityHashCode(lastNodeObject);
 		if (visitedNodeIdentityHashes.add(identityHash)) {
 			nodesToConsider.add(to);
 			numVisitedNodes++;
@@ -91,8 +101,9 @@ class InstanceSearch
 		if (!ReflectionUtils.isObjectInspectable(object) || object == this || object instanceof InstancePath) {
 			return ImmutableList.of();
 		}
+		Class<?> objectClass = object.getClass();
 		if (!settings.isSearchOnlyPureFields()) {
-			if (object.getClass().isArray()) {
+			if (objectClass.isArray()) {
 				return ArrayElementCollector.collect(object, parent);
 			}
 			if (object instanceof Collection<?>) {
@@ -109,15 +120,27 @@ class InstanceSearch
 		/*
 		 * Collect regular fields
 		 */
-		List<Field> fields = new FieldScanner().getFields(object.getClass(), false);
+		List<Field> fields = new FieldScanner().getFields(objectClass, false);
+		InstancePath classParent = null;
 		List<InstancePath> children = new ArrayList<>();
+		boolean classVisited = visitedClasses.contains(objectClass);
 		for (Field field : fields) {
-			if (settings.isSearchOnlyNonStaticFields() && Modifier.isStatic(field.getModifiers())) {
+			boolean isStatic = Modifier.isStatic(field.getModifiers());
+			if (isStatic && (settings.isSearchOnlyNonStaticFields() || classVisited)) {
 				continue;
 			}
 			try {
 				field.setAccessible(true);
-				InstancePath child = new InstancePath(field.get(object), "." + field.getName(), parent);
+				String fieldName = field.getName();
+				final InstancePath child;
+				if (isStatic) {
+					if (classParent == null) {
+						classParent = new InstancePath(objectClass, objectClass.getSimpleName(), null);
+					}
+					child = new InstancePath(field.get(null), "." + fieldName, classParent);
+				} else {
+					child = new InstancePath(field.get(object), "." + fieldName, parent);
+				}
 				children.add(child);
 			} catch (IllegalAccessException ignored) {
 				/* we only discover what can be discovered */

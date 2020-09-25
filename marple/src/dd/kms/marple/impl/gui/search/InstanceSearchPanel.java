@@ -21,6 +21,7 @@ import dd.kms.zenodot.api.wrappers.ObjectInfo;
 import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -378,7 +379,10 @@ class InstanceSearchPanel extends JPanel
 
 	private void startSearch() {
 		statusTF.setText(null);
-		instanceSearchTree.setModel(new DefaultTreeModel(null));
+		DefaultMutableTreeNode invisibleSearchRoot = new DefaultMutableTreeNode();
+		instanceSearchTree.setModel(new DefaultTreeModel(invisibleSearchRoot));
+		instanceSearchTree.setRootVisible(false);
+		instanceSearchTree.setShowsRootHandles(true);
 		instanceSearchNodes.clear();
 
 		InstancePath sourcePath = new InstancePath(root, "root", null);
@@ -404,26 +408,26 @@ class InstanceSearchPanel extends JPanel
 	}
 
 	private void addInstancePath(InstancePath path) {
+		if (instanceSearchNodes.containsKey(path)) {
+			return;
+		}
 		InstancePath parentPath = path.getParentPath();
+		DefaultTreeModel model = (DefaultTreeModel) instanceSearchTree.getModel();
+		final DefaultMutableTreeNode parentNode;
 		if (parentPath == null) {
-			// root node
-			if (!instanceSearchNodes.containsKey(path)) {
-				SearchNode pathNode = new SearchNode(path, context);
-				instanceSearchNodes.put(path, pathNode);
-				instanceSearchTree.setModel(new DefaultTreeModel(pathNode));
-			}
+			// root or class node
+			parentNode = (DefaultMutableTreeNode) model.getRoot();
 		} else {
 			if (!instanceSearchNodes.containsKey(parentPath)) {
 				addInstancePath(parentPath);
 			}
-			SearchNode parentNode = instanceSearchNodes.get(parentPath);
-			assert parentNode != null;
-			SearchNode pathNode = new SearchNode(path, context);
-			instanceSearchNodes.put(path, pathNode);
-			DefaultTreeModel model = (DefaultTreeModel) instanceSearchTree.getModel();
-			model.insertNodeInto(pathNode, parentNode, model.getChildCount(parentNode));
-			instanceSearchTree.expandPath(new TreePath(parentNode.getPath()));
+			 parentNode = instanceSearchNodes.get(parentPath);
 		}
+		assert parentNode != null;
+		SearchNode pathNode = new SearchNode(path, context);
+		instanceSearchNodes.put(path, pathNode);
+		model.insertNodeInto(pathNode, parentNode, model.getChildCount(parentNode));
+		instanceSearchTree.expandPath(new TreePath(parentNode.getPath()));
 	}
 
 	private void onNoSearchOptionSelected() throws SettingsException {
