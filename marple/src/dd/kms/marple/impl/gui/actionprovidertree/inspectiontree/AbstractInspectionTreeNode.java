@@ -4,26 +4,26 @@ import java.util.List;
 
 abstract class AbstractInspectionTreeNode implements InspectionTreeNode
 {
-	private final int							childIndex;
-
-	private List<? extends InspectionTreeNode>	cachedChildren;
-
-	AbstractInspectionTreeNode(int childIndex) {
-		this.childIndex = childIndex;
-	}
+	private List<InspectionTreeNode>	cachedChildren;
 
 	abstract List<? extends InspectionTreeNode> doGetChildren();
 
 	@Override
-	public int getChildIndex() {
-		return childIndex;
+	public int getChildIndex(Object child) {
+		return cachedChildren.indexOf(child);
 	}
 
 	@Override
-	public List<? extends InspectionTreeNode> getChildren() {
+	public List<InspectionTreeNode> getChildren() {
 		if (cachedChildren == null) {
-			cachedChildren = doGetChildren();
+			cachedChildren = new IndexedList<>();
+			cachedChildren.addAll(doGetChildren());
 		}
 		return cachedChildren;
+	}
+
+	@Override
+	public final String toString() {
+		return getTrimmedText();
 	}
 }

@@ -1,14 +1,19 @@
 package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-import java.util.Collections;
-import java.util.List;
 
 class InspectionTreeModel implements TreeModel
 {
-	private final InspectionTreeNode	root;
+	private final InspectionTreeNode		root;
+	private final Set<TreeModelListener>	listeners	= new HashSet<>();
 
 	InspectionTreeModel(InspectionTreeNode root) {
 		this.root = root;
@@ -21,7 +26,7 @@ class InspectionTreeModel implements TreeModel
 
 	@Override
 	public InspectionTreeNode getChild(Object parent, int index) {
-		List<? extends InspectionTreeNode> children = getChildren(parent);
+		List<InspectionTreeNode> children = getChildren(parent);
 		return 0 <= index && index < children.size() ? children.get(index) : null;
 	}
 
@@ -37,7 +42,9 @@ class InspectionTreeModel implements TreeModel
 
 	@Override
 	public int getIndexOfChild(Object parent, Object child) {
-		return child instanceof InspectionTreeNode ? ((InspectionTreeNode) child).getChildIndex() : -1;
+		return parent instanceof InspectionTreeNode
+				? ((InspectionTreeNode) parent).getChildIndex(child)
+				: -1;
 	}
 
 	@Override
@@ -46,15 +53,30 @@ class InspectionTreeModel implements TreeModel
 	}
 
 	@Override
-	public void addTreeModelListener(TreeModelListener l) {
-		/* do nothing */
+	public void addTreeModelListener(TreeModelListener listener) {
+		listeners.add(listener);
 	}
 
 	@Override
-	public void removeTreeModelListener(TreeModelListener l) {
-		/* do nothing */
+	public void removeTreeModelListener(TreeModelListener listener) {
+		listeners.remove(listener);
 	}
-	List<? extends InspectionTreeNode> getChildren(Object parent) {
+
+	void fireTreeNodesRemoved(Object[] path, int[] childIndices, Object[] children) {
+		TreeModelEvent e = new TreeModelEvent(this, path, childIndices, children);
+		for (TreeModelListener listener : listeners) {
+			listener.treeNodesRemoved(e);
+		}
+	}
+
+	void fireTreeNodesInserted(Object[] path, int[] childIndices, Object[] children) {
+		TreeModelEvent e = new TreeModelEvent(this, path, childIndices, children);
+		for (TreeModelListener listener : listeners) {
+			listener.treeNodesInserted(e);
+		}
+	}
+
+	List<InspectionTreeNode> getChildren(Object parent) {
 		return parent instanceof InspectionTreeNode
 				? ((InspectionTreeNode) parent).getChildren()
 				: Collections.emptyList();

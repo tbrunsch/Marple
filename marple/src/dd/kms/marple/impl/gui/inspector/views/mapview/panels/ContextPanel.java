@@ -26,7 +26,7 @@ public class ContextPanel extends JPanel
 
 		setBorder(BorderFactory.createTitledBorder("Map"));
 
-		fieldTree = new FieldTree(mapInfo, true, context);
+		fieldTree = new FieldTree(mapInfo, context);
 		fieldTree.setPreferredSize(new Dimension(fieldTree.getPreferredSize().width, 100));
 
 		commonKeyClassLabel.setText(commonKeyType.toString());

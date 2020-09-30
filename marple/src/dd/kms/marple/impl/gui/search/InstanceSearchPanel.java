@@ -3,6 +3,8 @@ package dd.kms.marple.impl.gui.search;
 import com.google.common.base.Strings;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
+import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
+import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNodes;
 import dd.kms.marple.impl.gui.common.ExceptionFormatter;
 import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.impl.gui.evaluator.textfields.ClassInputTextField;
@@ -161,7 +163,11 @@ class InstanceSearchPanel extends JPanel
 		resultPanel.add(instanceSearchScrollPane,	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		resultPanel.add(fullPathLabel,				new GridBagConstraints(0, 2, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
+		instanceSearchTree.setRootVisible(false);
+		instanceSearchTree.setShowsRootHandles(true);
+
 		ActionProviderListeners.addMouseListeners(instanceSearchTree);
+		ActionProviderTreeNodes.enableFullTextToolTips(instanceSearchTree);
 		instanceSearchTree.addMouseMotionListener(new FullPathMouseMotionListener(fullPathLabel::setText));
 
 		statusTF.setEditable(false);
@@ -381,8 +387,7 @@ class InstanceSearchPanel extends JPanel
 		statusTF.setText(null);
 		DefaultMutableTreeNode invisibleSearchRoot = new DefaultMutableTreeNode();
 		instanceSearchTree.setModel(new DefaultTreeModel(invisibleSearchRoot));
-		instanceSearchTree.setRootVisible(false);
-		instanceSearchTree.setShowsRootHandles(true);
+
 		instanceSearchNodes.clear();
 
 		InstancePath sourcePath = new InstancePath(root, "root", null);

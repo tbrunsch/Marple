@@ -12,6 +12,7 @@ import dd.kms.marple.impl.actions.Actions;
 import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
+import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNodes;
 import dd.kms.marple.impl.settings.components.ComponentHierarchyImpl;
 
 import javax.swing.*;
@@ -113,7 +114,7 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 		String fieldText = fields.stream()
 			.map(field -> field.getDeclaringClass().getSimpleName() + "." + field.getName())
 			.collect(Collectors.joining(", "));
-		return Actions.trimName(displayText + " (" + fieldText + ")");
+		return displayText + " (" + fieldText + ")";
 	}
 
 	/*
@@ -137,6 +138,7 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 		JTree tree = new JTree(root);
 
 		ActionProviderListeners.addMouseListeners(tree);
+		ActionProviderTreeNodes.enableFullTextToolTips(tree);
 
 		return tree;
 	}
@@ -150,6 +152,16 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 		@Override
 		public ActionProvider getActionProvider() {
 			return (ActionProvider) getUserObject();
+		}
+
+		@Override
+		public String getFullText() {
+			return getActionProvider().toString();
+		}
+
+		@Override
+		public String toString() {
+			return getTrimmedText();
 		}
 	}
 }
