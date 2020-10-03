@@ -6,6 +6,8 @@ import dd.kms.marple.impl.gui.filters.ValueFilters;
 import dd.kms.marple.impl.gui.table.*;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.common.MethodScanner;
+import dd.kms.zenodot.api.common.MethodScannerBuilder;
+import dd.kms.zenodot.api.common.StaticMode;
 import dd.kms.zenodot.api.wrappers.ExecutableInfo;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
@@ -32,7 +34,8 @@ class MethodTable extends JPanel
 
 		this.methodViewUtils = new MethodViewUtils(objectInfo, context);
 
-		List<ExecutableInfo> methodInfos = InfoProvider.getMethodInfos(ReflectionUtils.getRuntimeTypeInfo(objectInfo), new MethodScanner());
+		MethodScanner methodScanner = MethodScannerBuilder.create().staticMode(StaticMode.BOTH).build();
+		List<ExecutableInfo> methodInfos = InfoProvider.getMethodInfos(ReflectionUtils.getRuntimeTypeInfo(objectInfo), methodScanner);
 		List<ColumnDescription<ExecutableInfo>> columnDescriptions = createColumnDescriptions();
 
 		table = new ListBasedTable<>(methodInfos, columnDescriptions);

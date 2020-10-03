@@ -1,15 +1,5 @@
 package dd.kms.marple.impl.instancesearch;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.*;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -20,7 +10,17 @@ import dd.kms.marple.impl.instancesearch.elementcollectors.CollectionElementColl
 import dd.kms.marple.impl.instancesearch.elementcollectors.MapElementCollector;
 import dd.kms.marple.impl.instancesearch.elementcollectors.MultimapElementCollector;
 import dd.kms.marple.impl.instancesearch.settings.SearchSettings;
-import dd.kms.zenodot.api.common.FieldScanner;
+import dd.kms.zenodot.api.common.FieldScannerBuilder;
+import dd.kms.zenodot.api.common.StaticMode;
+
+import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 class InstanceSearch
 {
@@ -120,7 +120,11 @@ class InstanceSearch
 		/*
 		 * Collect regular fields
 		 */
-		List<Field> fields = new FieldScanner().getFields(objectClass, false);
+		List<Field> fields = FieldScannerBuilder.create()
+			.staticMode(settings.isSearchOnlyNonStaticFields() ? StaticMode.NON_STATIC : StaticMode.BOTH)
+			.ignoreShadowedFields(false)
+			.build()
+			.getFields(objectClass);
 		InstancePath classParent = null;
 		List<InstancePath> children = new ArrayList<>();
 		boolean classVisited = visitedClasses.contains(objectClass);

@@ -10,6 +10,8 @@ import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.zenodot.api.common.FieldScanner;
+import dd.kms.zenodot.api.common.FieldScannerBuilder;
+import dd.kms.zenodot.api.common.StaticMode;
 import dd.kms.zenodot.api.wrappers.FieldInfo;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
@@ -31,7 +33,8 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 		if (!ReflectionUtils.isObjectInspectable(objectInfo.getObject())) {
 			return ImmutableList.of();
 		}
-		List<FieldInfo> fieldInfos = InfoProvider.getFieldInfos(ReflectionUtils.getRuntimeTypeInfo(objectInfo), new FieldScanner());
+		FieldScanner fieldScanner = FieldScannerBuilder.create().staticMode(StaticMode.NON_STATIC).build();
+		List<FieldInfo> fieldInfos = InfoProvider.getFieldInfos(ReflectionUtils.getRuntimeTypeInfo(objectInfo), fieldScanner);
 		ImmutableList.Builder<InspectionTreeNode> childBuilder = ImmutableList.builder();
 		for (FieldInfo fieldInfo : fieldInfos) {
 			ObjectInfo fieldValueInfo = ReflectionUtils.OBJECT_INFO_PROVIDER.getFieldValueInfo(objectInfo.getObject(), fieldInfo);

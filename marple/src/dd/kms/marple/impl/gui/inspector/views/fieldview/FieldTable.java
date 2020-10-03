@@ -8,6 +8,8 @@ import dd.kms.marple.impl.gui.filters.ValueFilters;
 import dd.kms.marple.impl.gui.table.*;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.common.FieldScanner;
+import dd.kms.zenodot.api.common.FieldScannerBuilder;
+import dd.kms.zenodot.api.common.StaticMode;
 import dd.kms.zenodot.api.wrappers.FieldInfo;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
@@ -32,7 +34,8 @@ public class FieldTable extends JPanel
 		this.objectInfo = objectInfo;
 		this.context = context;
 
-		List<FieldInfo> fieldInfos = InfoProvider.getFieldInfos(ReflectionUtils.getRuntimeTypeInfo(objectInfo), new FieldScanner());
+		FieldScanner fieldScanner = FieldScannerBuilder.create().staticMode(StaticMode.BOTH).build();
+		List<FieldInfo> fieldInfos = InfoProvider.getFieldInfos(ReflectionUtils.getRuntimeTypeInfo(objectInfo), fieldScanner);
 
 		List<ColumnDescription<FieldInfo>> columnDescriptions = createColumnDescriptions();
 

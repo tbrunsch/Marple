@@ -2,9 +2,10 @@
 
 ## v0.2.1
 
-- instance search now ignores iterables and lists static fields as part of classes instead of instances
-- added a "more ..." node to the field tree to support displaying huge or infinite iterables
-- display a tool tip with the full text of a tree node if its text is only displayed partially
+  - changed to Zenodot 0.2.1
+  - instance search now ignores iterables and lists static fields as part of classes instead of instances
+  - added a "more ..." node to the field tree to support displaying huge or infinite iterables
+  - display a tool tip with the full text of a tree node if its text is only displayed partially
 
 ## v0.2.0
 

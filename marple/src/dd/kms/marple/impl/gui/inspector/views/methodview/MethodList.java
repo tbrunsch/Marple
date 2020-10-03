@@ -7,6 +7,8 @@ import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.impl.gui.filters.ValueFilter;
 import dd.kms.marple.impl.gui.filters.ValueFilters;
 import dd.kms.zenodot.api.common.MethodScanner;
+import dd.kms.zenodot.api.common.MethodScannerBuilder;
+import dd.kms.zenodot.api.common.StaticMode;
 import dd.kms.zenodot.api.wrappers.ExecutableInfo;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
@@ -61,7 +63,8 @@ class MethodList extends JPanel
 			((JTextField) nameFilterEditor).setColumns(20);
 		}
 
-		this.methodInfos = InfoProvider.getMethodInfos(ReflectionUtils.getRuntimeTypeInfo(objectInfo), new MethodScanner());
+		MethodScanner methodScanner = MethodScannerBuilder.create().staticMode(StaticMode.BOTH).build();
+		this.methodInfos = InfoProvider.getMethodInfos(ReflectionUtils.getRuntimeTypeInfo(objectInfo), methodScanner);
 		updateListModel();
 		list.setSelectionModel(new NoItemSelectionModel());
 		list.setCellRenderer(new ActionProviderRenderer());
