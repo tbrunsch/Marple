@@ -1,11 +1,11 @@
 package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
-import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
-
 import java.util.List;
+
+import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
 
 interface InspectionTreeNode extends ActionProviderTreeNode
 {
-	int getChildIndex();
-	List<? extends InspectionTreeNode> getChildren();
+	int getChildIndex(Object child);
+	List<InspectionTreeNode> getChildren();
 }

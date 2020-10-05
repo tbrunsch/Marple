@@ -23,7 +23,7 @@ public class ContextPanel extends JPanel
 
 		setBorder(BorderFactory.createTitledBorder("Iterable"));
 
-		fieldTree = new FieldTree(iterableInfo, true, context);
+		fieldTree = new FieldTree(iterableInfo, context);
 		fieldTree.setPreferredSize(new Dimension(fieldTree.getPreferredSize().width, 100));
 
 		commonElementClassLabel.setText(commonElementType.toString());

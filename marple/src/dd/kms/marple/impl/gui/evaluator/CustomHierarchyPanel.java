@@ -6,8 +6,11 @@ import com.google.common.collect.Lists;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
+import dd.kms.marple.impl.actions.Actions;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
+import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNodes;
+import dd.kms.marple.impl.gui.actionprovidertree.inspectiontree.InspectionTreeNodes;
 import dd.kms.zenodot.api.settings.ObjectTreeNode;
 
 import javax.swing.*;
@@ -39,7 +42,9 @@ class CustomHierarchyPanel extends JPanel
 
 		TreeNode root = new CustomHierarchyTreeNode(context.getEvaluator().getParserSettings().getCustomHierarchyRoot(), null, context);
 		tree = new JTree(root);
+
 		ActionProviderListeners.addMouseListeners(tree);
+		ActionProviderTreeNodes.enableFullTextToolTips(tree);
 
 		scrollPane = new JScrollPane(tree);
 
@@ -106,6 +111,11 @@ class CustomHierarchyPanel extends JPanel
 
 		@Override
 		public String toString() {
+			return getTrimmedText();
+		}
+
+		@Override
+		public String getFullText() {
 			String name = wrappedNode.getName();
 			return name == null ? "<no name>" : name;
 		}

@@ -9,11 +9,11 @@ import java.util.Optional;
 
 public class Actions
 {
-	private static final int	MAX_NAME_LENGTH	= 60;
+	private static final int	MAX_DISPLAY_TEXT_LENGTH	= 60;
 
-	public static String trimName(String name) {
-		return name.length() > MAX_NAME_LENGTH
-			? name.substring(0, MAX_NAME_LENGTH) + "..."
+	public static String trimDisplayText(String name) {
+		return name.length() > MAX_DISPLAY_TEXT_LENGTH
+			? name.substring(0, MAX_DISPLAY_TEXT_LENGTH) + "..."
 			: name;
 	}
 

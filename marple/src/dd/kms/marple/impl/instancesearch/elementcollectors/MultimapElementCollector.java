@@ -16,15 +16,15 @@ public class MultimapElementCollector extends AbstractElementCollector
 	/**
 	 * Warning: not thread-safe
 	 */
-	public static List<InstancePath> collect(Multimap<?,?> multimap, InstancePath parentPath, Function<Object, String> toStringFunction) {
+	public static List<InstancePath> collect(Multimap<?,?> multimap, InstancePath parent, Function<Object, String> toStringFunction) {
 		COLLECTOR.multimap = multimap;
-		COLLECTOR.parentPath = parentPath;
+		COLLECTOR.parent = parent;
 		COLLECTOR.toStringFunction = toStringFunction;
 		return COLLECTOR.collect();
 	}
 
 	private Multimap<?,?>				multimap;
-	private InstancePath				parentPath;
+	private InstancePath				parent;
 	private Function<Object, String>	toStringFunction;
 
 	@Override
@@ -33,12 +33,12 @@ public class MultimapElementCollector extends AbstractElementCollector
 		int i = 0;
 		for (Map.Entry<?, ? extends Collection<?>> entry : multimap.asMap().entrySet()) {
 			Object key = entry.getKey();
-			InstancePath keyChild = new InstancePath(key, ".keySet(){" + i + "}", parentPath);
+			InstancePath keyChild = new InstancePath(key, ".keySet(){" + i + "}", parent);
 			children.add(keyChild);
 			String namePrefix = ".get(" + toStringFunction.apply(key) + ")";
 			int j = 0;
 			for (Object value : entry.getValue()) {
-				InstancePath valueChild = new InstancePath(value, namePrefix + "{" + j + "}", parentPath);
+				InstancePath valueChild = new InstancePath(value, namePrefix + "{" + j + "}", parent);
 				children.add(valueChild);
 				j++;
 			}

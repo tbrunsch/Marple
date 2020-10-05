@@ -3,6 +3,7 @@ package dd.kms.marple.impl.gui.search;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
+import dd.kms.marple.impl.actions.Actions;
 import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
 import dd.kms.marple.impl.instancesearch.InstancePath;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
@@ -21,14 +22,15 @@ class SearchNode extends DefaultMutableTreeNode implements ActionProviderTreeNod
 
 	@Override
 	public @Nullable ActionProvider getActionProvider() {
-		return new ActionProviderBuilder(getDisplayText(), InfoProvider.createObjectInfo(getObject()), context).build();
+		return new ActionProviderBuilder(getFullText(), InfoProvider.createObjectInfo(getObject()), context).build();
 	}
 
 	String getFullPathAsString() {
 		return getInstancePath().toString();
 	}
 
-	private String getDisplayText() {
+	@Override
+	public String getFullText() {
 		InstancePath instancePath = getInstancePath();
 		String lastNodeStringRepresentation = instancePath.getLastNodeStringRepresentation();
 		int beginIndex = lastNodeStringRepresentation.startsWith(".") ? 1 : 0;
@@ -45,6 +47,6 @@ class SearchNode extends DefaultMutableTreeNode implements ActionProviderTreeNod
 
 	@Override
 	public String toString() {
-		return getDisplayText();
+		return getTrimmedText();
 	}
 }

@@ -31,7 +31,7 @@ public class ResultPanel extends JPanel
 	}
 
 	public void displayResult(ObjectInfo resultInfo) {
-		FieldTree fieldTree = new FieldTree(resultInfo, false, context);
+		FieldTree fieldTree = new FieldTree(resultInfo, context);
 		displayComponent(fieldTree);
 	}
 

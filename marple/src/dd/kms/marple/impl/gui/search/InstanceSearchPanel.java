@@ -3,6 +3,8 @@ package dd.kms.marple.impl.gui.search;
 import com.google.common.base.Strings;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
+import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
+import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNodes;
 import dd.kms.marple.impl.gui.common.ExceptionFormatter;
 import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.impl.gui.evaluator.textfields.ClassInputTextField;
@@ -21,6 +23,7 @@ import dd.kms.zenodot.api.wrappers.ObjectInfo;
 import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -160,7 +163,11 @@ class InstanceSearchPanel extends JPanel
 		resultPanel.add(instanceSearchScrollPane,	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		resultPanel.add(fullPathLabel,				new GridBagConstraints(0, 2, REMAINDER, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
+		instanceSearchTree.setRootVisible(false);
+		instanceSearchTree.setShowsRootHandles(true);
+
 		ActionProviderListeners.addMouseListeners(instanceSearchTree);
+		ActionProviderTreeNodes.enableFullTextToolTips(instanceSearchTree);
 		instanceSearchTree.addMouseMotionListener(new FullPathMouseMotionListener(fullPathLabel::setText));
 
 		statusTF.setEditable(false);
@@ -378,7 +385,9 @@ class InstanceSearchPanel extends JPanel
 
 	private void startSearch() {
 		statusTF.setText(null);
-		instanceSearchTree.setModel(new DefaultTreeModel(null));
+		DefaultMutableTreeNode invisibleSearchRoot = new DefaultMutableTreeNode();
+		instanceSearchTree.setModel(new DefaultTreeModel(invisibleSearchRoot));
+
 		instanceSearchNodes.clear();
 
 		InstancePath sourcePath = new InstancePath(root, "root", null);
@@ -404,26 +413,26 @@ class InstanceSearchPanel extends JPanel
 	}
 
 	private void addInstancePath(InstancePath path) {
+		if (instanceSearchNodes.containsKey(path)) {
+			return;
+		}
 		InstancePath parentPath = path.getParentPath();
+		DefaultTreeModel model = (DefaultTreeModel) instanceSearchTree.getModel();
+		final DefaultMutableTreeNode parentNode;
 		if (parentPath == null) {
-			// root node
-			if (!instanceSearchNodes.containsKey(path)) {
-				SearchNode pathNode = new SearchNode(path, context);
-				instanceSearchNodes.put(path, pathNode);
-				instanceSearchTree.setModel(new DefaultTreeModel(pathNode));
-			}
+			// root or class node
+			parentNode = (DefaultMutableTreeNode) model.getRoot();
 		} else {
 			if (!instanceSearchNodes.containsKey(parentPath)) {
 				addInstancePath(parentPath);
 			}
-			SearchNode parentNode = instanceSearchNodes.get(parentPath);
-			assert parentNode != null;
-			SearchNode pathNode = new SearchNode(path, context);
-			instanceSearchNodes.put(path, pathNode);
-			DefaultTreeModel model = (DefaultTreeModel) instanceSearchTree.getModel();
-			model.insertNodeInto(pathNode, parentNode, model.getChildCount(parentNode));
-			instanceSearchTree.expandPath(new TreePath(parentNode.getPath()));
+			 parentNode = instanceSearchNodes.get(parentPath);
 		}
+		assert parentNode != null;
+		SearchNode pathNode = new SearchNode(path, context);
+		instanceSearchNodes.put(path, pathNode);
+		model.insertNodeInto(pathNode, parentNode, model.getChildCount(parentNode));
+		instanceSearchTree.expandPath(new TreePath(parentNode.getPath()));
 	}
 
 	private void onNoSearchOptionSelected() throws SettingsException {

@@ -4,9 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.primitives.Primitives;
-import dd.kms.zenodot.api.common.FieldScanner;
-import dd.kms.zenodot.api.common.MethodScanner;
-import dd.kms.zenodot.api.common.ObjectInfoProvider;
+import dd.kms.zenodot.api.common.*;
 import dd.kms.zenodot.api.wrappers.ExecutableInfo;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
@@ -90,7 +88,11 @@ public class ReflectionUtils
 		if (instance == null) {
 			return fieldsByValue;
 		}
-		List<Field> fields = new FieldScanner().getFields(instance.getClass(), false);
+		List<Field> fields = FieldScannerBuilder.create()
+			.ignoreShadowedFields(false)
+			.staticMode(StaticMode.NON_STATIC)
+			.build()
+			.getFields(instance.getClass());
 		for (Field field : fields) {
 			try {
 				field.setAccessible(true);
@@ -106,7 +108,10 @@ public class ReflectionUtils
 	}
 
 	public static ExecutableInfo getUniqueMethodInfo(TypeInfo type, String methodName) {
-		List<ExecutableInfo> methodInfos = InfoProvider.getMethodInfos(type, new MethodScanner().name(methodName));
+		MethodScanner methodScanner = MethodScannerBuilder.create()
+			.name(methodName)
+			.build();
+		List<ExecutableInfo> methodInfos = InfoProvider.getMethodInfos(type, methodScanner);
 		return Iterables.getOnlyElement(methodInfos);
 	}
 

@@ -1,5 +1,12 @@
 package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
+
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.actions.ActionProvider;
@@ -10,95 +17,50 @@ import dd.kms.zenodot.api.wrappers.InfoProvider;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
 import dd.kms.zenodot.api.wrappers.TypeInfo;
 
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Function;
-
-/**
- * Node that represents both, lists and arrays
- */
 class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 {
-	private static final int	UNKNOWN_SIZE	= -1;
+	private static final int	MAX_NUM_CHILDREN	= 50;
+
+	private static final int	UNKNOWN_SIZE		= -1;
 
 	private final @Nullable String				fieldName;
 	private final ObjectInfo					containerInfo;
 	private final Iterable<?>					keys;
 	private final @Nullable Function<Object, ?>	elementAccessor;
 	private final InspectionContext				context;
+	private final int							size;
 
-	private int size;
-
-	IterableBasedObjectContainerTreeNode(int childIndex, @Nullable String displayKey, ObjectInfo containerInfo, Iterable<?> keys, @Nullable Function<Object, ?> elementAccessor, InspectionContext context) {
-		super(childIndex);
-		this.fieldName = displayKey;
+	IterableBasedObjectContainerTreeNode(@Nullable String fieldName, ObjectInfo containerInfo, Iterable<?> keys, @Nullable Function<Object, ?> elementAccessor, InspectionContext context) {
+		this.fieldName = fieldName;
 		this.containerInfo = containerInfo;
 		this.keys = keys;
 		this.elementAccessor = elementAccessor;
 		this.context = context;
-
 		this.size = keys instanceof Collection<?> ? ((Collection<?>) keys).size() : UNKNOWN_SIZE;
 	}
 
 	@Override
 	List<? extends InspectionTreeNode> doGetChildren() {
-		ImmutableList.Builder<InspectionTreeNode> childBuilder = ImmutableList.builder();
-		int numChildren = 0;
-		int entryIndex = 0;
-		for (Object key : keys) {
-			if (!ReflectionUtils.isObjectInspectable(key) && withValueNodes()) {
-				Object value = elementAccessor.apply(key);
-				InspectionTreeNode keyValueNode = createKeyValueNode(numChildren++, key, value);
-				childBuilder.add(keyValueNode);
-			} else {
-				InspectionTreeNode keyNode = createKeyNode(numChildren++, entryIndex, key);
-				childBuilder.add(keyNode);
-				if (withValueNodes()) {
-					Object value = elementAccessor.apply(key);
-					InspectionTreeNode valueNode = createValueNode(numChildren++, entryIndex, value);
-					childBuilder.add(valueNode);
-				}
-			}
-			entryIndex++;
-		}
-		if (size == UNKNOWN_SIZE) {
-			size = entryIndex;
-		}
-		return childBuilder.build();
+		return InspectionTreeNodes.getChildren(new ChildIterator(), MAX_NUM_CHILDREN);
 	}
 
-	@Override
-	public ActionProvider getActionProvider() {
-		return new ActionProviderBuilder(toString(), containerInfo, context)
-			.suggestVariableName(fieldName)
-			.build();
-	}
-
-	@Override
-	public String toString() {
-		String sizeText = size == UNKNOWN_SIZE ? "?" : Integer.toString(size);
-		String valueDisplayText = Actions.trimName(context.getDisplayText(containerInfo)) + " size = " + sizeText;
-		return fieldName == null ? valueDisplayText : fieldName + " = " + valueDisplayText;
-	}
-
-	private InspectionTreeNode createKeyNode(int childIndex, int entryIndex, Object key) {
+	private InspectionTreeNode createKeyNode(int entryIndex, Object key) {
 		String displayText = getKeyNodeDisplayText(entryIndex);
 		ObjectInfo keyInfo = getObjectInfo(key);
-		return InspectionTreeNodes.create(childIndex, displayText, keyInfo, true, context);
+		return InspectionTreeNodes.create(displayText, keyInfo, context);
 	}
 
-	private InspectionTreeNode createValueNode(int childIndex, int entryIndex, Object value) {
+	private InspectionTreeNode createValueNode(int entryIndex, Object value) {
 		String displayText = getValueNodeDisplayText(entryIndex);
 		ObjectInfo valueInfo = getObjectInfo(value);
-		return InspectionTreeNodes.create(childIndex, displayText, valueInfo, true, context);
+		return InspectionTreeNodes.create(displayText, valueInfo, context);
 	}
 
-	private InspectionTreeNode createKeyValueNode(int childIndex, Object key, Object value) {
+	private InspectionTreeNode createKeyValueNode(Object key, Object value) {
 		ObjectInfo keyInfo = getObjectInfo(key);
 		ObjectInfo valueInfo = getObjectInfo(value);
 		String displayText = getKeyValueNodeDisplayText(keyInfo);
-		return InspectionTreeNodes.create(childIndex, displayText, valueInfo, true, context);
+		return InspectionTreeNodes.create(displayText, valueInfo, context);
 	}
 
 	private ObjectInfo getObjectInfo(Object keyOrValue) {
@@ -122,5 +84,65 @@ class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 
 	private boolean withValueNodes() {
 		return elementAccessor != null;
+	}
+
+	@Override
+	public ActionProvider getActionProvider() {
+		return new ActionProviderBuilder(toString(), containerInfo, context)
+			.suggestVariableName(fieldName)
+			.build();
+	}
+
+	@Override
+	public String getTrimmedText() {
+		return getText(true);
+	}
+
+	@Override
+	public String getFullText() {
+		return getText(false);
+	}
+
+	private String getText(boolean trimmed) {
+		String valueDisplayText = context.getDisplayText(containerInfo);
+		if (trimmed) {
+			valueDisplayText = Actions.trimDisplayText(valueDisplayText);
+		}
+		String sizeText = size == UNKNOWN_SIZE ? "?" : Integer.toString(size);
+		valueDisplayText += (" size = " + sizeText);
+		return fieldName == null ? valueDisplayText : fieldName + " = " + valueDisplayText;
+	}
+
+	private class ChildIterator implements Iterator<List<InspectionTreeNode>>
+	{
+		private final Iterator<?>	keyIterator = keys.iterator();
+
+		private int entryIndex	= 0;
+
+		@Override
+		public boolean hasNext() {
+			return keyIterator.hasNext();
+		}
+
+		@Override
+		public List<InspectionTreeNode> next() {
+			Object key = keyIterator.next();
+			ImmutableList.Builder<InspectionTreeNode> builder = ImmutableList.builder();
+			if (!ReflectionUtils.isObjectInspectable(key) && withValueNodes()) {
+				Object value = elementAccessor.apply(key);
+				InspectionTreeNode keyValueNode = createKeyValueNode(key, value);
+				builder.add(keyValueNode);
+			} else {
+				InspectionTreeNode keyNode = createKeyNode(entryIndex, key);
+				builder.add(keyNode);
+				if (withValueNodes()) {
+					Object value = elementAccessor.apply(key);
+					InspectionTreeNode valueNode = createValueNode(entryIndex, value);
+					builder.add(valueNode);
+				}
+			}
+			entryIndex++;
+			return builder.build();
+		}
 	}
 }

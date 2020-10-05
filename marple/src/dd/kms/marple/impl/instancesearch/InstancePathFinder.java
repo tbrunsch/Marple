@@ -21,7 +21,7 @@ public class InstancePathFinder
 	private volatile ProcessingState		processingState		= ProcessingState.NOT_RUNNING;
 	private int								pathCounter;
 
-	private InstanceBreadthFirstSearch		instanceSearch;
+	private InstanceSearch					instanceSearch;
 
 	public InstancePathFinder(Consumer<InstancePath> pathConsumer) {
 		this.pathConsumer = path -> {
@@ -46,7 +46,7 @@ public class InstancePathFinder
 			BooleanSupplier stopFlagSupplier = () -> processingState == ProcessingState.WAITING_FOR_TERMINATION;
 
 			changeProcessingState(ProcessingState.SEARCHING);
-			instanceSearch = new InstanceBreadthFirstSearch(targetFilter, pathConsumer, stopFlagSupplier, settings, this::getDisplayString);
+			instanceSearch = new InstanceSearch(targetFilter, pathConsumer, stopFlagSupplier, settings, this::getDisplayString);
 			pathCounter = 0;
 			instanceSearch.search(sourcePath);
 		} finally {

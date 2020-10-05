@@ -17,7 +17,7 @@ public class FieldView extends AbstractQuickAndDetailedView
 	@Override
 	protected Component createView(ViewType viewType, ObjectInfo objectInfo, InspectionContext context) {
 		return viewType == ViewType.QUICK
-			? new FieldTree(objectInfo, true, context)
+			? new FieldTree(objectInfo, context)
 			: new FieldTable(objectInfo, context);
 	}
 }

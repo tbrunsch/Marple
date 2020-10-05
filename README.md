@@ -381,7 +381,7 @@ If there are many fields and you have to search for a field, then the "Detailed 
 
 ![Fields Tab Detailed View](images/inspection_dialog/fields_tab/detailed_view.png)
 
-In the "Detailed View" you can sort fields by name, value, type, declaring class, or visibility modifier. For this, you simply left-click onto the corresponding column header. You can also filter fields by specifying filters for one ore more columns. For this, right-click onto the corresponding column headers and configure the filter. There are three types of filters:
+In the "Detailed View" you can sort fields by name, value, type, declaring class, or modifier. For this, you simply left-click onto the corresponding column header. You can also filter fields by specifying filters for one ore more columns. For this, right-click onto the corresponding column headers and configure the filter. There are three types of filters:
 
   * Text-based filters match String representations of objects against the specified filter text:<br/>
   ![Fields Tab Detailed View Text Filter](images/inspection_dialog/fields_tab/detailed_view/text_filter.png)<br/>
@@ -390,7 +390,7 @@ In the "Detailed View" you can sort fields by name, value, type, declaring class
   * Selection-based filters provide a set of possible values from which you can select one or more values:<br/>
   ![Fields Tab Detailed View Selection Filter](images/inspection_dialog/fields_tab/detailed_view/selection_filter.png)
    
-  * The modifier filter allows you to specify the minimum visibility a field should have in order to be shown in the table:<br/>
+  * The modifier filter allows you to specify the minimum visibility a field should have in order to be shown in the table. Additionally, you can specify whether to show static fields or not:<br/>
   ![Fields Tab Detailed View Modifier Filter](images/inspection_dialog/fields_tab/detailed_view/modifier_filter.png)
 
 ## Methods Tab

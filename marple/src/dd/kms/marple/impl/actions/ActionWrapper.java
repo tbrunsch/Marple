@@ -12,7 +12,7 @@ public class ActionWrapper extends AbstractAction
 	private final InspectionAction action;
 
 	public ActionWrapper(InspectionAction action) {
-		super(Actions.trimName(action.getName()));
+		super(Actions.trimDisplayText(action.getName()));
 		String description = action.getDescription();
 		if (description != null && description.length() > MAX_DESCRIPTION_LENGTH) {
 			description = description.substring(0, MAX_DESCRIPTION_LENGTH) + "...";

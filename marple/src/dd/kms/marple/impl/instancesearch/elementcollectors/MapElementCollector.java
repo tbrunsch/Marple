@@ -14,15 +14,15 @@ public class MapElementCollector extends AbstractElementCollector
 	/**
 	 * Warning: not thread-safe
 	 */
-	public static List<InstancePath> collect(Map<?,?> map, InstancePath parentPath, Function<Object, String> toStringFunction) {
+	public static List<InstancePath> collect(Map<?,?> map, InstancePath parent, Function<Object, String> toStringFunction) {
 		COLLECTOR.map = map;
-		COLLECTOR.parentPath = parentPath;
+		COLLECTOR.parent = parent;
 		COLLECTOR.toStringFunction = toStringFunction;
 		return COLLECTOR.collect();
 	}
 
 	private Map<?,?>					map;
-	private InstancePath				parentPath;
+	private InstancePath				parent;
 	private Function<Object, String>	toStringFunction;
 
 	@Override
@@ -31,9 +31,9 @@ public class MapElementCollector extends AbstractElementCollector
 		int i = 0;
 		for (Map.Entry<?, ?> entry : map.entrySet()) {
 			Object key = entry.getKey();
-			InstancePath keyChild = new InstancePath(key, ".keySet(){" + i + "}", parentPath);
+			InstancePath keyChild = new InstancePath(key, ".keySet(){" + i + "}", parent);
 			children.add(keyChild);
-			InstancePath valueChild = new InstancePath(entry.getValue(), ".get(" + toStringFunction.apply(key) + ")", parentPath);
+			InstancePath valueChild = new InstancePath(entry.getValue(), ".get(" + toStringFunction.apply(key) + ")", parent);
 			children.add(valueChild);
 			i++;
 		}
