@@ -6,7 +6,9 @@ public enum Operation
 	MAP			("Map"),
 	FOR_EACH	("ForEach"),
 	COLLECT		("Collect"),
-	TO_MAP		("ToMap");
+	TO_MAP		("ToMap"),
+	COUNT		("Count"),
+	GROUP		("Group");
 
 	private final String	displayText;
 

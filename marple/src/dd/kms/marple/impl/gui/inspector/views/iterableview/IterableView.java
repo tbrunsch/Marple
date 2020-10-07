@@ -98,6 +98,10 @@ public class IterableView extends JPanel implements ObjectView
 				return new CollectOperationExecutor(iterable, commonElementType, (CollectSettings) settings, context);
 			case TO_MAP:
 				return new ToMapOperationExecutor(iterable, commonElementType, (ToMapSettings) settings, context);
+			case COUNT:
+				return new CountOperationExecutor(iterable, commonElementType, (CountSettings) settings, context);
+			case GROUP:
+				return new GroupOperationExecutor(iterable, commonElementType, (GroupSettings) settings, context);
 			default:
 				throw new IllegalStateException("Unsupported operation: " + operation);
 		}

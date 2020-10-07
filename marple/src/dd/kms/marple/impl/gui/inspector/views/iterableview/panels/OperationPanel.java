@@ -23,6 +23,8 @@ public class OperationPanel extends JPanel
 	private final JToggleButton			forEachTB				= new JToggleButton();
 	private final JToggleButton			collectTB				= new JToggleButton();
 	private final JToggleButton			toMapTB					= new JToggleButton();
+	private final JToggleButton			countTB					= new JToggleButton();
+	private final JToggleButton			groupTB					= new JToggleButton();
 
 	private final ButtonGroup			operationButtonGroup	= new ButtonGroup();
 
@@ -31,6 +33,8 @@ public class OperationPanel extends JPanel
 	private final ForEachSettingsPanel	forEachSettingsPanel;
 	private final CollectSettingsPanel	collectSettingsPanel;
 	private final ToMapSettingsPanel	toMapSettingsPanel;
+	private final CountSettingsPanel	countSettingsPanel;
+	private final GroupSettingsPanel	groupSettingsPanel;
 
 	private final Map<Operation, JToggleButton> operationToButton = ImmutableMap.<Operation, JToggleButton>builder()
 																	.put(Operation.FILTER,		filterTB)
@@ -38,6 +42,8 @@ public class OperationPanel extends JPanel
 																	.put(Operation.FOR_EACH,	forEachTB)
 																	.put(Operation.COLLECT,		collectTB)
 																	.put(Operation.TO_MAP,		toMapTB)
+																	.put(Operation.COUNT,		countTB)
+																	.put(Operation.GROUP,		groupTB)
 																	.build();
 
 	private final Map<Operation, AbstractOperationSettingsPanel> operationToSettingsPanel;
@@ -55,6 +61,8 @@ public class OperationPanel extends JPanel
 		forEachSettingsPanel	= new ForEachSettingsPanel(commonElementType, context);
 		collectSettingsPanel	= new CollectSettingsPanel(commonElementType, context);
 		toMapSettingsPanel		= new ToMapSettingsPanel(commonElementType, context);
+		countSettingsPanel		= new CountSettingsPanel(commonElementType, context);
+		groupSettingsPanel		= new GroupSettingsPanel(commonElementType, context);
 
 		operationToSettingsPanel = ImmutableMap.<Operation, AbstractOperationSettingsPanel>builder()
 			.put(Operation.FILTER,		filterSettingsPanel)
@@ -62,6 +70,8 @@ public class OperationPanel extends JPanel
 			.put(Operation.FOR_EACH,	forEachSettingsPanel)
 			.put(Operation.COLLECT,		collectSettingsPanel)
 			.put(Operation.TO_MAP,		toMapSettingsPanel)
+			.put(Operation.COUNT,		countSettingsPanel)
+			.put(Operation.GROUP,		groupSettingsPanel)
 			.build();
 
 		setBorder(BorderFactory.createTitledBorder("Operation"));

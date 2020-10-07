@@ -102,7 +102,7 @@ While the [component hierarchy tab](#component-hierarchy-tab) helps you finding 
 
 ## Analysis Support for Iterables, Arrays, and Maps
 
-The ["Iterables" tab](#iterables-tab) in the inspection dialog offers common operations for `Iterable`s and arrays: Filter, Map, ForEach, Collect, and ToMap. Similarly, the ["Maps" tab](#maps-tab) offers common operations for `Map` keys and values: Filter and Map.
+The ["Iterables" tab](#iterables-tab) in the inspection dialog offers common operations for `Iterable`s and arrays: Filter, Map, ForEach, Collect, ToMap, Count, and Group. Similarly, the ["Maps" tab](#maps-tab) offers common operations for `Map` keys and values: Filter and Map.
 
 ## Expression Evaluation
 
@@ -407,7 +407,7 @@ Like in the "Detailed View" of the "Fields" tab, you can sort methods according 
 
 ## Iterables Tab
 
-The "Iterables" tab is only visible if the selected object is an `Iterable` or an array. This tab provides common operations on `Iterable`s (Filter, Map, ForEach, Collect, and ToMap). We will discuss these operations in the remainder and how to use them for a stream-like analysis. 
+The "Iterables" tab is only visible if the selected object is an `Iterable` or an array. This tab provides common operations on `Iterable`s (Filter, Map, ForEach, Collect, ToMap, Count, and Group). We will discuss these operations in the remainder and how to use them for a stream-like analysis. 
 
 ![Iterables Tab](images/inspection_dialog/iterables_tab.png)
 
@@ -470,6 +470,22 @@ It is not necessary to specify the correct size. You may, e.g., create an empty 
 You can transform `Iterables` and arrays to a `Map` by specifying a key mapping and a value mapping:
 
 ![Transform to Map](images/inspection_dialog/iterables_tab/to_map.png)
+
+### Count
+
+You can specify a mapping that assigns a group to each element of the `Iterable` and then count the number of elements in each group:
+
+![Iterating over Iterables](images/inspection_dialog/iterables_tab/count.png)
+
+In this example, the number of elements of the `Iterable` that fall into the intervals [0.0, 0.1), [0.1, 0.2), ..., [0.9, 1.0), respectively, are counted. These intervals are represented by the numbers 0, 1, ..., 9. 
+
+### Group
+
+The group operation is very similar to the count operation. The only difference is that here we are not interested in the number of elements in each group, but in the elements in these groups themselves:
+
+![Iterating over Iterables](images/inspection_dialog/iterables_tab/group.png)
+
+In this example, all elements of the `Iterable` that fall into the intervals [0.0, 0.1), [0.1, 0.2), ..., [0.9, 1.0), respectively, are lister per interval. These intervals are represented by the numbers 0, 1, ..., 9. 
 
 ### Stream-like Analysis
 
