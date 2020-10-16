@@ -15,7 +15,9 @@ import java.util.*;
 
 public class ReflectionUtils
 {
-	public static final ObjectInfoProvider OBJECT_INFO_PROVIDER	= new ObjectInfoProvider(true);
+	private static final int				MAX_NUM_ITERABLE_ELEMENTS_TO_CONSIDER	= 1000;
+
+	public static final ObjectInfoProvider	OBJECT_INFO_PROVIDER					= new ObjectInfoProvider(true);
 
 	/**
 	 * We consider an object worth being inspected if it is
@@ -50,6 +52,7 @@ public class ReflectionUtils
 	}
 
 	public static Class<?> getCommonSuperClass(Iterable<?> elements) {
+		elements = Iterables.limit(elements, MAX_NUM_ITERABLE_ELEMENTS_TO_CONSIDER);
 		Set<Class<?>> commonClassCandidates = null;
 		Object firstNonNullElement = null;
 		for (Object element : elements) {
