@@ -1,5 +1,16 @@
 package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
+import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.impl.common.TypedObjectInfo;
+import dd.kms.marple.impl.common.UniformView;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
+
+import javax.annotation.Nullable;
+import javax.swing.*;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -8,18 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
-
-import javax.annotation.Nullable;
-import javax.swing.*;
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreePath;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
-import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.common.TypedObjectInfo;
-import dd.kms.marple.impl.common.UniformView;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 public class InspectionTreeNodes
 {

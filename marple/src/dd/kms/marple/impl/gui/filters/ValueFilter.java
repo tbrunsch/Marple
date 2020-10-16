@@ -10,4 +10,6 @@ public interface ValueFilter extends Predicate<Object>
 	Component getEditor();
 	void addFilterChangedListener(Runnable listener);
 	void removeFilterChangedListener(Runnable listener);
+	Object getSettings();
+	void applySettings(Object settings);
 }

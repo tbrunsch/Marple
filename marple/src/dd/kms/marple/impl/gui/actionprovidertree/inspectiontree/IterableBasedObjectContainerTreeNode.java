@@ -1,12 +1,5 @@
 package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.function.Function;
-
-import javax.annotation.Nullable;
-
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.actions.ActionProvider;
@@ -16,6 +9,12 @@ import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
 import dd.kms.zenodot.api.wrappers.TypeInfo;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.Function;
 
 class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 {

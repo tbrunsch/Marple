@@ -1,8 +1,8 @@
 package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
-import java.util.List;
-
 import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
+
+import java.util.List;
 
 interface InspectionTreeNode extends ActionProviderTreeNode
 {

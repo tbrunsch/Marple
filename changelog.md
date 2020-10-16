@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.0
+
+  - iterables tab now provides additional operations "count" and "group"
+  - inspection history now also stores the view settings, which will be restored when navigating the history
+
+API changes:
+  - `ObjectView.applyViewSettings()` now gets an additional argument that describes whether the view settings have been taken for the current object or for a different object.
+
 ## v0.2.1
 
   - changed to Zenodot 0.2.1

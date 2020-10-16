@@ -1,11 +1,5 @@
 package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
-import static dd.kms.marple.impl.gui.actionprovidertree.inspectiontree.ListTreeNode.*;
-
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.actions.ActionProvider;
@@ -13,6 +7,11 @@ import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
 import dd.kms.zenodot.api.wrappers.TypeInfo;
+
+import javax.annotation.Nullable;
+import java.util.List;
+
+import static dd.kms.marple.impl.gui.actionprovidertree.inspectiontree.ListTreeNode.RANGE_SIZE_BASE;
 
 class ListIndexRangeTreeNode extends AbstractInspectionTreeNode
 {

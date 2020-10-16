@@ -36,6 +36,16 @@ public class ValueFilters
 		}
 
 		@Override
+		public Object getSettings() {
+			return null;
+		}
+
+		@Override
+		public void applySettings(Object settings) {
+			/* nothing to do */
+		}
+
+		@Override
 		public void addFilterChangedListener(Runnable listener) {
 			/* do nothing */
 		}

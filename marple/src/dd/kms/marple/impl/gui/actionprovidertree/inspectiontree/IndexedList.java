@@ -1,9 +1,9 @@
 package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
-import java.util.AbstractList;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+
+import java.util.AbstractList;
 
 class IndexedList<T> extends AbstractList<T>
 {

@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.inspector.views.fieldview;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.common.ReflectionUtils;
@@ -18,7 +19,7 @@ import java.util.List;
 
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 
-public class FieldTable extends JPanel
+public class FieldTable extends JPanel implements ObjectView
 {
 	private final ListBasedTable<FieldInfo>	table;
 
@@ -41,6 +42,26 @@ public class FieldTable extends JPanel
 		internalTable.setDefaultRenderer(MemberInfo.class, new MemberInfoRenderer());
 
 		add(table, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
+	}
+
+	@Override
+	public String getViewName() {
+		return "Detailed Field View";
+	}
+
+	@Override
+	public Component getViewComponent() {
+		return this;
+	}
+
+	@Override
+	public Object getViewSettings() {
+		return table.getViewSettings();
+	}
+
+	@Override
+	public void applyViewSettings(Object settings, ViewSettingsOrigin origin) {
+		table.applyViewSettings(settings, origin);
 	}
 
 	private List<ColumnDescription<FieldInfo>> createColumnDescriptions() {

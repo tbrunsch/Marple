@@ -3,7 +3,6 @@ package dd.kms.marple.impl.gui.search;
 import com.google.common.base.Strings;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
-import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
 import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNodes;
 import dd.kms.marple.impl.gui.common.ExceptionFormatter;
 import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorators;

@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.inspector.views.methodview;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
@@ -22,7 +23,7 @@ import java.util.List;
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
-class MethodList extends JPanel
+class MethodList extends JPanel implements ObjectView
 {
 	private final DefaultListModel<ExecutableInfo>	listModel				= new DefaultListModel<>();
 	private final JList<ExecutableInfo>				list					= new JList<>(listModel);
@@ -70,6 +71,34 @@ class MethodList extends JPanel
 		list.setCellRenderer(new ActionProviderRenderer());
 
 		addListeners();
+	}
+
+	@Override
+	public String getViewName() {
+		return "Quick Method View";
+	}
+
+	@Override
+	public Component getViewComponent() {
+		return this;
+	}
+
+	@Override
+	public Object getViewSettings() {
+		Object nameFilterSettings = nameFilter.getSettings();
+		Object modifierFilterSettings = modifierFilter.getSettings();
+		return new MethodListSettings(nameFilterSettings, modifierFilterSettings);
+	}
+
+	@Override
+	public void applyViewSettings(Object settings, ViewSettingsOrigin origin) {
+		if (settings instanceof MethodListSettings) {
+			MethodListSettings listSettings = (MethodListSettings) settings;
+			if (origin == ViewSettingsOrigin.SAME_CONTEXT) {
+				nameFilter.applySettings(listSettings.getNameFilterSettings());
+				modifierFilter.applySettings(listSettings.getModifierFilterSettings());
+			}
+		}
 	}
 
 	private void addListeners() {
@@ -162,6 +191,25 @@ class MethodList extends JPanel
 		@Override
 		public void setSelectionInterval(int index0, int index1) {
 			super.setSelectionInterval(-1, -1);
+		}
+	}
+
+	private static class MethodListSettings
+	{
+		private final Object	nameFilterSettings;
+		private final Object	modifierFilterSettings;
+
+		MethodListSettings(Object nameFilterSettings, Object modifierFilterSettings) {
+			this.nameFilterSettings = nameFilterSettings;
+			this.modifierFilterSettings = modifierFilterSettings;
+		}
+
+		Object getNameFilterSettings() {
+			return nameFilterSettings;
+		}
+
+		Object getModifierFilterSettings() {
+			return modifierFilterSettings;
 		}
 	}
 }

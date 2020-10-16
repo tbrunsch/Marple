@@ -36,7 +36,7 @@ class ColumnDescriptionImpl<T> implements ColumnDescription<T>
 	}
 
 	@Override
-	public ValueFilter createValueFilter() {
+	public ValueFilter getValueFilter() {
 		return valueFilter;
 	}
 

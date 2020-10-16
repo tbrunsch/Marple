@@ -1,13 +1,17 @@
 package dd.kms.marple.impl.actions;
 
 import dd.kms.marple.api.actions.InspectionAction;
-import dd.kms.marple.impl.inspector.InspectionHistory;
+import dd.kms.marple.api.inspector.ObjectInspector;
+import dd.kms.marple.impl.gui.common.History;
+import dd.kms.marple.impl.inspector.InspectionData;
 
 public class HistoryBackAction implements InspectionAction
 {
-	private final InspectionHistory	history;
+	private final ObjectInspector			inspector;
+	private final History<InspectionData>	history;
 
-	public HistoryBackAction(InspectionHistory history) {
+	public HistoryBackAction(ObjectInspector inspector, History<InspectionData> history) {
+		this.inspector = inspector;
 		this.history = history;
 	}
 
@@ -23,7 +27,12 @@ public class HistoryBackAction implements InspectionAction
 
 	@Override
 	public String getDescription() {
-		return isEnabled() ? history.getPreviousAction().getDescription() : null;
+		if (!isEnabled()) {
+			return null;
+		}
+		InspectionData previousElement = history.peekPreviousElement();
+		InspectionAction previousAction = previousElement.getAction();
+		return previousAction.getDescription();
 	}
 
 	@Override
@@ -33,8 +42,9 @@ public class HistoryBackAction implements InspectionAction
 
 	@Override
 	public void perform() {
-		InspectionAction prevAction = history.getPreviousAction();
+		HistoryUtils.storeViewSettings(inspector, history);
+		InspectionData prevData = history.peekPreviousElement();
 		history.goBack();
-		prevAction.perform();
+		HistoryUtils.restoreState(inspector, prevData);
 	}
 }

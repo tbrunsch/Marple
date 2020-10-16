@@ -1,9 +1,9 @@
 package dd.kms.marple.impl.gui.actionprovidertree;
 
-import javax.annotation.Nullable;
-
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.Actions;
+
+import javax.annotation.Nullable;
 
 public interface ActionProviderTreeNode
 {

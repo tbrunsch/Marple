@@ -8,7 +8,6 @@ import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
-import dd.kms.marple.impl.actions.Actions;
 import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
@@ -70,7 +69,7 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 	}
 
 	@Override
-	public void applyViewSettings(Object settings) {
+	public void applyViewSettings(Object settings, ViewSettingsOrigin origin) {
 		/* currently there are no settings */
 	}
 

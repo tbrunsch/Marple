@@ -1,9 +1,5 @@
 package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.actions.ActionProvider;
@@ -15,6 +11,9 @@ import dd.kms.zenodot.api.common.StaticMode;
 import dd.kms.zenodot.api.wrappers.FieldInfo;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 {

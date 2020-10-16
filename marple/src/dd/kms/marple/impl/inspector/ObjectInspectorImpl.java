@@ -42,8 +42,12 @@ public class ObjectInspectorImpl implements ObjectInspector
 	/*
 	 * Inspection Frame Handling
 	 */
+	public InspectionFrame getInspectionFrame() {
+		return WindowManager.getWindow(ObjectInspector.class, this::createInspectionFrame, this::onCloseInspectionFrame);
+	}
+
 	private void showViews(ObjectInfo objectInfo, List<ObjectView> views) {
-		InspectionFrame inspectionFrame = WindowManager.getWindow(ObjectInspector.class, this::createInspectionFrame, this::onCloseInspectionFrame);
+		InspectionFrame inspectionFrame = getInspectionFrame();
 		inspectionFrame.setViews(objectInfo, views);
 	}
 

@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.inspector.views.methodview;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.gui.filters.ValueFilters;
 import dd.kms.marple.impl.gui.table.*;
@@ -19,7 +20,7 @@ import java.util.List;
 
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 
-class MethodTable extends JPanel
+class MethodTable extends JPanel implements ObjectView
 {
 	private final ListBasedTable<ExecutableInfo>	table;
 
@@ -44,6 +45,26 @@ class MethodTable extends JPanel
 		internalTable.setDefaultRenderer(MemberInfo.class, new MemberInfoRenderer());
 
 		add(table, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
+	}
+
+	@Override
+	public String getViewName() {
+		return "Detailed Method View";
+	}
+
+	@Override
+	public Component getViewComponent() {
+		return this;
+	}
+
+	@Override
+	public Object getViewSettings() {
+		return table.getViewSettings();
+	}
+
+	@Override
+	public void applyViewSettings(Object settings, ViewSettingsOrigin origin) {
+		table.applyViewSettings(settings, origin);
 	}
 
 	private List<ColumnDescription<ExecutableInfo>> createColumnDescriptions() {

@@ -3,7 +3,6 @@ package dd.kms.marple.impl.gui.search;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
-import dd.kms.marple.impl.actions.Actions;
 import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
 import dd.kms.marple.impl.instancesearch.InstancePath;
 import dd.kms.zenodot.api.wrappers.InfoProvider;

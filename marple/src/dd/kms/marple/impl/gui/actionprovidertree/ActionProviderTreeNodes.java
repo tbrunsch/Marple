@@ -1,10 +1,9 @@
 package dd.kms.marple.impl.gui.actionprovidertree;
 
-import java.awt.*;
-import java.util.Objects;
-
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import java.awt.*;
+import java.util.Objects;
 
 public class ActionProviderTreeNodes
 {

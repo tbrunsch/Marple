@@ -7,6 +7,6 @@ public interface ColumnDescription<T>
 	String getName();
 	Class<?> getColumnClass();
 	Object extractValue(T element);
-	ValueFilter createValueFilter();
+	ValueFilter getValueFilter();
 	EditorSettings<T> getEditorSettings();
 }

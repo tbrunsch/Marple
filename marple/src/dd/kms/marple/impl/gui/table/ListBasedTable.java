@@ -1,5 +1,6 @@
 package dd.kms.marple.impl.gui.table;
 
+import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.impl.gui.filters.ValueFilter;
 import dd.kms.marple.impl.gui.filters.ValueFilters;
@@ -13,6 +14,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * A table whose rows values only depend on a 1-dimensional list.
@@ -21,7 +24,7 @@ import java.util.List;
  *
  * @param <T>
  */
-public class ListBasedTable<T> extends JPanel
+public class ListBasedTable<T> extends JPanel implements ObjectView
 {
 	private final ListBasedTableModel<T>	tableModel;
 	private final TableRowSorter			rowSorter;
@@ -47,6 +50,47 @@ public class ListBasedTable<T> extends JPanel
 		add(scrollPane, BorderLayout.CENTER);
 
 		addListeners();
+	}
+
+	public JTable getInternalTable() {
+		return table;
+	}
+
+	@Override
+	public String getViewName() {
+		return "Table";
+	}
+
+	@Override
+	public Component getViewComponent() {
+		return this;
+	}
+
+	@Override
+	public Object getViewSettings() {
+		int numColumns = tableModel.getColumnCount();
+		List<Object> filterSettings = IntStream.range(0, numColumns)
+			.mapToObj(tableModel::getValueFilter)
+			.map(ValueFilter::getSettings)
+			.collect(Collectors.toList());
+		return new ListBasedTableSettings(filterSettings);
+	}
+
+	@Override
+	public void applyViewSettings(Object settings, ViewSettingsOrigin origin) {
+		if (settings instanceof ListBasedTableSettings) {
+			ListBasedTableSettings tableSettings = (ListBasedTableSettings) settings;
+			if (origin == ViewSettingsOrigin.SAME_CONTEXT) {
+				List<Object> filterSettings = tableSettings.getFilterSettings();
+				int numColumns = tableModel.getColumnCount();
+				assert numColumns == filterSettings.size() : "Table settings do not match the current columns";
+				for (int col = 0; col < numColumns; col++) {
+					ValueFilter valueFilter = tableModel.getValueFilter(col);
+					Object valueFilterSettings = filterSettings.get(col);
+					valueFilter.applySettings(valueFilterSettings);
+				}
+			}
+		}
 	}
 
 	private void addListeners() {
@@ -98,10 +142,6 @@ public class ListBasedTable<T> extends JPanel
 		table.getTableHeader().repaint();
 	}
 
-	public JTable getInternalTable() {
-		return table;
-	}
-
 	private void showFilterPopup(int column, Point mousePos) {
 		ValueFilter valueFilter = tableModel.getValueFilter(column);
 		if (valueFilter == ValueFilters.NONE) {
@@ -113,5 +153,18 @@ public class ListBasedTable<T> extends JPanel
 		JPopupMenu popupMenu = new JPopupMenu();
 		popupMenu.add(filterPanel);
 		popupMenu.show(table.getTableHeader(), mousePos.x, mousePos.y);
+	}
+
+	private static class ListBasedTableSettings
+	{
+		private final List<Object>	filterSettings;
+
+		ListBasedTableSettings(List<Object> filterSettings) {
+			this.filterSettings = filterSettings;
+		}
+
+		List<Object> getFilterSettings() {
+			return filterSettings;
+		}
 	}
 }

@@ -67,7 +67,7 @@ public class IterableView extends JPanel implements ObjectView
 	}
 
 	@Override
-	public void applyViewSettings(Object settings) {
+	public void applyViewSettings(Object settings, ViewSettingsOrigin origin) {
 		if (settings instanceof OperationSettings) {
 			operationPanel.setSettings((OperationSettings) settings);
 		}

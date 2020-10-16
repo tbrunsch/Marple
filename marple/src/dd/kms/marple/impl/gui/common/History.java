@@ -1,29 +1,41 @@
-package dd.kms.marple.impl.inspector;
-
-import dd.kms.marple.api.actions.InspectionAction;
+package dd.kms.marple.impl.gui.common;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class InspectionHistory
+public class History<T>
 {
-	private final List<InspectionAction>	history						= new ArrayList<>();
-	private int								historyPosition;
-	private int								lastValidHistoryPosition;
+	private final List<T>	history						= new ArrayList<>();
+	private int				historyPosition;
+	private int				lastValidHistoryPosition;
 
-	public InspectionHistory() {
+	public History() {
 		clear();
 		checkInvariants();
 	}
 
-	public void addToHistory(InspectionAction action) {
+	public boolean hasElements() {
+		return !history.isEmpty();
+	}
+
+	public T get() {
+		assert hasElements();
+		return history.get(historyPosition);
+	}
+
+	public void set(T element) {
+		assert hasElements();
+		history.set(historyPosition, element);
+	}
+
+	public void add(T element) {
 		if (historyPosition < history.size() - 1) {
-			history.set(++historyPosition, action);
+			history.set(++historyPosition, element);
 			lastValidHistoryPosition = historyPosition;
 		} else {
 			assert historyPosition == history.size() - 1;
 			assert lastValidHistoryPosition == historyPosition;
-			history.add(action);
+			history.add(element);
 			historyPosition++;
 			lastValidHistoryPosition++;
 		}
@@ -33,7 +45,7 @@ public class InspectionHistory
 		return historyPosition > 0;
 	}
 
-	public InspectionAction getPreviousAction() {
+	public T peekPreviousElement() {
 		assert canGoBack();
 		return history.get(historyPosition-1);
 	}
@@ -49,7 +61,7 @@ public class InspectionHistory
 		return historyPosition < lastValidHistoryPosition;
 	}
 
-	public InspectionAction getNextAction() {
+	public T peekNextElement() {
 		assert canGoForward();
 		return history.get(historyPosition+1);
 	}

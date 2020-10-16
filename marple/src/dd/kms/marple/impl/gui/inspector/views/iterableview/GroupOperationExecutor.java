@@ -1,10 +1,11 @@
 package dd.kms.marple.impl.gui.inspector.views.iterableview;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.common.primitives.Primitives;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.GroupSettings;
-import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.MapSettings;
 import dd.kms.zenodot.api.CompiledExpression;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.wrappers.InfoProvider;

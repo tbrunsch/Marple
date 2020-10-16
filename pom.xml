@@ -7,7 +7,7 @@
 	<groupId>dd.kms.marple</groupId>
 	<artifactId>marple-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.2-SNAPSHOT</version>
+	<version>0.3-SNAPSHOT</version>
 	<modules>
 		<module>marple</module>
 		<module>marple-tests</module>

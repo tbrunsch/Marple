@@ -230,7 +230,19 @@ The `VisualSettingsBuilder` provides 3 methods:
 
   1. The method `displayText` lets you specify how to display objects of a certain class. Marple currently defines special logic to display instances of the following classes: `String`, `char`/`Character`, `Object`, `Frame`, `AbstractButton`, `JLabel`, and `JTextComponent`. A sample usage of the method is `builder.displayText(char.class, c -> "'" + c + "'")`. 
 
-  1. The method `objectView` lets you specify constructors/factory methods for `ObjectView` instances for a certain type of object. Each `ObjectView` describes one tab in the inspection dialog, so the available tabs depend on the inspected object. Note that the class argument only serves as a first filter for deciding which tabs to create and which not. The factory method you provide may return `null` if there should be no tab for a given object although the class is as expected.
+  1. The method `objectView` lets you specify constructors/factory methods for `ObjectView` instances for a certain type of object. Each `ObjectView` describes one tab in the inspection dialog. The available tabs depend on the inspected object. Note that the class argument only serves as a first filter for deciding which tabs to create and which not. The factory method you provide may return `null` if there should be no tab for a given object although the class is as expected.
+
+### Object Views
+
+Instances of `ObjectView` describe tabs in the inspection dialog. The method `getViewName()` is used to determine the tab title. The method `getViewComponent()` returns the component that is displayed on the tab.
+
+`ObjectView`s provide a way to store and load their current settings via the methods `getViewSettings()` and `applyViewSettings()`. There are two scenarios when view settings are applied:
+
+  1. When navigating in the inspection history by using the "Back" and "Forward" buttons, then the view settings associated with the element in the history are restored.
+  
+  1. When inspecting a new object, then the current view settings are applied as good as possible and reasonable to the view for the new object.
+
+As a rule of thumb, general settings are always applied, whereas object-dependent settings are only applied in the first scenario. To distinguish between both scenarios, the method `applyViewSettings()` gets an argument of type `ObjectView.ViewSettingsOrigin` describing where the view settings stem from: `ObjectView.ViewSettingsOrigin.SAME_CONTEXT` refers to the first scenario, in which all settings should be applied. `ObjectView.ViewSettingsOrigin.OTHER_CONTEXT` refers to the second scenario, in which only general settings should be transferred.
 
 ## Security Settings
 

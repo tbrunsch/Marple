@@ -25,7 +25,7 @@ public class ListBasedTableModel<T> extends AbstractTableModel
 		List<ValueFilter> valueFilters = new ArrayList<>(numCols);
 		for (int col = 0; col < numCols; col++) {
 			ColumnDescription<T> columnDescription = columnDescriptions.get(col);
-			ValueFilter valueFilter = columnDescription.createValueFilter();
+			ValueFilter valueFilter = columnDescription.getValueFilter();
 			if (valueFilter != null) {
 				for (int row = 0; row < numRows; row++) {
 					Object value = getValueAt(row, col);
@@ -84,7 +84,7 @@ public class ListBasedTableModel<T> extends AbstractTableModel
 		return columnDescriptions.get(col).getName();
 	}
 
-	ValueFilter getValueFilter(int col) {
+	public ValueFilter getValueFilter(int col) {
 		return valueFilters.get(col);
 	}
 }

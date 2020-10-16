@@ -12,19 +12,34 @@ import static java.awt.GridBagConstraints.*;
 
 class ValueFilterModifier extends AbstractValueFilter
 {
-	private final boolean	configureStaticMode;
+	private final JPanel				editor						= new JPanel(new GridBagLayout());
+	private final AccessModifierInput	accessModifierInput			= new AccessModifierInput();
+	private final JCheckBox				nonStaticModifiersCheckBox	= new JCheckBox("non-static");
+	private final JCheckBox				staticModifiersCheckBox		= new JCheckBox("static");
 
-	private AccessModifier	minimumAccessModifier	= AccessModifier.PRIVATE;
-	private boolean			allowStaticModifiers	= false;
+	private final boolean				configureStaticMode;
 
 	ValueFilterModifier(boolean configureStaticMode) {
 		this.configureStaticMode = configureStaticMode;
-		allowStaticModifiers = configureStaticMode ? false : true;
+
+		editor.add(accessModifierInput,			new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+		editor.add(nonStaticModifiersCheckBox,	new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+		editor.add(staticModifiersCheckBox,		new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+
+		accessModifierInput.setAccessModifier(AccessModifier.PRIVATE);
+		accessModifierInput.addChangeListener(e -> fireFilterChanged());
+
+		nonStaticModifiersCheckBox.setSelected(true);
+		nonStaticModifiersCheckBox.setEnabled(false);
+
+		boolean allowStaticModifiers = configureStaticMode ? false : true;
+		staticModifiersCheckBox.setSelected(allowStaticModifiers);
+		staticModifiersCheckBox.addItemListener(e -> fireFilterChanged());
 	}
 
 	@Override
 	public boolean isActive() {
-		return minimumAccessModifier != AccessModifier.PRIVATE || !allowStaticModifiers;
+		return getMinimumAccessModifier() != AccessModifier.PRIVATE || !allowStaticModifiers();
 	}
 
 	@Override
@@ -34,50 +49,57 @@ class ValueFilterModifier extends AbstractValueFilter
 
 	@Override
 	public Component getEditor() {
-		AccessModifierInput accessModifierInput = new AccessModifierInput();
-		accessModifierInput.setAccessModifier(minimumAccessModifier);
+		return configureStaticMode ? editor : accessModifierInput;
+	}
 
-		accessModifierInput.addChangeListener(e -> setMinimumAccessModifier(accessModifierInput.getAccessModifier()));
+	@Override
+	public Object getSettings() {
+		return new ValueFilterModifierSettings(getMinimumAccessModifier(), allowStaticModifiers());
+	}
 
-		if (!configureStaticMode) {
-			return accessModifierInput;
+	@Override
+	public void applySettings(Object settings) {
+		if (settings instanceof ValueFilterModifierSettings) {
+			ValueFilterModifierSettings filterSettings = (ValueFilterModifierSettings) settings;
+			accessModifierInput.setAccessModifier(filterSettings.getMinimumAccessModifier());
+			staticModifiersCheckBox.setSelected(filterSettings.isAllowStaticModifiers());
 		}
-
-		JPanel panel = new JPanel(new GridBagLayout());
-
-		JCheckBox nonStaticModifiersCheckBox = new JCheckBox("non-static");
-		nonStaticModifiersCheckBox.setSelected(true);
-		nonStaticModifiersCheckBox.setEnabled(false);
-
-		JCheckBox staticModifiersCheckBox = new JCheckBox("static");
-		staticModifiersCheckBox.setSelected(allowStaticModifiers);
-
-		staticModifiersCheckBox.addItemListener(e -> setAllowStaticModifiers(staticModifiersCheckBox.isSelected()));
-
-		panel.add(accessModifierInput,			new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-		panel.add(nonStaticModifiersCheckBox,	new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-		panel.add(staticModifiersCheckBox,		new GridBagConstraints(1, 1, 1, 1, 1.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-
-		return panel;
 	}
 
 	@Override
 	public boolean test(Object o) {
 		if (o instanceof MemberInfo) {
 			MemberInfo memberInfo = (MemberInfo) o;
-			return memberInfo.getAccessModifier().compareTo(minimumAccessModifier) <= 0
-				&& (!memberInfo.isStatic() || allowStaticModifiers);
+			return memberInfo.getAccessModifier().compareTo(getMinimumAccessModifier()) <= 0
+				&& (!memberInfo.isStatic() || allowStaticModifiers());
 		}
 		return false;
 	}
 
-	private void setMinimumAccessModifier(AccessModifier minimumAccessModifier) {
-		this.minimumAccessModifier = minimumAccessModifier;
-		fireFilterChanged();
+	private AccessModifier getMinimumAccessModifier() {
+		return accessModifierInput.getAccessModifier();
 	}
 
-	private void setAllowStaticModifiers(boolean allowStaticModifiers) {
-		this.allowStaticModifiers = allowStaticModifiers;
-		fireFilterChanged();
+	private boolean allowStaticModifiers() {
+		return staticModifiersCheckBox.isSelected();
+	}
+
+	private static class ValueFilterModifierSettings
+	{
+		private final AccessModifier	minimumAccessModifier;
+		private final boolean			allowStaticModifiers;
+
+		ValueFilterModifierSettings(AccessModifier minimumAccessModifier, boolean allowStaticModifiers) {
+			this.minimumAccessModifier = minimumAccessModifier;
+			this.allowStaticModifiers = allowStaticModifiers;
+		}
+
+		AccessModifier getMinimumAccessModifier() {
+			return minimumAccessModifier;
+		}
+
+		boolean isAllowStaticModifiers() {
+			return allowStaticModifiers;
+		}
 	}
 }

@@ -1,14 +1,18 @@
 package dd.kms.marple.impl.actions;
 
 import dd.kms.marple.api.actions.InspectionAction;
-import dd.kms.marple.impl.inspector.InspectionHistory;
+import dd.kms.marple.api.inspector.ObjectInspector;
+import dd.kms.marple.impl.gui.common.History;
+import dd.kms.marple.impl.inspector.InspectionData;
 
 public class HistoryActionWrapper implements InspectionAction
 {
-	private final InspectionHistory history;
-	private final InspectionAction	wrappedAction;
+	private final ObjectInspector			inspector;
+	private final History<InspectionData>	history;
+	private final InspectionAction			wrappedAction;
 
-	public HistoryActionWrapper(InspectionHistory history, InspectionAction wrappedAction) {
+	public HistoryActionWrapper(ObjectInspector inspector, History<InspectionData> history, InspectionAction wrappedAction) {
+		this.inspector = inspector;
 		this.history = history;
 		this.wrappedAction = wrappedAction;
 	}
@@ -35,7 +39,8 @@ public class HistoryActionWrapper implements InspectionAction
 
 	@Override
 	public void perform() {
-		history.addToHistory(wrappedAction);
+		HistoryUtils.storeViewSettings(inspector, history);
+		history.add(new InspectionData(wrappedAction, null));
 		wrappedAction.perform();
 	}
 }
