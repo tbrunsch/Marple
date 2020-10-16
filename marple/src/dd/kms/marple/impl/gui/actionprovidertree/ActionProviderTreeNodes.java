@@ -1,7 +1,10 @@
 package dd.kms.marple.impl.gui.actionprovidertree;
 
+import dd.kms.marple.api.settings.visual.VisualSettingsUtils;
+
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
 import java.util.Objects;
 
@@ -10,19 +13,27 @@ public class ActionProviderTreeNodes
 	public static void enableFullTextToolTips(JTree tree) {
 		ToolTipManager.sharedInstance().registerComponent(tree);
 
-		tree.setCellRenderer(new DefaultTreeCellRenderer() {
+		final TreeCellRenderer oldRenderer = tree.getCellRenderer();
+
+		tree.setCellRenderer(new TreeCellRenderer() {
 			@Override
 			public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-				JLabel rendererComponent = (JLabel) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-				rendererComponent.setToolTipText(null);
+				Component rendererComponent = oldRenderer.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+				setToolTipText(rendererComponent, null);
 				if (value instanceof ActionProviderTreeNode) {
 					ActionProviderTreeNode node = (ActionProviderTreeNode) value;
 					String fullText = node.getFullText();
-					if (!Objects.equals(rendererComponent.getText(), fullText)) {
-						rendererComponent.setToolTipText(splitToHtmlLines(fullText, 100));
+					if (!Objects.equals(VisualSettingsUtils.getText(rendererComponent), fullText)) {
+						setToolTipText(rendererComponent, splitToHtmlLines(fullText, 100));
 					}
 				}
 				return rendererComponent;
+			}
+
+			private void setToolTipText(Component component, String toolTipText) {
+				if (component instanceof JComponent) {
+					((JComponent) component).setToolTipText(toolTipText);
+				}
 			}
 
 			private String splitToHtmlLines(String text, int numCharactersPerLine) {

@@ -31,6 +31,14 @@ public class VisualSettingsUtils
 			.objectView(Object.class, VisualSettingsUtils::createMapView);
 	}
 
+	public static String getText(Component component) {
+		return	component instanceof Frame			? ((Frame) component).getTitle() :
+				component instanceof AbstractButton	? ((AbstractButton) component).getText() :
+				component instanceof JLabel			? ((JLabel) component).getText() :
+				component instanceof JTextComponent	? ((JTextComponent) component).getText()
+													: null;
+	}
+
 	private static String getObjectHashText(Object object) {
 		return object.getClass().getSimpleName() + "@" + System.identityHashCode(object);
 	}
