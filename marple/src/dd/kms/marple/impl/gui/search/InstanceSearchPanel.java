@@ -22,15 +22,14 @@ import dd.kms.zenodot.api.wrappers.ObjectInfo;
 import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
+import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
@@ -79,6 +78,7 @@ class InstanceSearchPanel extends JPanel
 	private final InstancePathFinder				instancePathFinder;
 
 	private final Map<InstancePath, SearchNode>		instanceSearchNodes			= new HashMap<>();
+	private final Set<Object>						matchingObjects				= new HashSet<>();
 
 	InstanceSearchPanel(InspectionContext context) {
 		super(new GridBagLayout());
@@ -132,7 +132,7 @@ class InstanceSearchPanel extends JPanel
 
 		configurationPanel.add(onlyPureFieldsCB,			new GridBagConstraints(1, yPos++, REMAINDER, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 
-		// Hack: We need this panel to prevent the textfield from collapsing
+		// Hack: We need this panel to prevent the text field from collapsing
 		JPanel maxSearchDepthPanel = new JPanel(new GridBagLayout());
 		maxSearchDepthPanel.add(maxSearchDepthTF,			new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, WEST, NONE, new Insets(0, 0, 0, 0), 0, 0));
 
@@ -165,6 +165,9 @@ class InstanceSearchPanel extends JPanel
 		instanceSearchTree.setRootVisible(false);
 		instanceSearchTree.setShowsRootHandles(true);
 
+		TreeCellRenderer renderer = new SearchTreeRenderer(matchingObjects, instanceSearchTree.getCellRenderer());
+		instanceSearchTree.setCellRenderer(renderer);
+
 		ActionProviderListeners.addMouseListeners(instanceSearchTree);
 		ActionProviderTreeNodes.enableFullTextToolTips(instanceSearchTree);
 		instanceSearchTree.addMouseMotionListener(new FullPathMouseMotionListener(fullPathLabel::setText));
@@ -194,9 +197,7 @@ class InstanceSearchPanel extends JPanel
 				onTargetFilterSpecified();
 			}
 		});
-		limitSearchDepthCB.addItemListener(e -> {
-			updateEnabilities();
-		});
+		limitSearchDepthCB.addItemListener(e -> updateEnabilities());
 		maxSearchDepthTF.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -388,6 +389,7 @@ class InstanceSearchPanel extends JPanel
 		instanceSearchTree.setModel(new DefaultTreeModel(invisibleSearchRoot));
 
 		instanceSearchNodes.clear();
+		matchingObjects.clear();
 
 		InstancePath sourcePath = new InstancePath(root, "root", null);
 
@@ -446,7 +448,10 @@ class InstanceSearchPanel extends JPanel
 	 * Listeners
 	 */
 	private void onPathDetected(InstancePath path) {
-		SwingUtilities.invokeLater(() -> addInstancePath(path));
+		SwingUtilities.invokeLater(() -> {
+			matchingObjects.add(path.getLastNodeObject());
+			addInstancePath(path);
+		});
 	}
 
 	private void onTargetClassSpecified() {
@@ -463,5 +468,33 @@ class InstanceSearchPanel extends JPanel
 
 	private void onTargetFilterSpecified() {
 		updateEnabilities();
+	}
+
+	private static class SearchTreeRenderer implements TreeCellRenderer
+	{
+		private final Set<Object>		matchingObjects;
+		private final TreeCellRenderer	oldRenderer;
+
+		SearchTreeRenderer(Set<Object> matchingObjects, TreeCellRenderer oldRenderer) {
+			this.matchingObjects = matchingObjects;
+			this.oldRenderer = oldRenderer;
+		}
+
+		@Override
+		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+			Component rendererComponent = oldRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+			if (!(value instanceof SearchNode)) {
+				return rendererComponent;
+			}
+			Object object = ((SearchNode) value).getObject();
+			boolean matches = matchingObjects.contains(object);
+			if (matches) {
+				rendererComponent.setBackground(Color.GREEN);
+			}
+			if (rendererComponent instanceof JComponent) {
+				((JComponent) rendererComponent).setOpaque(matches);
+			}
+			return rendererComponent;
+		}
 	}
 }

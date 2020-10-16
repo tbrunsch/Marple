@@ -4,6 +4,7 @@
 
   - iterables tab now provides additional operations "count" and "group"
   - inspection history now also stores the view settings, which will be restored when navigating the history
+  - matching nodes in the search dialog are now highlighted
 
 API changes:
   - `ObjectView.applyViewSettings()` now gets an additional argument that describes whether the view settings have been taken for the current object or for a different object.

@@ -25,23 +25,24 @@ class SearchNode extends DefaultMutableTreeNode implements ActionProviderTreeNod
 	}
 
 	String getFullPathAsString() {
-		return getInstancePath().toString();
+		return getUserObject().toString();
 	}
 
 	@Override
 	public String getFullText() {
-		InstancePath instancePath = getInstancePath();
+		InstancePath instancePath = getUserObject();
 		String lastNodeStringRepresentation = instancePath.getLastNodeStringRepresentation();
 		int beginIndex = lastNodeStringRepresentation.startsWith(".") ? 1 : 0;
 		return lastNodeStringRepresentation.substring(beginIndex);
 	}
 
-	private Object getObject() {
-		return getInstancePath().getLastNodeObject();
+	public Object getObject() {
+		return getUserObject().getLastNodeObject();
 	}
 
-	private InstancePath getInstancePath() {
-		return (InstancePath) getUserObject();
+	@Override
+	public InstancePath getUserObject() {
+		return (InstancePath) super.getUserObject();
 	}
 
 	@Override
