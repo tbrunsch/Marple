@@ -128,7 +128,7 @@ class MethodList extends JPanel implements ObjectView
 		if (row < 0 || row >= methodInfos.size()) {
 			return null;
 		}
-		ExecutableInfo methodInfo = methodInfos.get(row);
+		ExecutableInfo methodInfo = listModel.get(row);
 		return methodViewUtils.getMethodActionProvider(methodInfo);
 	}
 
