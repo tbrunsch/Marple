@@ -25,8 +25,7 @@ import static java.awt.GridBagConstraints.CENTER;
 
 class CustomHierarchyPanel extends JPanel
 {
-	private static final String	INFO_TEXT		= "<html><p>To access a node with the path root -> node1 -> node2 -> ... -> node" +
-		"during evaluation, write<br/>" +
+	private static final String	INFO_TEXT		= "<html><p>To access a node with the path root -> node1 -> node2 -> ... -> node during evaluation, write<br/>" +
 		"<br/>" +
 		"{node1#node2#...#node}" +
 		"</p></html>";
