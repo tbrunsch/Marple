@@ -167,7 +167,7 @@ public class ObjectInspectionFrameworkInstance
 			return;
 		}
 		Point mousePosOnScreen = dd.kms.marple.impl.gui.common.GuiCommons.getMousePositionOnScreen();
-		if (!mousePosOnScreen.equals(lastMousePositionOnScreen)) {
+		if (mousePosOnScreen == null || !mousePosOnScreen.equals(lastMousePositionOnScreen)) {
 			return;
 		}
 
