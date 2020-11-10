@@ -37,7 +37,7 @@ public class CurrentObjectPanel extends JPanel
 		this.currentObject = currentObject;
 
 		toStringLabel.setText(getDisplayText());
-		classInfoLabel.setText(ReflectionUtils.getRuntimeTypeInfo(currentObject).toString());
+		classInfoLabel.setText(currentObject.getDeclaredType().toString());
 	}
 
 	private String getDisplayText() {
