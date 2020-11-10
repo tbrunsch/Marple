@@ -1,14 +1,15 @@
 package dd.kms.marple.impl.common;
 
-import com.google.common.collect.ImmutableList;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+
+import com.google.common.collect.ImmutableList;
+import dd.kms.zenodot.api.common.ObjectInfoProvider;
+import dd.kms.zenodot.api.wrappers.InfoProvider;
+import dd.kms.zenodot.api.wrappers.ObjectInfo;
+import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 public class UniformView
 {
@@ -115,7 +116,7 @@ public class UniformView
 		TypeInfo iteratorResultTypeInfo = ReflectionUtils.getUniqueMethodInfo(iterableType, "iterator").getReturnType();
 		TypeInfo declaredElementType = ReflectionUtils.getUniqueMethodInfo(iteratorResultTypeInfo, "next").getReturnType();
 		Class<?> commonElementClass = ReflectionUtils.getCommonSuperClass(iterableInfo.getObject());
-		return ReflectionUtils.getRuntimeTypeInfo(declaredElementType, commonElementClass);
+		return ObjectInfoProvider.getRuntimeType(commonElementClass, declaredElementType);
 	}
 
 	private static Optional<ListReflectionData> getListReflectionData(Object object) {
