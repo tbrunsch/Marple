@@ -24,7 +24,7 @@ public class EvaluationSettingsPane extends JTabbedPane
 		addTab("Imports",			importPanel);
 		addTab("Custom Hierarchy",	customHierarchyPanel);
 
-		setPreferredSize(new Dimension(400, 300));
+		setPreferredSize(new Dimension(600, 500));
 	}
 
 	public void updateContent() {
