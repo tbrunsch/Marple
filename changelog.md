@@ -2,7 +2,8 @@
 
 ## v0.3.1
 
-  - operate on runtime types instead of declared types whenever possible 
+  - operate on runtime types instead of declared types whenever possible
+  - fixed bug that prevented treating custom implementations of Apache's primitive lists as lists  
 
 ## v0.3.0
 

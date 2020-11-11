@@ -141,17 +141,27 @@ public class UniformView
 		}
 
 		boolean isApplicable(Object object) {
-			return object != null && Arrays.stream(object.getClass().getInterfaces())
-				.anyMatch(i -> Objects.equals(i.getName(), className));
+			if (object == null) {
+				return false;
+			}
+			for (Class<?> clazz = object.getClass(); clazz != null; clazz = clazz.getSuperclass()) {
+				for (Class<?> interf : clazz.getInterfaces()) {
+					if (Objects.equals(interf.getName(), className)) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		int getSize(Object object) {
 			if (object == null) {
 				return 0;
 			}
-			Method sizeGetterMethod = null;
+			Method sizeGetterMethod;
 			try {
 				sizeGetterMethod = object.getClass().getMethod(sizeGetterName, new Class<?>[0]);
+				sizeGetterMethod.setAccessible(true);
 				return (Integer) sizeGetterMethod.invoke(object, new Object[0]);
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 				return 0;
@@ -162,9 +172,10 @@ public class UniformView
 			if (object == null) {
 				return null;
 			}
-			Method elementAccessorMethod = null;
+			Method elementAccessorMethod;
 			try {
 				elementAccessorMethod = object.getClass().getMethod(elementAccessorName, new Class<?>[] { int.class });
+				elementAccessorMethod.setAccessible(true);
 				return elementAccessorMethod.invoke(object, new Object[] { index });
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 				return null;
