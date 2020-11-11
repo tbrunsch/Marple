@@ -1,5 +1,8 @@
 package dd.kms.marple.impl.common;
 
+import java.lang.reflect.Field;
+import java.util.*;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
@@ -9,9 +12,6 @@ import dd.kms.zenodot.api.wrappers.ExecutableInfo;
 import dd.kms.zenodot.api.wrappers.InfoProvider;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
 import dd.kms.zenodot.api.wrappers.TypeInfo;
-
-import java.lang.reflect.Field;
-import java.util.*;
 
 public class ReflectionUtils
 {
@@ -118,26 +118,15 @@ public class ReflectionUtils
 		return Iterables.getOnlyElement(methodInfos);
 	}
 
-	public static TypeInfo getRuntimeTypeInfo(TypeInfo declaredType, Class<?> runtimeClass) {
-		try {
-			return declaredType.isPrimitive() ? declaredType : declaredType.getSubtype(runtimeClass);
-		} catch (Exception e) {
-			/*
-			 * Sometimes exceptions like
-			 *
-			 *     javax.swing.plaf.basic.BasicComboBoxRenderer$UIResource does not appear to be a subtype of javax.swing.ListCellRenderer<? super E>
-			 *
-			 * are thrown. This seems to be incorrect and we handle it by ignoring the declared type.
-			 *
-			 * We also get an exception if the declared type has unresolved parameters.
-			 */
-			return InfoProvider.createTypeInfo(runtimeClass);
-		}
-	}
-
 	public static TypeInfo getRuntimeTypeInfo(ObjectInfo objectInfo) {
 		Object object = objectInfo.getObject();
 		TypeInfo declaredType = objectInfo.getDeclaredType();
-		return object == null ? declaredType : getRuntimeTypeInfo(declaredType, object.getClass());
+		return ObjectInfoProvider.getRuntimeType(object, declaredType);
+	}
+
+	public static ObjectInfo getRuntimeInfo(ObjectInfo objectInfo) {
+		Object object = objectInfo.getObject();
+		TypeInfo runtimeType = getRuntimeTypeInfo(objectInfo);
+		return InfoProvider.createObjectInfo(object, runtimeType);
 	}
 }

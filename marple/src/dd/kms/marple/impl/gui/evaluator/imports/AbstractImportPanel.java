@@ -20,6 +20,7 @@ abstract class AbstractImportPanel<T> extends JPanel
 
 	private final DefaultListModel<T>			importListModel		= new DefaultListModel<>();
 	private final JList<T>						importList			= new JList<>(importListModel);
+	private final JScrollPane					importScrollPane	= new JScrollPane(importList);
 
 	private final AbstractInputTextField<T>		evaluationTextField;
 	private final JButton						addButton			= new JButton("+");
@@ -39,7 +40,7 @@ abstract class AbstractImportPanel<T> extends JPanel
 
 		add(titleLabel,				new GridBagConstraints(0, 0, REMAINDER, 1, 0.0, 0.0, NORTHWEST, NONE, DEFAULT_INSETS, 0, 0));
 
-		add(importList,				new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
+		add(importScrollPane,		new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 
 		add(evaluationTextField,	new GridBagConstraints(0, 2, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 		add(addButton,				new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));

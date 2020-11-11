@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.evaluator;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.gui.common.CurrentObjectPanel;
 import dd.kms.marple.impl.gui.common.WindowManager;
 import dd.kms.zenodot.api.wrappers.ObjectInfo;
@@ -40,8 +41,9 @@ public class EvaluationFrame extends JFrame
 	}
 
 	public void setThisValue(ObjectInfo thisValue) {
-		currentObjectPanel.setCurrentObject(thisValue);
-		evaluationPanel.setThisValue(thisValue);
+		ObjectInfo runtimeInfo = ReflectionUtils.getRuntimeInfo(thisValue);
+		currentObjectPanel.setCurrentObject(runtimeInfo);
+		evaluationPanel.setThisValue(runtimeInfo);
 	}
 
 	public void setExpression(String expression) {

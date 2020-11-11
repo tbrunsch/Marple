@@ -31,6 +31,8 @@ public class GeneralSettingsPanel extends JPanel
 
 		add(dynamicTypingControls.getDynamicTypingInfo(),				new GridBagConstraints(0, 2, REMAINDER, 1, 1.0, 0.0, NORTHWEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
+		add(new JLabel(),												new GridBagConstraints(0, 3, REMAINDER, 1, 1.0, 1.0, NORTHWEST, BOTH, DEFAULT_INSETS, 0, 0));
+
 		minimumAccessModifierControls.updateControls();
 		dynamicTypingControls.updateControls();
 	}

@@ -5,6 +5,7 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.inspector.ObjectInspector;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.visual.ObjectView;
+import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.gui.common.WindowManager;
 import dd.kms.marple.impl.gui.inspector.InspectionFrame;
 import dd.kms.marple.impl.gui.inspector.views.ComponentHierarchyView;
@@ -25,18 +26,20 @@ public class ObjectInspectorImpl implements ObjectInspector
 
 	@Override
 	public void inspectComponent(ComponentHierarchy componentHierarchy) {
-		ObjectInfo objectToInspect = InfoProvider.createObjectInfo(componentHierarchy.getSelectedComponent());
+		ObjectInfo objectInfo = InfoProvider.createObjectInfo(componentHierarchy.getSelectedComponent());
+		ObjectInfo runtimeInfo = ReflectionUtils.getRuntimeInfo(objectInfo);
 		ImmutableList.Builder<ObjectView> viewBuilder = ImmutableList.<ObjectView>builder()
 			.add(new ComponentHierarchyView(componentHierarchy, context))
-			.addAll(context.getInspectionViews(objectToInspect));
-		showViews(objectToInspect, viewBuilder.build());
+			.addAll(context.getInspectionViews(runtimeInfo));
+		showViews(runtimeInfo, viewBuilder.build());
 	}
 
 	@Override
 	public void inspectObject(ObjectInfo objectInfo) {
+		ObjectInfo runtimeInfo = ReflectionUtils.getRuntimeInfo(objectInfo);
 		ImmutableList.Builder<ObjectView> viewBuilder = ImmutableList.<ObjectView>builder()
-			.addAll(context.getInspectionViews(objectInfo));
-		showViews(objectInfo, viewBuilder.build());
+			.addAll(context.getInspectionViews(runtimeInfo));
+		showViews(runtimeInfo, viewBuilder.build());
 	}
 
 	/*

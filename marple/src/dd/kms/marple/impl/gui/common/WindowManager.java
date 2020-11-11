@@ -72,8 +72,10 @@ public class WindowManager
 				MANAGED_WINDOWS.put(identifier, window);
 				SwingUtilities.invokeLater(() -> {
 					window.setMinimumSize(window.getSize());
-					Point correctedLocation = getValidScreenLocation(new Rectangle(location.x, location.y, window.getWidth(), window.getHeight()));
-					window.setLocation(correctedLocation);
+					if (location != null) {
+						Point correctedLocation = getValidScreenLocation(new Rectangle(location.x, location.y, window.getWidth(), window.getHeight()));
+						window.setLocation(correctedLocation);
+					}
 				});
 			}
 			SwingUtilities.invokeLater(() -> {

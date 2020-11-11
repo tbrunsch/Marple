@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3.1
+
+  - operate on runtime types instead of declared types whenever possible
+  - fixed bug that prevented treating custom implementations of Apache's primitive lists as lists  
+
 ## v0.3.0
 
   - iterables tab now provides additional operations "count" and "group"

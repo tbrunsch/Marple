@@ -46,6 +46,7 @@ public class GuiCommons
 	}
 
 	public static Point getMousePositionOnScreen() {
-		return MouseInfo.getPointerInfo().getLocation();
+		PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+		return pointerInfo != null ? pointerInfo.getLocation() : null;
 	}
 }
