@@ -1,7 +1,7 @@
 package dd.kms.marple.impl.gui.evaluator.completion;
 
+import com.google.common.collect.Range;
 import dd.kms.zenodot.api.result.CodeCompletion;
-import dd.kms.zenodot.api.result.IntRange;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
@@ -29,8 +29,8 @@ class CustomBasicCompletion extends BasicCompletion implements CustomCompletion
 	@Override
 	public String getAlreadyEntered(JTextComponent textComponent) {
 		String text = textComponent.getText();
-		IntRange insertionRange = completion.getInsertionRange();
-		return text.substring(insertionRange.getBegin(), insertionRange.getEnd());
+		Range<Integer> insertionRange = completion.getInsertionRange();
+		return text.substring(insertionRange.lowerEndpoint(), insertionRange.upperEndpoint());
 	}
 
 	@Override
