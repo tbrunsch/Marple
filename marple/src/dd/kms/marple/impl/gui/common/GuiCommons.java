@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +27,15 @@ public class GuiCommons
 
 	public static Color getAccessModifierColor(AccessModifier accessModifier) {
 		return MODIFIER_COLORS.get(accessModifier);
+	}
+
+	public static String formatClass(Class<?> clazz) {
+		Class<?> componentType = clazz.getComponentType();
+		if (componentType != null) {
+			return formatClass(componentType) + "[]";
+		}
+		String qualifiedName = clazz.getName();
+		return qualifiedName.startsWith("java.lang.") ? clazz.getSimpleName() : qualifiedName;
 	}
 
 	public static void setFontStyle(JComponent component, int fontStyle) {

@@ -1,9 +1,6 @@
 package dd.kms.marple.impl.gui.filters;
 
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -72,7 +69,7 @@ class ValueFilterSelection extends AbstractValueFilter
 		if (checkBoxesByValue.containsKey(value)) {
 			return;
 		}
-		JCheckBox checkBox = new JCheckBox(getDisplayText(value));
+		JCheckBox checkBox = new JCheckBox(context.getDisplayText(value));
 		checkBoxesByValue.put(value, checkBox);
 		checkBox.setSelected(true);
 		editor.add(checkBox);
@@ -97,12 +94,6 @@ class ValueFilterSelection extends AbstractValueFilter
 		for (JCheckBox checkBox : checkBoxesByValue.values()) {
 			checkBox.setPreferredSize(size);
 		}
-	}
-
-	private String getDisplayText(Object value) {
-		return value instanceof ObjectInfo || value instanceof TypeInfo
-				? value.toString()
-				: context.getDisplayText(InfoProvider.createObjectInfo(value));
 	}
 
 	private Map<Object, Boolean> getFilteredValues() {

@@ -2,17 +2,16 @@ package dd.kms.marple.impl.actions;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.search.InstanceSearchFrame;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 public class SearchInstanceAction extends AbstractInstanceSearchAction
 {
-	public SearchInstanceAction(InspectionContext context, ObjectInfo target) {
+	public SearchInstanceAction(InspectionContext context, Object target) {
 		super(context, target);
 	}
 
 	@Override
-	void configureSearchFrame(InstanceSearchFrame searchFrame, ObjectInfo thisValue) {
-		searchFrame.setTarget(thisValue.getObject());
+	void configureSearchFrame(InstanceSearchFrame searchFrame, Object thisValue) {
+		searchFrame.setTarget(thisValue);
 	}
 
 	@Override

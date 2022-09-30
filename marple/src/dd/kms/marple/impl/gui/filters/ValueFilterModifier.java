@@ -2,10 +2,11 @@ package dd.kms.marple.impl.gui.filters;
 
 import dd.kms.marple.impl.gui.common.AccessModifierInput;
 import dd.kms.zenodot.api.common.AccessModifier;
-import dd.kms.zenodot.api.wrappers.MemberInfo;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.Member;
+import java.lang.reflect.Modifier;
 
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
@@ -68,10 +69,13 @@ class ValueFilterModifier extends AbstractValueFilter
 
 	@Override
 	public boolean test(Object o) {
-		if (o instanceof MemberInfo) {
-			MemberInfo memberInfo = (MemberInfo) o;
-			return memberInfo.getAccessModifier().compareTo(getMinimumAccessModifier()) <= 0
-				&& (!memberInfo.isStatic() || allowStaticModifiers());
+		if (o instanceof Member) {
+			Member member = (Member) o;
+			int modifiers = member.getModifiers();
+			AccessModifier accessModifier = AccessModifier.getValue(modifiers);
+			boolean isStatic = (modifiers & Modifier.STATIC) != 0;
+			return accessModifier.compareTo(getMinimumAccessModifier()) <= 0
+				&& (!isStatic || allowStaticModifiers());
 		}
 		return false;
 	}

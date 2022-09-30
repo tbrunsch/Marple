@@ -3,9 +3,7 @@ package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.common.TypedObjectInfo;
 import dd.kms.marple.impl.common.UniformView;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -22,8 +20,8 @@ import java.util.stream.IntStream;
 
 public class InspectionTreeNodes
 {
-	public static TreeModel createModel(@Nullable String fieldName, ObjectInfo objectInfo, InspectionContext context) {
-		InspectionTreeNode treeNode = create(fieldName, objectInfo, context);
+	public static TreeModel createModel(@Nullable String fieldName, Object object, InspectionContext context) {
+		InspectionTreeNode treeNode = create(fieldName, object, context);
 		return new InspectionTreeModel(treeNode);
 	}
 
@@ -81,28 +79,26 @@ public class InspectionTreeNodes
 		return builder.build();
 	}
 
-	static InspectionTreeNode create(@Nullable String displayKey, ObjectInfo objectInfo, InspectionContext context) {
-		if (UniformView.canViewAsList(objectInfo)) {
-			TypedObjectInfo<List<?>> listInfo = UniformView.asList(objectInfo);
-			List<?> list = listInfo.getObject();
-			return new ListTreeNode(displayKey, objectInfo, list, context);
+	static InspectionTreeNode create(@Nullable String displayKey, Object object, InspectionContext context) {
+		if (UniformView.canViewAsList(object)) {
+			List<?> list = UniformView.asList(object);
+			return new ListTreeNode(displayKey, object, list, context);
 		}
 
-		Object object = objectInfo.getObject();
-		if (Iterable.class.isInstance(object)) {
-			Iterable<?> iterable = Iterable.class.cast(object);
-			return new IterableBasedObjectContainerTreeNode(displayKey, objectInfo, iterable, null, context);
+		if (object instanceof Iterable) {
+			Iterable<?> iterable = (Iterable<?>) object;
+			return new IterableBasedObjectContainerTreeNode(displayKey, object, iterable, null, context);
 		}
-		if (Map.class.isInstance(object)) {
-			Map<?, ?> map = Map.class.cast(object);
+		if (object instanceof Map) {
+			Map<?, ?> map = (Map<?, ?>) object;
 			Set<?> keySet = map.keySet();
-			return new IterableBasedObjectContainerTreeNode(displayKey, objectInfo, keySet, map::get, context);
+			return new IterableBasedObjectContainerTreeNode(displayKey, object, keySet, map::get, context);
 		}
-		if (Multimap.class.isInstance(object)) {
-			Multimap multimap = Multimap.class.cast(object);
+		if (object instanceof Multimap) {
+			Multimap<Object, ?> multimap = (Multimap) object;
 			Set<?> keySet = multimap.keySet();
-			return new IterableBasedObjectContainerTreeNode(displayKey, objectInfo, keySet, multimap::get, context);
+			return new IterableBasedObjectContainerTreeNode(displayKey, object, keySet, multimap::get, context);
 		}
-		return new DefaultObjectTreeNode(displayKey, objectInfo, context);
+		return new DefaultObjectTreeNode(displayKey, object, context);
 	}
 }

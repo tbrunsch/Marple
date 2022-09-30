@@ -6,9 +6,6 @@ import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.actions.Actions;
 import dd.kms.marple.impl.common.ReflectionUtils;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -23,15 +20,15 @@ class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 	private static final int	UNKNOWN_SIZE		= -1;
 
 	private final @Nullable String				fieldName;
-	private final ObjectInfo					containerInfo;
+	private final Object						container;
 	private final Iterable<?>					keys;
 	private final @Nullable Function<Object, ?>	elementAccessor;
 	private final InspectionContext				context;
 	private final int							size;
 
-	IterableBasedObjectContainerTreeNode(@Nullable String fieldName, ObjectInfo containerInfo, Iterable<?> keys, @Nullable Function<Object, ?> elementAccessor, InspectionContext context) {
+	IterableBasedObjectContainerTreeNode(@Nullable String fieldName, Object container, Iterable<?> keys, @Nullable Function<Object, ?> elementAccessor, InspectionContext context) {
 		this.fieldName = fieldName;
-		this.containerInfo = containerInfo;
+		this.container = container;
 		this.keys = keys;
 		this.elementAccessor = elementAccessor;
 		this.context = context;
@@ -45,28 +42,17 @@ class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 
 	private InspectionTreeNode createKeyNode(int entryIndex, Object key) {
 		String displayText = getKeyNodeDisplayText(entryIndex);
-		ObjectInfo keyInfo = getObjectInfo(key);
-		return InspectionTreeNodes.create(displayText, keyInfo, context);
+		return InspectionTreeNodes.create(displayText, key, context);
 	}
 
 	private InspectionTreeNode createValueNode(int entryIndex, Object value) {
 		String displayText = getValueNodeDisplayText(entryIndex);
-		ObjectInfo valueInfo = getObjectInfo(value);
-		return InspectionTreeNodes.create(displayText, valueInfo, context);
+		return InspectionTreeNodes.create(displayText, value, context);
 	}
 
 	private InspectionTreeNode createKeyValueNode(Object key, Object value) {
-		ObjectInfo keyInfo = getObjectInfo(key);
-		ObjectInfo valueInfo = getObjectInfo(value);
-		String displayText = getKeyValueNodeDisplayText(keyInfo);
-		return InspectionTreeNodes.create(displayText, valueInfo, context);
-	}
-
-	private ObjectInfo getObjectInfo(Object keyOrValue) {
-		TypeInfo typeInfo = keyOrValue == null
-				? InfoProvider.NO_TYPE
-				: ReflectionUtils.getRuntimeTypeInfo(containerInfo).resolveType(keyOrValue.getClass());
-		return InfoProvider.createObjectInfo(keyOrValue, typeInfo);
+		String displayText = getKeyValueNodeDisplayText(key);
+		return InspectionTreeNodes.create(displayText, value, context);
 	}
 
 	private String getKeyNodeDisplayText(int entryIndex) {
@@ -77,8 +63,8 @@ class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 		return "[value" + entryIndex + "]";
 	}
 
-	private String getKeyValueNodeDisplayText(ObjectInfo keyInfo) {
-		return "[" + context.getDisplayText(keyInfo) + "]";
+	private String getKeyValueNodeDisplayText(Object key) {
+		return "[" + context.getDisplayText(key) + "]";
 	}
 
 	private boolean withValueNodes() {
@@ -87,7 +73,7 @@ class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 
 	@Override
 	public ActionProvider getActionProvider() {
-		return new ActionProviderBuilder(toString(), containerInfo, context)
+		return new ActionProviderBuilder(toString(), container, context)
 			.suggestVariableName(fieldName)
 			.build();
 	}
@@ -103,7 +89,7 @@ class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 	}
 
 	private String getText(boolean trimmed) {
-		String valueDisplayText = context.getDisplayText(containerInfo);
+		String valueDisplayText = context.getDisplayText(container);
 		if (trimmed) {
 			valueDisplayText = Actions.trimDisplayText(valueDisplayText);
 		}

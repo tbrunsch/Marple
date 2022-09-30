@@ -6,12 +6,11 @@ import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.Parsers;
 import dd.kms.zenodot.api.result.CodeCompletion;
 import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
-import dd.kms.zenodot.api.wrappers.PackageInfo;
 
 import java.util.List;
 import java.util.Optional;
 
-public class PackageInputTextField extends AbstractInputTextField<PackageInfo>
+public class PackageInputTextField extends AbstractInputTextField<String>
 {
 	public PackageInputTextField(InspectionContext context) {
 		super(context);
@@ -30,7 +29,7 @@ public class PackageInputTextField extends AbstractInputTextField<PackageInfo>
 	}
 
 	@Override
-	PackageInfo evaluate(String text) throws ParseException {
+	String evaluate(String text) throws ParseException {
 		PackageParser parser = createParser();
 		return parser.evaluate(text);
 	}

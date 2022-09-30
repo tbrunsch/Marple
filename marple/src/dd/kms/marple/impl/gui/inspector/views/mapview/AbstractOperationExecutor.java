@@ -7,25 +7,22 @@ import dd.kms.zenodot.api.CompiledExpression;
 import dd.kms.zenodot.api.ExpressionParser;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.Parsers;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import java.util.Map;
 import java.util.function.Consumer;
 
 abstract class AbstractOperationExecutor<T extends OperationSettings>
 {
-	final Map<?, ?>					map;
-	private final TypeInfo			commonKeyType;
-	private final TypeInfo			commonValueType;
-	final T							settings;
-	final InspectionContext			context;
+	final Map<?, ?>				map;
+	private final Class<?>		commonKeyType;
+	private final Class<?>		commonValueType;
+	final T						settings;
+	final InspectionContext		context;
 
-	private Consumer<ObjectInfo>	resultConsumer;
-	private Consumer<String>		textConsumer;
+	private Consumer<Object>	resultConsumer;
+	private Consumer<String>	textConsumer;
 
-	AbstractOperationExecutor(Map<?, ?> map, TypeInfo commonKeyType, TypeInfo commonValueType, T settings, InspectionContext context) {
+	AbstractOperationExecutor(Map<?, ?> map, Class<?> commonKeyType, Class<?> commonValueType, T settings, InspectionContext context) {
 		this.map = map;
 		this.commonKeyType = commonKeyType;
 		this.commonValueType = commonValueType;
@@ -35,7 +32,7 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 
 	abstract void execute() throws Exception;
 
-	void setResultConsumer(Consumer<ObjectInfo> resultConsumer) {
+	void setResultConsumer(Consumer<Object> resultConsumer) {
 		this.resultConsumer = resultConsumer;
 	}
 
@@ -43,7 +40,7 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 		this.textConsumer = textConsumer;
 	}
 
-	void displayResult(ObjectInfo result) {
+	void displayResult(Object result) {
 		Preconditions.checkNotNull(resultConsumer);
 		resultConsumer.accept(result);
 	}
@@ -54,7 +51,7 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 	}
 
 	Exception wrapEvaluationException(Exception e, Object element) {
-		return new Exception("Error evaluating exception for '" + context.getDisplayText(InfoProvider.createObjectInfo(element)) + "'", e);
+		return new Exception("Error evaluating exception for '" + context.getDisplayText(element) + "'", e);
 	}
 
 	CompiledExpression compileKeyExpression(String expression) throws ParseException {
@@ -65,9 +62,8 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 		return compile(expression, commonValueType);
 	}
 
-	private CompiledExpression compile(String expression, TypeInfo type) throws ParseException {
+	private CompiledExpression compile(String expression, Class<?> type) throws ParseException {
 		ExpressionParser parser = Parsers.createExpressionParser(context.getEvaluator().getParserSettings());
-		ObjectInfo thisValue = InfoProvider.createObjectInfo(InfoProvider.INDETERMINATE_VALUE, type);
-		return parser.compile(expression, thisValue);
+		return parser.compile(expression, type);
 	}
 }

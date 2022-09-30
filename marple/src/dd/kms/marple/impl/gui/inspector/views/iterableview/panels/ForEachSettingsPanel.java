@@ -5,7 +5,6 @@ import dd.kms.marple.impl.gui.evaluator.textfields.CompiledExpressionInputTextFi
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.ForEachSettings;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +20,7 @@ class ForEachSettingsPanel extends AbstractOperationSettingsPanel
 	private final CompiledExpressionInputTextField	consumerTF;
 	private final JLabel 							consumerInfoLabel		= new JLabel("'this' always refers to the element currently processed");
 
-	ForEachSettingsPanel(TypeInfo commonElementType, InspectionContext context) {
+	ForEachSettingsPanel(Class<?> commonElementType, InspectionContext context) {
 		consumerTF = new CompiledExpressionInputTextField(context);
 		consumerPanel = new EvaluationTextFieldPanel(consumerTF, context);
 		consumerTF.setThisType(commonElementType);

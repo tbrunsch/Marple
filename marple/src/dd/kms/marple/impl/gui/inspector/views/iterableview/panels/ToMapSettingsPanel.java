@@ -5,7 +5,6 @@ import dd.kms.marple.impl.gui.evaluator.textfields.CompiledExpressionInputTextFi
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.ToMapSettings;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,7 +25,7 @@ class ToMapSettingsPanel extends AbstractOperationSettingsPanel
 
 	private final JLabel 							mappingInfoLabel		= new JLabel("'this' always refers to the element currently processed");
 
-	ToMapSettingsPanel(TypeInfo commonElementType, InspectionContext context) {
+	ToMapSettingsPanel(Class<?> commonElementType, InspectionContext context) {
 		keyMappingTF = new CompiledExpressionInputTextField(context);
 		keyMappingPanel = new EvaluationTextFieldPanel(keyMappingTF, context);
 		keyMappingTF.setThisType(commonElementType);

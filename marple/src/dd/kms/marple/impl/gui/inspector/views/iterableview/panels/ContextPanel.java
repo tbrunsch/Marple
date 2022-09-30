@@ -1,9 +1,8 @@
 package dd.kms.marple.impl.gui.inspector.views.iterableview.panels;
 
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.common.TypedObjectInfo;
+import dd.kms.marple.impl.gui.common.GuiCommons;
 import dd.kms.marple.impl.gui.inspector.views.fieldview.FieldTree;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,15 +17,15 @@ public class ContextPanel extends JPanel
 
 	private final JComponent	fieldTree;
 
-	public ContextPanel(TypedObjectInfo<? extends Iterable<?>> iterableInfo, TypeInfo commonElementType, InspectionContext context) {
+	public ContextPanel(Iterable<?> iterable, Class<?> commonElementType, InspectionContext context) {
 		super(new GridBagLayout());
 
 		setBorder(BorderFactory.createTitledBorder("Iterable"));
 
-		fieldTree = new FieldTree(iterableInfo, context);
+		fieldTree = new FieldTree(iterable, context);
 		fieldTree.setPreferredSize(new Dimension(fieldTree.getPreferredSize().width, 100));
 
-		commonElementClassLabel.setText(commonElementType.toString());
+		commonElementClassLabel.setText(context.getDisplayText(commonElementType));
 
 		add(commonElementClassInfoLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 		add(commonElementClassLabel, new GridBagConstraints(1, 0, 1, 1, 1.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));

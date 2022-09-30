@@ -2,16 +2,15 @@ package dd.kms.marple.impl.actions;
 
 import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 public class EvaluateExpressionAction implements InspectionAction
 {
 	private final ExpressionEvaluator	expressionEvaluator;
 	private final String				expression;
-	private final ObjectInfo			thisValue;
+	private final Object				thisValue;
 	private final int					caretPosition;
 
-	public EvaluateExpressionAction(ExpressionEvaluator expressionEvaluator, String expression, ObjectInfo thisValue, int caretPosition) {
+	public EvaluateExpressionAction(ExpressionEvaluator expressionEvaluator, String expression, Object thisValue, int caretPosition) {
 		this.expressionEvaluator = expressionEvaluator;
 		this.expression = expression;
 		this.thisValue = thisValue;

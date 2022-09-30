@@ -2,14 +2,13 @@ package dd.kms.marple.impl.actions;
 
 import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 public class EvaluateAsThisAction implements InspectionAction
 {
 	private final ExpressionEvaluator	expressionEvaluator;
-	private final ObjectInfo			thisValue;
+	private final Object				thisValue;
 
-	public EvaluateAsThisAction(ExpressionEvaluator expressionEvaluator, ObjectInfo thisValue) {
+	public EvaluateAsThisAction(ExpressionEvaluator expressionEvaluator, Object thisValue) {
 		this.expressionEvaluator = expressionEvaluator;
 		this.thisValue = thisValue;
 	}

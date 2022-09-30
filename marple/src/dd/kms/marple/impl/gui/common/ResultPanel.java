@@ -3,7 +3,6 @@ package dd.kms.marple.impl.gui.common;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.impl.gui.inspector.views.fieldview.FieldTree;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -30,8 +29,8 @@ public class ResultPanel extends JPanel
 		displayComponent(exceptionLabel);
 	}
 
-	public void displayResult(ObjectInfo resultInfo) {
-		FieldTree fieldTree = new FieldTree(resultInfo, context);
+	public void displayResult(Object result) {
+		FieldTree fieldTree = new FieldTree(result, context);
 		displayComponent(fieldTree);
 	}
 

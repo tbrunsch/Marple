@@ -5,8 +5,6 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.inspector.views.mapview.settings.FilterSettings;
 import dd.kms.zenodot.api.CompiledExpression;
 import dd.kms.zenodot.api.ParseException;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import java.text.MessageFormat;
 import java.util.LinkedHashMap;
@@ -14,7 +12,7 @@ import java.util.Map;
 
 class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 {
-	FilterOperationExecutor(Map<?, ?> map, TypeInfo commonKeyType, TypeInfo commonValueType, FilterSettings settings, InspectionContext context) {
+	FilterOperationExecutor(Map<?, ?> map, Class<?> commonKeyType, Class<?> commonValueType, FilterSettings settings, InspectionContext context) {
 		super(map, commonKeyType, commonValueType, settings, context);
 	}
 
@@ -51,18 +49,18 @@ class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 			}
 			result.put(key, value);
 		}
-		displayResult(InfoProvider.createObjectInfo(result));
+		displayResult(result);
 	}
 
 	private void checkFilterExpression(String filterExpression, CompiledExpression compiledExpression) throws ParseException {
-		Class<?> resultClass = compiledExpression.getResultType().getRawType();
+		Class<?> resultClass = compiledExpression.getResultType();
 		if (Primitives.unwrap(resultClass) != boolean.class) {
 			throw new ParseException(filterExpression, filterExpression.length(), "The filter expression must be a predicate", null);
 		}
 	}
 
 	private boolean filter(CompiledExpression compiledFilterExpression, Object element) throws Exception {
-		Object result = compiledFilterExpression.evaluate(InfoProvider.createObjectInfo(element)).getObject();
+		Object result = compiledFilterExpression.evaluate(element);
 		if (result == null) {
 			throw new NullPointerException();
 		}
@@ -71,7 +69,7 @@ class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 			String error = MessageFormat.format(
 				"Predicate does not yield a boolean, but an element of type {0} for element {1}",
 				resultClass.getName(),
-				context.getDisplayText(InfoProvider.createObjectInfo(element))
+				context.getDisplayText(element)
 			);
 			throw new IllegalStateException(error);
 		}

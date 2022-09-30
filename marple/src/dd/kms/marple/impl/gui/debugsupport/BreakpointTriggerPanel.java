@@ -5,7 +5,6 @@ import dd.kms.marple.api.settings.DebugSettings;
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.impl.gui.evaluator.textfields.ExpressionInputTextField;
 import dd.kms.zenodot.api.ParseException;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -70,7 +69,7 @@ class BreakpointTriggerPanel extends JPanel
 		triggerButton.addActionListener(e -> triggerBreakpoint());
 	}
 
-	void setThisValue(ObjectInfo thisValue) {
+	void setThisValue(Object thisValue) {
 		customMethodTF.setThisValue(thisValue);
 	}
 

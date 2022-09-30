@@ -6,8 +6,6 @@ import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.FilterResult
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.FilterSettings;
 import dd.kms.zenodot.api.CompiledExpression;
 import dd.kms.zenodot.api.ParseException;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -17,7 +15,7 @@ import java.util.Map;
 
 class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 {
-	FilterOperationExecutor(Iterable<?> iterable, TypeInfo commonElementType, FilterSettings settings, InspectionContext context) {
+	FilterOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, FilterSettings settings, InspectionContext context) {
 		super(iterable, commonElementType, settings, context);
 	}
 
@@ -25,7 +23,7 @@ class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 	void execute() throws Exception {
 		String filterExpression = settings.getFilterExpression();
 		CompiledExpression compiledExpression = compile(filterExpression);
-		Class<?> resultClass = compiledExpression.getResultType().getRawType();
+		Class<?> resultClass = compiledExpression.getResultType();
 		if (Primitives.unwrap(resultClass) != boolean.class) {
 			throw new ParseException(filterExpression, filterExpression.length(), "The filter expression must be a predicate", null);
 		}
@@ -42,11 +40,11 @@ class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 			default:
 				throw new IllegalArgumentException("Unsupported operation result type: " + resultType);
 		}
-		displayResult(InfoProvider.createObjectInfo(filterResult));
+		displayResult(filterResult);
 	}
 
 	private boolean filter(CompiledExpression compiledFilterExpression, Object element) throws Exception {
-		Object result = compiledFilterExpression.evaluate(InfoProvider.createObjectInfo(element)).getObject();
+		Object result = compiledFilterExpression.evaluate(element);
 		if (result == null) {
 			throw new NullPointerException();
 		}
@@ -55,7 +53,7 @@ class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 			String error = MessageFormat.format(
 				"Predicate does not yield a boolean, but an element of type {0} for element {1}",
 				resultClass.getName(),
-				context.getDisplayText(InfoProvider.createObjectInfo(element))
+				context.getDisplayText(element)
 			);
 			throw new IllegalStateException(error);
 		}

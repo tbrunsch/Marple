@@ -10,8 +10,6 @@ import dd.kms.marple.impl.actions.*;
 import dd.kms.marple.impl.gui.ComponentHierarchies;
 import dd.kms.marple.impl.gui.common.History;
 import dd.kms.marple.impl.inspector.InspectionData;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -47,55 +45,54 @@ public class InspectionContextImpl implements InspectionContext
 
 	@Override
 	public InspectionAction createInspectComponentAction(ComponentHierarchy componentHierarchy) {
-		String componentDisplayText = getDisplayText(InfoProvider.createObjectInfo(componentHierarchy.getSelectedComponent()));
+		String componentDisplayText = getDisplayText(componentHierarchy.getSelectedComponent());
 		InspectionAction action = new InspectComponentAction(settings.getInspector(), componentHierarchy, componentDisplayText);
 		return new HistoryActionWrapper(settings.getInspector(), inspectionHistory, action);
 	}
 
 	@Override
-	public InspectionAction createInspectObjectAction(ObjectInfo objectInfo) {
-		Object object = objectInfo.getObject();
+	public InspectionAction createInspectObjectAction(Object object) {
 		if (object instanceof Component) {
 			Component component = (Component) object;
 			ComponentHierarchy componentHierarchy = ComponentHierarchies.getComponentHierarchy(component);
 			return createInspectComponentAction(componentHierarchy);
 		}
-		InspectionAction action = new InspectObjectAction(settings.getInspector(), objectInfo, getDisplayText(objectInfo));
+		InspectionAction action = new InspectObjectAction(settings.getInspector(), object, getDisplayText(object));
 		return new HistoryActionWrapper(settings.getInspector(), inspectionHistory, action);
 	}
 
 	@Override
-	public InspectionAction createAddVariableAction(String suggestedName, ObjectInfo valueInfo) {
-		return new AddVariableAction(suggestedName, valueInfo, this);
+	public InspectionAction createAddVariableAction(String suggestedName, Object value) {
+		return new AddVariableAction(suggestedName, value, this);
 	}
 
 	@Override
-	public InspectionAction createEvaluateExpressionAction(String expression, ObjectInfo thisValue) {
+	public InspectionAction createEvaluateExpressionAction(String expression, Object thisValue) {
 		return createEvaluateExpressionAction(expression, thisValue, expression.length());
 	}
 
 	@Override
-	public InspectionAction createEvaluateExpressionAction(String expression, ObjectInfo thisValue, int caretPosition) {
+	public InspectionAction createEvaluateExpressionAction(String expression, Object thisValue, int caretPosition) {
 		return new EvaluateExpressionAction(settings.getEvaluator(), expression, thisValue, caretPosition);
 	}
 
 	@Override
-	public InspectionAction createEvaluateAsThisAction(ObjectInfo thisValue) {
+	public InspectionAction createEvaluateAsThisAction(Object thisValue) {
 		return new EvaluateAsThisAction(settings.getEvaluator(), thisValue);
 	}
 
 	@Override
-	public InspectionAction createSearchInstancesFromHereAction(ObjectInfo root) {
+	public InspectionAction createSearchInstancesFromHereAction(Object root) {
 		return new SearchInstancesFromHereAction(this, root);
 	}
 
 	@Override
-	public InspectionAction createSearchInstanceAction(ObjectInfo target) {
+	public InspectionAction createSearchInstanceAction(Object target) {
 		return new SearchInstanceAction(this, target);
 	}
 
 	@Override
-	public InspectionAction createDebugSupportAction(ObjectInfo thisValue) {
+	public InspectionAction createDebugSupportAction(Object thisValue) {
 		return new DebugSupportAction(this, thisValue);
 	}
 
@@ -110,13 +107,13 @@ public class InspectionContextImpl implements InspectionContext
 	}
 
 	@Override
-	public String getDisplayText(ObjectInfo objectInfo) {
-		return settings.getVisualSettings().getDisplayText(objectInfo);
+	public String getDisplayText(Object object) {
+		return settings.getVisualSettings().getDisplayText(object);
 	}
 
 	@Override
-	public List<ObjectView> getInspectionViews(ObjectInfo objectInfo) {
-		return settings.getVisualSettings().getInspectionViews(objectInfo, this);
+	public List<ObjectView> getInspectionViews(Object object) {
+		return settings.getVisualSettings().getInspectionViews(object, this);
 	}
 
 	@Override

@@ -3,10 +3,8 @@ package dd.kms.marple.impl.gui.evaluator.completion;
 import com.google.common.collect.ImmutableList;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
-import dd.kms.zenodot.api.wrappers.ExecutableInfo;
 
 import javax.swing.*;
-import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -14,13 +12,15 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 class ExecutableArgumentPopup extends JPopupMenu
 {
-	private static int DELTA_Y	= -5;
+	private static final int DELTA_Y	= -5;
 
 	static void register(JTextComponent textComponent, ExecutableArgumentInfoProvider executableArgumentInfoProvider) {
 		if (textComponent.getComponentPopupMenu() instanceof ExecutableArgumentPopup) {
@@ -66,12 +66,7 @@ class ExecutableArgumentPopup extends JPopupMenu
 		};
 		textComponent.getDocument().addDocumentListener(documentListener);
 
-		caretListener = new CaretListener() {
-			@Override
-			public void caretUpdate(CaretEvent e) {
-				updatePopup();
-			}
-		};
+		caretListener = e -> updatePopup();
 		textComponent.addCaretListener(caretListener);
 
 		focusListener = new FocusAdapter() {
@@ -164,28 +159,29 @@ class ExecutableArgumentPopup extends JPopupMenu
 		}
 		ExecutableArgumentInfo info = executableArgumentInfo.get();
 		int currentArgIndex = info.getCurrentArgumentIndex();
-		Map<ExecutableInfo, Boolean> applicableExecutableOverloads = info.getApplicableExecutableOverloads();
+		Map<Executable, Boolean> applicableExecutableOverloads = info.getApplicableExecutableOverloads();
 
 		ImmutableList.Builder<JMenuItem> menuItemBuilder = ImmutableList.builder();
-		for (ExecutableInfo executableInfo : applicableExecutableOverloads.keySet()) {
-			boolean applicable = applicableExecutableOverloads.get(executableInfo);
+		for (Executable executable : applicableExecutableOverloads.keySet()) {
+			boolean applicable = applicableExecutableOverloads.get(executable);
 			StringBuilder argumentInfoTextBuilder = new StringBuilder();
-			argumentInfoTextBuilder.append("<html>").append(executableInfo.getName()).append("(");
-			int numArguments = executableInfo.getNumberOfArguments();
-			for (int argIndex = 0; argIndex < numArguments; argIndex++) {
-				String argTypeAsString = executableInfo.getExpectedArgumentType(argIndex).getRawType().getSimpleName();
-				if (executableInfo.isVariadic() && argIndex == numArguments - 1) {
+			argumentInfoTextBuilder.append("<html>").append(executable.getName()).append("(");
+			Class<?>[] parameterTypes = executable.getParameterTypes();
+			int numParameters = parameterTypes.length;
+			for (int paramIndex = 0; paramIndex < numParameters; paramIndex++) {
+				String argTypeAsString = parameterTypes[paramIndex].getSimpleName();
+				if (executable.isVarArgs() && paramIndex == numParameters - 1) {
 					argTypeAsString += "...";
 				}
 				boolean highlight = false;
 				if (applicable) {
-					if (executableInfo.isVariadic()) {
-						highlight = argIndex <= currentArgIndex;
+					if (executable.isVarArgs()) {
+						highlight = paramIndex <= currentArgIndex;
 					} else {
-						highlight = argIndex == currentArgIndex;
+						highlight = paramIndex == currentArgIndex;
 					}
 				}
-				if (argIndex > 0) {
+				if (paramIndex > 0) {
 					argumentInfoTextBuilder.append(", ");
 				}
 				if (highlight) {

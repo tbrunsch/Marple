@@ -7,8 +7,6 @@ import dd.kms.marple.api.settings.SecuritySettings;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
 import dd.kms.marple.api.settings.keys.KeySettings;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -104,10 +102,10 @@ public class ObjectInspectionFrameworkInstance
 		);
 	}
 
-	private void performAction(InspectionContext context, Component component, Point position, Function<ObjectInfo, InspectionAction> actionFunction) {
+	private void performAction(InspectionContext context, Component component, Point position, Function<Object, InspectionAction> actionFunction) {
 		Supplier<InspectionAction> actionSupplier = () -> {
 			ComponentHierarchy componentHierarchy = dd.kms.marple.impl.gui.ComponentHierarchies.getComponentHierarchy(component, position, context);
-			ObjectInfo componentHierarchyLeaf = InfoProvider.createObjectInfo(componentHierarchy.getSelectedComponent());
+			Object componentHierarchyLeaf = componentHierarchy.getSelectedComponent();
 			return actionFunction.apply(componentHierarchyLeaf);
 		};
 		performAction(context, actionSupplier);

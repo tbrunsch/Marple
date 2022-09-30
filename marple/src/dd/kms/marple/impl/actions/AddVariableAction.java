@@ -3,13 +3,11 @@ package dd.kms.marple.impl.actions;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.actions.InspectionAction;
-import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.evaluator.ExpressionEvaluators;
 import dd.kms.marple.impl.gui.common.WindowManager;
 import dd.kms.marple.impl.gui.evaluator.VariablePanel;
 import dd.kms.zenodot.api.settings.ParserSettingsUtils;
 import dd.kms.zenodot.api.settings.Variable;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,11 +15,11 @@ import java.util.stream.Collectors;
 public class AddVariableAction implements InspectionAction
 {
 	private final String			suggestedName;
-	private final ObjectInfo		valueInfo;
+	private final Object			value;
 	private final InspectionContext	context;
 
-	public AddVariableAction(String suggestedName, ObjectInfo valueInfo, InspectionContext context) {
-		this.valueInfo = valueInfo;
+	public AddVariableAction(String suggestedName, Object value, InspectionContext context) {
+		this.value = value;
 		this.context = context;
 		this.suggestedName = suggestedName;
 	}
@@ -51,7 +49,7 @@ public class AddVariableAction implements InspectionAction
 		String name = createVariableName(suggestedName == null ? "variable" : suggestedName);
 		ImmutableList.Builder<Variable> variablesBuilder = ImmutableList.builder();
 		variablesBuilder.addAll(ExpressionEvaluators.getVariables(context));
-		variablesBuilder.add(ParserSettingsUtils.createVariable(name, valueInfo.getObject(), ReflectionUtils.getRuntimeTypeInfo(valueInfo), false));
+		variablesBuilder.add(ParserSettingsUtils.createVariable(name, value, false));
 		ExpressionEvaluators.setVariables(variablesBuilder.build(), context);
 		WindowManager.showInFrame(VariablePanel.WINDOW_TITLE, this::createVariablePanel, variablePanel -> variablePanel.editVariableName(name), VariablePanel::updateContent);
 	}

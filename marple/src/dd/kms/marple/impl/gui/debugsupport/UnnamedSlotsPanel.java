@@ -6,8 +6,6 @@ import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.gui.table.ColumnDescription;
 import dd.kms.marple.impl.gui.table.ColumnDescriptionBuilder;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,18 +46,15 @@ class UnnamedSlotsPanel extends AbstractSlotPanel<Integer>
 
 	private ActionProvider getSlotValueAsActionProvider(Integer slotIndex) {
 		Object slotValue = DebugSupport.SLOTS[slotIndex];
-		ObjectInfo slotValueInfo = InfoProvider.createObjectInfo(slotValue);
 		String unnamedSlotName = getUnnamedSlotName(slotIndex);
-		return new ActionProviderBuilder(context.getDisplayText(slotValueInfo), slotValueInfo, context)
+		return new ActionProviderBuilder(context.getDisplayText(slotValue), slotValue, context)
 			.evaluateAs("DebugSupport." + unnamedSlotName)
 			.suggestVariableName(unnamedSlotName)
 			.executeDefaultAction(false)
 			.build();
 	}
 
-	private void setSlotValue(List<Integer> slotIndices, int slotIndex, Object valueInfoAsObject) {
-		ObjectInfo valueInfo = (ObjectInfo) valueInfoAsObject;
-		Object value = valueInfo.getObject();
+	private void setSlotValue(List<Integer> slotIndices, int slotIndex, Object value) {
 		DebugSupport.SLOTS[slotIndex] = value;
 	}
 }

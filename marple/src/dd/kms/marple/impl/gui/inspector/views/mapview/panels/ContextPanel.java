@@ -1,9 +1,8 @@
 package dd.kms.marple.impl.gui.inspector.views.mapview.panels;
 
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.common.TypedObjectInfo;
+import dd.kms.marple.impl.gui.common.GuiCommons;
 import dd.kms.marple.impl.gui.inspector.views.fieldview.FieldTree;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,16 +20,16 @@ public class ContextPanel extends JPanel
 
 	private final JComponent	fieldTree;
 
-	public ContextPanel(TypedObjectInfo<? extends Map<?,?>> mapInfo, TypeInfo commonKeyType, TypeInfo commonValueType, InspectionContext context) {
+	public ContextPanel(Map<?, ?> map, Class<?> commonKeyType, Class<?> commonValueType, InspectionContext context) {
 		super(new GridBagLayout());
 
 		setBorder(BorderFactory.createTitledBorder("Map"));
 
-		fieldTree = new FieldTree(mapInfo, context);
+		fieldTree = new FieldTree(map, context);
 		fieldTree.setPreferredSize(new Dimension(fieldTree.getPreferredSize().width, 100));
 
-		commonKeyClassLabel.setText(commonKeyType.toString());
-		commonValueClassLabel.setText(commonValueType.toString());
+		commonKeyClassLabel.setText(context.getDisplayText(commonKeyType));
+		commonValueClassLabel.setText(context.getDisplayText(commonValueType));
 
 		int yPos = 0;
 		int xPos = 0;

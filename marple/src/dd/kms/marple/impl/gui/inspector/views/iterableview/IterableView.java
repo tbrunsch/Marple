@@ -2,13 +2,11 @@ package dd.kms.marple.impl.gui.inspector.views.iterableview;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.settings.visual.ObjectView;
-import dd.kms.marple.impl.common.TypedObjectInfo;
-import dd.kms.marple.impl.common.UniformView;
+import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.gui.common.ResultPanel;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.panels.ContextPanel;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.panels.OperationPanel;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.*;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,21 +20,21 @@ public class IterableView extends JPanel implements ObjectView
 	public static final String	NAME	= "Iterables";
 
 	private final Iterable<?>		iterable;
-	private final TypeInfo			commonElementType;
+	private final Class<?>			commonElementType;
 	private final InspectionContext	context;
 
 	private final JPanel			contextPanel;
 	private final OperationPanel	operationPanel;
 	private final ResultPanel		resultPanel;
 
-	public IterableView(TypedObjectInfo<? extends Iterable<?>> iterableInfo, InspectionContext context) {
+	public IterableView(Iterable<?> iterable, InspectionContext context) {
 		super(new GridBagLayout());
 
-		this.iterable = iterableInfo.getObject();
-		this.commonElementType = UniformView.getCommonElementType(iterableInfo);
+		this.iterable = iterable;
+		this.commonElementType = ReflectionUtils.getCommonSuperClass(this.iterable);
 		this.context = context;
 
-		this.contextPanel = new ContextPanel(iterableInfo, commonElementType, context);
+		this.contextPanel = new ContextPanel(iterable, commonElementType, context);
 		this.operationPanel = new OperationPanel(commonElementType, context);
 		this.resultPanel = new ResultPanel(context);
 

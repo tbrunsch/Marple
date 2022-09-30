@@ -1,23 +1,20 @@
 package dd.kms.marple.impl.actions;
 
-import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.actions.InspectionAction;
-import dd.kms.marple.impl.common.ReflectionUtils;
-import dd.kms.zenodot.api.wrappers.ExecutableInfo;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
+import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
 public class InvokeMethodAction implements InspectionAction
 {
-	private final ObjectInfo			objectInfo;
-	private final ExecutableInfo		methodInfo;
-	private final Consumer<ObjectInfo>	returnValueConsumer;
+	private final Object				object;
+	private final Method				method;
+	private final Consumer<Object>		returnValueConsumer;
 	private final Consumer<Exception>	exceptionConsumer;
 
-	public InvokeMethodAction(ObjectInfo objectInfo, ExecutableInfo methodInfo, Consumer<ObjectInfo> returnValueConsumer, Consumer<Exception> exceptionConsumer) {
-		this.objectInfo = objectInfo;
-		this.methodInfo = methodInfo;
+	public InvokeMethodAction(Object object, Method method, Consumer<Object> returnValueConsumer, Consumer<Exception> exceptionConsumer) {
+		this.object = object;
+		this.method = method;
 		this.returnValueConsumer = returnValueConsumer;
 		this.exceptionConsumer = exceptionConsumer;
 	}
@@ -34,7 +31,7 @@ public class InvokeMethodAction implements InspectionAction
 
 	@Override
 	public String getDescription() {
-		return "Invoke method '" + methodInfo.getName() + "' and inspect the result in the inspection dialog";
+		return "Invoke method '" + method.getName() + "' and inspect the result in the inspection dialog";
 	}
 
 	@Override
@@ -45,9 +42,10 @@ public class InvokeMethodAction implements InspectionAction
 	@Override
 	public void perform() {
 		try {
-			ObjectInfo returnValueInfo = ReflectionUtils.OBJECT_INFO_PROVIDER.getExecutableReturnInfo(objectInfo.getObject(), methodInfo, ImmutableList.of());
-			if (!methodInfo.getReturnType().getRawType().equals(Void.TYPE)) {
-				returnValueConsumer.accept(returnValueInfo);
+			method.setAccessible(true);
+			Object returnValue = method.invoke(object);
+			if (!method.getReturnType().equals(Void.TYPE)) {
+				returnValueConsumer.accept(returnValue);
 			}
 		} catch (Exception e) {
 			exceptionConsumer.accept(e);

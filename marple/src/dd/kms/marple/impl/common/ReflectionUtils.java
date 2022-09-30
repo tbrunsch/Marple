@@ -1,23 +1,18 @@
 package dd.kms.marple.impl.common;
 
-import java.lang.reflect.Field;
-import java.util.*;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.primitives.Primitives;
-import dd.kms.zenodot.api.common.*;
-import dd.kms.zenodot.api.wrappers.ExecutableInfo;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
+import dd.kms.zenodot.api.common.FieldScannerBuilder;
+import dd.kms.zenodot.api.common.StaticMode;
+
+import java.lang.reflect.Field;
+import java.util.*;
 
 public class ReflectionUtils
 {
 	private static final int				MAX_NUM_ITERABLE_ELEMENTS_TO_CONSIDER	= 1000;
-
-	public static final ObjectInfoProvider	OBJECT_INFO_PROVIDER					= new ObjectInfoProvider(true);
 
 	/**
 	 * We consider an object worth being inspected if it is
@@ -82,6 +77,16 @@ public class ReflectionUtils
 		return result;
 	}
 
+	public static Object getFieldValue(Field field, Object object) {
+		try {
+			field.setAccessible(true);
+			return field.get(object);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	/**
 	 * Returns a multimap mapping each value from the set {@code fieldValues} to all
 	 * fields of the specified instance that are currently assigned that value.
@@ -108,25 +113,5 @@ public class ReflectionUtils
 			}
 		}
 		return fieldsByValue;
-	}
-
-	public static ExecutableInfo getUniqueMethodInfo(TypeInfo type, String methodName) {
-		MethodScanner methodScanner = MethodScannerBuilder.create()
-			.name(methodName)
-			.build();
-		List<ExecutableInfo> methodInfos = InfoProvider.getMethodInfos(type, methodScanner);
-		return Iterables.getOnlyElement(methodInfos);
-	}
-
-	public static TypeInfo getRuntimeTypeInfo(ObjectInfo objectInfo) {
-		Object object = objectInfo.getObject();
-		TypeInfo declaredType = objectInfo.getDeclaredType();
-		return ObjectInfoProvider.getRuntimeType(object, declaredType);
-	}
-
-	public static ObjectInfo getRuntimeInfo(ObjectInfo objectInfo) {
-		Object object = objectInfo.getObject();
-		TypeInfo runtimeType = getRuntimeTypeInfo(objectInfo);
-		return InfoProvider.createObjectInfo(object, runtimeType);
 	}
 }

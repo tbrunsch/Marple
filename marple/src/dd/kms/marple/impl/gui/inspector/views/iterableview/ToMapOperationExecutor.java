@@ -5,15 +5,13 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.ToMapSettings;
 import dd.kms.zenodot.api.CompiledExpression;
 import dd.kms.zenodot.api.ParseException;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 class ToMapOperationExecutor extends AbstractOperationExecutor<ToMapSettings>
 {
-	ToMapOperationExecutor(Iterable<?> iterable, TypeInfo commonElementType, ToMapSettings settings, InspectionContext context) {
+	ToMapOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, ToMapSettings settings, InspectionContext context) {
 		super(iterable, commonElementType, settings, context);
 	}
 
@@ -24,12 +22,12 @@ class ToMapOperationExecutor extends AbstractOperationExecutor<ToMapSettings>
 		CompiledExpression compiledKeyMappingExpression = compile(keyMappingExpression);
 		CompiledExpression compiledValueMappingExpression = compile(valueMappingExpression);
 
-		Class<?> keyResultClass = compiledKeyMappingExpression.getResultType().getRawType();
+		Class<?> keyResultClass = compiledKeyMappingExpression.getResultType();
 		if (Primitives.unwrap(keyResultClass) == void.class) {
 			throw new ParseException(keyMappingExpression, keyMappingExpression.length(), "The key mapping expression must evaluate to something different than void", null);
 		}
 
-		Class<?> valueResultClass = compiledValueMappingExpression.getResultType().getRawType();
+		Class<?> valueResultClass = compiledValueMappingExpression.getResultType();
 		if (Primitives.unwrap(valueResultClass) == void.class) {
 			throw new ParseException(valueMappingExpression, valueMappingExpression.length(), "The value mapping expression must evaluate to something different than void", null);
 		}
@@ -37,13 +35,13 @@ class ToMapOperationExecutor extends AbstractOperationExecutor<ToMapSettings>
 		Map<Object, Object> result = new LinkedHashMap<>();
 		for (Object element : iterable) {
 			try {
-				Object key = compiledKeyMappingExpression.evaluate(InfoProvider.createObjectInfo(element)).getObject();
-				Object value = compiledValueMappingExpression.evaluate(InfoProvider.createObjectInfo(element)).getObject();
+				Object key = compiledKeyMappingExpression.evaluate(element);
+				Object value = compiledValueMappingExpression.evaluate(element);
 				result.put(key, value);
 			} catch (Exception e) {
 				throw wrapEvaluationException(e, element);
 			}
 		}
-		displayResult(InfoProvider.createObjectInfo(result));
+		displayResult(result);
 	}
 }

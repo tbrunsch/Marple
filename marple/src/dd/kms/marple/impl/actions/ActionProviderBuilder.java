@@ -6,8 +6,6 @@ import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.gui.snapshot.Snapshots;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -20,7 +18,7 @@ public class ActionProviderBuilder
 	private static final Pattern VARIABLE_NAME_PATTERN	= Pattern.compile("^[A-Za-z][_A-Za-z0-9]*");
 
 	private final String					displayText;
-	private final ObjectInfo				objectInfo;
+	private final Object					object;
 	private final InspectionContext			context;
 
 	private @Nullable ComponentHierarchy	componentHierarchy;
@@ -30,15 +28,15 @@ public class ActionProviderBuilder
 
 	public ActionProviderBuilder(String displayText, ComponentHierarchy componentHierarchy, InspectionContext context) {
 		this.displayText = displayText;
-		this.objectInfo = InfoProvider.createObjectInfo(componentHierarchy.getSelectedComponent());
+		this.object = componentHierarchy.getSelectedComponent();
 		this.context = context;
 
 		this.componentHierarchy = componentHierarchy;
 	}
 
-	public ActionProviderBuilder(String displayText, ObjectInfo objectInfo, InspectionContext context) {
+	public ActionProviderBuilder(String displayText, Object object, InspectionContext context) {
 		this.displayText = displayText;
-		this.objectInfo = objectInfo;
+		this.object = object;
 		this.context = context;
 	}
 
@@ -50,10 +48,10 @@ public class ActionProviderBuilder
 	}
 
 	public ActionProviderBuilder evaluateAs(String expression) {
-		return evaluateAs(expression, InfoProvider.NULL_LITERAL);
+		return evaluateAs(expression, null);
 	}
 
-	public ActionProviderBuilder evaluateAs(String expression, ObjectInfo expressionContext) {
+	public ActionProviderBuilder evaluateAs(String expression, Object expressionContext) {
 		this.evaluationData = new EvaluationData(expression, expressionContext);
 		suggestVariableName(expression);
 		return this;
@@ -65,18 +63,14 @@ public class ActionProviderBuilder
 	}
 
 	public ActionProvider build() {
-		if (objectInfo == null) {
-			return null;
-		}
 		ImmutableList.Builder<InspectionAction> actionsBuilder = ImmutableList.builder();
-		Object object = objectInfo.getObject();
 		if (object == null) {
 			return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
 		}
 		boolean isInspectable = ReflectionUtils.isObjectInspectable(object);
 		if (componentHierarchy == null) {
 			if (isInspectable) {
-				actionsBuilder.add(context.createInspectObjectAction(objectInfo));
+				actionsBuilder.add(context.createInspectObjectAction(object));
 			}
 		} else {
 			actionsBuilder.add(context.createInspectComponentAction(componentHierarchy));
@@ -96,17 +90,17 @@ public class ActionProviderBuilder
 		if (object instanceof Paint) {
 			actionsBuilder.add(context.createSnapshotAction((Paint) object, paint -> Snapshots.takeSnapshot(paint, 200, 200)));
 		}
-		actionsBuilder.add(context.createAddVariableAction(suggestedVariableName, objectInfo));
-		actionsBuilder.add(context.createEvaluateAsThisAction(objectInfo));
+		actionsBuilder.add(context.createAddVariableAction(suggestedVariableName, this.object));
+		actionsBuilder.add(context.createEvaluateAsThisAction(this.object));
 		if (evaluationData != null) {
 			String expression = evaluationData.getExpression();
-			ObjectInfo expressionContext = evaluationData.getExpressionContext();
+			Object expressionContext = evaluationData.getExpressionContext();
 			actionsBuilder.add(context.createEvaluateExpressionAction(expression, expressionContext));
 		}
-		actionsBuilder.add(context.createSearchInstancesFromHereAction(objectInfo));
-		actionsBuilder.add(context.createSearchInstanceAction(objectInfo));
+		actionsBuilder.add(context.createSearchInstancesFromHereAction(object));
+		actionsBuilder.add(context.createSearchInstanceAction(object));
 		actionsBuilder.add(new CopyStringRepresentationAction(object));
-		actionsBuilder.add(context.createDebugSupportAction(objectInfo));
+		actionsBuilder.add(context.createDebugSupportAction(this.object));
 		return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
 	}
 
@@ -131,10 +125,10 @@ public class ActionProviderBuilder
 
 	private static class EvaluationData
 	{
-		private final String		expression;
-		private final ObjectInfo	expressionContext;
+		private final String	expression;
+		private final Object	expressionContext;
 
-		EvaluationData(String expression, ObjectInfo expressionContext) {
+		EvaluationData(String expression, Object expressionContext) {
 			this.expression = expression;
 			this.expressionContext = expressionContext;
 		}
@@ -143,7 +137,7 @@ public class ActionProviderBuilder
 			return expression;
 		}
 
-		ObjectInfo getExpressionContext() {
+		Object getExpressionContext() {
 			return expressionContext;
 		}
 	}

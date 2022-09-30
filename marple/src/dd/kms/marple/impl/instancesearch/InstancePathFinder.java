@@ -2,7 +2,6 @@ package dd.kms.marple.impl.instancesearch;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.instancesearch.settings.SearchSettings;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,9 +90,9 @@ public class InstancePathFinder
 	}
 
 	private String getDisplayString(Object object) {
-		return context == null
-				? (object == null ? "null" : object.toString())
-				: context.getDisplayText(InfoProvider.createObjectInfo(object));
+		return context != null
+			? context.getDisplayText(object)
+			: (object != null ? object.toString() : "null");
 	}
 
 	private void changeProcessingState(ProcessingState newState) {

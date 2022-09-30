@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.Operation;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -53,7 +52,7 @@ public class OperationPanel extends JPanel
 
 	private final JButton				runButton				= new JButton("Run");
 
-	public OperationPanel(TypeInfo commonElementType, InspectionContext context) {
+	public OperationPanel(Class<?> commonElementType, InspectionContext context) {
 		super(new GridBagLayout());
 
 		filterSettingsPanel		= new FilterSettingsPanel(commonElementType, context);

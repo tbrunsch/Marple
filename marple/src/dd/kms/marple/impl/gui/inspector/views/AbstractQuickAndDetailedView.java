@@ -2,7 +2,6 @@ package dd.kms.marple.impl.gui.inspector.views;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.settings.visual.ObjectView;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,17 +24,17 @@ public abstract class AbstractQuickAndDetailedView extends JPanel implements Obj
 
 	private final String				name;
 
-	private final ObjectInfo			objectInfo;
+	private final Object				objct;
 	private final InspectionContext		context;
 
 	private final Map<ViewType, Object>	settingsByViewType = new HashMap<>();
 
-	public AbstractQuickAndDetailedView(String name, ObjectInfo objectInfo, InspectionContext context) {
+	public AbstractQuickAndDetailedView(String name, Object objct, InspectionContext context) {
 		super(new BorderLayout());
 
 		this.name = name;
 
-		this.objectInfo = objectInfo;
+		this.objct = objct;
 		this.context = context;
 
 		setName(name);
@@ -56,7 +55,7 @@ public abstract class AbstractQuickAndDetailedView extends JPanel implements Obj
 		detailedViewToggleButton.addActionListener(e -> setViewType(ViewType.DETAILED));
 	}
 
-	protected abstract ObjectView createView(ViewType viewType, ObjectInfo objectInfo, InspectionContext context);
+	protected abstract ObjectView createView(ViewType viewType, Object object, InspectionContext context);
 
 	@Override
 	public String getViewName() {
@@ -93,7 +92,7 @@ public abstract class AbstractQuickAndDetailedView extends JPanel implements Obj
 	private void setViewType(ViewType viewType) {
 		storeCurrentViewSettings();
 		currentViewType = viewType;
-		currentView = createView(viewType, objectInfo, context);
+		currentView = createView(viewType, objct, context);
 		loadCurrentViewSettings();
 
 		JToggleButton toggleButton = viewType == ViewType.QUICK ? quickViewToggleButton : detailedViewToggleButton;

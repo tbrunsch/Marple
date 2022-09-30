@@ -13,7 +13,6 @@ import dd.kms.marple.impl.gui.table.ColumnDescriptionBuilder;
 import dd.kms.marple.impl.gui.table.ListBasedTableModel;
 import dd.kms.zenodot.api.settings.ParserSettingsUtils;
 import dd.kms.zenodot.api.settings.Variable;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -106,7 +105,7 @@ public class VariablePanel extends JPanel
 	}
 
 	private ActionProvider getValueAsActionProvider(Variable variable) {
-		ObjectInfo valueInfo = variable.getValue();
+		Object valueInfo = variable.getValue();
 		return new ActionProviderBuilder(context.getDisplayText(valueInfo), valueInfo, context)
 			.evaluateAs(variable.getName())
 			.executeDefaultAction(true)
@@ -157,7 +156,7 @@ public class VariablePanel extends JPanel
 	private void exportVariables() {
 		DebugSupport.clearNamedSlots();
 		for (Variable variable : variables) {
-			DebugSupport.setSlotValue(variable.getName(), variable.getValue().getObject());
+			DebugSupport.setSlotValue(variable.getName(), variable.getValue());
 		}
 	}
 
@@ -182,8 +181,8 @@ public class VariablePanel extends JPanel
 		if (!acceptVariableName(oldVariable, name)) {
 			return;
 		}
-		ObjectInfo oldValue = oldVariable.getValue();
-		Variable newVariable = ParserSettingsUtils.createVariable(name, oldValue.getObject(), oldValue.getDeclaredType(), oldVariable.isUseHardReference());
+		Object oldValue = oldVariable.getValue();
+		Variable newVariable = ParserSettingsUtils.createVariable(name, oldValue, oldVariable.isUseHardReference());
 		variables.set(elementIndex, newVariable);
 	}
 
@@ -205,8 +204,8 @@ public class VariablePanel extends JPanel
 		}
 		boolean useHardReference = (Boolean) useHardReferenceAsObject;
 		Variable oldVariable = variables.get(elementIndex);
-		ObjectInfo oldValue = oldVariable.getValue();
-		Variable newVariable = ParserSettingsUtils.createVariable(oldVariable.getName(), oldValue.getObject(), oldValue.getDeclaredType(), useHardReference);
+		Object oldValue = oldVariable.getValue();
+		Variable newVariable = ParserSettingsUtils.createVariable(oldVariable.getName(), oldValue, useHardReference);
 		variables.set(elementIndex, newVariable);
 	}
 

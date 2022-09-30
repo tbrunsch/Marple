@@ -5,7 +5,6 @@ import dd.kms.marple.impl.gui.evaluator.textfields.CompiledExpressionInputTextFi
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.impl.gui.inspector.views.mapview.settings.FilterSettings;
 import dd.kms.marple.impl.gui.inspector.views.mapview.settings.OperationSettings;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,7 +25,7 @@ class FilterSettingsPanel extends AbstractOperationSettingsPanel
 
 	private final JLabel 							filterInfoLabel		= new JLabel("'this' always refers to the element currently processed");
 
-	FilterSettingsPanel(TypeInfo commonKeyType, TypeInfo commonValueType, InspectionContext context) {
+	FilterSettingsPanel(Class<?> commonKeyType, Class<?> commonValueType, InspectionContext context) {
 		keyFilterTF = new CompiledExpressionInputTextField(context);
 		keyFilterPanel = new EvaluationTextFieldPanel(keyFilterTF, context);
 		keyFilterTF.setThisType(commonKeyType);

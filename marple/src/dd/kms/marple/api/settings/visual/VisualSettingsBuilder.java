@@ -1,7 +1,6 @@
 package dd.kms.marple.api.settings.visual;
 
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -18,6 +17,6 @@ public interface VisualSettingsBuilder
 	/**
 	 * {@code objectViewConstructor} may check further conditions whether the view is applicable and, if not, return null.
 	 */
-	VisualSettingsBuilder objectView(Class<?> objectClass, BiFunction<ObjectInfo, InspectionContext, ? extends ObjectView> objectViewConstructor);
+	VisualSettingsBuilder objectView(Class<?> objectClass, BiFunction<Object, InspectionContext, ? extends ObjectView> objectViewConstructor);
 	VisualSettings build();
 }

@@ -5,12 +5,9 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.inspector.ObjectInspector;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.visual.ObjectView;
-import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.gui.common.WindowManager;
 import dd.kms.marple.impl.gui.inspector.InspectionFrame;
 import dd.kms.marple.impl.gui.inspector.views.ComponentHierarchyView;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.awt.*;
 import java.util.List;
@@ -26,20 +23,18 @@ public class ObjectInspectorImpl implements ObjectInspector
 
 	@Override
 	public void inspectComponent(ComponentHierarchy componentHierarchy) {
-		ObjectInfo objectInfo = InfoProvider.createObjectInfo(componentHierarchy.getSelectedComponent());
-		ObjectInfo runtimeInfo = ReflectionUtils.getRuntimeInfo(objectInfo);
+		Object object = componentHierarchy.getSelectedComponent();
 		ImmutableList.Builder<ObjectView> viewBuilder = ImmutableList.<ObjectView>builder()
 			.add(new ComponentHierarchyView(componentHierarchy, context))
-			.addAll(context.getInspectionViews(runtimeInfo));
-		showViews(runtimeInfo, viewBuilder.build());
+			.addAll(context.getInspectionViews(object));
+		showViews(object, viewBuilder.build());
 	}
 
 	@Override
-	public void inspectObject(ObjectInfo objectInfo) {
-		ObjectInfo runtimeInfo = ReflectionUtils.getRuntimeInfo(objectInfo);
+	public void inspectObject(Object object) {
 		ImmutableList.Builder<ObjectView> viewBuilder = ImmutableList.<ObjectView>builder()
-			.addAll(context.getInspectionViews(runtimeInfo));
-		showViews(runtimeInfo, viewBuilder.build());
+			.addAll(context.getInspectionViews(object));
+		showViews(object, viewBuilder.build());
 	}
 
 	/*
@@ -49,9 +44,9 @@ public class ObjectInspectorImpl implements ObjectInspector
 		return WindowManager.getWindow(ObjectInspector.class, this::createInspectionFrame, this::onCloseInspectionFrame);
 	}
 
-	private void showViews(ObjectInfo objectInfo, List<ObjectView> views) {
+	private void showViews(Object object, List<ObjectView> views) {
 		InspectionFrame inspectionFrame = getInspectionFrame();
-		inspectionFrame.setViews(objectInfo, views);
+		inspectionFrame.setViews(object, views);
 	}
 
 	private InspectionFrame createInspectionFrame() {

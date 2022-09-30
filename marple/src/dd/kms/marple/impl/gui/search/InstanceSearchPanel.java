@@ -15,9 +15,6 @@ import dd.kms.marple.impl.instancesearch.settings.SearchSettings;
 import dd.kms.marple.impl.instancesearch.settings.SearchSettingsBuilders;
 import dd.kms.zenodot.api.CompiledExpression;
 import dd.kms.zenodot.api.ParseException;
-import dd.kms.zenodot.api.wrappers.ClassInfo;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -257,7 +254,7 @@ class InstanceSearchPanel extends JPanel
 			.searchOnlyPureFields(onlyPureFieldsCB.isSelected())
 			.limitSearchDepth(limitSearchDepth)
 			.maximumSearchDepth(maxSearchDepth)
-			.addClassesToExclude(getClass(), ObjectInfo.class)
+			.addClassesToExclude(getClass())
 			.addExclusionFilter(clazz -> "sun.awt.AppContext".equals(clazz.getName()))
 			.build();
 	}
@@ -269,8 +266,7 @@ class InstanceSearchPanel extends JPanel
 				throw new SettingsException("No target class specified");
 			}
 			try {
-				ClassInfo targetClassInfo = targetClassTF.evaluateText();
-				return Class.forName(targetClassInfo.getNormalizedName());
+				return targetClassTF.evaluateText();
 			} catch (ParseException e) {
 				throw new SettingsException(ExceptionFormatter.formatParseException(e));
 			} catch (Throwable t) {
@@ -308,8 +304,8 @@ class InstanceSearchPanel extends JPanel
 
 	private boolean applyFilter(CompiledExpression filter, Object o) {
 		try {
-			ObjectInfo resultInfo = filter.evaluate(InfoProvider.createObjectInfo(o));
-			return resultInfo != null && Boolean.TRUE.equals(resultInfo.getObject());
+			Object result = filter.evaluate(o);
+			return Boolean.TRUE.equals(result);
 		} catch (Exception e) {
 			return false;
 		}
@@ -369,7 +365,7 @@ class InstanceSearchPanel extends JPanel
 	}
 
 	private String getDisplayText(Object object) {
-		return object == null ? "<none>" : context.getDisplayText(InfoProvider.createObjectInfo(object));
+		return object == null ? "<none>" : context.getDisplayText(object);
 	}
 
 	private void updateStatusText() {
@@ -462,7 +458,7 @@ class InstanceSearchPanel extends JPanel
 			showError(e.getMessage());
 			return;
 		}
-		targetFilterTF.setThisType(InfoProvider.createTypeInfo(targetClass));
+		targetFilterTF.setThisType(targetClass);
 		updateEnabilities();
 	}
 

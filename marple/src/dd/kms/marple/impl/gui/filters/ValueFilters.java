@@ -3,6 +3,7 @@ package dd.kms.marple.impl.gui.filters;
 import dd.kms.marple.api.InspectionContext;
 
 import java.awt.*;
+import java.util.function.Function;
 
 public class ValueFilters
 {
@@ -13,7 +14,11 @@ public class ValueFilters
 	}
 
 	public static ValueFilter createWildcardFilter() {
-		return new ValueFilterWildcard();
+		return createWildcardFilter(o -> o.toString());
+	}
+
+	public static ValueFilter createWildcardFilter(Function<Object, String> stringRepresentationProvider) {
+		return new ValueFilterWildcard(stringRepresentationProvider);
 	}
 
 	public static ValueFilter createModifierFilter(boolean configureStaticMode) { return new ValueFilterModifier(configureStaticMode); }

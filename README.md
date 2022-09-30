@@ -128,10 +128,6 @@ See [Search Dialog](#search-dialog) for details.
 
 The in-application debugging capabilities are a nice feature, but they are negligible compared to what real debuggers are capable of. Having that said, Marple is still valuable for your debugging process because it gives you good entry points via the GUI components of your application. Data exchange between Marple and the debugger is done via the [debug support dialog](#debug-support). 
 
-## Generic Type Tracking
-
-The library Zenodot that is used to evaluate expressions can, to some extend, track generic type parameters. When accessing a field `names` whose declared type is `List<String>`, then it will recognize that it is possible to call `names.get(0).length()` despite type erasure. For this to work, Marple uses a special wrapper class `ObjectInfo` instead of pure `Object`s  to track these information. See [ObjectInfo](#objectinfo) for details.
-
 ## Navigation
 
 The GUI elements of your application are the entry points for the analysis with Marple. From there you can navigate along fields in the inspection dialog, analyze the result of expressions in the evaluation dialog, or search for instances in the search dialog. Many Marple elements provide a context menu that offers several options to continue the investigation. These elements are called ["navigable elements"](#navigable-elements).
@@ -157,13 +153,6 @@ If you cannot remember the shortcuts, then you can look them up in the Quick Hel
 ![Quick Help](images/quick_help.png)
 
 Hence, the shortcut for the Quick Help is the only one you have to know initially.
-
-# ObjectInfo
-
-The expression evaluation library Zenodot operates on a utility class called `ObjectInfo` instead of `Object` in order to track generic type parameters to some extent. Essentially, an `ObjectInfo` does not only contain the object itself, but also its declared type and an optional setter, i.e., `ObjectInfo` = object + declared type + optional setter. Since Marple is based on Zenodot, is also uses this class. This technicality is transparent to the user. However, you must be aware of this when configuring Marple. If you do not care about the declared type at all, then you can work with pure `Object` instances and perform one of the following transformations when interacting with the Marple API:
-
-  * `ObjectInfo.getObject()` returns the `Object` wrapped by an `ObjectInfo`.
-  * `InfoProvider.createObjectInfo(Object)` wraps an `Object` instance in an `ObjectInfo`, taking its runtime type as declared type.
 
 # Setup and Configuration
 

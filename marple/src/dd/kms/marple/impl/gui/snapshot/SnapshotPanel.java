@@ -2,7 +2,6 @@ package dd.kms.marple.impl.gui.snapshot;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.common.CurrentObjectPanel;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -86,7 +85,7 @@ public class SnapshotPanel extends JPanel
 		lastSnapshotTarget = new WeakReference<>(snapshotTarget);
 		lastSnapshotTimeMs = System.currentTimeMillis();
 		this.screenshot = snapshotFunction.apply(snapshotTarget);
-		currentObjectPanel.setCurrentObject(InfoProvider.createObjectInfo(snapshotTarget));
+		currentObjectPanel.setCurrentObject(snapshotTarget);
 		imagePanel.setImage(screenshot);
 	}
 

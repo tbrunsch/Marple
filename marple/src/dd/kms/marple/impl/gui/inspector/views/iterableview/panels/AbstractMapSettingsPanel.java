@@ -3,7 +3,6 @@ package dd.kms.marple.impl.gui.inspector.views.iterableview.panels;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.evaluator.textfields.CompiledExpressionInputTextField;
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +18,7 @@ abstract class AbstractMapSettingsPanel extends AbstractOperationSettingsPanel
 	private final CompiledExpressionInputTextField	mappingTF;
 	private final JLabel 							mappingInfoLabel	= new JLabel("'this' always refers to the element currently processed");
 
-	AbstractMapSettingsPanel(TypeInfo commonElementType, InspectionContext context) {
+	AbstractMapSettingsPanel(Class<?> commonElementType, InspectionContext context) {
 		mappingTF = new CompiledExpressionInputTextField(context);
 		mappingPanel = new EvaluationTextFieldPanel(mappingTF, context);
 		mappingTF.setThisType(commonElementType);

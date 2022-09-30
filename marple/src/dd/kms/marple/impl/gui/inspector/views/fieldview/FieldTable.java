@@ -10,10 +10,11 @@ import dd.kms.marple.impl.gui.table.*;
 import dd.kms.zenodot.api.common.FieldScanner;
 import dd.kms.zenodot.api.common.FieldScannerBuilder;
 import dd.kms.zenodot.api.common.StaticMode;
-import dd.kms.zenodot.api.wrappers.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,25 +22,26 @@ import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 
 public class FieldTable extends JPanel implements ObjectView
 {
-	private final ListBasedTable<FieldInfo>	table;
+	private final ListBasedTable<Field>	table;
 
-	private final ObjectInfo				objectInfo;
-	private final InspectionContext			context;
+	private final Object				object;
+	private final InspectionContext		context;
 
-	public FieldTable(ObjectInfo objectInfo, InspectionContext context) {
+	public FieldTable(Object object, InspectionContext context) {
 		super(new GridBagLayout());
-		this.objectInfo = objectInfo;
+		this.object = object;
 		this.context = context;
 
 		FieldScanner fieldScanner = FieldScannerBuilder.create().staticMode(StaticMode.BOTH).build();
-		List<FieldInfo> fieldInfos = InfoProvider.getFieldInfos(ReflectionUtils.getRuntimeTypeInfo(objectInfo), fieldScanner);
+		List<Field> fields = fieldScanner.getFields(object.getClass());
 
-		List<ColumnDescription<FieldInfo>> columnDescriptions = createColumnDescriptions();
+		List<ColumnDescription<Field>> columnDescriptions = createColumnDescriptions();
 
-		table = new ListBasedTable<>(fieldInfos, columnDescriptions);
+		table = new ListBasedTable<>(fields, columnDescriptions);
 		JTable internalTable = table.getInternalTable();
 		internalTable.getColumnModel().getColumn(1).setCellRenderer(new ActionProviderRenderer());
-		internalTable.setDefaultRenderer(MemberInfo.class, new MemberInfoRenderer());
+		internalTable.setDefaultRenderer(Member.class, new MemberRenderer());
+		internalTable.setDefaultRenderer(Class.class, new ClassRenderer(context));
 
 		add(table, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
 	}
@@ -64,25 +66,21 @@ public class FieldTable extends JPanel implements ObjectView
 		table.applyViewSettings(settings, origin);
 	}
 
-	private List<ColumnDescription<FieldInfo>> createColumnDescriptions() {
+	private List<ColumnDescription<Field>> createColumnDescriptions() {
 		return Arrays.asList(
-			new ColumnDescriptionBuilder<FieldInfo>("Name",		String.class,			fieldInfo -> fieldInfo.getName()					).valueFilter(ValueFilters.createWildcardFilter()).build(),
-			new ColumnDescriptionBuilder<FieldInfo>("Value",	ActionProvider.class, 	fieldInfo -> getFieldValueActionProvider(fieldInfo)	).valueFilter(ValueFilters.createWildcardFilter()).build(),
-			new ColumnDescriptionBuilder<FieldInfo>("Type",		TypeInfo.class,			fieldInfo -> fieldInfo.getType()					).valueFilter(ValueFilters.createWildcardFilter()).build(),
-			new ColumnDescriptionBuilder<FieldInfo>("Class",	TypeInfo.class,			fieldInfo -> fieldInfo.getDeclaringType()			).valueFilter(ValueFilters.createSelectionFilter(context)).build(),
-			new ColumnDescriptionBuilder<FieldInfo>("Modifier",	MemberInfo.class,		fieldInfo -> fieldInfo								).valueFilter(ValueFilters.createModifierFilter(true)).build()
+			new ColumnDescriptionBuilder<Field>("Name",		String.class,			field -> field.getName()					).valueFilter(ValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<Field>("Value",	ActionProvider.class, 	field -> getFieldValueActionProvider(field)	).valueFilter(ValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<Field>("Type",		Class.class,			field -> field.getType()					).valueFilter(ValueFilters.createWildcardFilter(o -> context.getDisplayText(o))).build(),
+			new ColumnDescriptionBuilder<Field>("Class",	Class.class,			field -> field.getDeclaringClass()			).valueFilter(ValueFilters.createSelectionFilter(context)).build(),
+			new ColumnDescriptionBuilder<Field>("Modifier",	Member.class,			field -> field								).valueFilter(ValueFilters.createModifierFilter(true)).build()
 		);
 	}
 
-	private ActionProvider getFieldValueActionProvider(FieldInfo fieldInfo) {
-		String fieldName = fieldInfo.getName();
-		ObjectInfo fieldValueInfo = getFieldValue(fieldInfo);
-		return new ActionProviderBuilder(context.getDisplayText(fieldValueInfo), fieldValueInfo, context)
-				.evaluateAs(fieldName, objectInfo)
+	private ActionProvider getFieldValueActionProvider(Field field) {
+		String fieldName = field.getName();
+		Object fieldValue = ReflectionUtils.getFieldValue(field, object);
+		return new ActionProviderBuilder(context.getDisplayText(fieldValue), fieldValue, context)
+				.evaluateAs(fieldName, object)
 				.build();
-	}
-
-	private ObjectInfo getFieldValue(FieldInfo fieldInfo) {
-		return ReflectionUtils.OBJECT_INFO_PROVIDER.getFieldValueInfo(objectInfo.getObject(), fieldInfo);
 	}
 }

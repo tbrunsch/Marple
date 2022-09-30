@@ -5,7 +5,6 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.actions.Actions;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -20,13 +19,13 @@ class ListTreeNode extends AbstractInspectionTreeNode
 	static final int	RANGE_SIZE_BASE	= 10;
 
 	private final @Nullable String	displayKey;
-	private final ObjectInfo		containerInfo;
+	private final Object 			container;
 	private final List<?>			list;
 	private final InspectionContext	context;
 
-	ListTreeNode(@Nullable String displayKey, ObjectInfo containerInfo, List<?> list, InspectionContext context) {
+	ListTreeNode(@Nullable String displayKey, Object container, List<?> list, InspectionContext context) {
 		this.displayKey = displayKey;
-		this.containerInfo = containerInfo;
+		this.container = container;
 		this.list = list;
 		this.context = context;
 	}
@@ -37,12 +36,12 @@ class ListTreeNode extends AbstractInspectionTreeNode
 	}
 
 	private InspectionTreeNode createRangeNode(int rangeBeginIndex, int rangeEndIndex) {
-		return ListIndexRangeTreeNode.createRangeNode(containerInfo, list, rangeBeginIndex, rangeEndIndex, context);
+		return ListIndexRangeTreeNode.createRangeNode(container, list, rangeBeginIndex, rangeEndIndex, context);
 	}
 
 	@Override
 	public ActionProvider getActionProvider() {
-		return new ActionProviderBuilder(toString(), containerInfo, context)
+		return new ActionProviderBuilder(toString(), container, context)
 			.suggestVariableName(displayKey)
 			.build();
 	}
@@ -58,7 +57,7 @@ class ListTreeNode extends AbstractInspectionTreeNode
 	}
 
 	private String getText(boolean trimmed) {
-		String valueDisplayText = context.getDisplayText(containerInfo);
+		String valueDisplayText = context.getDisplayText(container);
 		if (trimmed) {
 			valueDisplayText = Actions.trimDisplayText(valueDisplayText);
 		}

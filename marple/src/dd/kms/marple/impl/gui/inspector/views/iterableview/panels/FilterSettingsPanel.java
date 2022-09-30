@@ -7,7 +7,6 @@ import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.FilterResultType;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.FilterSettings;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,7 +32,7 @@ class FilterSettingsPanel extends AbstractOperationSettingsPanel
 	private final CompiledExpressionInputTextField		filterTF;
 	private final JLabel 								filterInfoLabel			= new JLabel("'this' always refers to the element currently processed");
 
-	FilterSettingsPanel(TypeInfo commonElementType, InspectionContext context) {
+	FilterSettingsPanel(Class<?> commonElementType, InspectionContext context) {
 		filterTF = new CompiledExpressionInputTextField(context);
 		filterPanel = new EvaluationTextFieldPanel(filterTF, context);
 		filterTF.setThisType(commonElementType);

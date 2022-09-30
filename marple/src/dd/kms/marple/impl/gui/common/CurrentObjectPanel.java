@@ -3,9 +3,7 @@ package dd.kms.marple.impl.gui.common;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
-import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +17,7 @@ public class CurrentObjectPanel extends JPanel
 
 	private final InspectionContext	context;
 
-	private ObjectInfo				currentObject;
+	private Object					currentObject;
 
 	public CurrentObjectPanel(InspectionContext context) {
 		super(new GridBagLayout());
@@ -33,11 +31,11 @@ public class CurrentObjectPanel extends JPanel
 		ActionProviderListeners.addMouseListeners(toStringLabel, e -> createActionProvider());
 	}
 
-	public void setCurrentObject(ObjectInfo currentObject) {
+	public void setCurrentObject(Object currentObject) {
 		this.currentObject = currentObject;
 
 		toStringLabel.setText(getDisplayText());
-		classInfoLabel.setText(currentObject.getDeclaredType().toString());
+		classInfoLabel.setText(currentObject != null ? context.getDisplayText(currentObject.getClass()) : null);
 	}
 
 	private String getDisplayText() {

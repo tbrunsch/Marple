@@ -5,21 +5,20 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.impl.gui.common.WindowManager;
 import dd.kms.marple.impl.gui.search.InstanceSearchFrame;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import java.awt.*;
 
 abstract class AbstractInstanceSearchAction implements InspectionAction
 {
 	private final InspectionContext	context;
-	private final ObjectInfo		thisValue;
+	private final Object			thisValue;
 
-	public AbstractInstanceSearchAction(InspectionContext context, ObjectInfo thisValue) {
+	public AbstractInstanceSearchAction(InspectionContext context, Object thisValue) {
 		this.context = context;
 		this.thisValue = thisValue;
 	}
 
-	abstract void configureSearchFrame(InstanceSearchFrame searchFrame, ObjectInfo thisValue);
+	abstract void configureSearchFrame(InstanceSearchFrame searchFrame, Object thisValue);
 
 	@Override
 	public boolean isDefaultAction() {

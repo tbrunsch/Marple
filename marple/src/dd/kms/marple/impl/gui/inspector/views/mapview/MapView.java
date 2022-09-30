@@ -3,8 +3,6 @@ package dd.kms.marple.impl.gui.inspector.views.mapview;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.common.ReflectionUtils;
-import dd.kms.marple.impl.common.TypedObjectInfo;
-import dd.kms.marple.impl.common.UniformView;
 import dd.kms.marple.impl.gui.common.ResultPanel;
 import dd.kms.marple.impl.gui.inspector.views.mapview.panels.ContextPanel;
 import dd.kms.marple.impl.gui.inspector.views.mapview.panels.OperationPanel;
@@ -12,14 +10,10 @@ import dd.kms.marple.impl.gui.inspector.views.mapview.settings.FilterSettings;
 import dd.kms.marple.impl.gui.inspector.views.mapview.settings.MapSettings;
 import dd.kms.marple.impl.gui.inspector.views.mapview.settings.Operation;
 import dd.kms.marple.impl.gui.inspector.views.mapview.settings.OperationSettings;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.BOTH;
@@ -30,35 +24,25 @@ public class MapView extends JPanel implements ObjectView
 	public static final String	NAME	= "Maps";
 
 	private final Map<?, ?>			map;
-	private final TypeInfo			commonKeyType;
-	private final TypeInfo			commonValueType;
+	private final Class<?>			commonKeyType;
+	private final Class<?>			commonValueType;
 	private final InspectionContext	context;
 
 	private final JPanel			contextPanel;
 	private final OperationPanel	operationPanel;
 	private final ResultPanel		resultPanel;
 
-	public MapView(TypedObjectInfo<? extends Map<?,?>> mapInfo, InspectionContext context) {
+	public MapView(Map<?, ?> map, InspectionContext context) {
 		super(new GridBagLayout());
 
-		this.map = mapInfo.getObject();
+		this.map = map;
 
-		TypeInfo mapType = ReflectionUtils.getRuntimeTypeInfo(mapInfo);
-		TypeInfo keysTypeInfo = ReflectionUtils.getUniqueMethodInfo(mapType, "keySet").getReturnType();
-		TypeInfo valuesTypeInfo = ReflectionUtils.getUniqueMethodInfo(mapType, "values").getReturnType();
-
-		Set<?> keys = map.keySet();
-		Collection<?> values = map.values();
-
-		TypedObjectInfo<Set<?>> keysInfo = new TypedObjectInfo<>(InfoProvider.createObjectInfo(keys, keysTypeInfo));
-		TypedObjectInfo<Collection<?>> valuesInfo = new TypedObjectInfo<>(InfoProvider.createObjectInfo(values, valuesTypeInfo));
-
-		this.commonKeyType = UniformView.getCommonElementType(keysInfo);
-		this.commonValueType = UniformView.getCommonElementType(valuesInfo);
+		this.commonKeyType = ReflectionUtils.getCommonSuperClass(map.keySet());
+		this.commonValueType = ReflectionUtils.getCommonSuperClass(map.values());
 
 		this.context = context;
 
-		this.contextPanel = new ContextPanel(mapInfo, commonKeyType, commonValueType, context);
+		this.contextPanel = new ContextPanel(map, commonKeyType, commonValueType, context);
 		this.operationPanel = new OperationPanel(commonKeyType, commonValueType, context);
 		this.resultPanel = new ResultPanel(context);
 

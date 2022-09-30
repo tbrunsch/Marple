@@ -2,7 +2,6 @@ package dd.kms.marple.api.evaluator;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.zenodot.api.settings.ParserSettings;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 public interface ExpressionEvaluator
 {
@@ -13,6 +12,6 @@ public interface ExpressionEvaluator
 	void setInspectionContext(InspectionContext context);
 	ParserSettings getParserSettings();
 	void setParserSettings(ParserSettings parserSettings);
-	void evaluate(String expression, ObjectInfo thisValue);
-	void evaluate(String expression, ObjectInfo thisValue, int caretPosition);
+	void evaluate(String expression, Object thisValue);
+	void evaluate(String expression, Object thisValue, int caretPosition);
 }

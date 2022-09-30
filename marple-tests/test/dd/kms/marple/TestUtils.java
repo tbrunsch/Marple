@@ -7,8 +7,6 @@ import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.settings.*;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -34,7 +32,7 @@ class TestUtils
 		ParserSettings parserSettings = ParserSettingsBuilder.create()
 			.variables(ImmutableList.of(variable1, variable2))
 			.minimumAccessModifier(AccessModifier.PRIVATE)
-			.importPackagesByName(ImmutableSet.of(importPackage1, importPackage2))
+			.importPackages(ImmutableSet.of(importPackage1, importPackage2))
 			.importClassesByName(ImmutableSet.of(importClass1, importClass2))
 			.considerAllClassesForClassCompletions(true)
 			.customHierarchyRoot(customHierarchyRoot)
@@ -78,8 +76,8 @@ class TestUtils
 		}
 
 		@Override
-		public @Nullable ObjectInfo getUserObject() {
-			return InfoProvider.createObjectInfo(file);
+		public @Nullable Object getUserObject() {
+			return file;
 		}
 
 		private File getFile() {

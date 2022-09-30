@@ -1,27 +1,24 @@
 package dd.kms.marple.impl.gui.evaluator.textfields;
 
-import java.util.List;
-import java.util.Optional;
-
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.zenodot.api.ExpressionParser;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.Parsers;
 import dd.kms.zenodot.api.result.CodeCompletion;
 import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
-public class ExpressionInputTextField extends AbstractExpressionInputTextField<ObjectInfo>
+import java.util.List;
+import java.util.Optional;
+
+public class ExpressionInputTextField extends AbstractExpressionInputTextField<Object>
 {
-	private ObjectInfo	thisValue = InfoProvider.NULL_LITERAL;
+	private Object	thisValue	= null;
 
 	public ExpressionInputTextField(InspectionContext context) {
 		super(context);
 	}
 
-	public void setThisValue(ObjectInfo thisValue) {
+	public void setThisValue(Object thisValue) {
 		this.thisValue = thisValue;
 	}
 
@@ -38,10 +35,9 @@ public class ExpressionInputTextField extends AbstractExpressionInputTextField<O
 	}
 
 	@Override
-	ObjectInfo evaluate(String text) throws ParseException {
+	Object evaluate(String text) throws ParseException {
 		ExpressionParser parser = createParser();
-		ObjectInfo result = parser.evaluate(text, thisValue);
-		return ReflectionUtils.getRuntimeInfo(result);
+		return parser.evaluate(text, thisValue);
 	}
 
 	private ExpressionParser createParser() {

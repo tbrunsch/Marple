@@ -3,40 +3,40 @@ package dd.kms.marple.impl.gui.evaluator.completion;
 import dd.kms.zenodot.api.result.CodeCompletion;
 import dd.kms.zenodot.api.result.IntRange;
 import dd.kms.zenodot.api.result.codecompletions.CodeCompletionMethod;
-import dd.kms.zenodot.api.wrappers.ExecutableInfo;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.FunctionCompletion;
 import org.fife.ui.autocomplete.ParameterizedCompletion;
 
 import javax.swing.text.JTextComponent;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 class CustomFunctionCompletion extends FunctionCompletion implements CustomCompletion
 {
 	private final CodeCompletion	completion;
-	private final ExecutableInfo	methodInfo;
+	private final Method			method;
 
 	CustomFunctionCompletion(CodeCompletionMethod completion, int relevance, CompletionProvider completionProvider) {
-		super(completionProvider, completion.getMethodInfo().getName(), completion.getMethodInfo().getReturnType().toString());
+		super(completionProvider, completion.getMethod().getName(), completion.getMethod().getReturnType().toString());
 
 		this.completion = completion;
-		this.methodInfo = completion.getMethodInfo();
+		this.method = completion.getMethod();
 
 		List<Parameter> params = new ArrayList<>();
-		int numArguments = methodInfo.getNumberOfArguments();
-		for (int i = 0; i < numArguments; i++) {
-			TypeInfo type = methodInfo.getExpectedArgumentType(i);
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		int numParameters = parameterTypes.length;
+		for (int i = 0; i < numParameters; i++) {
+			Class<?> type = parameterTypes[i];
 			String name = "arg" + i;
-			ParameterizedCompletion.Parameter param = new ParameterizedCompletion.Parameter(type, name, i == numArguments - 1);
+			ParameterizedCompletion.Parameter param = new ParameterizedCompletion.Parameter(type, name, i == numParameters - 1);
 			params.add(param);
 		}
 		setShortDescription(completion.getType().toString());
 		setParams(params);
 		setRelevance(relevance);
-		setReturnValueDescription(methodInfo.getReturnType().getSimpleName());
+		setReturnValueDescription(method.getReturnType().getSimpleName());
 		setShortDescription(completion.getType().toString());
 		setIcon(IconFactory.getIcon(completion));
 	}

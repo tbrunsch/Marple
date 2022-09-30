@@ -5,7 +5,6 @@ import dd.kms.marple.impl.gui.evaluator.textfields.CompiledExpressionInputTextFi
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.CollectSettings;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +20,7 @@ class CollectSettingsPanel extends AbstractOperationSettingsPanel
 	private final CompiledExpressionInputTextField	constructorTF;
 	private final JLabel 							constructorInfoLabel	= new JLabel("Create a Collection or an array for holding the elements");
 
-	CollectSettingsPanel(TypeInfo commonElementType, InspectionContext context) {
+	CollectSettingsPanel(Class<?> commonElementType, InspectionContext context) {
 		constructorTF = new CompiledExpressionInputTextField(context);
 		constructorPanel = new EvaluationTextFieldPanel(constructorTF, context);
 		constructorTF.setThisType(commonElementType);

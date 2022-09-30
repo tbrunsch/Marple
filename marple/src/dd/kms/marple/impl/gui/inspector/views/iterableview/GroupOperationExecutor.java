@@ -8,14 +8,12 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.GroupSettings;
 import dd.kms.zenodot.api.CompiledExpression;
 import dd.kms.zenodot.api.ParseException;
-import dd.kms.zenodot.api.wrappers.InfoProvider;
-import dd.kms.zenodot.api.wrappers.TypeInfo;
 
 import java.util.Objects;
 
 class GroupOperationExecutor extends AbstractOperationExecutor<GroupSettings>
 {
-	GroupOperationExecutor(Iterable<?> iterable, TypeInfo commonElementType, GroupSettings settings, InspectionContext context) {
+	GroupOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, GroupSettings settings, InspectionContext context) {
 		super(iterable, commonElementType, settings, context);
 	}
 
@@ -23,7 +21,7 @@ class GroupOperationExecutor extends AbstractOperationExecutor<GroupSettings>
 	void execute() throws Exception {
 		String mappingExpression = settings.getMappingExpression();
 		CompiledExpression compiledExpression = compile(mappingExpression);
-		Class<?> resultClass = compiledExpression.getResultType().getRawType();
+		Class<?> resultClass = compiledExpression.getResultType();
 		if (Primitives.unwrap(resultClass) == void.class) {
 			throw new ParseException(mappingExpression, mappingExpression.length(), "The mapping expression must evaluate to something different than void", null);
 		}
@@ -32,13 +30,13 @@ class GroupOperationExecutor extends AbstractOperationExecutor<GroupSettings>
 										: ArrayListMultimap.create();
 		for (Object element : iterable) {
 			try {
-				Object group = compiledExpression.evaluate(InfoProvider.createObjectInfo(element)).getObject();
+				Object group = compiledExpression.evaluate(element);
 				result.put(group, element);
 			} catch (Exception e) {
 				throw wrapEvaluationException(e, element);
 			}
 		}
-		displayResult(InfoProvider.createObjectInfo(result));
+		displayResult(result);
 	}
 
 	private int compare(Object o1, Object o2) {

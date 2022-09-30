@@ -6,15 +6,20 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 class ValueFilterWildcard extends AbstractValueFilter
 {
-	private final JTextField	filterTF;
+	private final JTextField				filterTF;
 
-	private Pattern				filterPattern;
+	private final Function<Object, String>	stringRepresentationProvider;
 
-	ValueFilterWildcard() {
+	private Pattern							filterPattern;
+
+	ValueFilterWildcard(Function<Object, String> stringRepresentationProvider) {
+		this.stringRepresentationProvider = stringRepresentationProvider;
+
 		filterTF = new JTextField();
 		filterTF.requestFocus();
 		filterTF.selectAll();
@@ -72,7 +77,7 @@ class ValueFilterWildcard extends AbstractValueFilter
 			// Do not filter null if no text is specified, but filter it otherwise
 			return getText().isEmpty();
 		}
-		return filterPattern.matcher(o.toString()).matches();
+		return filterPattern.matcher(stringRepresentationProvider.apply(o)).matches();
 	}
 
 	private void onFilterTextChanged() {

@@ -14,12 +14,8 @@ public class ImportPanel extends JPanel
 	private final PackageImportPanel	packagesPanel;
 	private final ClassImportPanel		classesPanel;
 
-	private final InspectionContext	context;
-
 	public ImportPanel(InspectionContext context) {
 		super(new GridBagLayout());
-
-		this.context = context;
 
 		packagesPanel = new PackageImportPanel(context);
 		classesPanel = new ClassImportPanel(context);

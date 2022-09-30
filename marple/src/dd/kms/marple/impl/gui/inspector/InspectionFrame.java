@@ -8,7 +8,6 @@ import dd.kms.marple.impl.actions.ActionWrapper;
 import dd.kms.marple.impl.gui.common.CurrentObjectPanel;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.IterableView;
 import dd.kms.marple.impl.gui.inspector.views.mapview.MapView;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -116,10 +115,10 @@ public class InspectionFrame extends JFrame implements ObjectView
 		}
 	}
 
-	public void setViews(ObjectInfo objectInfo, List<ObjectView> views) {
+	public void setViews(Object object, List<ObjectView> views) {
 		Object oldViewSettings = getViewSettings();
 		this.views = views;
-		currentObjectPanel.setCurrentObject(objectInfo);
+		currentObjectPanel.setCurrentObject(object);
 		viewPane.removeAll();
 
 		for (ObjectView view : views) {

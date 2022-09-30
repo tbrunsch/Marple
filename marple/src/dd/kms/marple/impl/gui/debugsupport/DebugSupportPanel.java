@@ -1,10 +1,8 @@
 package dd.kms.marple.impl.gui.debugsupport;
 
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.gui.common.CurrentObjectPanel;
 import dd.kms.marple.impl.gui.common.ExceptionFormatter;
-import dd.kms.zenodot.api.wrappers.ObjectInfo;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -46,12 +44,11 @@ public class DebugSupportPanel extends JPanel
 		setPreferredSize(new Dimension(640, 800));
 	}
 
-	public void setThisValue(ObjectInfo thisValue) {
-		ObjectInfo runtimeInfo = ReflectionUtils.getRuntimeInfo(thisValue);
-		currentObjectPanel.setCurrentObject(runtimeInfo);
-		unnamedSlotsPanel.setThisValue(runtimeInfo);
-		namedSlotsPanel.setThisValue(runtimeInfo);
-		breakpointTriggerPanel.setThisValue(runtimeInfo);
+	public void setThisValue(Object thisValue) {
+		currentObjectPanel.setCurrentObject(thisValue);
+		unnamedSlotsPanel.setThisValue(thisValue);
+		namedSlotsPanel.setThisValue(thisValue);
+		breakpointTriggerPanel.setThisValue(thisValue);
 	}
 
 	public void updateContent() {
