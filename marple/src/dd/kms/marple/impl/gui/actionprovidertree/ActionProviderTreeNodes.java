@@ -10,6 +10,8 @@ import java.util.Objects;
 
 public class ActionProviderTreeNodes
 {
+	private static final int	MAX_TOOLTIP_LENGTH	= 1000;
+
 	public static void enableFullTextToolTips(JTree tree) {
 		ToolTipManager.sharedInstance().registerComponent(tree);
 
@@ -23,6 +25,9 @@ public class ActionProviderTreeNodes
 				if (value instanceof ActionProviderTreeNode) {
 					ActionProviderTreeNode node = (ActionProviderTreeNode) value;
 					String fullText = node.getFullText();
+					if (fullText.length() > MAX_TOOLTIP_LENGTH) {
+						fullText = fullText.substring(0, MAX_TOOLTIP_LENGTH - 3) + "...";
+					}
 					if (!Objects.equals(VisualSettingsUtils.getText(rendererComponent), fullText)) {
 						setToolTipText(rendererComponent, splitToHtmlLines(fullText, 100));
 					}
