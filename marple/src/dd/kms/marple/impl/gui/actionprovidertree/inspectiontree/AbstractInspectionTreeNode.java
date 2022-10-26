@@ -1,5 +1,6 @@
 package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
+import java.util.LinkedList;
 import java.util.List;
 
 abstract class AbstractInspectionTreeNode implements InspectionTreeNode
@@ -16,7 +17,7 @@ abstract class AbstractInspectionTreeNode implements InspectionTreeNode
 	@Override
 	public List<InspectionTreeNode> getChildren() {
 		if (cachedChildren == null) {
-			cachedChildren = new IndexedList<>();
+			cachedChildren = new LinkedList<>();
 			cachedChildren.addAll(doGetChildren());
 		}
 		return cachedChildren;

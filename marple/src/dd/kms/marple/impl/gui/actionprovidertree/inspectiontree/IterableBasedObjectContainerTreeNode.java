@@ -15,7 +15,7 @@ import java.util.function.Function;
 
 class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 {
-	private static final int	MAX_NUM_CHILDREN	= 50;
+	private static final int	MAX_NUM_CHILDREN	= 100;
 
 	private static final int	UNKNOWN_SIZE		= -1;
 

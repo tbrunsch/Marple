@@ -38,9 +38,9 @@ public class Actions
 			.forEach(ImmediateInspectionAction::performImmediately);
 	}
 
-	public static void showActionPopup(Component parent, ActionProvider actionProvider, MouseEvent e) {
+	public static void showActionPopup(ActionProvider actionProvider, MouseEvent e) {
 		JPopupMenu popup = createActionPopup(actionProvider);
-		popup.show(parent, e.getX(), e.getY());
+		popup.show(e.getComponent(), e.getX(), e.getY());
 	}
 
 	private static JPopupMenu createActionPopup(ActionProvider actionProvider) {

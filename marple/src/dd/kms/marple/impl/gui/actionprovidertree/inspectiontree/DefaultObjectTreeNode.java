@@ -5,7 +5,6 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.common.ReflectionUtils;
-import dd.kms.marple.impl.gui.common.GuiCommons;
 import dd.kms.zenodot.api.common.FieldScanner;
 import dd.kms.zenodot.api.common.FieldScannerBuilder;
 import dd.kms.zenodot.api.common.StaticMode;
