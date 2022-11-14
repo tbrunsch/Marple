@@ -6,6 +6,7 @@ import dd.kms.marple.api.settings.components.ComponentHierarchyModelBuilder;
 import dd.kms.marple.api.settings.components.ComponentHierarchyModels;
 import dd.kms.marple.api.settings.visual.VisualSettingsBuilder;
 import dd.kms.marple.api.settings.visual.VisualSettingsUtils;
+import dd.kms.zenodot.api.Parsers;
 
 public class ObjectInspectionFramework
 {
@@ -15,6 +16,7 @@ public class ObjectInspectionFramework
 	 * Registration/Deregistration
 	 */
 	public static synchronized void register(InspectionSettings inspectionSettings) {
+		Parsers.preloadClasses();
 		dd.kms.marple.impl.ObjectInspectionFrameworkInstance frameworkInstance = getFrameworkInstance(true);
 		frameworkInstance.registerSettings(inspectionSettings);
 	}
