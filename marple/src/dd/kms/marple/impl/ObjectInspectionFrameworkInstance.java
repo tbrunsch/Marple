@@ -5,6 +5,7 @@ import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.SecuritySettings;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
+import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
 import dd.kms.marple.api.settings.keys.KeySettings;
 
@@ -81,7 +82,12 @@ public class ObjectInspectionFrameworkInstance
 	}
 
 	private void performEvaluation(InspectionContext context, Component component, Point position) {
-		performAction(context, component, position, context::createEvaluateAsThisAction);
+		Function<Object, InspectionAction> actionFunction = thisValue -> {
+			EvaluationSettings evaluationSettings = context.getSettings().getEvaluationSettings();
+			String expression = evaluationSettings.suggestExpressionToEvaluate(thisValue);
+			return context.createEvaluateExpressionAction(expression, thisValue);
+		};
+		performAction(context, component, position, actionFunction);
 	}
 
 	private void performSearch(InspectionContext context, Component component, Point position) {
