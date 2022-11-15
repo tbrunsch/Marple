@@ -5,11 +5,14 @@ import com.google.common.collect.ImmutableSet;
 import dd.kms.marple.api.DebugSupport;
 import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.settings.InspectionSettings;
+import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
+import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.settings.*;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +41,13 @@ class TestUtils
 			.customHierarchyRoot(customHierarchyRoot)
 			.build();
 
-		InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspectionSettingsBuilder().build();
+		EvaluationSettings evaluationSettings = EvaluationSettingsBuilder.create()
+			.suggestExpressionToEvaluate(DefaultMutableTreeNode.class, "this.getUserObject()")
+			.build();
+
+		InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspectionSettingsBuilder()
+			.evaluationSettings(evaluationSettings)
+			.build();
 		inspectionSettings.getEvaluator().setParserSettings(parserSettings);
 
 		ObjectInspectionFramework.register(inspectionSettings);
