@@ -15,21 +15,7 @@ import java.util.function.Function;
 public class VisualSettingsBuilderImpl implements VisualSettingsBuilder
 {
 	private String																			nullDisplayText			= "null";
-
-	/*
-	 * Since we want the user to add strategies without having to know which strategies
-	 * are already defined, we cannot use ImmutableMap.Builder here. Otherwise, the user would get
-	 * an exception if he specified a strategy for the same object class for which there is already
-	 * a default strategy defined.
-	 */
 	private final Map<Class<?>, Function<Object, String>>									displayTextFunctions	= new HashMap<>();
-
-	/*
-	 * Since we want the user to add strategies without having to know which strategies
-	 * are already defined, we cannot use ImmutableMap.Builder here. Otherwise, the user would get
-	 * an exception if he specified a strategy for the same object class for which there is already
-	 * a default strategy defined.
-	 */
 	private final Multimap<Class<?>, BiFunction<Object, InspectionContext, ObjectView>>		objectViewConstructors	= ArrayListMultimap.create();
 
 	@Override
