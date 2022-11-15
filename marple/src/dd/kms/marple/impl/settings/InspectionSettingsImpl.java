@@ -6,6 +6,7 @@ import dd.kms.marple.api.settings.DebugSettings;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.SecuritySettings;
 import dd.kms.marple.api.settings.components.ComponentHierarchyModel;
+import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.keys.KeySettings;
 import dd.kms.marple.api.settings.visual.VisualSettings;
 
@@ -14,13 +15,15 @@ class InspectionSettingsImpl implements InspectionSettings
 	private final ObjectInspector			inspector;
 	private final ExpressionEvaluator		evaluator;
 	private final ComponentHierarchyModel	componentHierarchyModel;
+	private final EvaluationSettings		evaluationSettings;
 	private final VisualSettings			visualSettings;
 	private final SecuritySettings			securitySettings;
 	private final DebugSettings				debugSettings;
 	private final KeySettings				keySettings;
 
-	InspectionSettingsImpl(ComponentHierarchyModel componentHierarchyModel, VisualSettings visualSettings,
-			SecuritySettings securitySettings, DebugSettings debugSettings, KeySettings keySettings) {
+	InspectionSettingsImpl(ComponentHierarchyModel componentHierarchyModel, EvaluationSettings evaluationSettings, VisualSettings visualSettings,
+						   SecuritySettings securitySettings, DebugSettings debugSettings, KeySettings keySettings) {
+		this.evaluationSettings = evaluationSettings;
 		this.debugSettings = debugSettings;
 		this.inspector = ObjectInspector.create();
 		this.evaluator = ExpressionEvaluator.create();
@@ -43,6 +46,11 @@ class InspectionSettingsImpl implements InspectionSettings
 	@Override
 	public ComponentHierarchyModel getComponentHierarchyModel() {
 		return componentHierarchyModel;
+	}
+
+	@Override
+	public EvaluationSettings getEvaluationSettings() {
+		return evaluationSettings;
 	}
 
 	@Override
