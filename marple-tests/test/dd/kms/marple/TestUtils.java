@@ -7,6 +7,7 @@ import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
+import dd.kms.marple.api.settings.evaluation.NamedObject;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.settings.*;
 
@@ -15,6 +16,7 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +45,8 @@ class TestUtils
 
 		EvaluationSettings evaluationSettings = EvaluationSettingsBuilder.create()
 			.suggestExpressionToEvaluate(DefaultMutableTreeNode.class, "this.getUserObject()")
+			.addRelatedObjectsProvider(JTable.class, table -> Collections.singletonList(new NamedObject("Model", table.getModel())))
+			.addRelatedObjectsProvider(DefaultMutableTreeNode.class, node -> Collections.singletonList(new NamedObject("Root", node.getRoot())))
 			.build();
 
 		InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspectionSettingsBuilder()
