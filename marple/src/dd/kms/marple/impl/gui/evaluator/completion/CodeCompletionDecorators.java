@@ -17,6 +17,8 @@ import java.util.function.Consumer;
 public class CodeCompletionDecorators
 {
 	private static final KeyRepresentation	APPLY_KEY	= new KeyRepresentation(0, KeyEvent.VK_ENTER);
+	private static final KeyRepresentation	UP_KEY		= new KeyRepresentation(0, KeyEvent.VK_UP);
+	private static final KeyRepresentation	DOWN_KEY	= new KeyRepresentation(0, KeyEvent.VK_DOWN);
 
 	public static void decorate(JTextComponent textComponent, CompletionSuggestionProvider completionSuggestionProvider, KeyRepresentation completionSuggestionKey,
 			@Nullable ExecutableArgumentInfoProvider executableArgumentInfoProvider, @Nullable KeyRepresentation showExecutableArgumentsKey,
@@ -40,7 +42,10 @@ public class CodeCompletionDecorators
 			GuiCommons.installKeyHandler(textComponent, showExecutableArgumentsKey, "Display method argument info", onShowExecutableArguments);
 		}
 		if (inputConsumer != null) {
-			GuiCommons.installKeyHandler(textComponent, APPLY_KEY, "Evaluate result", () -> evaluateInput(textComponent, inputConsumer));
+			ExpressionHistory expressionHistory = new ExpressionHistory();
+			GuiCommons.installKeyHandler(textComponent, APPLY_KEY, "Evaluate result", () -> evaluateInput(textComponent, inputConsumer, expressionHistory));
+			GuiCommons.installKeyHandler(textComponent, UP_KEY, "Show previous expression", () -> lookUpInExpressionHistory(textComponent, expressionHistory, ExpressionHistory.PREVIOUS));
+			GuiCommons.installKeyHandler(textComponent, DOWN_KEY, "Show next expression", () -> lookUpInExpressionHistory(textComponent, expressionHistory, ExpressionHistory.NEXT));
 		}
 	}
 
@@ -83,8 +88,18 @@ public class CodeCompletionDecorators
 		ExecutableArgumentPopup.register(textComponent, executableArgumentInfoProvider);
 	}
 
-	private static void evaluateInput(JTextComponent textComponent, Consumer<String> inputConsumer) {
-		inputConsumer.accept(textComponent.getText());
+	private static void evaluateInput(JTextComponent textComponent, Consumer<String> inputConsumer, ExpressionHistory expressionHistory) {
+		String expression = textComponent.getText();
+		expressionHistory.addExpression(expression);
+		inputConsumer.accept(expression);
+	}
+
+	private static void lookUpInExpressionHistory(JTextComponent textComponent, ExpressionHistory expressionHistory, int searchDirection) {
+		String expression = expressionHistory.lookup(searchDirection);
+		if (expression != null) {
+			textComponent.setText(expression);
+			textComponent.setCaretPosition(expression.length());
+		}
 	}
 
 	public static void configureExceptionComponent(JComponent exceptionComponent) {
