@@ -15,10 +15,12 @@ public class EvaluationFrame extends JFrame
 	private final JPanel				mainPanel			= new JPanel(new GridBagLayout());
 
 	private final CurrentObjectPanel	currentObjectPanel;
+	private final RelatedObjectsPanel	relatedObjectsPanel;
 	private final EvaluationPanel		evaluationPanel;
 
 	public EvaluationFrame(InspectionContext context) {
 		this.currentObjectPanel = new CurrentObjectPanel(context);
+		this.relatedObjectsPanel = new RelatedObjectsPanel(context);
 		this.evaluationPanel = new EvaluationPanel(context);
 		configure();
 	}
@@ -28,8 +30,9 @@ public class EvaluationFrame extends JFrame
 
 		getContentPane().add(mainPanel);
 
-		mainPanel.add(currentObjectPanel, 	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL,	DEFAULT_INSETS, 0, 0));
-		mainPanel.add(evaluationPanel, 		new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, CENTER, BOTH,			DEFAULT_INSETS, 0, 0));
+		mainPanel.add(currentObjectPanel, 	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, NORTHWEST, HORIZONTAL,	DEFAULT_INSETS, 0, 0));
+		mainPanel.add(relatedObjectsPanel, 	new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, NORTHWEST, HORIZONTAL,	DEFAULT_INSETS, 0, 0));
+		mainPanel.add(evaluationPanel, 		new GridBagConstraints(0, 2, 1, 1, 1.0, 1.0, CENTER, BOTH,			DEFAULT_INSETS, 0, 0));
 
 		addListeners();
 	}
@@ -40,6 +43,7 @@ public class EvaluationFrame extends JFrame
 
 	public void setThisValue(Object thisValue) {
 		currentObjectPanel.setCurrentObject(thisValue);
+		relatedObjectsPanel.setCurrentObject(thisValue);
 		evaluationPanel.setThisValue(thisValue);
 	}
 

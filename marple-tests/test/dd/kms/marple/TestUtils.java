@@ -45,7 +45,15 @@ class TestUtils
 
 		EvaluationSettings evaluationSettings = EvaluationSettingsBuilder.create()
 			.suggestExpressionToEvaluate(DefaultMutableTreeNode.class, "this.getUserObject()")
-			.addRelatedObjectsProvider(JTable.class, table -> Collections.singletonList(new NamedObject("Model", table.getModel())))
+			.addRelatedObjectsProvider(JTable.class, table ->
+				Arrays.asList(
+					new NamedObject("Model", table.getModel()),
+					new NamedObject("Column model", table.getColumnModel()),
+					new NamedObject("Cell editor", table.getCellEditor()),
+					new NamedObject("Cell selection enabled", table.getCellSelectionEnabled()),
+					new NamedObject("Num rows", table.getRowHeight())
+				)
+			)
 			.addRelatedObjectsProvider(DefaultMutableTreeNode.class, node -> Collections.singletonList(new NamedObject("Root", node.getRoot())))
 			.build();
 
