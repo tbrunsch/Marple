@@ -12,6 +12,8 @@ import static java.awt.GridBagConstraints.*;
 
 public class EvaluationFrame extends JFrame
 {
+	public static final Dimension	INITIAL_PREFERRED_SIZE	= new Dimension(600, 400);
+
 	private final JPanel				mainPanel			= new JPanel(new GridBagLayout());
 
 	private final CurrentObjectPanel	currentObjectPanel;
@@ -45,6 +47,18 @@ public class EvaluationFrame extends JFrame
 		currentObjectPanel.setCurrentObject(thisValue);
 		relatedObjectsPanel.setCurrentObject(thisValue);
 		evaluationPanel.setThisValue(thisValue);
+
+		if (relatedObjectsPanel.isVisible()) {
+			// possibly increase preferred frame height because size of relatedObjectsPanel is dynamic
+			pack();
+			Dimension preferredSize = getPreferredSize();
+			int suggestedPreferredHeight = INITIAL_PREFERRED_SIZE.height + Math.min(relatedObjectsPanel.getHeight(), 100);
+			if (preferredSize.height < suggestedPreferredHeight) {
+				preferredSize.height = suggestedPreferredHeight;
+				setPreferredSize(preferredSize);
+				pack();
+			}
+		}
 	}
 
 	public void setExpression(String expression) {

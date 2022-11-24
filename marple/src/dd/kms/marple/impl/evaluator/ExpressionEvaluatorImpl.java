@@ -52,7 +52,7 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 
 	private EvaluationFrame createEvaluationFrame() {
 		EvaluationFrame evaluationFrame = new EvaluationFrame(context);
-		evaluationFrame.setPreferredSize(new Dimension(600, 400));
+		evaluationFrame.setPreferredSize(EvaluationFrame.INITIAL_PREFERRED_SIZE);
 		return evaluationFrame;
 	}
 }
