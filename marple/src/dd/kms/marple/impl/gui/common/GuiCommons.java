@@ -59,4 +59,8 @@ public class GuiCommons
 		PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 		return pointerInfo != null ? pointerInfo.getLocation() : null;
 	}
+
+	public static boolean isCaretPositionValid(String text, int caretPosition) {
+		return text != null && 0 <= caretPosition && caretPosition <= text.length();
+	}
 }

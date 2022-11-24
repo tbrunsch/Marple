@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.evaluator.completion;
 
 import com.google.common.collect.ImmutableList;
+import dd.kms.marple.impl.gui.common.GuiCommons;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
 
@@ -137,9 +138,14 @@ class ExecutableArgumentPopup extends JPopupMenu
 	}
 
 	private void updateLocation() {
+		String text = textComponent.getText();
+		int caretPosition = textComponent.getCaretPosition();
+		if (!GuiCommons.isCaretPositionValid(text, caretPosition)) {
+			return;
+		}
 		Rectangle r;
 		try {
-			r = textComponent.modelToView(textComponent.getCaretPosition());
+			r = textComponent.modelToView(caretPosition);
 		} catch (BadLocationException e) {
 			return;
 		}
@@ -152,7 +158,9 @@ class ExecutableArgumentPopup extends JPopupMenu
 	private List<JMenuItem> getExecutableArgumentInfoMenuItems() throws ParseException {
 		String text = textComponent.getText();
 		int caretPosition = textComponent.getCaretPosition();
-		Optional<ExecutableArgumentInfo> executableArgumentInfo = executableArgumentInfoProvider.getExecutableArgumentInfo(text, caretPosition);
+		Optional<ExecutableArgumentInfo> executableArgumentInfo = GuiCommons.isCaretPositionValid(text, caretPosition)
+			? executableArgumentInfoProvider.getExecutableArgumentInfo(text, caretPosition)
+			: Optional.empty();
 		if (!executableArgumentInfo.isPresent()) {
 			unregister();
 			return ImmutableList.of();

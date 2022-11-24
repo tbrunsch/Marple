@@ -1,5 +1,7 @@
 package dd.kms.marple.impl.gui.evaluator.completion;
 
+import com.google.common.collect.ImmutableList;
+import dd.kms.marple.impl.gui.common.GuiCommons;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.ParameterChoicesProvider;
@@ -37,7 +39,9 @@ public class CodeCompletionProvider implements CompletionProvider
 	public List<Completion> getCompletions(JTextComponent textComponent) {
 		String text = textComponent.getText();
 		int caretPosition = textComponent.getCaretPosition();
-		return completionsFactory.getCompletions(text, caretPosition);
+		return GuiCommons.isCaretPositionValid(text, caretPosition)
+			? completionsFactory.getCompletions(text, caretPosition)
+			: ImmutableList.of();
 	}
 
 	@Override
@@ -54,7 +58,9 @@ public class CodeCompletionProvider implements CompletionProvider
 	public List<ParameterizedCompletion> getParameterizedCompletions(JTextComponent textComponent) {
 		String text = textComponent.getText();
 		int caretPosition = textComponent.getCaretPosition();
-		return completionsFactory.getParameterizedCompletions(text, caretPosition);
+		return GuiCommons.isCaretPositionValid(text, caretPosition)
+			? completionsFactory.getParameterizedCompletions(text, caretPosition)
+			: ImmutableList.of();
 	}
 
 	@Override

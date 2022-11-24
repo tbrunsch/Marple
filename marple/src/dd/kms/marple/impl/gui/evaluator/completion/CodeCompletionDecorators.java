@@ -70,6 +70,9 @@ public class CodeCompletionDecorators
 				SwingUtilities.invokeLater(() -> {
 					String text = textComponent.getText();
 					int caretPosition = textComponent.getCaretPosition();
+					if (!GuiCommons.isCaretPositionValid(text, caretPosition)) {
+						return;
+					}
 					try {
 						completionSuggestionProvider.provideCodeCompletions(text, caretPosition);
 						exceptionConsumer.accept(null);
