@@ -56,6 +56,6 @@ public class ObjectInspectorImpl implements ObjectInspector
 	}
 
 	private void onCloseInspectionFrame() {
-		context.clearHistory();
+		context.clearInspectionHistory();
 	}
 }

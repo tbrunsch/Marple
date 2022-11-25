@@ -34,13 +34,13 @@ public class InspectionContextImpl implements InspectionContext
 	}
 
 	@Override
-	public InspectionAction createHistoryBackAction() {
-		return new HistoryBackAction(settings.getInspector(), inspectionHistory);
+	public InspectionAction createInspectionHistoryBackAction() {
+		return new InspectionHistoryBackAction(settings.getInspector(), inspectionHistory);
 	}
 
 	@Override
-	public InspectionAction createHistoryForwardAction() {
-		return new HistoryForwardAction(settings.getInspector(), inspectionHistory);
+	public InspectionAction createInspectionHistoryForwardAction() {
+		return new InspectionHistoryForwardAction(settings.getInspector(), inspectionHistory);
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class InspectionContextImpl implements InspectionContext
 	}
 
 	@Override
-	public void clearHistory() {
+	public void clearInspectionHistory() {
 		inspectionHistory.clear();
 	}
 

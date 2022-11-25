@@ -5,12 +5,12 @@ import dd.kms.marple.api.inspector.ObjectInspector;
 import dd.kms.marple.impl.gui.common.History;
 import dd.kms.marple.impl.inspector.InspectionData;
 
-public class HistoryBackAction implements InspectionAction
+public class InspectionHistoryForwardAction implements InspectionAction
 {
 	private final ObjectInspector			inspector;
 	private final History<InspectionData>	history;
 
-	public HistoryBackAction(ObjectInspector inspector, History<InspectionData> history) {
+	public InspectionHistoryForwardAction(ObjectInspector inspector, History<InspectionData> history) {
 		this.inspector = inspector;
 		this.history = history;
 	}
@@ -22,7 +22,7 @@ public class HistoryBackAction implements InspectionAction
 
 	@Override
 	public String getName() {
-		return "Back";
+		return "Forward";
 	}
 
 	@Override
@@ -30,21 +30,21 @@ public class HistoryBackAction implements InspectionAction
 		if (!isEnabled()) {
 			return null;
 		}
-		InspectionData previousElement = history.peekPreviousElement();
-		InspectionAction previousAction = previousElement.getAction();
-		return previousAction.getDescription();
+		InspectionData nextElement = history.peekNextElement();
+		InspectionAction nextAction = nextElement.getAction();
+		return nextAction.getDescription();
 	}
 
 	@Override
 	public boolean isEnabled() {
-		return history.canGoBack();
+		return history.canGoForward();
 	}
 
 	@Override
 	public void perform() {
-		HistoryUtils.storeViewSettings(inspector, history);
-		InspectionData prevData = history.peekPreviousElement();
-		history.goBack();
-		HistoryUtils.restoreState(inspector, prevData);
+		InspectionHistoryUtils.storeViewSettings(inspector, history);
+		InspectionData nextData = history.peekNextElement();
+		history.goForward();
+		InspectionHistoryUtils.restoreState(inspector, nextData);
 	}
 }

@@ -14,8 +14,8 @@ public interface InspectionContext
 {
 	InspectionSettings getSettings();
 
-	InspectionAction createHistoryBackAction();
-	InspectionAction createHistoryForwardAction();
+	InspectionAction createInspectionHistoryBackAction();
+	InspectionAction createInspectionHistoryForwardAction();
 	InspectionAction createInspectComponentAction(ComponentHierarchy componentHierarchy);
 	InspectionAction createInspectObjectAction(Object object);
 	InspectionAction createAddVariableAction(String suggestedName, Object value);
@@ -27,7 +27,7 @@ public interface InspectionContext
 	InspectionAction createDebugSupportAction(Object thisValue);
 	<T> InspectionAction createSnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction);
 
-	void clearHistory();
+	void clearInspectionHistory();
 
 	String getDisplayText(Object object);
 	List<ObjectView> getInspectionViews(Object object);

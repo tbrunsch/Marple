@@ -128,8 +128,8 @@ public class InspectionFrame extends JFrame implements ObjectView
 
 		setVisible(true);
 
-		prevButton.setAction(new ActionWrapper(context.createHistoryBackAction()));
-		nextButton.setAction(new ActionWrapper(context.createHistoryForwardAction()));
+		prevButton.setAction(new ActionWrapper(context.createInspectionHistoryBackAction()));
+		nextButton.setAction(new ActionWrapper(context.createInspectionHistoryForwardAction()));
 	}
 
 	private static class InspectionViewSettings

@@ -39,7 +39,7 @@ public class HistoryActionWrapper implements InspectionAction
 
 	@Override
 	public void perform() {
-		HistoryUtils.storeViewSettings(inspector, history);
+		InspectionHistoryUtils.storeViewSettings(inspector, history);
 		history.add(new InspectionData(wrappedAction, null));
 		wrappedAction.perform();
 	}

@@ -8,7 +8,7 @@ import dd.kms.marple.impl.gui.inspector.InspectionFrame;
 import dd.kms.marple.impl.inspector.InspectionData;
 import dd.kms.marple.impl.inspector.ObjectInspectorImpl;
 
-class HistoryUtils
+class InspectionHistoryUtils
 {
 	static void storeViewSettings(ObjectInspector inspector, History<InspectionData> history) {
 		if (!history.hasElements()) {
