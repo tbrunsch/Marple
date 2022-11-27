@@ -11,6 +11,8 @@ import dd.kms.marple.impl.gui.inspector.views.mapview.MapView;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +39,13 @@ public class InspectionFrame extends JFrame implements ObjectView
 		this.context = context;
 		this.currentObjectPanel = new CurrentObjectPanel(context);
 		configure();
+
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				context.clearInspectionHistory();
+			}
+		});
 	}
 
 	@Override

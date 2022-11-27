@@ -41,7 +41,7 @@ public class ObjectInspectorImpl implements ObjectInspector
 	 * Inspection Frame Handling
 	 */
 	public InspectionFrame getInspectionFrame() {
-		return WindowManager.getWindow(ObjectInspector.class, this::createInspectionFrame, this::onCloseInspectionFrame);
+		return WindowManager.getWindow(ObjectInspector.class, this::createInspectionFrame);
 	}
 
 	private void showViews(Object object, List<ObjectView> views) {
@@ -53,9 +53,5 @@ public class ObjectInspectorImpl implements ObjectInspector
 		InspectionFrame inspectionFrame = new InspectionFrame(context);
 		inspectionFrame.setPreferredSize(new Dimension(800, 600));
 		return inspectionFrame;
-	}
-
-	private void onCloseInspectionFrame() {
-		context.clearInspectionHistory();
 	}
 }

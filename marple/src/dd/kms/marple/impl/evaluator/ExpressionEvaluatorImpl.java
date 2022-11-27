@@ -1,6 +1,5 @@
 package dd.kms.marple.impl.evaluator;
 
-import com.google.common.util.concurrent.Runnables;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.impl.gui.common.WindowManager;
@@ -37,7 +36,7 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 	 * Evaluation Frame Handling
 	 */
 	private void showEvaluationFrame(String expression, int caretPosition, Object thisValue) {
-		EvaluationFrame evaluationFrame = WindowManager.getWindow(ExpressionEvaluator.class, this::createEvaluationFrame, Runnables.doNothing());
+		EvaluationFrame evaluationFrame = WindowManager.getWindow(ExpressionEvaluator.class, this::createEvaluationFrame);
 		evaluationFrame.evaluate(expression, caretPosition, thisValue);
 	}
 

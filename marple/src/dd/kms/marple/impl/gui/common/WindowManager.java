@@ -1,7 +1,5 @@
 package dd.kms.marple.impl.gui.common;
 
-import com.google.common.util.concurrent.Runnables;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -18,7 +16,7 @@ public class WindowManager
 
 	public static <T extends Component> void showInFrame(String title, Supplier<T> componentSupplier, Consumer<T> componentConfigurator, Consumer<T> contentUpdater) {
 		Supplier<JFrame> frameConstructor = () -> createComponentFrame(title, componentSupplier, contentUpdater);
-		JFrame window = getWindow(title, frameConstructor, Runnables.doNothing());
+		JFrame window = getWindow(title, frameConstructor);
 		if (window == null) {
 			return;
 		}
@@ -47,7 +45,7 @@ public class WindowManager
 		});
 	}
 
-	public static <T extends Window> T getWindow(Object identifier, Supplier<T> windowCreator, Runnable windowDestructor) {
+	public static <T extends Window> T getWindow(Object identifier, Supplier<T> windowCreator) {
 		synchronized (LOCK) {
 			final T window;
 			if (MANAGED_WINDOWS.containsKey(identifier)) {
@@ -63,7 +61,6 @@ public class WindowManager
 					public void windowClosing(WindowEvent e) {
 						synchronized (LOCK) {
 							MANAGED_WINDOWS.remove(identifier);
-							windowDestructor.run();
 						}
 					}
 				});

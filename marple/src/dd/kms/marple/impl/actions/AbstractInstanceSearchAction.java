@@ -1,6 +1,5 @@
 package dd.kms.marple.impl.actions;
 
-import com.google.common.util.concurrent.Runnables;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.impl.gui.common.WindowManager;
@@ -36,7 +35,7 @@ abstract class AbstractInstanceSearchAction implements InspectionAction
 	}
 
 	private void showInstanceSearchFrame() {
-		InstanceSearchFrame searchFrame = WindowManager.getWindow(InstanceSearchFrame.class, this::createInstanceSearchFrame, Runnables.doNothing());
+		InstanceSearchFrame searchFrame = WindowManager.getWindow(InstanceSearchFrame.class, this::createInstanceSearchFrame);
 		configureSearchFrame(searchFrame, thisValue);
 	}
 
