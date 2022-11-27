@@ -19,9 +19,7 @@ public interface InspectionContext
 	InspectionAction createInspectComponentAction(ComponentHierarchy componentHierarchy);
 	InspectionAction createInspectObjectAction(Object object);
 	InspectionAction createAddVariableAction(String suggestedName, Object value);
-	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue);
 	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue, int caretPosition);
-	InspectionAction createEvaluateAsThisAction(Object thisValue);
 	InspectionAction createSearchInstancesFromHereAction(Object root);
 	InspectionAction createSearchInstanceAction(Object target);
 	InspectionAction createDebugSupportAction(Object thisValue);

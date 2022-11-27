@@ -24,12 +24,12 @@ public class EvaluateExpressionAction implements InspectionAction
 
 	@Override
 	public String getName() {
-		return expression == null ? "Evaluate..." : "Evaluate '" + expression + "'";
+		return "this".equals(expression) ? "Evaluate" : "Evaluate as '" + expression + "'";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Opens the expression evaluation dialog. The expression 'this' refers to object containing this object as field.";
+		return "Opens the expression evaluation dialog. The expression '" + expression + "' refers to this object.";
 	}
 
 	@Override
