@@ -67,8 +67,8 @@ public class InspectionContextImpl implements InspectionContext
 	}
 
 	@Override
-	public InspectionAction createEvaluateExpressionAction(String expression, Object thisValue, int caretPosition) {
-		return new EvaluateExpressionAction(settings.getEvaluator(), expression, thisValue, caretPosition);
+	public InspectionAction createEvaluateExpressionAction(String expression, int caretPosition, Object thisValue) {
+		return new EvaluateExpressionAction(settings.getEvaluator(), expression, caretPosition, thisValue);
 	}
 
 	@Override

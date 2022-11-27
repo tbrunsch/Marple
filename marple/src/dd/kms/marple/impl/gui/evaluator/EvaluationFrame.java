@@ -43,7 +43,7 @@ public class EvaluationFrame extends JFrame
 		WindowManager.updateFrameOnFocusGained(this, evaluationPanel::updateContent);
 	}
 
-	public void evaluate(String expression, Object thisValue, int caretPosition) {
+	public void evaluate(String expression, int caretPosition, Object thisValue) {
 		setThisValue(thisValue);
 		evaluationPanel.setExpression(expression, caretPosition);
 	}

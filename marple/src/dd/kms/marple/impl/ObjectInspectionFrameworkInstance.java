@@ -85,7 +85,7 @@ public class ObjectInspectionFrameworkInstance
 		Function<Object, InspectionAction> actionFunction = thisValue -> {
 			EvaluationSettings evaluationSettings = context.getSettings().getEvaluationSettings();
 			String expression = evaluationSettings.suggestExpressionToEvaluate(thisValue);
-			return context.createEvaluateExpressionAction(expression, thisValue, expression.length());
+			return context.createEvaluateExpressionAction(expression, expression.length(), thisValue);
 		};
 		performAction(context, component, position, actionFunction);
 	}

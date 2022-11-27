@@ -29,16 +29,16 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 	}
 
 	@Override
-	public void evaluate(String expression, Object thisValue, int caretPosition) {
-		showEvaluationFrame(expression, thisValue, caretPosition);
+	public void evaluate(String expression, int caretPosition, Object thisValue) {
+		showEvaluationFrame(expression, caretPosition, thisValue);
 	}
 
 	/*
 	 * Evaluation Frame Handling
 	 */
-	private void showEvaluationFrame(String expression, Object thisValue, int caretPosition) {
+	private void showEvaluationFrame(String expression, int caretPosition, Object thisValue) {
 		EvaluationFrame evaluationFrame = WindowManager.getWindow(ExpressionEvaluator.class, this::createEvaluationFrame, Runnables.doNothing());
-		evaluationFrame.evaluate(expression, thisValue, caretPosition);
+		evaluationFrame.evaluate(expression, caretPosition, thisValue);
 	}
 
 	private EvaluationFrame createEvaluationFrame() {

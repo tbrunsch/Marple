@@ -7,14 +7,14 @@ public class EvaluateExpressionAction implements InspectionAction
 {
 	private final ExpressionEvaluator	expressionEvaluator;
 	private final String				expression;
-	private final Object				thisValue;
 	private final int					caretPosition;
+	private final Object				thisValue;
 
-	public EvaluateExpressionAction(ExpressionEvaluator expressionEvaluator, String expression, Object thisValue, int caretPosition) {
+	public EvaluateExpressionAction(ExpressionEvaluator expressionEvaluator, String expression, int caretPosition, Object thisValue) {
 		this.expressionEvaluator = expressionEvaluator;
 		this.expression = expression;
-		this.thisValue = thisValue;
 		this.caretPosition = caretPosition;
+		this.thisValue = thisValue;
 	}
 
 	@Override
@@ -39,6 +39,6 @@ public class EvaluateExpressionAction implements InspectionAction
 
 	@Override
 	public void perform() {
-		expressionEvaluator.evaluate(expression, thisValue, caretPosition);
+		expressionEvaluator.evaluate(expression, caretPosition, thisValue);
 	}
 }
