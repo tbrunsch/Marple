@@ -38,9 +38,7 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 	 */
 	private void showEvaluationFrame(String expression, Object thisValue, int caretPosition) {
 		EvaluationFrame evaluationFrame = WindowManager.getWindow(ExpressionEvaluator.class, this::createEvaluationFrame, Runnables.doNothing());
-		evaluationFrame.setThisValue(thisValue);
-		evaluationFrame.setExpression(expression);
-		evaluationFrame.setCaretPosition(caretPosition);
+		evaluationFrame.evaluate(expression, thisValue, caretPosition);
 	}
 
 	private EvaluationFrame createEvaluationFrame() {

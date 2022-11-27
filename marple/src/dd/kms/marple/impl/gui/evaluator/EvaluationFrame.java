@@ -43,7 +43,12 @@ public class EvaluationFrame extends JFrame
 		WindowManager.updateFrameOnFocusGained(this, evaluationPanel::updateContent);
 	}
 
-	public void setThisValue(Object thisValue) {
+	public void evaluate(String expression, Object thisValue, int caretPosition) {
+		setThisValue(thisValue);
+		evaluationPanel.setExpression(expression, caretPosition);
+	}
+
+	private void setThisValue(Object thisValue) {
 		currentObjectPanel.setCurrentObject(thisValue);
 		relatedObjectsPanel.setCurrentObject(thisValue);
 		evaluationPanel.setThisValue(thisValue);
@@ -59,13 +64,5 @@ public class EvaluationFrame extends JFrame
 				pack();
 			}
 		}
-	}
-
-	public void setExpression(String expression) {
-		evaluationPanel.setExpression(expression);
-	}
-
-	public void setCaretPosition(int caretPosition) {
-		evaluationPanel.setCaretPosition(caretPosition);
 	}
 }
