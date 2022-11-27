@@ -35,6 +35,6 @@ public class EvaluateAsThisAction implements InspectionAction
 
 	@Override
 	public void perform() {
-		expressionEvaluator.evaluate("this", thisValue);
+		expressionEvaluator.evaluate("this", thisValue, "this".length());
 	}
 }

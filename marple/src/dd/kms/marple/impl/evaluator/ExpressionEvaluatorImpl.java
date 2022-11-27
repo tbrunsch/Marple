@@ -8,8 +8,6 @@ import dd.kms.marple.impl.gui.evaluator.EvaluationFrame;
 import dd.kms.zenodot.api.settings.ParserSettings;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
 
-import java.awt.*;
-
 public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 {
 	private ParserSettings		parserSettings	= ParserSettingsBuilder.create().build();
@@ -28,11 +26,6 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 	@Override
 	public void setParserSettings(ParserSettings parserSettings) {
 		this.parserSettings = parserSettings;
-	}
-
-	@Override
-	public void evaluate(String expression, Object thisValue) {
-		evaluate(expression, thisValue, expression.length());
 	}
 
 	@Override

@@ -12,6 +12,5 @@ public interface ExpressionEvaluator
 	void setInspectionContext(InspectionContext context);
 	ParserSettings getParserSettings();
 	void setParserSettings(ParserSettings parserSettings);
-	void evaluate(String expression, Object thisValue);
 	void evaluate(String expression, Object thisValue, int caretPosition);
 }
