@@ -7,7 +7,6 @@ public class History<T>
 {
 	private final List<T>	historyElements				= new ArrayList<>();
 	private int				historyPosition;
-	private int				lastValidHistoryPosition;
 
 	public History() {
 		clear();
@@ -31,13 +30,11 @@ public class History<T>
 	public void add(T element) {
 		if (historyPosition < historyElements.size() - 1) {
 			historyElements.set(++historyPosition, element);
-			lastValidHistoryPosition = historyPosition;
+			reduceHistorySize(historyPosition + 1);
 		} else {
 			assert historyPosition == historyElements.size() - 1;
-			assert lastValidHistoryPosition == historyPosition;
 			historyElements.add(element);
 			historyPosition++;
-			lastValidHistoryPosition++;
 		}
 	}
 
@@ -47,23 +44,22 @@ public class History<T>
 
 	public T peekPreviousElement() {
 		assert canGoBack();
-		return historyElements.get(historyPosition-1);
+		return historyElements.get(historyPosition - 1);
 	}
 
 	public void goBack() {
 		assert canGoBack();
 		historyPosition--;
-		assert historyPosition < lastValidHistoryPosition;
 		checkInvariants();
 	}
 
 	public boolean canGoForward() {
-		return historyPosition < lastValidHistoryPosition;
+		return historyPosition + 1 < historyElements.size();
 	}
 
 	public T peekNextElement() {
 		assert canGoForward();
-		return historyElements.get(historyPosition+1);
+		return historyElements.get(historyPosition + 1);
 	}
 
 	public void goForward() {
@@ -76,12 +72,15 @@ public class History<T>
 	public void clear() {
 		historyElements.clear();
 		historyPosition = -1;
-		lastValidHistoryPosition = -1;
 	}
 
 	private void checkInvariants() {
 		assert -1 <= historyPosition && historyPosition < historyElements.size();
-		assert -1 <= lastValidHistoryPosition && lastValidHistoryPosition < historyElements.size();
-		assert historyPosition <= lastValidHistoryPosition;
+	}
+
+	private void reduceHistorySize(int maxSize) {
+		while (historyElements.size() > maxSize) {
+			historyElements.remove(historyElements.size() - 1);
+		}
 	}
 }
