@@ -5,7 +5,7 @@ import java.util.List;
 
 public class History<T>
 {
-	private final List<T>	history						= new ArrayList<>();
+	private final List<T>	historyElements				= new ArrayList<>();
 	private int				historyPosition;
 	private int				lastValidHistoryPosition;
 
@@ -15,27 +15,27 @@ public class History<T>
 	}
 
 	public boolean hasElements() {
-		return !history.isEmpty();
+		return !historyElements.isEmpty();
 	}
 
 	public T get() {
 		assert hasElements();
-		return history.get(historyPosition);
+		return historyElements.get(historyPosition);
 	}
 
 	public void set(T element) {
 		assert hasElements();
-		history.set(historyPosition, element);
+		historyElements.set(historyPosition, element);
 	}
 
 	public void add(T element) {
-		if (historyPosition < history.size() - 1) {
-			history.set(++historyPosition, element);
+		if (historyPosition < historyElements.size() - 1) {
+			historyElements.set(++historyPosition, element);
 			lastValidHistoryPosition = historyPosition;
 		} else {
-			assert historyPosition == history.size() - 1;
+			assert historyPosition == historyElements.size() - 1;
 			assert lastValidHistoryPosition == historyPosition;
-			history.add(element);
+			historyElements.add(element);
 			historyPosition++;
 			lastValidHistoryPosition++;
 		}
@@ -47,7 +47,7 @@ public class History<T>
 
 	public T peekPreviousElement() {
 		assert canGoBack();
-		return history.get(historyPosition-1);
+		return historyElements.get(historyPosition-1);
 	}
 
 	public void goBack() {
@@ -63,7 +63,7 @@ public class History<T>
 
 	public T peekNextElement() {
 		assert canGoForward();
-		return history.get(historyPosition+1);
+		return historyElements.get(historyPosition+1);
 	}
 
 	public void goForward() {
@@ -74,14 +74,14 @@ public class History<T>
 	}
 
 	public void clear() {
-		history.clear();
+		historyElements.clear();
 		historyPosition = -1;
 		lastValidHistoryPosition = -1;
 	}
 
 	private void checkInvariants() {
-		assert -1 <= historyPosition && historyPosition < history.size();
-		assert -1 <= lastValidHistoryPosition && lastValidHistoryPosition < history.size();
+		assert -1 <= historyPosition && historyPosition < historyElements.size();
+		assert -1 <= lastValidHistoryPosition && lastValidHistoryPosition < historyElements.size();
 		assert historyPosition <= lastValidHistoryPosition;
 	}
 }
