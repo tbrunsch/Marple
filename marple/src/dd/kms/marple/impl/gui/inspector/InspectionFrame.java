@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.actions.ActionWrapper;
+import dd.kms.marple.impl.actions.HistoryBackAction;
+import dd.kms.marple.impl.actions.HistoryForwardAction;
 import dd.kms.marple.impl.gui.common.CurrentObjectPanel;
 import dd.kms.marple.impl.gui.common.History;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.IterableView;
@@ -84,8 +86,8 @@ public class InspectionFrame extends JFrame implements ObjectView
 		navigationPanel.add(currentObjectPanel,	new GridBagConstraints(1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,	GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
 		navigationPanel.add(nextButton,   		new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
 
-		prevButton.setAction(new ActionWrapper(new InspectionHistoryBackAction(history, this::getStringRepresentation, this::updateHistoryEntry, this::applyHistoryViewSettings)));
-		nextButton.setAction(new ActionWrapper(new InspectionHistoryForwardAction(history, this::getStringRepresentation, this::updateHistoryEntry, this::applyHistoryViewSettings)));
+		prevButton.setAction(new ActionWrapper(new HistoryBackAction<>(history, this::getStringRepresentation, this::updateHistoryElement, this::applyHistoryViewSettings)));
+		nextButton.setAction(new ActionWrapper(new HistoryForwardAction<>(history, this::getStringRepresentation, this::updateHistoryElement, this::applyHistoryViewSettings)));
 	}
 
 	@Override
@@ -159,7 +161,7 @@ public class InspectionFrame extends JFrame implements ObjectView
 
 	public void setViews(Object object, List<ObjectView> views, Runnable viewGenerator) {
 		if (!restoringStateFromHistory) {
-			updateHistoryEntry();
+			updateHistoryElement();
 		}
 
 		InspectionViewSettings oldViewSettings = this.viewGenerator != null ? getViewSettings() : null;
@@ -191,7 +193,7 @@ public class InspectionFrame extends JFrame implements ObjectView
 		return context.getDisplayText(currentObject);
 	}
 
-	private void updateHistoryEntry() {
+	private void updateHistoryElement() {
 		if (this.viewGenerator != null) {
 			InspectionViewSettings viewSettings = getViewSettings();
 			history.set(viewSettings);
