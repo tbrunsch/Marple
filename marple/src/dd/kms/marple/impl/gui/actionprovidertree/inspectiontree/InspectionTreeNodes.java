@@ -79,6 +79,9 @@ public class InspectionTreeNodes
 	}
 
 	static List<InspectionTreeNode> getListElementNodes(List<?> list, int start, int end, int indexToShow, InspectionContext context) {
+		if (end <= start) {
+			return ImmutableList.of();
+		}
 		assert start <= indexToShow && indexToShow < end;
 		int displayStart = start;
 		int displayEnd = end;
