@@ -83,6 +83,9 @@ public class InspectionFrame extends JFrame implements ObjectView
 		navigationPanel.add(prevButton,   		new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
 		navigationPanel.add(currentObjectPanel,	new GridBagConstraints(1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER,	GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
 		navigationPanel.add(nextButton,   		new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+
+		prevButton.setAction(new ActionWrapper(new InspectionHistoryBackAction(context, history, this::updateHistoryEntry, this::applyHistoryViewSettings)));
+		nextButton.setAction(new ActionWrapper(new InspectionHistoryForwardAction(context, history, this::updateHistoryEntry, this::applyHistoryViewSettings)));
 	}
 
 	@Override
@@ -181,9 +184,6 @@ public class InspectionFrame extends JFrame implements ObjectView
 		}
 
 		setVisible(true);
-
-		prevButton.setAction(new ActionWrapper(new InspectionHistoryBackAction(context, history, this::updateHistoryEntry, this::applyHistoryViewSettings)));
-		nextButton.setAction(new ActionWrapper(new InspectionHistoryForwardAction(context, history, this::updateHistoryEntry, this::applyHistoryViewSettings)));
 	}
 
 	private void updateHistoryEntry() {
