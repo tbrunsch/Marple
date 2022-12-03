@@ -6,6 +6,7 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.actions.ActionWrapper;
 import dd.kms.marple.impl.gui.common.CurrentObjectPanel;
+import dd.kms.marple.impl.gui.common.History;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.IterableView;
 import dd.kms.marple.impl.gui.inspector.views.mapview.MapView;
 
@@ -21,19 +22,32 @@ import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 
 public class InspectionFrame extends JFrame implements ObjectView
 {
-	private final JPanel				mainPanel			= new JPanel(new BorderLayout());
+	private final JPanel							mainPanel			= new JPanel(new BorderLayout());
 
-	private final JPanel				navigationPanel		= new JPanel(new GridBagLayout());
-	private final JButton				prevButton			= new JButton();
-	private final JButton				nextButton			= new JButton();
-	private final CurrentObjectPanel	currentObjectPanel;
+	private final JPanel							navigationPanel		= new JPanel(new GridBagLayout());
+	private final JButton							prevButton			= new JButton();
+	private final JButton							nextButton			= new JButton();
+	private final CurrentObjectPanel				currentObjectPanel;
 
-	private final JTabbedPane 			viewPane			= new JTabbedPane();
-	private final JScrollPane			viewScrollPane		= new JScrollPane(viewPane);
+	private final JTabbedPane 						viewPane			= new JTabbedPane();
+	private final JScrollPane						viewScrollPane		= new JScrollPane(viewPane);
 
-	private final InspectionContext		context;
+	private final InspectionContext					context;
 
-	private List<ObjectView>			views				= ImmutableList.of();
+	private final History<InspectionViewSettings>	history				= new History<>();
+
+	/**
+	 * {@code Runnable} that represents the last call of {@link #setViews(Object, List, Runnable)}.
+	 */
+	private Runnable								viewGenerator;
+
+	/**
+	 * Used to distinguish whether {@link #setViews(Object, List, Runnable)} is called by the user or because a
+	 * state from the history is currently restored.
+	 */
+	private boolean									restoringStateFromHistory;
+
+	private List<ObjectView>						views				= ImmutableList.of();
 
 	public InspectionFrame(InspectionContext context) {
 		this.context = context;
@@ -43,7 +57,7 @@ public class InspectionFrame extends JFrame implements ObjectView
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				context.clearInspectionHistory();
+				history.clear();
 			}
 		});
 	}
@@ -72,7 +86,8 @@ public class InspectionFrame extends JFrame implements ObjectView
 	}
 
 	@Override
-	public Object getViewSettings() {
+	public InspectionViewSettings getViewSettings() {
+		Object currentObject = currentObjectPanel.getCurrentObject();
 		String selectedViewName = getSelectedViewName();
 		Map<String, Object> viewSettingsByViewName = new HashMap<>();
 		for (ObjectView view : views) {
@@ -81,7 +96,7 @@ public class InspectionFrame extends JFrame implements ObjectView
 				viewSettingsByViewName.put(view.getViewName(), viewSettings);
 			}
 		}
-		return new InspectionViewSettings(selectedViewName, viewSettingsByViewName);
+		return new InspectionViewSettings(currentObject, viewGenerator, selectedViewName, viewSettingsByViewName);
 	}
 
 	private String getSelectedViewName() {
@@ -110,6 +125,11 @@ public class InspectionFrame extends JFrame implements ObjectView
 	public void applyViewSettings(Object settings, ViewSettingsOrigin origin) {
 		if (settings instanceof InspectionViewSettings) {
 			InspectionViewSettings inspectionViewSettings = (InspectionViewSettings) settings;
+
+			if (origin == ViewSettingsOrigin.SAME_CONTEXT) {
+				currentObjectPanel.setCurrentObject(inspectionViewSettings.getCurrentObject());
+			}
+
 			String selectedViewName = inspectionViewSettings.getSelectedViewName();
 			selectView(selectedViewName);
 
@@ -124,31 +144,75 @@ public class InspectionFrame extends JFrame implements ObjectView
 		}
 	}
 
-	public void setViews(Object object, List<ObjectView> views) {
-		Object oldViewSettings = getViewSettings();
+	private void applyHistoryViewSettings(InspectionViewSettings viewSettings) {
+		restoringStateFromHistory = true;
+		try {
+			viewSettings.viewGenerator.run();
+			applyViewSettings(viewSettings, ViewSettingsOrigin.SAME_CONTEXT);
+		} finally {
+			restoringStateFromHistory = false;
+		}
+	}
+
+	public void setViews(Object object, List<ObjectView> views, Runnable viewGenerator) {
+		if (!restoringStateFromHistory) {
+			updateHistoryEntry();
+		}
+
+		InspectionViewSettings oldViewSettings = this.viewGenerator != null ? getViewSettings() : null;
+
 		this.views = views;
 		currentObjectPanel.setCurrentObject(object);
-		viewPane.removeAll();
+		this.viewGenerator = viewGenerator;
 
+		viewPane.removeAll();
 		for (ObjectView view : views) {
 			viewPane.add(view.getViewComponent(), Preconditions.checkNotNull(view.getViewName(), "Missing name of view '" + view + "'"));
 		}
-		applyViewSettings(oldViewSettings, ObjectView.ViewSettingsOrigin.OTHER_CONTEXT);
+
+		if (!restoringStateFromHistory) {
+			if (oldViewSettings != null) {
+				// apply old state to new state as good as possible
+				applyViewSettings(oldViewSettings, ObjectView.ViewSettingsOrigin.OTHER_CONTEXT);
+			}
+
+			InspectionViewSettings newViewSettings = getViewSettings();
+			history.add(newViewSettings);
+		}
 
 		setVisible(true);
 
-		prevButton.setAction(new ActionWrapper(context.createInspectionHistoryBackAction()));
-		nextButton.setAction(new ActionWrapper(context.createInspectionHistoryForwardAction()));
+		prevButton.setAction(new ActionWrapper(new InspectionHistoryBackAction(context, history, this::updateHistoryEntry, this::applyHistoryViewSettings)));
+		nextButton.setAction(new ActionWrapper(new InspectionHistoryForwardAction(context, history, this::updateHistoryEntry, this::applyHistoryViewSettings)));
 	}
 
-	private static class InspectionViewSettings
+	private void updateHistoryEntry() {
+		if (this.viewGenerator != null) {
+			InspectionViewSettings viewSettings = getViewSettings();
+			history.set(viewSettings);
+		}
+	}
+
+	static class InspectionViewSettings
 	{
+		private final Object				currentObject;
+		private final Runnable				viewGenerator;
 		private final String				selectedViewName;
 		private final Map<String, Object>	viewSettingsByViewName;
 
-		InspectionViewSettings(String selectedViewName, Map<String, Object> viewSettingsByViewName) {
+		InspectionViewSettings(Object currentObject, Runnable viewGenerator, String selectedViewName, Map<String, Object> viewSettingsByViewName) {
+			this.currentObject = currentObject;
+			this.viewGenerator = viewGenerator;
 			this.selectedViewName = selectedViewName;
 			this.viewSettingsByViewName = viewSettingsByViewName;
+		}
+
+		Object getCurrentObject() {
+			return currentObject;
+		}
+
+		Runnable getViewGenerator() {
+			return viewGenerator;
 		}
 
 		String getSelectedViewName() {

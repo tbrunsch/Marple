@@ -13,29 +13,16 @@ public class History<T>
 		checkInvariants();
 	}
 
-	public boolean hasElements() {
-		return !historyElements.isEmpty();
-	}
-
-	public T get() {
-		assert hasElements();
-		return historyElements.get(historyPosition);
-	}
-
 	public void set(T element) {
-		assert hasElements();
+		assert !historyElements.isEmpty();
 		historyElements.set(historyPosition, element);
 	}
 
 	public void add(T element) {
-		if (historyPosition < historyElements.size() - 1) {
-			historyElements.set(++historyPosition, element);
-			reduceHistorySize(historyPosition + 1);
-		} else {
-			assert historyPosition == historyElements.size() - 1;
-			historyElements.add(element);
-			historyPosition++;
-		}
+		reduceHistorySize(historyPosition + 1);
+		assert historyPosition == historyElements.size() - 1;
+		historyElements.add(element);
+		historyPosition++;
 	}
 
 	public boolean canGoBack() {
