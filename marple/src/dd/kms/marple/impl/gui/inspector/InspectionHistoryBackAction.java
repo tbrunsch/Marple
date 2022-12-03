@@ -1,22 +1,22 @@
 package dd.kms.marple.impl.gui.inspector;
 
-import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.impl.gui.common.History;
 import dd.kms.marple.impl.gui.inspector.InspectionFrame.InspectionViewSettings;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 class InspectionHistoryBackAction implements InspectionAction
 {
-	private final InspectionContext					context;
-	private final History<InspectionViewSettings>	history;
-	private final Runnable							updateHistoryEntryRunnable;
-	private final Consumer<InspectionViewSettings>	prevSettingsConsumer;
+	private final History<InspectionViewSettings>			history;
+	private final Function<InspectionViewSettings, String>	stringRepresentationProvider;
+	private final Runnable									updateHistoryEntryRunnable;
+	private final Consumer<InspectionViewSettings>			prevSettingsConsumer;
 
-	InspectionHistoryBackAction(InspectionContext context, History<InspectionViewSettings> history, Runnable updateHistoryEntryRunnable, Consumer<InspectionViewSettings> prevSettingsConsumer) {
-		this.context = context;
+	InspectionHistoryBackAction(History<InspectionViewSettings> history, Function<InspectionViewSettings, String> stringRepresentationProvider, Runnable updateHistoryEntryRunnable, Consumer<InspectionViewSettings> prevSettingsConsumer) {
 		this.history = history;
+		this.stringRepresentationProvider = stringRepresentationProvider;
 		this.updateHistoryEntryRunnable = updateHistoryEntryRunnable;
 		this.prevSettingsConsumer = prevSettingsConsumer;
 	}
@@ -37,8 +37,7 @@ class InspectionHistoryBackAction implements InspectionAction
 			return null;
 		}
 		InspectionViewSettings prevSettings = history.peekPreviousElement();
-		Object currentObject = prevSettings.getCurrentObject();
-		return context.getDisplayText(currentObject);
+		return stringRepresentationProvider.apply(prevSettings);
 	}
 
 	@Override
