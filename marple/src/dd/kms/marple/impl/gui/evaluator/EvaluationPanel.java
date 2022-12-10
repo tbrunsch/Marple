@@ -50,6 +50,14 @@ public class EvaluationPanel extends JPanel
 		evaluationTextField.setCaretPosition(caretPosition);
 	}
 
+	public String getExpression() {
+		return evaluationTextField.getExpression();
+	}
+
+	public int getCaretPosition() {
+		return evaluationTextField.getCaretPosition();
+	}
+
 	void updateContent() {
 		evaluationModePanel.updateControls();
 	}

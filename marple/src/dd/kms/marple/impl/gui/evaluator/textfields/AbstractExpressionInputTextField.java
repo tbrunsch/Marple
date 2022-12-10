@@ -17,6 +17,10 @@ abstract class AbstractExpressionInputTextField<T> extends AbstractInputTextFiel
 		setCaretPosition(expression == null ? 0 : expression.length());
 	}
 
+	public String getExpression() {
+		return getText();
+	}
+
 	abstract List<CodeCompletion> suggestCodeCompletion(String text, int caretPosition) throws ParseException;
 
 	@Override
