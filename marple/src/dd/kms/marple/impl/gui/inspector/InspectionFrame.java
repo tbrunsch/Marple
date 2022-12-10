@@ -8,6 +8,7 @@ import dd.kms.marple.impl.actions.ActionWrapper;
 import dd.kms.marple.impl.actions.HistoryBackAction;
 import dd.kms.marple.impl.actions.HistoryForwardAction;
 import dd.kms.marple.impl.gui.common.CurrentObjectPanel;
+import dd.kms.marple.impl.gui.common.GuiCommons;
 import dd.kms.marple.impl.gui.common.History;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.IterableView;
 import dd.kms.marple.impl.gui.inspector.views.mapview.MapView;
@@ -184,6 +185,9 @@ public class InspectionFrame extends JFrame implements ObjectView
 			InspectionViewSettings newViewSettings = getViewSettings();
 			history.add(newViewSettings);
 		}
+
+		GuiCommons.reevaluateButtonAction(prevButton);
+		GuiCommons.reevaluateButtonAction(nextButton);
 
 		setVisible(true);
 	}

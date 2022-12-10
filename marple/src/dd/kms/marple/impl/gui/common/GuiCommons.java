@@ -63,4 +63,10 @@ public class GuiCommons
 	public static boolean isCaretPositionValid(String text, int caretPosition) {
 		return text != null && 0 <= caretPosition && caretPosition <= text.length();
 	}
+
+	public static void reevaluateButtonAction(AbstractButton button) {
+		Action action = button.getAction();
+		button.setAction(null);
+		button.setAction(action);
+	}
 }
