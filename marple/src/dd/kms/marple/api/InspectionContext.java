@@ -14,20 +14,14 @@ public interface InspectionContext
 {
 	InspectionSettings getSettings();
 
-	InspectionAction createHistoryBackAction();
-	InspectionAction createHistoryForwardAction();
 	InspectionAction createInspectComponentAction(ComponentHierarchy componentHierarchy);
 	InspectionAction createInspectObjectAction(Object object);
 	InspectionAction createAddVariableAction(String suggestedName, Object value);
-	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue);
-	InspectionAction createEvaluateExpressionAction(String expression, Object thisValue, int caretPosition);
-	InspectionAction createEvaluateAsThisAction(Object thisValue);
+	InspectionAction createEvaluateExpressionAction(String expression, int caretPosition, Object thisValue);
 	InspectionAction createSearchInstancesFromHereAction(Object root);
 	InspectionAction createSearchInstanceAction(Object target);
 	InspectionAction createDebugSupportAction(Object thisValue);
 	<T> InspectionAction createSnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction);
-
-	void clearHistory();
 
 	String getDisplayText(Object object);
 	List<ObjectView> getInspectionViews(Object object);

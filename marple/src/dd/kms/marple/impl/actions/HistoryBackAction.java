@@ -1,18 +1,23 @@
 package dd.kms.marple.impl.actions;
 
 import dd.kms.marple.api.actions.InspectionAction;
-import dd.kms.marple.api.inspector.ObjectInspector;
 import dd.kms.marple.impl.gui.common.History;
-import dd.kms.marple.impl.inspector.InspectionData;
 
-public class HistoryBackAction implements InspectionAction
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+public class HistoryBackAction<T> implements InspectionAction
 {
-	private final ObjectInspector			inspector;
-	private final History<InspectionData>	history;
+	private final History<T>			history;
+	private final Function<T, String>	stringRepresentationProvider;
+	private final Runnable				updateHistoryElementRunnable;
+	private final Consumer<T>			historyElementConsumer;
 
-	public HistoryBackAction(ObjectInspector inspector, History<InspectionData> history) {
-		this.inspector = inspector;
+	public HistoryBackAction(History<T> history, Function<T, String> stringRepresentationProvider, Runnable updateHistoryElementRunnable, Consumer<T> historyElementConsumer) {
 		this.history = history;
+		this.stringRepresentationProvider = stringRepresentationProvider;
+		this.updateHistoryElementRunnable = updateHistoryElementRunnable;
+		this.historyElementConsumer = historyElementConsumer;
 	}
 
 	@Override
@@ -30,9 +35,8 @@ public class HistoryBackAction implements InspectionAction
 		if (!isEnabled()) {
 			return null;
 		}
-		InspectionData previousElement = history.peekPreviousElement();
-		InspectionAction previousAction = previousElement.getAction();
-		return previousAction.getDescription();
+		T prevElement = history.peekPreviousElement();
+		return stringRepresentationProvider.apply(prevElement);
 	}
 
 	@Override
@@ -42,9 +46,9 @@ public class HistoryBackAction implements InspectionAction
 
 	@Override
 	public void perform() {
-		HistoryUtils.storeViewSettings(inspector, history);
-		InspectionData prevData = history.peekPreviousElement();
+		updateHistoryElementRunnable.run();
+		T prevElement = history.peekPreviousElement();
 		history.goBack();
-		HistoryUtils.restoreState(inspector, prevData);
+		historyElementConsumer.accept(prevElement);
 	}
 }

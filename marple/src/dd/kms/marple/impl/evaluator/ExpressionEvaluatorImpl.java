@@ -1,14 +1,11 @@
 package dd.kms.marple.impl.evaluator;
 
-import com.google.common.util.concurrent.Runnables;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.impl.gui.common.WindowManager;
 import dd.kms.marple.impl.gui.evaluator.EvaluationFrame;
 import dd.kms.zenodot.api.settings.ParserSettings;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
-
-import java.awt.*;
 
 public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 {
@@ -31,23 +28,16 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 	}
 
 	@Override
-	public void evaluate(String expression, Object thisValue) {
-		evaluate(expression, thisValue, expression.length());
-	}
-
-	@Override
-	public void evaluate(String expression, Object thisValue, int caretPosition) {
-		showEvaluationFrame(expression, thisValue, caretPosition);
+	public void evaluate(String expression, int caretPosition, Object thisValue) {
+		showEvaluationFrame(expression, caretPosition, thisValue);
 	}
 
 	/*
 	 * Evaluation Frame Handling
 	 */
-	private void showEvaluationFrame(String expression, Object thisValue, int caretPosition) {
-		EvaluationFrame evaluationFrame = WindowManager.getWindow(ExpressionEvaluator.class, this::createEvaluationFrame, Runnables.doNothing());
-		evaluationFrame.setThisValue(thisValue);
-		evaluationFrame.setExpression(expression);
-		evaluationFrame.setCaretPosition(caretPosition);
+	private void showEvaluationFrame(String expression, int caretPosition, Object thisValue) {
+		EvaluationFrame evaluationFrame = WindowManager.getWindow(ExpressionEvaluator.class, this::createEvaluationFrame);
+		evaluationFrame.evaluate(expression, caretPosition, thisValue);
 	}
 
 	private EvaluationFrame createEvaluationFrame() {

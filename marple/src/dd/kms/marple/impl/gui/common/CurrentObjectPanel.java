@@ -31,6 +31,10 @@ public class CurrentObjectPanel extends JPanel
 		ActionProviderListeners.addMouseListeners(toStringLabel, e -> createActionProvider());
 	}
 
+	public Object getCurrentObject() {
+		return currentObject;
+	}
+
 	public void setCurrentObject(Object currentObject) {
 		this.currentObject = currentObject;
 

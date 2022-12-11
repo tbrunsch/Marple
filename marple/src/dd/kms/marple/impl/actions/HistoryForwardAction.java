@@ -1,18 +1,23 @@
 package dd.kms.marple.impl.actions;
 
 import dd.kms.marple.api.actions.InspectionAction;
-import dd.kms.marple.api.inspector.ObjectInspector;
 import dd.kms.marple.impl.gui.common.History;
-import dd.kms.marple.impl.inspector.InspectionData;
 
-public class HistoryForwardAction implements InspectionAction
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+public class HistoryForwardAction<T> implements InspectionAction
 {
-	private final ObjectInspector			inspector;
-	private final History<InspectionData>	history;
+	private final History<T>			history;
+	private final Function<T, String>	stringRepresentationProvider;
+	private final Runnable				updateHistoryElementRunnable;
+	private final Consumer<T>			historyElementConsumer;
 
-	public HistoryForwardAction(ObjectInspector inspector, History<InspectionData> history) {
-		this.inspector = inspector;
+	public HistoryForwardAction(History<T> history, Function<T, String> stringRepresentationProvider, Runnable updateHistoryElementRunnable, Consumer<T> historyElementConsumer) {
 		this.history = history;
+		this.stringRepresentationProvider = stringRepresentationProvider;
+		this.updateHistoryElementRunnable = updateHistoryElementRunnable;
+		this.historyElementConsumer = historyElementConsumer;
 	}
 
 	@Override
@@ -30,9 +35,8 @@ public class HistoryForwardAction implements InspectionAction
 		if (!isEnabled()) {
 			return null;
 		}
-		InspectionData nextElement = history.peekNextElement();
-		InspectionAction nextAction = nextElement.getAction();
-		return nextAction.getDescription();
+		T nextElement = history.peekNextElement();
+		return stringRepresentationProvider.apply(nextElement);
 	}
 
 	@Override
@@ -42,9 +46,9 @@ public class HistoryForwardAction implements InspectionAction
 
 	@Override
 	public void perform() {
-		HistoryUtils.storeViewSettings(inspector, history);
-		InspectionData nextData = history.peekNextElement();
+		updateHistoryElementRunnable.run();
+		T nextElement = history.peekNextElement();
 		history.goForward();
-		HistoryUtils.restoreState(inspector, nextData);
+		historyElementConsumer.accept(nextElement);
 	}
 }

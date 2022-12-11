@@ -1,6 +1,5 @@
 package dd.kms.marple.impl.actions;
 
-import com.google.common.util.concurrent.Runnables;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.common.WindowManager;
 import dd.kms.marple.impl.gui.snapshot.SnapshotPanel;
@@ -50,7 +49,7 @@ public class SnapshotAction<T> implements ImmediateInspectionAction
 
 	@Override
 	public final void performImmediately() {
-		JFrame window = WindowManager.getWindow(FRAME_TITLE, () -> null, Runnables.doNothing());
+		JFrame window = WindowManager.getWindow(FRAME_TITLE, () -> null);
 		WindowManager.<SnapshotPanel>configureComponent(window, panel -> panel.takeLiveSnapshot(snapshotTarget, snapshotFunction));
 	}
 }

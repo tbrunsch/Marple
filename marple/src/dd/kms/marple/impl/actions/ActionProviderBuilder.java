@@ -91,11 +91,11 @@ public class ActionProviderBuilder
 			actionsBuilder.add(context.createSnapshotAction((Paint) object, paint -> Snapshots.takeSnapshot(paint, 200, 200)));
 		}
 		actionsBuilder.add(context.createAddVariableAction(suggestedVariableName, this.object));
-		actionsBuilder.add(context.createEvaluateAsThisAction(this.object));
+		actionsBuilder.add(context.createEvaluateExpressionAction("this", "this".length(), this.object));
 		if (evaluationData != null) {
 			String expression = evaluationData.getExpression();
 			Object expressionContext = evaluationData.getExpressionContext();
-			actionsBuilder.add(context.createEvaluateExpressionAction(expression, expressionContext));
+			actionsBuilder.add(context.createEvaluateExpressionAction(expression, expression.length(), expressionContext));
 		}
 		actionsBuilder.add(context.createSearchInstancesFromHereAction(object));
 		actionsBuilder.add(context.createSearchInstanceAction(object));

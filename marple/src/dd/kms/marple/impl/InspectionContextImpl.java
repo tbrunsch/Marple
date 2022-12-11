@@ -8,8 +8,6 @@ import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.actions.*;
 import dd.kms.marple.impl.gui.ComponentHierarchies;
-import dd.kms.marple.impl.gui.common.History;
-import dd.kms.marple.impl.inspector.InspectionData;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -19,11 +17,9 @@ import java.util.function.Function;
 public class InspectionContextImpl implements InspectionContext
 {
 	private final InspectionSettings		settings;
-	private final History<InspectionData>	inspectionHistory;
 
 	public InspectionContextImpl(InspectionSettings settings) {
 		this.settings = settings;
-		inspectionHistory = new History<>();
 		settings.getInspector().setInspectionContext(this);
 		settings.getEvaluator().setInspectionContext(this);
 	}
@@ -34,20 +30,9 @@ public class InspectionContextImpl implements InspectionContext
 	}
 
 	@Override
-	public InspectionAction createHistoryBackAction() {
-		return new HistoryBackAction(settings.getInspector(), inspectionHistory);
-	}
-
-	@Override
-	public InspectionAction createHistoryForwardAction() {
-		return new HistoryForwardAction(settings.getInspector(), inspectionHistory);
-	}
-
-	@Override
 	public InspectionAction createInspectComponentAction(ComponentHierarchy componentHierarchy) {
 		String componentDisplayText = getDisplayText(componentHierarchy.getSelectedComponent());
-		InspectionAction action = new InspectComponentAction(settings.getInspector(), componentHierarchy, componentDisplayText);
-		return new HistoryActionWrapper(settings.getInspector(), inspectionHistory, action);
+		return new InspectComponentAction(settings.getInspector(), componentHierarchy, componentDisplayText);
 	}
 
 	@Override
@@ -57,8 +42,7 @@ public class InspectionContextImpl implements InspectionContext
 			ComponentHierarchy componentHierarchy = ComponentHierarchies.getComponentHierarchy(component);
 			return createInspectComponentAction(componentHierarchy);
 		}
-		InspectionAction action = new InspectObjectAction(settings.getInspector(), object, getDisplayText(object));
-		return new HistoryActionWrapper(settings.getInspector(), inspectionHistory, action);
+		return new InspectObjectAction(settings.getInspector(), object, getDisplayText(object));
 	}
 
 	@Override
@@ -67,18 +51,8 @@ public class InspectionContextImpl implements InspectionContext
 	}
 
 	@Override
-	public InspectionAction createEvaluateExpressionAction(String expression, Object thisValue) {
-		return createEvaluateExpressionAction(expression, thisValue, expression.length());
-	}
-
-	@Override
-	public InspectionAction createEvaluateExpressionAction(String expression, Object thisValue, int caretPosition) {
-		return new EvaluateExpressionAction(settings.getEvaluator(), expression, thisValue, caretPosition);
-	}
-
-	@Override
-	public InspectionAction createEvaluateAsThisAction(Object thisValue) {
-		return new EvaluateAsThisAction(settings.getEvaluator(), thisValue);
+	public InspectionAction createEvaluateExpressionAction(String expression, int caretPosition, Object thisValue) {
+		return new EvaluateExpressionAction(settings.getEvaluator(), expression, caretPosition, thisValue);
 	}
 
 	@Override
@@ -99,11 +73,6 @@ public class InspectionContextImpl implements InspectionContext
 	@Override
 	public <T> InspectionAction createSnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction) {
 		return new SnapshotAction<>(snapshotTarget, snapshotFunction, this);
-	}
-
-	@Override
-	public void clearHistory() {
-		inspectionHistory.clear();
 	}
 
 	@Override

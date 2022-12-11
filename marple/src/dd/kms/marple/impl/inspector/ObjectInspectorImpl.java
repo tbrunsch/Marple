@@ -27,35 +27,31 @@ public class ObjectInspectorImpl implements ObjectInspector
 		ImmutableList.Builder<ObjectView> viewBuilder = ImmutableList.<ObjectView>builder()
 			.add(new ComponentHierarchyView(componentHierarchy, context))
 			.addAll(context.getInspectionViews(object));
-		showViews(object, viewBuilder.build());
+		showViews(object, viewBuilder.build(), () -> inspectComponent(componentHierarchy));
 	}
 
 	@Override
 	public void inspectObject(Object object) {
 		ImmutableList.Builder<ObjectView> viewBuilder = ImmutableList.<ObjectView>builder()
 			.addAll(context.getInspectionViews(object));
-		showViews(object, viewBuilder.build());
+		showViews(object, viewBuilder.build(), () -> inspectObject(object));
 	}
 
 	/*
 	 * Inspection Frame Handling
 	 */
 	public InspectionFrame getInspectionFrame() {
-		return WindowManager.getWindow(ObjectInspector.class, this::createInspectionFrame, this::onCloseInspectionFrame);
+		return WindowManager.getWindow(ObjectInspector.class, this::createInspectionFrame);
 	}
 
-	private void showViews(Object object, List<ObjectView> views) {
+	private void showViews(Object object, List<ObjectView> views, Runnable viewGenerator) {
 		InspectionFrame inspectionFrame = getInspectionFrame();
-		inspectionFrame.setViews(object, views);
+		inspectionFrame.setViews(object, views, viewGenerator);
 	}
 
 	private InspectionFrame createInspectionFrame() {
 		InspectionFrame inspectionFrame = new InspectionFrame(context);
 		inspectionFrame.setPreferredSize(new Dimension(800, 600));
 		return inspectionFrame;
-	}
-
-	private void onCloseInspectionFrame() {
-		context.clearHistory();
 	}
 }

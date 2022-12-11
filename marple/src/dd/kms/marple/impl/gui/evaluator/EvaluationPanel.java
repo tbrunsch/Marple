@@ -45,12 +45,17 @@ public class EvaluationPanel extends JPanel
 		evaluationTextField.setThisValue(thisValue);
 	}
 
-	public void setExpression(String expression) {
+	public void setExpression(String expression, int caretPosition) {
 		evaluationTextField.setExpression(expression);
+		evaluationTextField.setCaretPosition(caretPosition);
 	}
 
-	public void setCaretPosition(int caretPosition) {
-		evaluationTextField.setCaretPosition(caretPosition);
+	public String getExpression() {
+		return evaluationTextField.getExpression();
+	}
+
+	public int getCaretPosition() {
+		return evaluationTextField.getCaretPosition();
 	}
 
 	void updateContent() {

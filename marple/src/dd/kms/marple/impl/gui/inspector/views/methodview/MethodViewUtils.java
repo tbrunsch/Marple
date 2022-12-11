@@ -6,7 +6,6 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.InvokeMethodAction;
-import dd.kms.marple.impl.gui.common.GuiCommons;
 
 import javax.swing.*;
 import java.lang.reflect.Method;
@@ -35,7 +34,7 @@ class MethodViewUtils
 		String parameterPlaceholder = IntStream.range(0, numParameters).mapToObj(i -> "").collect(Collectors.joining(", "));
 		String expression = methodName + "(" + parameterPlaceholder + ")";
 		int caretPosition = numParameters == 0 ? expression.length() : methodName.length() + 1;
-		actionsBuilder.add(context.createEvaluateExpressionAction(expression, object, caretPosition));
+		actionsBuilder.add(context.createEvaluateExpressionAction(expression, caretPosition, object));
 		return ActionProvider.of(methodName, actionsBuilder.build(), true);
 	}
 
