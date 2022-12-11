@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4
+
+  - switched to Zenodot 0.3 (lambda support, new evaluation mode "mixed typing" that is similar to dynamic typing, but without side effects)
+  - made new evaluation mode "mixed typing" the default evaluation mode
+  - improved display of lists
+  - added possibility to provide an initial expression and to suggest related objects when evaluating certain objects
+  - added expression evaluation history
+
+API changes:
+
+  - several changes resulting from API changes of Zenodot, most notably replacement of wrapper class `ObjectInfo` by `Object`
+
 ## v0.3.1
 
   - operate on runtime types instead of declared types whenever possible
