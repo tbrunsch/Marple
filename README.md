@@ -177,7 +177,7 @@ The first call creates an empty builder, while the second call creates a preconf
   * an immutable part that has to be configured by the `InspectionSettingsBuilder` and
   * a mutable part that is intended to be configurable by the user.
 
-The only mutable settings are the [settings for the parser](#parser-settings) that can be configured in the [evaluation settings dialog](#evaluation-settings).  
+The only mutable settings are the [settings for the parser](#parser-settings) that can be configured in the [evaluation settings dialog](#evaluation-settings-1).  
     
 In the remainder of this section we discuss the different types of settings.
 
@@ -296,7 +296,7 @@ Marple uses GUI components of your application as entry points for you analysis.
 * Nodes in all result panels like in the [evaluation dialog](#evaluation-dialog):<br/>
 ![Result Panel](images/navigable_elements/evaluation_dialog/result_panel.png)
 
-* Values in the variables tab and nodes in the custom hierarchy tab in the [settings](#evaluation-settings) for expression evaluation:<br/>
+* Values in the variables tab and nodes in the custom hierarchy tab in the [settings](#evaluation-settings-1) for expression evaluation:<br/>
 ![Variable Settings](images/navigable_elements/evaluation_dialog/variables_settings.png)<br/><br/>
 ![Custom Hierarchy Settings](images/navigable_elements/evaluation_dialog/custom_hierarchy_settings.png)
 
@@ -570,7 +570,7 @@ The evaluation dialog allows you to evaluate expressions. There are two ways to 
 The evaluation dialog is rather simple: You enter the expression you want to evaluate and press enter. The result (or possibly a syntax error or an exception) is then displayed at the bottom of the dialog. There are two possibilities to configure how the expression is evaluated:
 
   * The ["evaluation mode"](#evaluation-modes) slider allows you to configure the evaluation mode. By default it is "mixed". This means that expressions are evaluated based on runtime types, but without side effects. Particularly, methods are not evaluated during parsing in order to determine the methods' runtime return type because this could cause side effects.
-  * By clicking the settings button ![Settings Button](images/evaluation_dialog/settings_button.png) you can configure many more [evaluation settings](#evaluation-settings).
+  * By clicking the settings button ![Settings Button](images/evaluation_dialog/settings_button.png) you can configure many more [evaluation settings](#evaluation-settings-1).
 
 Expression text fields have two features that simplify writing expressions:
 
@@ -641,7 +641,7 @@ In this case, the parser evaluates the call to `getComponent()` and recognizes t
 You can introduce variables that can be access from within expressions. Variables can be preconfigured via the API and changed at runtime by the user. There are several ways to manage variables:
 
   1. You can select the ["Add to variables" action](#add-to-variables-action) in the context menu of a [navigable element](#navigable-elements). This opens the [variables dialog](#variables) where you can enter the name of the variable. You can also delete or rename variables in the variables dialog there.
-  1. The content of the variables dialog is also shown in the "Variables" tab in the [evaluation settings dialog](#evaluation-settings) that is opened when pressing the settings button ![Evaluation Settings Button](images/evaluation_dialog/settings_button.png) behind an expression input field.
+  1. The content of the variables dialog is also shown in the "Variables" tab in the [evaluation settings dialog](#evaluation-settings-1) that is opened when pressing the settings button ![Evaluation Settings Button](images/evaluation_dialog/settings_button.png) behind an expression input field.
 
 The variables dialog looks as follows:
 
