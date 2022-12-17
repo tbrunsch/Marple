@@ -109,7 +109,7 @@ The ["Iterables" tab](#iterables-tab) in the inspection dialog offers common ope
 
 Marple allows you to evaluate expressions. These expressions are evaluated in a certain context. This context can be referred to by the keyword `this`. Instead of `this.myField` or `this.myMethod()` you can simply write `myField` or `myMethod()` when referring to the field `myField` or the method `myMethod()` of the context object. Some notable features for expression evaluation are:
 
-  * [Dynamic typing](#dynamic-typing): When activated, then runtime types rather than declared types are used when evaluating expressions and suggesting code completions. This can save tedious casts.  
+  * Different [evaluation modes](#evaluation-modes): You can choose between static typing, dynamic typing, and a mixed mode. With dynamic typing, runtime types rather than declared types are used when evaluating expressions and suggesting code completions. This can save tedious casts.
   * Class and package [imports](#imports) 
   * Definition of [variables](#variables) that can be used within expressions
   * A language extension that allows navigating in a [custom, application-specific hierarchy](#custom-hierarchy)  
@@ -130,7 +130,7 @@ The in-application debugging capabilities are a nice feature, but they are negli
 
 The GUI elements of your application are the entry points for the analysis with Marple. From there you can navigate along fields in the inspection dialog, analyze the result of expressions in the evaluation dialog, or search for instances in the search dialog. Many Marple elements provide a context menu that offers several options to continue the investigation. These elements are called ["navigable elements"](#navigable-elements).
 
-Additionally, the inspection dialog maintains a history of inspected objects. This allows you to continue your investigation at an object you have analyzed earlier or to look something up in the history and then continue your current investigation.    
+Additionally, the inspection and the evaluation dialog maintain a history of inspected or evaluated objects, respectively. This allows you to continue your investigation at an object you have analyzed earlier or to look something up in the history and then continue your current investigation.    
 
 # Default Shortcuts
 
@@ -203,6 +203,18 @@ builder.subcomponentHierarchyStrategy(JTree.class, createSingleSubcomponentStrat
 ```
 Note that the bi-function that you have to specify for the method `createSingleSubcomponentStrategy()` may return `null` if there is no subcomponent for the specified position.
 
+## Evaluation Settings
+
+The interface `EvaluationSettings` contains information about what will be displayed when the evaluation dialog is opened for certain objects. You can create an instance of `EvaluationSettings` via its builder that you obtain via `EvaluationSettingsBuilder.create()`.
+
+`EvaluationSettings` do not influence how expressions are evaluated. This can be achieved by specifying `ParserSettings` (see Section [Parser Settings](#parser-settings)). Instead, `EvaluationSettings` allow you to specify
+
+The `EvaluationSettingsBuilder` provides 2 methods:
+
+  1. The method `suggestExpressionToEvaluate` lets you specify which expression to display initially for which object. When nothing is specified for a certain object, then `this` is displayed.
+  
+  1. The method `addRelatedObjectsProvider` lets you specify which related objects to show in a dedicated panel when evaluating a certain object.
+
 ## Visual Settings
 
 The interface `VisualSettings` describes how to display objects as text and which tabs are available in the [inspection dialog](#inspection-dialog) for which object. You can create an instance of `VisualSettings` via the `VisualSettingsBuilder`. There are different ways to create a `VisualSettingsBuilder`:
@@ -259,7 +271,7 @@ The builder allows you, among others,
   * to configure the behavior of code completions (currently not configurable via API)
   * to specify the [imports](#imports) (classes and packages),
   * to specify the minimum access modifier (`private`, `package private`, `protected`, or `public`) a field or method must have in order to be accessed from within expressions
-  * to enable/disable [dynamic typing](#dynamic-typing)
+  * to choose the [evaluation mode](#evaluation-modes)
   * to predefine [variables](#variables), which you can create via `ParserSettingsUtils.createVariable`
   * to specify a [custom hierarchy](#custom-hierarchy)   
 
@@ -287,7 +299,7 @@ Marple uses GUI components of your application as entry points for you analysis.
 ![Variable Settings](images/navigable_elements/evaluation_dialog/variables_settings.png)<br/><br/>
 ![Custom Hierarchy Settings](images/navigable_elements/evaluation_dialog/custom_hierarchy_settings.png)
 
-* Values of unnamed and names slots in the [debug support dialog](#debug-support):<br/>
+* Values of unnamed and named slots in the [debug support dialog](#debug-support):<br/>
 ![Unnamed Slots](images/navigable_elements/debug_support/unnamed_slots.png)<br/><br/>
 ![Named Slots](images/navigable_elements/debug_support/named_slots.png)
 
@@ -415,12 +427,12 @@ The "Iterables" tab is only visible if the selected object is an `Iterable` or a
 
 ### Lambdas
 
-For all operations you have to specify a lambda. However, you do not use Java lambda notation for this, but write an expression or a statement expressed in terms of `this`. In the "Iterables" tab, the keyword `this` refers to each element in the `Iterable`, one after another.
+Zenodot, the library Marple uses to evaluate expressions, supports lambdas. However, due to the lack of type inference, implementing generic functional interfaces by a lambda is a bit tedious because you have to cast the parameters to the correct type when accessing them. This is why Marple uses a different notation for lambdas with one parameter for the "Iterables" tab: The body of the lambda is written as an expression or a statement expressed in terms of `this`. The keyword `this` refers to each element in the `Iterable`, one after another.
 
 *Examples:*
 
   1. A predicate that checks whether an element is greater than 0.9 is written as `this > 0.9` (instead of `x -> x > 0.9`).
-  1. A function that maps an element to its String representation is written as `this.toString()` (instead of `x -> x.toString()` or `Object::toString`). Note that you can omit `this` in this case an simply write `toString()`.
+  1. A function that maps an element to its String representation is written as `this.toString()` (instead of `x -> x.toString()` or `Object::toString`). Note that you can omit `this` in this case and simply write `toString()`.
   1. A consumer that prints an element to the console is written as `System.out.println(this)` (instead of `x -> System.out.println(x)` or `System.out::println`).
 
 ### Filter
@@ -491,7 +503,7 @@ In this example, all elements of the `Iterable` that fall into the intervals [0.
 
 ### Stream-like Analysis
 
-The expression parser does not support lambdas and, hence, streaming. However, the "Iterables" tab provides a way to analyze `Iterable`s similar to the streaming approach. The result of an operation is displayed at the bottom of the dialog. If it is a list (you will not use an index map as result type during streaming) and you click onto that list, then the inspection dialog uses that newly selected list as context and updates all tabs. Since that list is an `Iterable` as well, you remain in the "Iterables" tab. Hence, you can apply the next streaming operation.
+The "Iterables" tab provides a way to analyze `Iterable`s similar to the streaming approach. The result of an operation is displayed at the bottom of the dialog. If it is a list (you will not use an index map as result type during streaming) and you click onto that list, then the inspection dialog uses that newly selected list as context and updates all tabs. Since that list is an `Iterable` as well, you remain in the "Iterables" tab. Hence, you can apply the next streaming operation.
 
 Note that with that workflow you benefit from the inspection history, which you can navigate in using the "Back" and "Forward" buttons.
 
@@ -556,7 +568,7 @@ The evaluation dialog allows you to evaluate expressions. There are two ways to 
 
 The evaluation dialog is rather simple: You enter the expression you want to evaluate and press enter. The result (or possibly a syntax error or an exception) is then displayed at the bottom of the dialog. There are two possibilities to configure how the expression is evaluated:
 
-  * The ["dynamic typing"](#dynamic-typing) check box allows you to toggle dynamic typing easily.
+  * The ["evaluation mode"](#evaluation-modes) slider allows you to configure the evaluation mode. By default it is "mixed". This means that expressions are evaluated based on runtime types, but without side effects. Particularly, methods are not evaluated during parsing in order to determine the methods' runtime return type because this could cause side effects.
   * By clicking the settings button ![Settings Button](images/evaluation_dialog/settings_button.png) you can configure many more [evaluation settings](#evaluation-settings).
 
 Expression text fields have two features that simplify writing expressions:
@@ -598,11 +610,19 @@ In this example, we wrapped the file/directory structure under the user home dir
 
 Note that this hierarchy is not hard-coded, but users can configure Marple to support arbitrary hierarchies. Additionally, Marple supports code completion for these hierarchies, even if they contain spaces. See [Custom Hierarchy](#custom-hierarchy) for details. 
 
-### Dynamic Typing
+### Evaluation Modes
 
-Without dynamic typing, expressions are evaluated based on declared types. You can only call methods and access fields that the declared types provide. When you need to analyze the runtime type, then you have to cast the instance to that type.
+Marple provides three different evaluation modes:
 
-With dynamic typing, expressions are evaluated based on runtime types. That saves you unnecessary casts, but forces the evaluation framework to evaluate subexpressions to determine the runtime type. In particular, methods will be executed even during code completion. This can be critical if the method has side effects or its evaluation is expensive. This is why dynamic typing is deactivated by default. 
+* static typing
+* dynamic typing
+* mixed typing
+
+With static typing, expressions are evaluated based on declared types. You can only call methods and access fields that the declared types provide. When you need to analyze the runtime type, then you have to cast the instance to that type.
+
+With dynamic typing, expressions are evaluated based on runtime types. That saves you unnecessary casts, but forces the evaluation framework to evaluate subexpressions to determine the runtime type. In particular, methods will be executed even during code completion. This can be critical if the method has side effects or if its evaluation is expensive.
+
+Mixed typing is like dynamic typing, but without side effects. Particularly, no methods will be evaluated before the whole expression is evaluated. Instead, like with static typing the type of the value returned by a method is assumed to be the return type declared by the method.
 
 Consider a `JPanel` whose 11'th component is a `JButton`:<br/>
 ![Dynamic Typing Sample](images/dynamic_typing/sample.png)
