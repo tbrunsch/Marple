@@ -3,16 +3,15 @@ package dd.kms.marple.impl.gui.evaluator;
 import com.google.common.base.Joiner;
 import dd.kms.marple.api.DebugSupport;
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.evaluator.ExpressionEvaluator;
+import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
-import dd.kms.marple.impl.evaluator.ExpressionEvaluators;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.impl.gui.table.ActionProviderRenderer;
 import dd.kms.marple.impl.gui.table.ColumnDescription;
 import dd.kms.marple.impl.gui.table.ColumnDescriptionBuilder;
 import dd.kms.marple.impl.gui.table.ListBasedTableModel;
-import dd.kms.zenodot.api.settings.ParserSettingsUtils;
-import dd.kms.zenodot.api.settings.Variable;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -89,8 +88,9 @@ public class VariablePanel extends JPanel
 	}
 
 	public void updateContent() {
+		ExpressionEvaluator evaluator = context.getEvaluator();
 		variables.clear();
-		variables.addAll(ExpressionEvaluators.getVariables(context));
+		variables.addAll(evaluator.getVariables());
 		tableModel.fireTableChanged(new TableModelEvent(tableModel));
 
 		updateButtons();
@@ -147,7 +147,7 @@ public class VariablePanel extends JPanel
 		variables.clear();
 		for (String name : DebugSupport.getSlotNames()) {
 			Object value = DebugSupport.getSlotValue(name);
-			Variable variable = ParserSettingsUtils.createVariable(name, value, false);
+			Variable variable = Variable.create(name, Object.class, value, true, false);
 			variables.add(variable);
 		}
 		tableModel.fireTableChanged(new TableModelEvent(tableModel));
@@ -181,8 +181,7 @@ public class VariablePanel extends JPanel
 		if (!acceptVariableName(oldVariable, name)) {
 			return;
 		}
-		Object oldValue = oldVariable.getValue();
-		Variable newVariable = ParserSettingsUtils.createVariable(name, oldValue, oldVariable.isUseHardReference());
+		Variable newVariable = Variable.create(name, oldVariable.getType(), oldVariable.getValue(), oldVariable.isFinal(), oldVariable.isUseHardReference());
 		variables.set(elementIndex, newVariable);
 	}
 
@@ -204,12 +203,12 @@ public class VariablePanel extends JPanel
 		}
 		boolean useHardReference = (Boolean) useHardReferenceAsObject;
 		Variable oldVariable = variables.get(elementIndex);
-		Object oldValue = oldVariable.getValue();
-		Variable newVariable = ParserSettingsUtils.createVariable(oldVariable.getName(), oldValue, useHardReference);
+		Variable newVariable = Variable.create(oldVariable.getName(), oldVariable.getType(), oldVariable.getValue(), oldVariable.isFinal(), useHardReference);
 		variables.set(elementIndex, newVariable);
 	}
 
 	private void updateParserSettings() {
-		ExpressionEvaluators.setVariables(variables, context);
+		ExpressionEvaluator evaluator = context.getEvaluator();
+		evaluator.setVariables(variables);
 	}
 }

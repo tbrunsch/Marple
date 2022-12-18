@@ -41,6 +41,6 @@ public class ExpressionInputTextField extends AbstractExpressionInputTextField<O
 	}
 
 	private ExpressionParser createParser() {
-		return Parsers.createExpressionParser(getParserSettings());
+		return Parsers.createExpressionParser(getParserSettings(), getVariables());
 	}
 }

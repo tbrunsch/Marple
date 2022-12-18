@@ -42,6 +42,6 @@ public class CompiledExpressionInputTextField extends AbstractExpressionInputTex
 	}
 
 	private ExpressionParser createParser() {
-		return Parsers.createExpressionParser(getParserSettings());
+		return Parsers.createExpressionParser(getParserSettings(), getVariables());
 	}
 }

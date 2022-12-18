@@ -1,18 +1,23 @@
 package dd.kms.marple.impl.evaluator;
 
+import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
+import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.impl.gui.common.WindowManager;
 import dd.kms.marple.impl.gui.evaluator.EvaluationFrame;
+import dd.kms.zenodot.api.Variables;
 import dd.kms.zenodot.api.settings.ParserSettings;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
+
+import java.util.List;
 
 public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 {
 	private ParserSettings		parserSettings	= ParserSettingsBuilder.create().build();
+	private VariablePool		variablePool	= new VariablePool(ImmutableList.of());
 	private InspectionContext	context;
 
-	@Override
 	public void setInspectionContext(InspectionContext context) {
 		this.context = context;
 	}
@@ -25,6 +30,24 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 	@Override
 	public void setParserSettings(ParserSettings parserSettings) {
 		this.parserSettings = parserSettings;
+	}
+
+	@Override
+	public List<Variable> getVariables() {
+		return variablePool.getVariables();
+	}
+
+	@Override
+	public void setVariables(List<Variable> variables) {
+		variablePool = new VariablePool(variables);
+	}
+
+	public Variables getVariableCollection() {
+		Variables variables = Variables.create();
+		for (Variable variable : getVariables()) {
+			variables.createVariable(variable.getName(), variable.getClass(), variable.getValue(), variable.isFinal());
+		}
+		return variables;
 	}
 
 	@Override

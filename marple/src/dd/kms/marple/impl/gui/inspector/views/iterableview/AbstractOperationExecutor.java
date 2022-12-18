@@ -2,6 +2,7 @@ package dd.kms.marple.impl.gui.inspector.views.iterableview;
 
 import com.google.common.base.Preconditions;
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.impl.evaluator.ExpressionEvaluatorImpl;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
 import dd.kms.zenodot.api.CompiledExpression;
 import dd.kms.zenodot.api.ExpressionParser;
@@ -52,7 +53,8 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 	}
 
 	CompiledExpression compile(String expression) throws ParseException {
-		ExpressionParser parser = Parsers.createExpressionParser(context.getEvaluator().getParserSettings());
+		ExpressionEvaluatorImpl evaluator = (ExpressionEvaluatorImpl) context.getEvaluator();
+		ExpressionParser parser = Parsers.createExpressionParser(evaluator.getParserSettings(), evaluator.getVariableCollection());
 		return parser.compile(expression, commonElementType);
 	}
 }

@@ -4,9 +4,7 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.zenodot.api.settings.ParserSettings;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
-import dd.kms.zenodot.api.settings.Variable;
 
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -24,13 +22,5 @@ public class ExpressionEvaluators
 		ExpressionEvaluator evaluator = context.getEvaluator();
 		ParserSettings parserSettings = evaluator.getParserSettings();
 		return valueGetter.apply(parserSettings);
-	}
-
-	public static void setVariables(List<Variable> variables, InspectionContext context) {
-		setValue(variables, ParserSettingsBuilder::variables, context);
-	}
-
-	public static List<Variable> getVariables(InspectionContext context) {
-		return getValue(ParserSettings::getVariables, context);
 	}
 }
