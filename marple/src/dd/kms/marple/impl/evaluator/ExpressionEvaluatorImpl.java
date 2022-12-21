@@ -61,7 +61,7 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 	public Variables getVariableCollection() {
 		Variables variables = Variables.create();
 		for (Variable variable : getVariables()) {
-			variables.createVariable(variable.getName(), variable.getClass(), variable.getValue(), variable.isFinal());
+			variables.createVariable(variable.getName(), variable.getType(), variable.getValue(), variable.isFinal());
 		}
 		return variables;
 	}
