@@ -1,6 +1,5 @@
 package dd.kms.marple.impl.evaluator;
 
-import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
@@ -10,13 +9,15 @@ import dd.kms.zenodot.api.Variables;
 import dd.kms.zenodot.api.settings.ParserSettings;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 {
-	private ParserSettings		parserSettings	= ParserSettingsBuilder.create().build();
-	private VariablePool		variablePool	= new VariablePool(ImmutableList.of());
-	private InspectionContext	context;
+	private ParserSettings					parserSettings	= ParserSettingsBuilder.create().build();
+	private final List<DisposableVariable>	variables		= new ArrayList<>();
+	private InspectionContext				context;
 
 	public void setInspectionContext(InspectionContext context) {
 		this.context = context;
@@ -34,12 +35,27 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 
 	@Override
 	public List<Variable> getVariables() {
-		return variablePool.getVariables();
+		List<Variable> variables = new ArrayList<>(this.variables.size());
+		Iterator<DisposableVariable> iter = this.variables.iterator();
+		while (iter.hasNext()) {
+			DisposableVariable variable = iter.next();
+			DefaultVariable variableSnapshot = new DefaultVariable(variable.getName(), variable.getType(), variable.getValue(), variable.isFinal(), variable.isUseHardReference());
+			if (variable.isGarbageCollected()) {
+				iter.remove();
+			} else {
+				variables.add(variableSnapshot);
+			}
+		}
+		return variables;
 	}
 
 	@Override
 	public void setVariables(List<Variable> variables) {
-		variablePool = new VariablePool(variables);
+		this.variables.clear();
+		for (Variable variable : variables) {
+			DisposableVariable disposableVariable = new DisposableVariable(variable.getName(), variable.getType(), variable.getValue(), variable.isFinal(), variable.isUseHardReference());
+			this.variables.add(disposableVariable);
+		}
 	}
 
 	public Variables getVariableCollection() {

@@ -10,7 +10,7 @@ package dd.kms.marple.api.evaluator;
 public interface Variable
 {
 	static Variable create(String name, Class<?> type, Object value, boolean isFinal, boolean useHardReference) {
-		return new dd.kms.marple.impl.evaluator.VariableImpl(name, type, value, isFinal, useHardReference);
+		return new dd.kms.marple.impl.evaluator.DefaultVariable(name, type, value, isFinal, useHardReference);
 	}
 
 	String getName();
