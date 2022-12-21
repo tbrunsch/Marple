@@ -101,6 +101,7 @@ public class VariablePanel extends JPanel implements Disposable
 		return Arrays.asList(
 			new ColumnDescriptionBuilder<>("Name",					String.class, 			Variable::getName)					.editorSettings(this::changeVariableName).build(),
 			new ColumnDescriptionBuilder<>("Value",					ActionProvider.class, 	this::getValueAsActionProvider).build(),
+			new ColumnDescriptionBuilder<>("final",					Boolean.class,			Variable::isFinal)					.editorSettings(this::changeIsFinal).build(),
 			new ColumnDescriptionBuilder<>("Use hard reference",	Boolean.class,			Variable::isUseHardReference)		.editorSettings(this::changeUseHardReference).build()
 		);
 	}
@@ -196,6 +197,16 @@ public class VariablePanel extends JPanel implements Disposable
 			}
 		}
 		return true;
+	}
+
+	private void changeIsFinal(List<Variable> variables, int elementIndex, Object isFinalAsObject) {
+		if (!(isFinalAsObject instanceof Boolean)) {
+			return;
+		}
+		boolean isFinal = (Boolean) isFinalAsObject;
+		Variable oldVariable = variables.get(elementIndex);
+		Variable newVariable = Variable.create(oldVariable.getName(), oldVariable.getType(), oldVariable.getValue(), isFinal, oldVariable.isUseHardReference());
+		variables.set(elementIndex, newVariable);
 	}
 
 	private void changeUseHardReference(List<Variable> variables, int elementIndex, Object useHardReferenceAsObject) {
