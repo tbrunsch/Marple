@@ -1,5 +1,6 @@
 package dd.kms.marple.impl.gui.table;
 
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.impl.gui.filters.ValueFilter;
@@ -24,8 +25,9 @@ import java.util.stream.IntStream;
  *
  * @param <T>
  */
-public class ListBasedTable<T> extends JPanel implements ObjectView
+public class ListBasedTable<T> extends JPanel implements ObjectView, Disposable
 {
+	private final List<T>					list;
 	private final ListBasedTableModel<T>	tableModel;
 	private final TableRowSorter			rowSorter;
 	private final JTable					table;
@@ -33,6 +35,8 @@ public class ListBasedTable<T> extends JPanel implements ObjectView
 
 	public ListBasedTable(List<T> list, List<ColumnDescription<T>> columnDescriptions) {
 		super(new BorderLayout());
+
+		this.list = list;
 
 		tableModel = new ListBasedTableModel<>(list, columnDescriptions);
 
@@ -153,6 +157,11 @@ public class ListBasedTable<T> extends JPanel implements ObjectView
 		JPopupMenu popupMenu = new JPopupMenu();
 		popupMenu.add(filterPanel);
 		popupMenu.show(table.getTableHeader(), mousePos.x, mousePos.y);
+	}
+
+	@Override
+	public void dispose() {
+		list.clear();
 	}
 
 	private static class ListBasedTableSettings

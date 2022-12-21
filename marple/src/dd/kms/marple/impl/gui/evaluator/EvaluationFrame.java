@@ -1,7 +1,7 @@
 package dd.kms.marple.impl.gui.evaluator;
 
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.api.settings.visual.ObjectView;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.impl.actions.ActionWrapper;
 import dd.kms.marple.impl.actions.HistoryBackAction;
 import dd.kms.marple.impl.actions.HistoryForwardAction;
@@ -9,18 +9,14 @@ import dd.kms.marple.impl.gui.common.CurrentObjectPanel;
 import dd.kms.marple.impl.gui.common.GuiCommons;
 import dd.kms.marple.impl.gui.common.History;
 import dd.kms.marple.impl.gui.common.WindowManager;
-import dd.kms.marple.impl.gui.inspector.InspectionFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.List;
 
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
-public class EvaluationFrame extends JFrame
+public class EvaluationFrame extends JFrame implements Disposable
 {
 	public static final Dimension	INITIAL_PREFERRED_SIZE	= new Dimension(600, 400);
 
@@ -51,13 +47,6 @@ public class EvaluationFrame extends JFrame
 		this.relatedObjectsPanel = new RelatedObjectsPanel(context);
 		this.evaluationPanel = new EvaluationPanel(context);
 		configure();
-
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				history.clear();
-			}
-		});
 	}
 
 	private void configure() {
@@ -146,6 +135,16 @@ public class EvaluationFrame extends JFrame
 		String expression = evaluationPanel.getExpression();
 		int caretPosition = evaluationPanel.getCaretPosition();
 		return new EvaluationViewSettings(currentObject, expression, caretPosition);
+	}
+
+	@Override
+	public void dispose() {
+		currentObjectPanel.dispose();
+		relatedObjectsPanel.dispose();
+		evaluationPanel.dispose();
+		history.clear();
+
+		super.dispose();
 	}
 
 	private static class EvaluationViewSettings

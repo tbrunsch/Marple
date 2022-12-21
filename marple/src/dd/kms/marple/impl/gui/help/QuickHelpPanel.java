@@ -1,5 +1,6 @@
 package dd.kms.marple.impl.gui.help;
 
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
 import dd.kms.marple.api.settings.keys.KeySettings;
 
@@ -9,7 +10,7 @@ import java.awt.*;
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
-public class QuickHelpPanel extends JPanel
+public class QuickHelpPanel extends JPanel implements Disposable
 {
 	public static final String	TITLE						= "Marple Quick Help";
 
@@ -49,5 +50,10 @@ public class QuickHelpPanel extends JPanel
 
 		add(categoryPanel,		new GridBagConstraints(0, yPos,   1, 1, 0.0, 0.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));
 		add(descriptionPanel,	new GridBagConstraints(1, yPos++, 1, 1, 1.0, 0.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));
+	}
+
+	@Override
+	public void dispose() {
+		/* Currently there is nothing to do */
 	}
 }

@@ -1,9 +1,11 @@
 package dd.kms.marple.api.settings.visual;
 
+import dd.kms.marple.api.gui.Disposable;
+
 import javax.annotation.Nullable;
 import java.awt.*;
 
-public interface ObjectView
+public interface ObjectView extends Disposable
 {
 	String getViewName();
 	Component getViewComponent();

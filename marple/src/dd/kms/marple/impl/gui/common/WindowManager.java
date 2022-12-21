@@ -1,5 +1,7 @@
 package dd.kms.marple.impl.gui.common;
 
+import dd.kms.marple.api.gui.Disposable;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -14,7 +16,7 @@ public class WindowManager
 	private static final Map<Object, Window>	MANAGED_WINDOWS	= new LinkedHashMap<>();
 	private static final Object					LOCK			= new Object();
 
-	public static <T extends Component> void showInFrame(String title, Supplier<T> componentSupplier, Consumer<T> componentConfigurator, Consumer<T> contentUpdater) {
+	public static <T extends Component & Disposable> void showInFrame(String title, Supplier<T> componentSupplier, Consumer<T> componentConfigurator, Consumer<T> contentUpdater) {
 		Supplier<JFrame> frameConstructor = () -> createComponentFrame(title, componentSupplier, contentUpdater);
 		JFrame window = getWindow(title, frameConstructor);
 		if (window == null) {
@@ -86,11 +88,17 @@ public class WindowManager
 		}
 	}
 
-	private static <T extends Component> JFrame createComponentFrame(String title, Supplier<T> componentSupplier, Consumer<T> contentUpdater) {
+	private static <T extends Component & Disposable> JFrame createComponentFrame(String title, Supplier<T> componentSupplier, Consumer<T> contentUpdater) {
 		JFrame frame = new JFrame(title);
 		T component = componentSupplier.get();
 		frame.getContentPane().add(component);
 		updateFrameOnFocusGained(frame, () -> contentUpdater.accept(component));
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				component.dispose();
+			}
+		});
 		return frame;
 	}
 

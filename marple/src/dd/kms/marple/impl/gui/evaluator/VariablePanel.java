@@ -5,6 +5,7 @@ import dd.kms.marple.api.DebugSupport;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
@@ -25,7 +26,7 @@ import java.util.*;
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.REMAINDER;
 
-public class VariablePanel extends JPanel
+public class VariablePanel extends JPanel implements Disposable
 {
 	public static final String	WINDOW_TITLE	= "Variables";
 
@@ -210,5 +211,10 @@ public class VariablePanel extends JPanel
 	private void updateParserSettings() {
 		ExpressionEvaluator evaluator = context.getEvaluator();
 		evaluator.setVariables(variables);
+	}
+
+	@Override
+	public void dispose() {
+		variables.clear();
 	}
 }

@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.common;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
@@ -10,7 +11,7 @@ import java.awt.*;
 
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 
-public class CurrentObjectPanel extends JPanel
+public class CurrentObjectPanel extends JPanel implements Disposable
 {
 	private final JLabel			classInfoLabel		= new JLabel();
 	private final JLabel			toStringLabel		= new JLabel();
@@ -50,5 +51,10 @@ public class CurrentObjectPanel extends JPanel
 		return new ActionProviderBuilder(getDisplayText(), currentObject, context)
 			.executeDefaultAction(true)
 			.build();
+	}
+
+	@Override
+	public void dispose() {
+		this.currentObject = null;
 	}
 }

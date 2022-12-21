@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.inspector.views.mapview.panels;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.impl.gui.common.GuiCommons;
 import dd.kms.marple.impl.gui.inspector.views.fieldview.FieldTree;
 
@@ -11,14 +12,14 @@ import java.util.Map;
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
-public class ContextPanel extends JPanel
+public class ContextPanel extends JPanel implements Disposable
 {
 	private final JLabel		commonKeyClassInfoLabel		= new JLabel("Key class:");
 	private final JLabel		commonKeyClassLabel			= new JLabel();
 	private final JLabel		commonValueClassInfoLabel	= new JLabel("Value class:");
 	private final JLabel		commonValueClassLabel		= new JLabel();
 
-	private final JComponent	fieldTree;
+	private final FieldTree		fieldTree;
 
 	public ContextPanel(Map<?, ?> map, Class<?> commonKeyType, Class<?> commonValueType, InspectionContext context) {
 		super(new GridBagLayout());
@@ -42,5 +43,10 @@ public class ContextPanel extends JPanel
 
 		xPos = 0;
 		add(fieldTree, new GridBagConstraints(xPos++, yPos++, 2, 1, 1.0, 1.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));
+	}
+
+	@Override
+	public void dispose() {
+		fieldTree.dispose();
 	}
 }

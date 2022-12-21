@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.evaluator.textfields;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.zenodot.api.ExpressionParser;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.Parsers;
@@ -10,7 +11,7 @@ import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
 import java.util.List;
 import java.util.Optional;
 
-public class ExpressionInputTextField extends AbstractExpressionInputTextField<Object>
+public class ExpressionInputTextField extends AbstractExpressionInputTextField<Object> implements Disposable
 {
 	private Object	thisValue	= null;
 
@@ -42,5 +43,10 @@ public class ExpressionInputTextField extends AbstractExpressionInputTextField<O
 
 	private ExpressionParser createParser() {
 		return Parsers.createExpressionParser(getParserSettings(), getVariables());
+	}
+
+	@Override
+	public void dispose() {
+		thisValue = null;
 	}
 }

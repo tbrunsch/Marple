@@ -33,7 +33,7 @@ class MethodList extends JPanel implements ObjectView
 	private final Component					modifierFilterEditor;
 
 	private final List<Method>				methods;
-	private final MethodViewUtils			methodViewUtils;
+	private MethodViewUtils					methodViewUtils;
 
 	private final ValueFilter				nameFilter				= ValueFilters.createWildcardFilter();
 	private final ValueFilter				modifierFilter			= ValueFilters.createModifierFilter(false);
@@ -134,6 +134,11 @@ class MethodList extends JPanel implements ObjectView
 	 */
 	private void onFilterChanged() {
 		updateListModel();
+	}
+
+	@Override
+	public void dispose() {
+		methodViewUtils = null;
 	}
 
 	private static class ActionProviderRenderer extends JPanel implements ListCellRenderer<Method>

@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.debugsupport;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.api.settings.DebugSettings;
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.impl.gui.evaluator.textfields.ExpressionInputTextField;
@@ -13,7 +14,7 @@ import java.util.function.Consumer;
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
-class BreakpointTriggerPanel extends JPanel
+class BreakpointTriggerPanel extends JPanel implements Disposable
 {
 	private final JLabel					methodLabel				= new JLabel("Method:");
 
@@ -83,5 +84,10 @@ class BreakpointTriggerPanel extends JPanel
 		} catch (ParseException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
+	}
+
+	@Override
+	public void dispose() {
+		/* currently there is nothing to do */
 	}
 }

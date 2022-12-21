@@ -79,6 +79,11 @@ public class FieldTree extends JPanel implements ObjectView
 		}
 	}
 
+	@Override
+	public void dispose() {
+		tree.setModel(null);
+	}
+
 	private static class FieldTreeSettings
 	{
 		private final int[] expandedRows;

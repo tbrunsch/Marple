@@ -56,13 +56,6 @@ public class InspectionFrame extends JFrame implements ObjectView
 		this.context = context;
 		this.currentObjectPanel = new CurrentObjectPanel(context);
 		configure();
-
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				history.clear();
-			}
-		});
 	}
 
 	@Override
@@ -202,6 +195,15 @@ public class InspectionFrame extends JFrame implements ObjectView
 			InspectionViewSettings viewSettings = getViewSettings();
 			history.set(viewSettings);
 		}
+	}
+
+	@Override
+	public void dispose() {
+		currentObjectPanel.dispose();
+		history.clear();
+		viewGenerator = null;
+
+		super.dispose();
 	}
 
 	static class InspectionViewSettings

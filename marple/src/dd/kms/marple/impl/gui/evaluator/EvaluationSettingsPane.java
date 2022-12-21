@@ -1,12 +1,13 @@
 package dd.kms.marple.impl.gui.evaluator;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.impl.gui.evaluator.imports.ImportPanel;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class EvaluationSettingsPane extends JTabbedPane
+public class EvaluationSettingsPane extends JTabbedPane implements Disposable
 {
 	private final GeneralSettingsPanel	generalSettingsPanel;
 	private final VariablePanel			variablePanel;
@@ -31,5 +32,13 @@ public class EvaluationSettingsPane extends JTabbedPane
 		generalSettingsPanel.updateContent();
 		variablePanel.updateContent();
 		importPanel.updateContent();
+	}
+
+	@Override
+	public void dispose() {
+		generalSettingsPanel.dispose();
+		variablePanel.dispose();
+		importPanel.dispose();
+		customHierarchyPanel.dispose();
 	}
 }
