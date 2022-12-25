@@ -2,9 +2,12 @@ package dd.kms.marple.impl.evaluator;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
+import dd.kms.marple.api.evaluator.Variable;
+import dd.kms.zenodot.api.Variables;
 import dd.kms.zenodot.api.settings.ParserSettings;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
 
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -22,5 +25,13 @@ public class ExpressionEvaluators
 		ExpressionEvaluator evaluator = context.getEvaluator();
 		ParserSettings parserSettings = evaluator.getParserSettings();
 		return valueGetter.apply(parserSettings);
+	}
+
+	public static Variables toVariableCollection(List<Variable> variables, boolean forceFinal) {
+		Variables variableCollection = Variables.create();
+		for (Variable variable : variables) {
+			variableCollection.createVariable(variable.getName(), variable.getType(), variable.getValue(), forceFinal || variable.isFinal());
+		}
+		return variableCollection;
 	}
 }

@@ -58,14 +58,6 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 		}
 	}
 
-	public Variables getVariableCollection() {
-		Variables variables = Variables.create();
-		for (Variable variable : getVariables()) {
-			variables.createVariable(variable.getName(), variable.getType(), variable.getValue(), variable.isFinal());
-		}
-		return variables;
-	}
-
 	@Override
 	public void evaluate(String expression, int caretPosition, Object thisValue) {
 		showEvaluationFrame(expression, caretPosition, thisValue);

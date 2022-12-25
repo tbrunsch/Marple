@@ -1,10 +1,9 @@
 package dd.kms.marple.impl.gui.evaluator.textfields;
 
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.zenodot.api.CompiledExpression;
-import dd.kms.zenodot.api.ExpressionParser;
-import dd.kms.zenodot.api.ParseException;
-import dd.kms.zenodot.api.Parsers;
+import dd.kms.marple.api.evaluator.Variable;
+import dd.kms.marple.impl.evaluator.ExpressionEvaluators;
+import dd.kms.zenodot.api.*;
 import dd.kms.zenodot.api.result.CodeCompletion;
 import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
 
@@ -42,6 +41,8 @@ public class CompiledExpressionInputTextField extends AbstractExpressionInputTex
 	}
 
 	private ExpressionParser createParser() {
-		return Parsers.createExpressionParser(getParserSettings(), getVariables());
+		List<Variable> variables = getVariables();
+		Variables variableCollection = ExpressionEvaluators.toVariableCollection(variables, true);
+		return Parsers.createExpressionParser(getParserSettings(), variableCollection);
 	}
 }
