@@ -49,7 +49,7 @@ public class AddVariableAction implements InspectionAction
 		ImmutableList.Builder<Variable> variablesBuilder = ImmutableList.builder();
 		ExpressionEvaluator evaluator = context.getEvaluator();
 		variablesBuilder.addAll(evaluator.getVariables());
-		variablesBuilder.add(Variable.create(name, Object.class, value, false, false));
+		variablesBuilder.add(Variable.create(name, value != null ? value.getClass() : Object.class, value, true, true));
 		evaluator.setVariables(variablesBuilder.build());
 		WindowManager.showInFrame(VariablePanel.WINDOW_TITLE, this::createVariablePanel, variablePanel -> variablePanel.editVariableName(name), VariablePanel::updateContent);
 	}
