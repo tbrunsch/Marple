@@ -17,7 +17,7 @@ public class ActionProviderRenderer implements TableCellRenderer
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		JLabel rendererComponent = (JLabel) wrappedRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		rendererComponent.setText(value == null ? null : value.toString());
-		rendererComponent.setFont(rendererComponent.getFont().deriveFont(0));
+		rendererComponent.setFont(rendererComponent.getFont().deriveFont(Font.PLAIN));
 		rendererComponent.setForeground(value instanceof ActionProvider ? DARK_BLUE : Color.BLACK);
 		return rendererComponent;
 	}

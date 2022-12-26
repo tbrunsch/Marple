@@ -3,6 +3,7 @@ package dd.kms.marple.impl.gui.evaluator.textfields;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.api.settings.keys.KeySettings;
 import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.zenodot.api.ParseException;
@@ -81,6 +82,14 @@ public abstract class AbstractInputTextField<T> extends JTextField
 
 	ParserSettings getParserSettings() {
 		return context.getEvaluator().getParserSettings();
+	}
+
+	List<Variable> getVariables() {
+		return context.getEvaluator().getVariables();
+	}
+
+	void setVariables(List<Variable> variables) {
+		context.getEvaluator().setVariables(variables);
 	}
 
 	private List<CodeCompletion> provideCodeCompletions(String text, int caretPosition) throws ParseException {

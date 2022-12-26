@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.debugsupport;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.impl.gui.common.CurrentObjectPanel;
 import dd.kms.marple.impl.gui.common.ExceptionFormatter;
 
@@ -12,7 +13,7 @@ import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.CENTER;
 
-public class DebugSupportPanel extends JPanel
+public class DebugSupportPanel extends JPanel implements Disposable
 {
 	private final CurrentObjectPanel		currentObjectPanel;
 	private final UnnamedSlotsPanel			unnamedSlotsPanel;
@@ -60,5 +61,13 @@ public class DebugSupportPanel extends JPanel
 		exceptionPanel.setVisible(exception != null);
 		String exceptionMessage = exception == null ? null : ExceptionFormatter.formatException(exception, true);
 		exceptionLabel.setText(exceptionMessage);
+	}
+
+	@Override
+	public void dispose() {
+		currentObjectPanel.dispose();
+		unnamedSlotsPanel.dispose();
+		namedSlotsPanel.dispose();
+		breakpointTriggerPanel.dispose();
 	}
 }

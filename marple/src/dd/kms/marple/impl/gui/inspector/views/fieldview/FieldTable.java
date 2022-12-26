@@ -24,7 +24,7 @@ public class FieldTable extends JPanel implements ObjectView
 {
 	private final ListBasedTable<Field>	table;
 
-	private final Object				object;
+	private Object						object;
 	private final InspectionContext		context;
 
 	public FieldTable(Object object, InspectionContext context) {
@@ -82,5 +82,10 @@ public class FieldTable extends JPanel implements ObjectView
 		return new ActionProviderBuilder(context.getDisplayText(fieldValue), fieldValue, context)
 				.evaluateAs(fieldName, object)
 				.build();
+	}
+
+	@Override
+	public void dispose() {
+		object = null;
 	}
 }

@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.evaluator;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.impl.gui.common.ResultPanel;
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.impl.gui.evaluator.textfields.ExpressionInputTextField;
@@ -11,7 +12,7 @@ import java.awt.*;
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
-public class EvaluationPanel extends JPanel
+public class EvaluationPanel extends JPanel implements Disposable
 {
 	private final JPanel					expressionPanel			= new JPanel(new GridBagLayout());
 	private final JPanel					evaluationTextFieldPanel;
@@ -60,5 +61,11 @@ public class EvaluationPanel extends JPanel
 
 	void updateContent() {
 		evaluationModePanel.updateControls();
+	}
+
+	@Override
+	public void dispose() {
+		evaluationTextField.dispose();
+		resultPanel.dispose();
 	}
 }

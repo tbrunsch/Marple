@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import dd.kms.marple.api.DebugSupport;
 import dd.kms.marple.api.ObjectInspectionFramework;
+import dd.kms.marple.api.evaluator.ExpressionEvaluator;
+import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
@@ -23,8 +25,8 @@ import java.util.stream.Collectors;
 class TestUtils
 {
 	static void setupInspectionFramework(JFrame testFrame) throws ClassNotFoundException {
-		Variable variable1 = ParserSettingsUtils.createVariable("testFrame", testFrame, false);
-		Variable variable2 = ParserSettingsUtils.createVariable("testData", new TestData(), true);
+		Variable variable1 = Variable.create("testFrame", JFrame.class, testFrame, true, false);
+		Variable variable2 = Variable.create("testData", TestData.class, new TestData(), true, true);
 
 		String importPackage1 = "javax.swing";
 		String importPackage2 = "dd.kms.marple";
@@ -35,7 +37,6 @@ class TestUtils
 		ObjectTreeNode customHierarchyRoot = new FileNode(new File(System.getProperty("user.home")));
 
 		ParserSettings parserSettings = ParserSettingsBuilder.create()
-			.variables(ImmutableList.of(variable1, variable2))
 			.minimumAccessModifier(AccessModifier.PRIVATE)
 			.importPackages(ImmutableSet.of(importPackage1, importPackage2))
 			.importClassesByName(ImmutableSet.of(importClass1, importClass2))
@@ -60,7 +61,9 @@ class TestUtils
 		InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspectionSettingsBuilder()
 			.evaluationSettings(evaluationSettings)
 			.build();
-		inspectionSettings.getEvaluator().setParserSettings(parserSettings);
+		ExpressionEvaluator evaluator = inspectionSettings.getEvaluator();
+		evaluator.setParserSettings(parserSettings);
+		evaluator.setVariables(ImmutableList.of(variable1, variable2));
 
 		ObjectInspectionFramework.register(inspectionSettings);
 

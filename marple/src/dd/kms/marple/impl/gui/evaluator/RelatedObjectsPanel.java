@@ -1,12 +1,14 @@
 package dd.kms.marple.impl.gui.evaluator;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.NamedObject;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
+import dd.kms.marple.impl.gui.common.GuiCommons;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +16,7 @@ import java.util.Collection;
 
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 
-class RelatedObjectsPanel extends JPanel
+class RelatedObjectsPanel extends JPanel implements Disposable
 {
 	private final InspectionContext				context;
 
@@ -33,10 +35,7 @@ class RelatedObjectsPanel extends JPanel
 
 		setVisible(!relatedObjects.isEmpty());
 
-		int numComponents = getComponentCount();
-		for (int i = numComponents - 1; i >= 0; i--) {
-			remove(i);
-		}
+		removeAll();
 
 		int y = 0;
 		for (NamedObject relatedObject : relatedObjects) {
@@ -58,5 +57,10 @@ class RelatedObjectsPanel extends JPanel
 		return new ActionProviderBuilder(displayText, object, context)
 			.executeDefaultAction(true)
 			.build();
+	}
+
+	@Override
+	public void dispose() {
+		removeAll();
 	}
 }

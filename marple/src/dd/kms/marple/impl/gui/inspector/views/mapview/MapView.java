@@ -23,12 +23,12 @@ public class MapView extends JPanel implements ObjectView
 {
 	public static final String	NAME	= "Maps";
 
-	private final Map<?, ?>			map;
+	private Map<?, ?>				map;
 	private final Class<?>			commonKeyType;
 	private final Class<?>			commonValueType;
 	private final InspectionContext	context;
 
-	private final JPanel			contextPanel;
+	private final ContextPanel		contextPanel;
 	private final OperationPanel	operationPanel;
 	private final ResultPanel		resultPanel;
 
@@ -101,5 +101,12 @@ public class MapView extends JPanel implements ObjectView
 			default:
 				throw new IllegalStateException("Unsupported operation: " + operation);
 		}
+	}
+
+	@Override
+	public void dispose() {
+		map = null;
+		contextPanel.dispose();
+		resultPanel.dispose();
 	}
 }

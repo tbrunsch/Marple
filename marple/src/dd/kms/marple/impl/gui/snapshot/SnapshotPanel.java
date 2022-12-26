@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.snapshot;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.impl.gui.common.CurrentObjectPanel;
 
 import javax.annotation.Nullable;
@@ -16,7 +17,7 @@ import java.util.function.Function;
 
 import static java.awt.GridBagConstraints.*;
 
-public class SnapshotPanel extends JPanel
+public class SnapshotPanel extends JPanel implements Disposable
 {
 	private static final Insets		DEFAULT_INSETS				= new Insets(3, 3, 3, 3);
 
@@ -148,6 +149,11 @@ public class SnapshotPanel extends JPanel
 		}
 		File directory = LAST_SELECTED_FILE.getParentFile();
 		return directory != null && directory.exists() ? directory : null;
+	}
+
+	@Override
+	public void dispose() {
+		currentObjectPanel.dispose();
 	}
 
 	private static class ImagePanel extends JPanel

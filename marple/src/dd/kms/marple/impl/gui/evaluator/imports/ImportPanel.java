@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.evaluator.imports;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +10,7 @@ import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.CENTER;
 
-public class ImportPanel extends JPanel
+public class ImportPanel extends JPanel implements Disposable
 {
 	private final PackageImportPanel	packagesPanel;
 	private final ClassImportPanel		classesPanel;
@@ -27,5 +28,10 @@ public class ImportPanel extends JPanel
 	public void updateContent() {
 		packagesPanel.updateContent();
 		classesPanel.updateContent();
+	}
+
+	@Override
+	public void dispose() {
+		/* Currently there is nothing to do */
 	}
 }

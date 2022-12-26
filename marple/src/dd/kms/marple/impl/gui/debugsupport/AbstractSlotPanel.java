@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.debugsupport;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.impl.gui.evaluator.textfields.ExpressionInputTextField;
@@ -23,7 +24,7 @@ import java.util.function.Consumer;
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
-abstract class AbstractSlotPanel<T> extends JPanel
+abstract class AbstractSlotPanel<T> extends JPanel implements Disposable
 {
 	private static final KeyStroke	UP_KEY		= KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0);
 	private static final KeyStroke	DOWN_KEY	= KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0);
@@ -108,6 +109,11 @@ abstract class AbstractSlotPanel<T> extends JPanel
 
 	void fireTableChanged() {
 		table.tableChanged(new TableModelEvent(tableModel));
+	}
+
+	@Override
+	public void dispose() {
+		tableList.clear();
 	}
 
 	private static class CellEditor extends AbstractCellEditor implements TableCellEditor

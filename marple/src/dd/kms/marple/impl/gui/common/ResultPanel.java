@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.common;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.impl.gui.inspector.views.fieldview.FieldTree;
 
@@ -11,7 +12,7 @@ import java.awt.*;
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.NORTH;
 
-public class ResultPanel extends JPanel
+public class ResultPanel extends JPanel implements Disposable
 {
 	private final InspectionContext context;
 
@@ -44,5 +45,10 @@ public class ResultPanel extends JPanel
 		add(component, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, NORTH, BOTH, new Insets(3, 3, 3, 3), 0, 0));
 		revalidate();
 		repaint();
+	}
+
+	@Override
+	public void dispose() {
+		removeAll();
 	}
 }

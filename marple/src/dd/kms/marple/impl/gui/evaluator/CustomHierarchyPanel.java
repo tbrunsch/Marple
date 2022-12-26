@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
@@ -23,7 +24,7 @@ import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.CENTER;
 
-class CustomHierarchyPanel extends JPanel
+class CustomHierarchyPanel extends JPanel implements Disposable
 {
 	private static final String	INFO_TEXT		= "<html><p>To access a node with the path root -> node1 -> node2 -> ... -> node during evaluation, write<br/>" +
 		"<br/>" +
@@ -47,6 +48,11 @@ class CustomHierarchyPanel extends JPanel
 
 		add(scrollPane,	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.8, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		add(infoLabel,	new GridBagConstraints(0, 1, 1, 1, 1.0, 0.2, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
+	}
+
+	@Override
+	public void dispose() {
+		tree.setModel(null);
 	}
 
 	private static class CustomHierarchyTreeNode implements TreeNode, ActionProviderTreeNode

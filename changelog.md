@@ -7,10 +7,13 @@
   - improved display of lists
   - added possibility to provide an initial expression and to suggest related objects when evaluating certain objects
   - added expression evaluation history
+  - added possiblity to change variable values via expressions.
 
 API changes:
 
   - several changes resulting from API changes of Zenodot, most notably replacement of wrapper class `ObjectInfo` by `Object`
+  - Variables are not part of the Zenodot configuration stored in `ParserSettings`, but part of Marple's `ExpressionEvaluator`. You can now specify their type and whether they are `final`. If they are not final, then you can change their value within expressions.
+  - `ObjectView`s are now `Disposable`, so you have to implement `dispose()` when you provide such a view. This method is called when the inspection dialog is closed and gives you a chance to release certain data.   
 
 ## v0.3.1
 

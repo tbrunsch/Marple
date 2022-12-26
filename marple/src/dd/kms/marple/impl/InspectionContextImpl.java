@@ -7,6 +7,7 @@ import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.actions.*;
+import dd.kms.marple.impl.evaluator.ExpressionEvaluatorImpl;
 import dd.kms.marple.impl.gui.ComponentHierarchies;
 
 import java.awt.*;
@@ -21,7 +22,7 @@ public class InspectionContextImpl implements InspectionContext
 	public InspectionContextImpl(InspectionSettings settings) {
 		this.settings = settings;
 		settings.getInspector().setInspectionContext(this);
-		settings.getEvaluator().setInspectionContext(this);
+		((ExpressionEvaluatorImpl) settings.getEvaluator()).setInspectionContext(this);
 	}
 
 	@Override

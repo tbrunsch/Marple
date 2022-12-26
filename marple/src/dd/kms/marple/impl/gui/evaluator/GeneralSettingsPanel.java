@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.evaluator;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.gui.Disposable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +9,7 @@ import java.awt.*;
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
 
-public class GeneralSettingsPanel extends JPanel
+public class GeneralSettingsPanel extends JPanel implements Disposable
 {
 	private final JLabel						minimumAccessModifierLabel		= new JLabel("Minimum access modifier:");
 	private final MinimumAccessModifierControls	minimumAccessModifierControls;
@@ -37,5 +38,10 @@ public class GeneralSettingsPanel extends JPanel
 	public void updateContent() {
 		minimumAccessModifierControls.updateControls();
 		evaluationModePanel.updateControls();
+	}
+
+	@Override
+	public void dispose() {
+		/* Currently there is nothing to do */
 	}
 }

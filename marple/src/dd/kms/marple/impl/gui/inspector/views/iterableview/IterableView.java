@@ -19,11 +19,11 @@ public class IterableView extends JPanel implements ObjectView
 {
 	public static final String	NAME	= "Iterables";
 
-	private final Iterable<?>		iterable;
+	private Iterable<?>				iterable;
 	private final Class<?>			commonElementType;
 	private final InspectionContext	context;
 
-	private final JPanel			contextPanel;
+	private final ContextPanel		contextPanel;
 	private final OperationPanel	operationPanel;
 	private final ResultPanel		resultPanel;
 
@@ -105,4 +105,10 @@ public class IterableView extends JPanel implements ObjectView
 		}
 	}
 
+	@Override
+	public void dispose() {
+		iterable = null;
+		contextPanel.dispose();
+		resultPanel.dispose();
+	}
 }

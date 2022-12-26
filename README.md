@@ -245,6 +245,8 @@ Instances of `ObjectView` describe tabs in the inspection dialog. The method `ge
 
 As a rule of thumb, general settings are always applied, whereas object-dependent settings are only applied in the first scenario. To distinguish between both scenarios, the method `applyViewSettings()` gets an argument of type `ObjectView.ViewSettingsOrigin` describing where the view settings stem from: `ObjectView.ViewSettingsOrigin.SAME_CONTEXT` refers to the first scenario, in which all settings should be applied. `ObjectView.ViewSettingsOrigin.OTHER_CONTEXT` refers to the second scenario, in which only general settings should be transferred.
 
+When the dialog that holds the `ObjectView`'s view component is closed, then the method `ObjectView.dispose()` is called which is meant for cleanup.
+
 ## Security Settings
 
 If you decide to ship Marple with your application, then you might want to prevent your customers from analyzing your application with Marple. To do so, you can subclass the interface `SecuritySettings` to protect the Marple access by a password prompt. Marple does neither restrict the way the password prompt is implemented nor does it provide utilities for implementing it. 
@@ -259,7 +261,7 @@ The interface `KeySettings` contains all information about configurable shortcut
 
 ## Parser Settings
 
-Parser/evalution settings are the only settings that are partially configurable by the user. These settings control how expressions are evaluated. In most cases it is helpful to preconfigure these settings appropriately. You can set the parser settings of an instance of `InspectionSettings` as follows:
+Parser/evalution settings are partially configurable by the user. These settings control how expressions are evaluated. In most cases it is helpful to preconfigure these settings appropriately. You can set the parser settings of an instance of `InspectionSettings` as follows:
 
 ```
 inspectionSettings.getEvaluator().setParserSettings(parserSettings)
@@ -273,7 +275,6 @@ The builder allows you, among others,
   * to specify the [imports](#imports) (classes and packages),
   * to specify the minimum access modifier (`private`, `package private`, `protected`, or `public`) a field or method must have in order to be accessed from within expressions
   * to choose the [evaluation mode](#evaluation-modes)
-  * to predefine [variables](#variables), which you can create via `ParserSettingsUtils.createVariable`
   * to specify a [custom hierarchy](#custom-hierarchy)   
 
 See the [parser settings](https://github.com/tbrunsch/Zenodot#parser-settings) documentation of Zenodot for more details on these features.
@@ -589,11 +590,11 @@ The evaluation settings dialog consists of for tabs:
   1. Imports
   1. Custom Hierarchy
 
-In the "General Settings" tab you can specify the minimum access modifier fields and methods must have in order to be accessible in expressions. Additionally, you can enable/disable [dynamic typing](#dynamic-typing):
+In the "General Settings" tab you can specify the minimum access modifier fields and methods must have in order to be accessible in expressions. Additionally, you can specify the [evaluation mode](#evaluation-modes):
 
 ![General Settings](images/evaluation_dialog/settings/general.png)
 
-In the "Variables" tab you can see which [variables](#variables) are currently defined and you can specify which variables are hard-referenced by Marple. Additionally, you can import variables from named slots or export variables to named slots. See [Debug Support](#debug-support) for details about named and unnamed slots:
+In the "Variables" tab you can see which [variables](#variables) are currently defined and you can specify their type, whether they are final, and whether a hard reference to their values should be held by Marple. Additionally, you can import variables from named slots or export variables to named slots. See [Debug Support](#debug-support) for details about named and unnamed slots:
 
 ![Variables](images/evaluation_dialog/settings/variables.png)  
 
@@ -640,14 +641,24 @@ In this case, the parser evaluates the call to `getComponent()` and recognizes t
 
 You can introduce variables that can be access from within expressions. Variables can be preconfigured via the API and changed at runtime by the user. There are several ways to manage variables:
 
-  1. You can select the ["Add to variables" action](#add-to-variables-action) in the context menu of a [navigable element](#navigable-elements). This opens the [variables dialog](#variables) where you can enter the name of the variable. You can also delete or rename variables in the variables dialog there.
+  1. Preconfiguration via API: You can create variables via the method `Variable.create()`. To set the variables, you have to retrieve the evaluator via `InspectionSettings.getEvaluator()` and assign it the variables via `ExpressionEvaluator.setVariables()`.
+  1. You can select the ["Add to variables" action](#add-to-variables-action) in the context menu of a [navigable element](#navigable-elements). This opens the [variables dialog](#variables) where you can configure the variable. You can also delete or rename variables in the variables dialog there.
   1. The content of the variables dialog is also shown in the "Variables" tab in the [evaluation settings dialog](#evaluation-settings-1) that is opened when pressing the settings button ![Evaluation Settings Button](images/evaluation_dialog/settings_button.png) behind an expression input field.
 
 The variables dialog looks as follows:
 
 ![Variables Dialog](images/variables_dialog.png) 
 
-For each variable you have to specify if Marple should keep a hard or a weak reference to it. In most cases it will be a good idea to use only weak references in order to avoid prolonging the lifetime of instances unnecessarily. You should only use hard references when you intend to inspect an object even after its natural lifetime.
+For each variable you can specify
+ 
+ * the variable name,
+ * its type,
+ * whether it is final, and
+ * whether Marple should keep a hard reference on the variable's value.
+
+Depending on whether you declare a variable `final` or not, you can use the variable as l-value in expressions (and, hence, change its value) or not. When assigning a new value to the variable, then this value must be assignable to the declared variable type. This is why you can specify this type. By default, it is set to the runtime type of the initial variable value.
+
+When referencing variable values via hard references, you prevent the garbage collector from disposing this object. In some cases this might be what you want, in some others maybe not. This is why you can specify whether the value of a variable should be referenced by a hard reference. If not, then Marple will only hold a weak reference to the variable value and remove the variable entirely when detecting that the value has been garbage collected.
 
 In the variables dialog you can import all named slots from the [debug support](#debug-support) as variables, overwriting all existing variables, or you can export all variables to named slots of the debug support, overwriting existing slots. The difference between variables and named slots is that variables are meant to be referenced when parsing expressions, while named slots are used to transfer data between Marple and an external debugger. 
 

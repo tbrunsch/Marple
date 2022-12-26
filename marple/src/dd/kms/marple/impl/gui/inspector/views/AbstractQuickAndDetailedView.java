@@ -24,17 +24,17 @@ public abstract class AbstractQuickAndDetailedView extends JPanel implements Obj
 
 	private final String				name;
 
-	private final Object				objct;
+	private Object						object;
 	private final InspectionContext		context;
 
 	private final Map<ViewType, Object>	settingsByViewType = new HashMap<>();
 
-	public AbstractQuickAndDetailedView(String name, Object objct, InspectionContext context) {
+	public AbstractQuickAndDetailedView(String name, Object object, InspectionContext context) {
 		super(new BorderLayout());
 
 		this.name = name;
 
-		this.objct = objct;
+		this.object = object;
 		this.context = context;
 
 		setName(name);
@@ -92,7 +92,7 @@ public abstract class AbstractQuickAndDetailedView extends JPanel implements Obj
 	private void setViewType(ViewType viewType) {
 		storeCurrentViewSettings();
 		currentViewType = viewType;
-		currentView = createView(viewType, objct, context);
+		currentView = createView(viewType, object, context);
 		loadCurrentViewSettings();
 
 		JToggleButton toggleButton = viewType == ViewType.QUICK ? quickViewToggleButton : detailedViewToggleButton;
@@ -120,6 +120,14 @@ public abstract class AbstractQuickAndDetailedView extends JPanel implements Obj
 
 	private ViewType getViewType() {
 		return quickViewToggleButton.isSelected() ? ViewType.QUICK : ViewType.DETAILED;
+	}
+
+	@Override
+	public void dispose() {
+		object = null;
+		if (currentView != null) {
+			currentView.dispose();
+		}
 	}
 
 	protected enum ViewType { QUICK, DETAILED }

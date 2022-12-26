@@ -142,6 +142,11 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 		return tree;
 	}
 
+	@Override
+	public void dispose() {
+		tree.setModel(null);
+	}
+
 	private static class ComponentHierarchyTreeNode extends DefaultMutableTreeNode implements ActionProviderTreeNode
 	{
 		ComponentHierarchyTreeNode(ActionProvider actionProvider) {

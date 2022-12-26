@@ -3,17 +3,18 @@ package dd.kms.marple.impl.gui.evaluator;
 import com.google.common.base.Joiner;
 import dd.kms.marple.api.DebugSupport;
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.evaluator.ExpressionEvaluator;
+import dd.kms.marple.api.evaluator.Variable;
+import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
-import dd.kms.marple.impl.evaluator.ExpressionEvaluators;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
-import dd.kms.marple.impl.gui.table.ActionProviderRenderer;
-import dd.kms.marple.impl.gui.table.ColumnDescription;
-import dd.kms.marple.impl.gui.table.ColumnDescriptionBuilder;
-import dd.kms.marple.impl.gui.table.ListBasedTableModel;
-import dd.kms.zenodot.api.settings.ParserSettingsUtils;
-import dd.kms.zenodot.api.settings.Variable;
+import dd.kms.marple.impl.gui.common.ExceptionFormatter;
+import dd.kms.marple.impl.gui.evaluator.textfields.ClassInputTextField;
+import dd.kms.marple.impl.gui.table.*;
+import dd.kms.zenodot.api.ParseException;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableCellEditor;
@@ -22,17 +23,22 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
-import static java.awt.GridBagConstraints.REMAINDER;
+import static java.awt.GridBagConstraints.*;
 
-public class VariablePanel extends JPanel
+public class VariablePanel extends JPanel implements Disposable
 {
 	public static final String	WINDOW_TITLE	= "Variables";
 
 	private final JScrollPane					scrollPane;
 	private final JTable						table;
 	private final ListBasedTableModel<Variable>	tableModel;
+	private final CellEditor					cellEditor;
+
+	private final JPanel						exceptionPanel		= new JPanel(new GridBagLayout());
+	private final JLabel						exceptionLabel		= new JLabel();
 
 	private final JButton						importButton		= new JButton("Import from 'DebugSupport'");
 	private final JButton						exportButton		= new JButton("Export to 'DebugSupport'");
@@ -54,12 +60,22 @@ public class VariablePanel extends JPanel
 
 		TableColumnModel columnModel = table.getColumnModel();
 		columnModel.getColumn(1).setCellRenderer(new ActionProviderRenderer());
+		cellEditor = new CellEditor(this::onException, context);
+		columnModel.getColumn(2).setCellEditor(cellEditor);
+
+		table.setDefaultRenderer(Class.class, new ClassRenderer(context));
 
 		add(scrollPane,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
 
-		add(importButton,	new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
-		add(exportButton,	new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
-		add(deleteButton,	new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+		add(exceptionPanel,	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 0.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.HORIZONTAL, DEFAULT_INSETS, 0, 0));
+
+		add(importButton,	new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+		add(exportButton,	new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+		add(deleteButton,	new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+
+		exceptionPanel.setVisible(false);
+		exceptionPanel.add(exceptionLabel,	new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
+		exceptionLabel.setForeground(Color.RED);
 
 		updateContent();
 
@@ -89,17 +105,26 @@ public class VariablePanel extends JPanel
 	}
 
 	public void updateContent() {
+		ExpressionEvaluator evaluator = context.getEvaluator();
 		variables.clear();
-		variables.addAll(ExpressionEvaluators.getVariables(context));
+		variables.addAll(evaluator.getVariables());
 		tableModel.fireTableChanged(new TableModelEvent(tableModel));
 
 		updateButtons();
+	}
+
+	private void onException(@Nullable Throwable exception) {
+		exceptionPanel.setVisible(exception != null);
+		String exceptionMessage = exception == null ? null : ExceptionFormatter.formatException(exception, true);
+		exceptionLabel.setText(exceptionMessage);
 	}
 
 	private List<ColumnDescription<Variable>> createColumnDescriptions() {
 		return Arrays.asList(
 			new ColumnDescriptionBuilder<>("Name",					String.class, 			Variable::getName)					.editorSettings(this::changeVariableName).build(),
 			new ColumnDescriptionBuilder<>("Value",					ActionProvider.class, 	this::getValueAsActionProvider).build(),
+			new ColumnDescriptionBuilder<>("Type",					Class.class, 			Variable::getType)					.editorSettings(this::changeType).build(),
+			new ColumnDescriptionBuilder<>("final",					Boolean.class,			Variable::isFinal)					.editorSettings(this::changeIsFinal).build(),
 			new ColumnDescriptionBuilder<>("Use hard reference",	Boolean.class,			Variable::isUseHardReference)		.editorSettings(this::changeUseHardReference).build()
 		);
 	}
@@ -147,7 +172,7 @@ public class VariablePanel extends JPanel
 		variables.clear();
 		for (String name : DebugSupport.getSlotNames()) {
 			Object value = DebugSupport.getSlotValue(name);
-			Variable variable = ParserSettingsUtils.createVariable(name, value, false);
+			Variable variable = Variable.create(name, Object.class, value, true, false);
 			variables.add(variable);
 		}
 		tableModel.fireTableChanged(new TableModelEvent(tableModel));
@@ -172,6 +197,23 @@ public class VariablePanel extends JPanel
 		tableModel.fireTableChanged(new TableModelEvent(tableModel));
 	}
 
+	private void changeType(List<Variable> variables, int elementIndex, Object typeAsObject) {
+		if (!(typeAsObject instanceof Class<?>)) {
+			return;
+		}
+		Variable oldVariable = variables.get(elementIndex);
+		Object value = oldVariable.getValue();
+		Class<?> type = (Class<?>) typeAsObject;
+		if (!type.isInstance(value)) {
+			Exception exception = new IllegalArgumentException("The current variable value is no instance of " + type.getName());
+			onException(exception);
+			return;
+		}
+		Variable newVariable = Variable.create(oldVariable.getName(), type, oldVariable.getValue(), oldVariable.isFinal(), oldVariable.isUseHardReference());
+		variables.set(elementIndex, newVariable);
+		onException(null);
+	}
+
 	private void changeVariableName(List<Variable> variables, int elementIndex, Object nameAsObject) {
 		if (!(nameAsObject instanceof String)) {
 			return;
@@ -181,8 +223,7 @@ public class VariablePanel extends JPanel
 		if (!acceptVariableName(oldVariable, name)) {
 			return;
 		}
-		Object oldValue = oldVariable.getValue();
-		Variable newVariable = ParserSettingsUtils.createVariable(name, oldValue, oldVariable.isUseHardReference());
+		Variable newVariable = Variable.create(name, oldVariable.getType(), oldVariable.getValue(), oldVariable.isFinal(), oldVariable.isUseHardReference());
 		variables.set(elementIndex, newVariable);
 	}
 
@@ -198,18 +239,77 @@ public class VariablePanel extends JPanel
 		return true;
 	}
 
+	private void changeIsFinal(List<Variable> variables, int elementIndex, Object isFinalAsObject) {
+		if (!(isFinalAsObject instanceof Boolean)) {
+			return;
+		}
+		boolean isFinal = (Boolean) isFinalAsObject;
+		Variable oldVariable = variables.get(elementIndex);
+		Variable newVariable = Variable.create(oldVariable.getName(), oldVariable.getType(), oldVariable.getValue(), isFinal, oldVariable.isUseHardReference());
+		variables.set(elementIndex, newVariable);
+	}
+
 	private void changeUseHardReference(List<Variable> variables, int elementIndex, Object useHardReferenceAsObject) {
 		if (!(useHardReferenceAsObject instanceof Boolean)) {
 			return;
 		}
 		boolean useHardReference = (Boolean) useHardReferenceAsObject;
 		Variable oldVariable = variables.get(elementIndex);
-		Object oldValue = oldVariable.getValue();
-		Variable newVariable = ParserSettingsUtils.createVariable(oldVariable.getName(), oldValue, useHardReference);
+		Variable newVariable = Variable.create(oldVariable.getName(), oldVariable.getType(), oldVariable.getValue(), oldVariable.isFinal(), useHardReference);
 		variables.set(elementIndex, newVariable);
 	}
 
 	private void updateParserSettings() {
-		ExpressionEvaluators.setVariables(variables, context);
+		ExpressionEvaluator evaluator = context.getEvaluator();
+		evaluator.setVariables(variables);
+	}
+
+	@Override
+	public void dispose() {
+		variables.clear();
+	}
+
+
+	private static class CellEditor extends AbstractCellEditor implements TableCellEditor
+	{
+		private final ClassInputTextField		editorTextField;
+
+		private final Map<Integer, String>		rowToTypeNames = new HashMap<>();
+
+		private boolean							editingFinished	= false;
+		private int								currentRow		= -1;
+
+		CellEditor(Consumer<Throwable> exceptionConsumer, InspectionContext context) {
+			editorTextField = new ClassInputTextField(context);
+			editorTextField.requestFocus();
+			editorTextField.setEvaluationResultConsumer(o -> {
+				editingFinished = true;
+				rowToTypeNames.put(currentRow, editorTextField.getText());
+				stopCellEditing();
+			});
+			editorTextField.setExceptionConsumer(exceptionConsumer);
+		}
+
+		@Override
+		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+			currentRow = row;
+			editingFinished = false;
+			editorTextField.setText(value instanceof Class<?> ? ((Class<?>) value).getName() : String.valueOf(value));
+			return editorTextField;
+		}
+
+		@Override
+		public Object getCellEditorValue() {
+			try {
+				return editorTextField.evaluateText();
+			} catch (ParseException e) {
+				return null;
+			}
+		}
+
+		@Override
+		public boolean stopCellEditing() {
+			return editingFinished && super.stopCellEditing();
+		}
 	}
 }

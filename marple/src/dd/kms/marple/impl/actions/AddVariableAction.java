@@ -3,11 +3,10 @@ package dd.kms.marple.impl.actions;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.actions.InspectionAction;
-import dd.kms.marple.impl.evaluator.ExpressionEvaluators;
+import dd.kms.marple.api.evaluator.ExpressionEvaluator;
+import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.impl.gui.common.WindowManager;
 import dd.kms.marple.impl.gui.evaluator.VariablePanel;
-import dd.kms.zenodot.api.settings.ParserSettingsUtils;
-import dd.kms.zenodot.api.settings.Variable;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,14 +47,16 @@ public class AddVariableAction implements InspectionAction
 	public void perform() {
 		String name = createVariableName(suggestedName == null ? "variable" : suggestedName);
 		ImmutableList.Builder<Variable> variablesBuilder = ImmutableList.builder();
-		variablesBuilder.addAll(ExpressionEvaluators.getVariables(context));
-		variablesBuilder.add(ParserSettingsUtils.createVariable(name, value, false));
-		ExpressionEvaluators.setVariables(variablesBuilder.build(), context);
+		ExpressionEvaluator evaluator = context.getEvaluator();
+		variablesBuilder.addAll(evaluator.getVariables());
+		variablesBuilder.add(Variable.create(name, value != null ? value.getClass() : Object.class, value, true, true));
+		evaluator.setVariables(variablesBuilder.build());
 		WindowManager.showInFrame(VariablePanel.WINDOW_TITLE, this::createVariablePanel, variablePanel -> variablePanel.editVariableName(name), VariablePanel::updateContent);
 	}
 
 	private String createVariableName(String suggestedName) {
-		Set<String> variableNames = ExpressionEvaluators.getVariables(context).stream().map(Variable::getName).collect(Collectors.toSet());
+		ExpressionEvaluator evaluator = context.getEvaluator();
+		Set<String> variableNames = evaluator.getVariables().stream().map(Variable::getName).collect(Collectors.toSet());
 		String name = suggestedName;
 		int index = 1;
 		while (variableNames.contains(name)) {

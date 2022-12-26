@@ -23,7 +23,7 @@ class MethodTable extends JPanel implements ObjectView
 
 	private final InspectionContext			context;
 
-	private final MethodViewUtils			methodViewUtils;
+	private MethodViewUtils					methodViewUtils;
 
 	public MethodTable(Object object, InspectionContext context) {
 		super(new GridBagLayout());
@@ -73,5 +73,10 @@ class MethodTable extends JPanel implements ObjectView
 			new ColumnDescriptionBuilder<Method>("Class",		Class.class, 	method -> method.getDeclaringClass()						).valueFilter(ValueFilters.createSelectionFilter(context)).build(),
 			new ColumnDescriptionBuilder<Method>("Modifier",	Member.class,	method -> method											).valueFilter(ValueFilters.createModifierFilter(false)).build()
 		);
+	}
+
+	@Override
+	public void dispose() {
+		methodViewUtils = null;
 	}
 }
