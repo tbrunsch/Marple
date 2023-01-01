@@ -56,7 +56,9 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 		ExpressionEvaluator evaluator = context.getEvaluator();
 		List<Variable> variables = evaluator.getVariables();
 		Variables variableCollection = ExpressionEvaluators.toVariableCollection(variables, true);
-		ExpressionParser parser = Parsers.createExpressionParser(evaluator.getParserSettings(), variableCollection);
+		ExpressionParser parser = Parsers.createExpressionParserBuilder(evaluator.getParserSettings())
+			.variables(variableCollection)
+			.createExpressionParser();
 		return parser.compile(expression, commonElementType);
 	}
 }

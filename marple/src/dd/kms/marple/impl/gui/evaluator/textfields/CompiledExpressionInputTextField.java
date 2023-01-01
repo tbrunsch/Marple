@@ -43,6 +43,8 @@ public class CompiledExpressionInputTextField extends AbstractExpressionInputTex
 	private ExpressionParser createParser() {
 		List<Variable> variables = getVariables();
 		Variables variableCollection = ExpressionEvaluators.toVariableCollection(variables, true);
-		return Parsers.createExpressionParser(getParserSettings(), variableCollection);
+		return Parsers.createExpressionParserBuilder(getParserSettings())
+			.variables(variableCollection)
+			.createExpressionParser();
 	}
 }
