@@ -2,12 +2,12 @@
 
 ## v0.4
 
-  - switched to Zenodot 0.3 (lambda support, new evaluation mode "mixed typing" that is similar to dynamic typing, but without side effects)
+  - switched to Zenodot 0.3 (lambda support, new evaluation mode "mixed typing" that is similar to dynamic typing, but without side effects, accessing the field "length" of arrays)
   - made new evaluation mode "mixed typing" the default evaluation mode
   - improved display of lists
   - added possibility to provide an initial expression and to suggest related objects when evaluating certain objects
   - added expression evaluation history
-  - added possiblity to change variable values via expressions.
+  - added possibility to change variable values via expressions
 
 API changes:
 
