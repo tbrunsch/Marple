@@ -13,12 +13,12 @@ import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
 import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNodes;
 import dd.kms.marple.impl.settings.components.ComponentHierarchyImpl;
+import dd.kms.zenodot.api.common.GeneralizedField;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import java.awt.*;
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -74,7 +74,7 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 	}
 
 	private List<ActionProvider> createActionProviderHierarchy(ComponentHierarchy componentHierarchy) {
-		Multimap<Object, Field> fieldsByObject = ArrayListMultimap.create();
+		Multimap<Object, GeneralizedField> fieldsByObject = ArrayListMultimap.create();
 		Set<Object> objectsToFind = new HashSet<>();
 
 		List<Object> components = new ArrayList<>(componentHierarchy.getComponents());
@@ -90,7 +90,7 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 		List<ActionProvider> actionProviderHierarchy = new ArrayList<>(components.size());
 		for (int j = 0; j < components.size(); j++) {
 			Object component = components.get(j);
-			Collection<Field> fieldsForComponent = fieldsByObject.get(component);
+			Collection<GeneralizedField> fieldsForComponent = fieldsByObject.get(component);
 			ActionProvider actionProvider = createActionProvider(new ComponentHierarchyImpl(components, j), fieldsForComponent);
 			actionProviderHierarchy.add(actionProvider);
 		}
@@ -100,12 +100,12 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 	/*
 	 * Action Providers
 	 */
-	private ActionProvider createActionProvider(ComponentHierarchy componentHierarchy, Collection<Field> detectedFields) {
+	private ActionProvider createActionProvider(ComponentHierarchy componentHierarchy, Collection<GeneralizedField> detectedFields) {
 		String displayText = createActionProviderDisplayText(componentHierarchy.getSelectedComponent(), detectedFields);
 		return new ActionProviderBuilder(displayText, componentHierarchy, context).build();
 	}
 
-	private String createActionProviderDisplayText(Object object, Collection<Field> fields) {
+	private String createActionProviderDisplayText(Object object, Collection<GeneralizedField> fields) {
 		String displayText = object.getClass().getSimpleName();
 		if (fields.isEmpty()) {
 			return displayText;

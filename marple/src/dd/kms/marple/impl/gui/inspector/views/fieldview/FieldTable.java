@@ -9,11 +9,11 @@ import dd.kms.marple.impl.gui.filters.ValueFilters;
 import dd.kms.marple.impl.gui.table.*;
 import dd.kms.zenodot.api.common.FieldScanner;
 import dd.kms.zenodot.api.common.FieldScannerBuilder;
+import dd.kms.zenodot.api.common.GeneralizedField;
 import dd.kms.zenodot.api.common.StaticMode;
 
 import javax.swing.*;
 import java.awt.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.util.Arrays;
 import java.util.List;
@@ -22,10 +22,10 @@ import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 
 public class FieldTable extends JPanel implements ObjectView
 {
-	private final ListBasedTable<Field>	table;
+	private final ListBasedTable<GeneralizedField>	table;
 
-	private Object						object;
-	private final InspectionContext		context;
+	private Object									object;
+	private final InspectionContext					context;
 
 	public FieldTable(Object object, InspectionContext context) {
 		super(new GridBagLayout());
@@ -33,9 +33,9 @@ public class FieldTable extends JPanel implements ObjectView
 		this.context = context;
 
 		FieldScanner fieldScanner = FieldScannerBuilder.create().staticMode(StaticMode.BOTH).build();
-		List<Field> fields = fieldScanner.getFields(object.getClass());
+		List<GeneralizedField> fields = fieldScanner.getFields(object.getClass());
 
-		List<ColumnDescription<Field>> columnDescriptions = createColumnDescriptions();
+		List<ColumnDescription<GeneralizedField>> columnDescriptions = createColumnDescriptions();
 
 		table = new ListBasedTable<>(fields, columnDescriptions);
 		JTable internalTable = table.getInternalTable();
@@ -66,17 +66,17 @@ public class FieldTable extends JPanel implements ObjectView
 		table.applyViewSettings(settings, origin);
 	}
 
-	private List<ColumnDescription<Field>> createColumnDescriptions() {
+	private List<ColumnDescription<GeneralizedField>> createColumnDescriptions() {
 		return Arrays.asList(
-			new ColumnDescriptionBuilder<Field>("Name",		String.class,			field -> field.getName()					).valueFilter(ValueFilters.createWildcardFilter()).build(),
-			new ColumnDescriptionBuilder<Field>("Value",	ActionProvider.class, 	field -> getFieldValueActionProvider(field)	).valueFilter(ValueFilters.createWildcardFilter()).build(),
-			new ColumnDescriptionBuilder<Field>("Type",		Class.class,			field -> field.getType()					).valueFilter(ValueFilters.createWildcardFilter(o -> context.getDisplayText(o))).build(),
-			new ColumnDescriptionBuilder<Field>("Class",	Class.class,			field -> field.getDeclaringClass()			).valueFilter(ValueFilters.createSelectionFilter(context)).build(),
-			new ColumnDescriptionBuilder<Field>("Modifier",	Member.class,			field -> field								).valueFilter(ValueFilters.createModifierFilter(true)).build()
+			new ColumnDescriptionBuilder<GeneralizedField>("Name",		String.class,			field -> field.getName()					).valueFilter(ValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<GeneralizedField>("Value",		ActionProvider.class, 	field -> getFieldValueActionProvider(field)	).valueFilter(ValueFilters.createWildcardFilter()).build(),
+			new ColumnDescriptionBuilder<GeneralizedField>("Type",		Class.class,			field -> field.getType()					).valueFilter(ValueFilters.createWildcardFilter(o -> context.getDisplayText(o))).build(),
+			new ColumnDescriptionBuilder<GeneralizedField>("Class",		Class.class,			field -> field.getDeclaringClass()			).valueFilter(ValueFilters.createSelectionFilter(context)).build(),
+			new ColumnDescriptionBuilder<GeneralizedField>("Modifier",	Member.class,			field -> field								).valueFilter(ValueFilters.createModifierFilter(true)).build()
 		);
 	}
 
-	private ActionProvider getFieldValueActionProvider(Field field) {
+	private ActionProvider getFieldValueActionProvider(GeneralizedField field) {
 		String fieldName = field.getName();
 		Object fieldValue = ReflectionUtils.getFieldValue(field, object);
 		return new ActionProviderBuilder(context.getDisplayText(fieldValue), fieldValue, context)
