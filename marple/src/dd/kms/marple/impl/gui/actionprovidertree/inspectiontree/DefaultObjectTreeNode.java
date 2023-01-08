@@ -7,10 +7,10 @@ import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.zenodot.api.common.FieldScanner;
 import dd.kms.zenodot.api.common.FieldScannerBuilder;
+import dd.kms.zenodot.api.common.GeneralizedField;
 import dd.kms.zenodot.api.common.StaticMode;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
 import java.util.List;
 
 class DefaultObjectTreeNode extends AbstractInspectionTreeNode
@@ -31,9 +31,9 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 			return ImmutableList.of();
 		}
 		FieldScanner fieldScanner = FieldScannerBuilder.create().staticMode(StaticMode.NON_STATIC).build();
-		List<Field> fields = fieldScanner.getFields(object.getClass());
+		List<GeneralizedField> fields = fieldScanner.getFields(object.getClass());
 		ImmutableList.Builder<InspectionTreeNode> childBuilder = ImmutableList.builder();
-		for (Field field : fields) {
+		for (GeneralizedField field : fields) {
 			Object fieldValue = ReflectionUtils.getFieldValue(field, object);
 			InspectionTreeNode child = InspectionTreeNodes.create(field.getName(), fieldValue, context);
 			childBuilder.add(child);

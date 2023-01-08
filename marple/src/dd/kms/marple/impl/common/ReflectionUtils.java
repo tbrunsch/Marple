@@ -5,9 +5,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.primitives.Primitives;
 import dd.kms.zenodot.api.common.FieldScannerBuilder;
+import dd.kms.zenodot.api.common.GeneralizedField;
 import dd.kms.zenodot.api.common.StaticMode;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 public class ReflectionUtils
@@ -77,7 +77,7 @@ public class ReflectionUtils
 		return result;
 	}
 
-	public static Object getFieldValue(Field field, Object object) {
+	public static Object getFieldValue(GeneralizedField field, Object object) {
 		try {
 			field.setAccessible(true);
 			return field.get(object);
@@ -91,17 +91,17 @@ public class ReflectionUtils
 	 * Returns a multimap mapping each value from the set {@code fieldValues} to all
 	 * fields of the specified instance that are currently assigned that value.
 	 */
-	public static Multimap<Object, Field> findFieldValues(Object instance, Set<Object> fieldValues) {
-		Multimap<Object, Field> fieldsByValue = ArrayListMultimap.create();
+	public static Multimap<Object, GeneralizedField> findFieldValues(Object instance, Set<Object> fieldValues) {
+		Multimap<Object, GeneralizedField> fieldsByValue = ArrayListMultimap.create();
 		if (instance == null) {
 			return fieldsByValue;
 		}
-		List<Field> fields = FieldScannerBuilder.create()
+		List<GeneralizedField> fields = FieldScannerBuilder.create()
 			.ignoreShadowedFields(false)
 			.staticMode(StaticMode.NON_STATIC)
 			.build()
 			.getFields(instance.getClass());
-		for (Field field : fields) {
+		for (GeneralizedField field : fields) {
 			try {
 				field.setAccessible(true);
 				Object fieldValue = field.get(instance);

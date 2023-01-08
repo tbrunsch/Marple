@@ -11,10 +11,10 @@ import dd.kms.marple.impl.instancesearch.elementcollectors.MapElementCollector;
 import dd.kms.marple.impl.instancesearch.elementcollectors.MultimapElementCollector;
 import dd.kms.marple.impl.instancesearch.settings.SearchSettings;
 import dd.kms.zenodot.api.common.FieldScannerBuilder;
+import dd.kms.zenodot.api.common.GeneralizedField;
 import dd.kms.zenodot.api.common.StaticMode;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.BooleanSupplier;
@@ -120,7 +120,7 @@ class InstanceSearch
 		/*
 		 * Collect regular fields
 		 */
-		List<Field> fields = FieldScannerBuilder.create()
+		List<GeneralizedField> fields = FieldScannerBuilder.create()
 			.staticMode(settings.isSearchOnlyNonStaticFields() ? StaticMode.NON_STATIC : StaticMode.BOTH)
 			.ignoreShadowedFields(false)
 			.build()
@@ -128,7 +128,7 @@ class InstanceSearch
 		InstancePath classParent = null;
 		List<InstancePath> children = new ArrayList<>();
 		boolean classVisited = visitedClasses.contains(objectClass);
-		for (Field field : fields) {
+		for (GeneralizedField field : fields) {
 			boolean isStatic = Modifier.isStatic(field.getModifiers());
 			if (isStatic && (settings.isSearchOnlyNonStaticFields() || classVisited)) {
 				continue;

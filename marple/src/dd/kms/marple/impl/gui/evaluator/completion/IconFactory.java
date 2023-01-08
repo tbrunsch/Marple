@@ -4,6 +4,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import dd.kms.marple.impl.gui.common.GuiCommons;
 import dd.kms.zenodot.api.common.AccessModifier;
+import dd.kms.zenodot.api.common.GeneralizedField;
 import dd.kms.zenodot.api.result.CodeCompletion;
 import dd.kms.zenodot.api.result.CodeCompletionType;
 import dd.kms.zenodot.api.result.codecompletions.CodeCompletionField;
@@ -12,7 +13,6 @@ import dd.kms.zenodot.api.result.codecompletions.CodeCompletionMethod;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 class IconFactory
@@ -45,7 +45,7 @@ class IconFactory
 				return COLOR_OBJECT_TREE_NODE;
 			case FIELD: {
 				CodeCompletionField fieldCompletion = (CodeCompletionField) completion;
-				Field field = fieldCompletion.getField();
+				GeneralizedField field = fieldCompletion.getField();
 				AccessModifier accessModifier = AccessModifier.getValue(field.getModifiers());
 				return getColor(accessModifier);
 			}
