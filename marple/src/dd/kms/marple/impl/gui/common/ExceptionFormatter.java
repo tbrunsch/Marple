@@ -14,7 +14,12 @@ public class ExceptionFormatter
 			return null;
 		}
 		StringBuilder builder = new StringBuilder();
-		builder.append("<html><p><b>").append(t.getMessage().replace("\n", "<br/>")).append("</b></p>");
+		String message = t.getMessage();
+		if (message == null) {
+			Class<?> clazz = t.getClass();
+			message = clazz.getEnclosingClass() == null ? clazz.getSimpleName() : clazz.getName();
+		}
+		builder.append("<html><p><b>").append(message.replace("\n", "<br/>")).append("</b></p>");
 		Throwable cause = t.getCause();
 		if (cause != null) {
 			builder.append("<br/>").append(formatException(cause, false));
