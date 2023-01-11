@@ -13,8 +13,8 @@ import java.util.Objects;
 
 class GroupOperationExecutor extends AbstractOperationExecutor<GroupSettings>
 {
-	GroupOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, GroupSettings settings, InspectionContext context) {
-		super(iterable, commonElementType, settings, context);
+	GroupOperationExecutor(Object object, Iterable<?> iterable, Class<?> commonElementType, GroupSettings settings, InspectionContext context) {
+		super(object, iterable, commonElementType, settings, context);
 	}
 
 	@Override

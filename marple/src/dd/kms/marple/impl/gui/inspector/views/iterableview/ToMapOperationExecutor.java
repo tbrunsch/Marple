@@ -11,8 +11,8 @@ import java.util.Map;
 
 class ToMapOperationExecutor extends AbstractOperationExecutor<ToMapSettings>
 {
-	ToMapOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, ToMapSettings settings, InspectionContext context) {
-		super(iterable, commonElementType, settings, context);
+	ToMapOperationExecutor(Object object, Iterable<?> iterable, Class<?> commonElementType, ToMapSettings settings, InspectionContext context) {
+		super(object, iterable, commonElementType, settings, context);
 	}
 
 	@Override

@@ -19,7 +19,8 @@ public class IterableView extends JPanel implements ObjectView
 {
 	public static final String	NAME	= "Iterables";
 
-	private Iterable<?>				iterable;
+	private Object					object;
+	private Iterable<?>				iterableView;
 	private final Class<?>			commonElementType;
 	private final InspectionContext	context;
 
@@ -27,14 +28,15 @@ public class IterableView extends JPanel implements ObjectView
 	private final OperationPanel	operationPanel;
 	private final ResultPanel		resultPanel;
 
-	public IterableView(Iterable<?> iterable, InspectionContext context) {
+	public IterableView(Object object, Iterable<?> iterableView, InspectionContext context) {
 		super(new GridBagLayout());
 
-		this.iterable = iterable;
-		this.commonElementType = ReflectionUtils.getCommonSuperClass(this.iterable);
+		this.object = object;
+		this.iterableView = iterableView;
+		this.commonElementType = ReflectionUtils.getCommonSuperClass(this.iterableView);
 		this.context = context;
 
-		this.contextPanel = new ContextPanel(iterable, commonElementType, context);
+		this.contextPanel = new ContextPanel(iterableView, commonElementType, context);
 		this.operationPanel = new OperationPanel(commonElementType, context);
 		this.resultPanel = new ResultPanel(context);
 
@@ -87,19 +89,19 @@ public class IterableView extends JPanel implements ObjectView
 		Operation operation = settings.getOperation();
 		switch (operation) {
 			case FILTER:
-				return new FilterOperationExecutor(iterable, commonElementType, (FilterSettings) settings, context);
+				return new FilterOperationExecutor(object, iterableView, commonElementType, (FilterSettings) settings, context);
 			case MAP:
-				return new MapOperationExecutor(iterable, commonElementType, (MapSettings) settings, context);
+				return new MapOperationExecutor(object, iterableView, commonElementType, (MapSettings) settings, context);
 			case FOR_EACH:
-				return new ForEachOperationExecutor(iterable, commonElementType, (ForEachSettings) settings, context);
+				return new ForEachOperationExecutor(object, iterableView, commonElementType, (ForEachSettings) settings, context);
 			case COLLECT:
-				return new CollectOperationExecutor(iterable, commonElementType, (CollectSettings) settings, context);
+				return new CollectOperationExecutor(object, iterableView, commonElementType, (CollectSettings) settings, context);
 			case TO_MAP:
-				return new ToMapOperationExecutor(iterable, commonElementType, (ToMapSettings) settings, context);
+				return new ToMapOperationExecutor(object, iterableView, commonElementType, (ToMapSettings) settings, context);
 			case COUNT:
-				return new CountOperationExecutor(iterable, commonElementType, (CountSettings) settings, context);
+				return new CountOperationExecutor(object, iterableView, commonElementType, (CountSettings) settings, context);
 			case GROUP:
-				return new GroupOperationExecutor(iterable, commonElementType, (GroupSettings) settings, context);
+				return new GroupOperationExecutor(object, iterableView, commonElementType, (GroupSettings) settings, context);
 			default:
 				throw new IllegalStateException("Unsupported operation: " + operation);
 		}
@@ -107,7 +109,8 @@ public class IterableView extends JPanel implements ObjectView
 
 	@Override
 	public void dispose() {
-		iterable = null;
+		object = null;
+		iterableView = null;
 		contextPanel.dispose();
 		resultPanel.dispose();
 	}

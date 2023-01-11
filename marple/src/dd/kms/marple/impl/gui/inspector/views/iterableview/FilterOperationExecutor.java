@@ -15,8 +15,8 @@ import java.util.Map;
 
 class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 {
-	FilterOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, FilterSettings settings, InspectionContext context) {
-		super(iterable, commonElementType, settings, context);
+	FilterOperationExecutor(Object object, Iterable<?> iterable, Class<?> commonElementType, FilterSettings settings, InspectionContext context) {
+		super(object, iterable, commonElementType, settings, context);
 	}
 
 	@Override

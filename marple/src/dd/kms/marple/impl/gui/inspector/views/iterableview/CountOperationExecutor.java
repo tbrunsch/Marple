@@ -12,8 +12,8 @@ import java.util.TreeMap;
 
 class CountOperationExecutor extends AbstractOperationExecutor<CountSettings>
 {
-	CountOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, CountSettings settings, InspectionContext context) {
-		super(iterable, commonElementType, settings, context);
+	CountOperationExecutor(Object object, Iterable<?> iterable, Class<?> commonElementType, CountSettings settings, InspectionContext context) {
+		super(object, iterable, commonElementType, settings, context);
 	}
 
 	@Override

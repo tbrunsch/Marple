@@ -13,16 +13,18 @@ import java.util.function.Consumer;
 
 abstract class AbstractOperationExecutor<T extends OperationSettings>
 {
-	final Iterable<?>			iterable;
-	private final Class<?>		commonElementType;
+	final Object				object;
+	final Iterable<?>			iterableView;
+	final Class<?>				commonElementType;
 	final T						settings;
 	final InspectionContext		context;
 
 	private Consumer<Object>	resultConsumer;
 	private Consumer<String>	textConsumer;
 
-	AbstractOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, T settings, InspectionContext context) {
-		this.iterable = iterable;
+	AbstractOperationExecutor(Object object, Iterable<?> iterableView, Class<?> commonElementType, T settings, InspectionContext context) {
+		this.object = object;
+		this.iterableView = iterableView;
 		this.commonElementType = commonElementType;
 		this.settings = settings;
 		this.context = context;

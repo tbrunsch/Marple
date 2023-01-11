@@ -6,8 +6,8 @@ import dd.kms.zenodot.api.CompiledExpression;
 
 class ForEachOperationExecutor extends AbstractOperationExecutor<ForEachSettings>
 {
-	ForEachOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, ForEachSettings settings, InspectionContext context) {
-		super(iterable, commonElementType, settings, context);
+	ForEachOperationExecutor(Object object, Iterable<?> iterable, Class<?> commonElementType, ForEachSettings settings, InspectionContext context) {
+		super(object, iterable, commonElementType, settings, context);
 	}
 
 	@Override

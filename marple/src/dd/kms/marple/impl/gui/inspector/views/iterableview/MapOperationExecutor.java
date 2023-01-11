@@ -11,8 +11,8 @@ import java.util.List;
 
 class MapOperationExecutor extends AbstractOperationExecutor<MapSettings>
 {
-	MapOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, MapSettings settings, InspectionContext context) {
-		super(iterable, commonElementType, settings, context);
+	MapOperationExecutor(Object object, Iterable<?> iterable, Class<?> commonElementType, MapSettings settings, InspectionContext context) {
+		super(object, iterable, commonElementType, settings, context);
 	}
 
 	@Override
