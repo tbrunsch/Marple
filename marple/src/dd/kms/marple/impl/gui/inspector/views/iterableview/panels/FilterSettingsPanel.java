@@ -2,8 +2,9 @@ package dd.kms.marple.impl.gui.inspector.views.iterableview.panels;
 
 import com.google.common.collect.ImmutableMap;
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.gui.evaluator.textfields.CompiledExpressionInputTextField;
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
+import dd.kms.marple.impl.gui.evaluator.textfields.LambdaExpressionInputTextField;
+import dd.kms.marple.impl.gui.inspector.views.iterableview.FilterOperationExecutor;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.FilterResultType;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.FilterSettings;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
@@ -29,14 +30,13 @@ class FilterSettingsPanel extends AbstractOperationSettingsPanel
 
 	private final JLabel								filterLabel				= new JLabel("Filter condition:");
 	private final JPanel								filterPanel;
-	private final CompiledExpressionInputTextField		filterTF;
-	private final JLabel 								filterInfoLabel			= new JLabel("'this' always refers to the element currently processed");
+	private final LambdaExpressionInputTextField		filterTF;
 
 	FilterSettingsPanel(Class<?> commonElementType, InspectionContext context) {
-		filterTF = new CompiledExpressionInputTextField(context);
+		filterTF = new LambdaExpressionInputTextField(FilterOperationExecutor.FUNCTIONAL_INTERFACE, context);
 		filterPanel = new EvaluationTextFieldPanel(filterTF, context);
-		filterTF.setThisType(commonElementType);
-		filterTF.setExpression("true");
+		filterTF.setParameterTypes(commonElementType);
+		filterTF.setExpression("x -> true");
 
 		for (FilterResultType resultType : resultTypeToButton.keySet()) {
 			JToggleButton button = resultTypeToButton.get(resultType);
@@ -54,9 +54,11 @@ class FilterSettingsPanel extends AbstractOperationSettingsPanel
 		xPos = 0;
 		add(filterLabel,		new GridBagConstraints(xPos++, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 		add(filterPanel,		new GridBagConstraints(xPos++, yPos++, 2, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+	}
 
-		xPos = 0;
-		add(filterInfoLabel,	new GridBagConstraints(xPos++, yPos++, REMAINDER, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+	@Override
+	void setIterableType(Class<?> iterableType) {
+		filterTF.setThisType(iterableType);
 	}
 
 	@Override

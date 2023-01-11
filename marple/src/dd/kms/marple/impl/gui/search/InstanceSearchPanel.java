@@ -7,13 +7,14 @@ import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNodes;
 import dd.kms.marple.impl.gui.common.ExceptionFormatter;
 import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.impl.gui.evaluator.textfields.ClassInputTextField;
-import dd.kms.marple.impl.gui.evaluator.textfields.CompiledExpressionInputTextField;
+import dd.kms.marple.impl.gui.evaluator.textfields.LambdaExpressionInputTextField;
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.impl.instancesearch.InstancePath;
 import dd.kms.marple.impl.instancesearch.InstancePathFinder;
 import dd.kms.marple.impl.instancesearch.settings.SearchSettings;
 import dd.kms.marple.impl.instancesearch.settings.SearchSettingsBuilders;
 import dd.kms.zenodot.api.CompiledExpression;
+import dd.kms.zenodot.api.CompiledLambdaExpression;
 import dd.kms.zenodot.api.ParseException;
 
 import javax.annotation.Nullable;
@@ -45,7 +46,7 @@ class InstanceSearchPanel extends JPanel
 	private final ClassInputTextField				targetClassTF;
 	private final JPanel							targetClassPanel;
 	private final JCheckBox							targetFilterCB				= new JCheckBox("filter:");
-	private final CompiledExpressionInputTextField	targetFilterTF;
+	private final LambdaExpressionInputTextField	targetFilterTF;
 	private final JPanel							targetFilterPanel;
 	private final JLabel							optionsLabel				= new JLabel("Options:");
 	private final JCheckBox							onlyNonStaticFieldsCB		= new JCheckBox("non-static fields only");
@@ -85,7 +86,8 @@ class InstanceSearchPanel extends JPanel
 		targetClassTF = new ClassInputTextField(context);
 		targetClassTF.setExceptionConsumer(t -> showError(ExceptionFormatter.formatParseException(t)));
 		targetClassPanel = new EvaluationTextFieldPanel(targetClassTF, context);
-		targetFilterTF = new CompiledExpressionInputTextField(context);
+		targetFilterTF = new LambdaExpressionInputTextField(Predicate.class, context);
+		targetFilterTF.setExpression("x -> true");
 		targetFilterTF.setExceptionConsumer(t -> showError(ExceptionFormatter.formatParseException(t)));
 		targetFilterPanel = new EvaluationTextFieldPanel(targetFilterTF, context);
 
@@ -285,8 +287,9 @@ class InstanceSearchPanel extends JPanel
 			if (targetFilterCB.isSelected()) {
 				String targetFilterExpression = targetFilterTF.getText();
 				try {
-					CompiledExpression compiledFilter = targetFilterTF.evaluateText();
-					return o -> targetClass.isInstance(o) && applyFilter(compiledFilter, o);
+					CompiledLambdaExpression<?> compiledFilter = targetFilterTF.evaluateText();
+					Predicate<Object> filter = (Predicate<Object>) compiledFilter.evaluate(null);
+					return o -> targetClass.isInstance(o) && filter.test(o);
 				} catch (ParseException e) {
 					throw new SettingsException(ExceptionFormatter.formatParseException(e));
 				} catch (Throwable t) {
@@ -299,15 +302,6 @@ class InstanceSearchPanel extends JPanel
 			return o -> o == target;
 		} else {
 			throw createNoSearchOptionSelectedException();
-		}
-	}
-
-	private boolean applyFilter(CompiledExpression filter, Object o) {
-		try {
-			Object result = filter.evaluate(o);
-			return Boolean.TRUE.equals(result);
-		} catch (Exception e) {
-			return false;
 		}
 	}
 
@@ -458,7 +452,7 @@ class InstanceSearchPanel extends JPanel
 			showError(e.getMessage());
 			return;
 		}
-		targetFilterTF.setThisType(targetClass);
+		targetFilterTF.setParameterTypes(targetClass);
 		updateEnabilities();
 	}
 

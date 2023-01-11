@@ -1,8 +1,9 @@
 package dd.kms.marple.impl.gui.inspector.views.iterableview.panels;
 
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.gui.evaluator.textfields.CompiledExpressionInputTextField;
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
+import dd.kms.marple.impl.gui.evaluator.textfields.LambdaExpressionInputTextField;
+import dd.kms.marple.impl.gui.inspector.views.iterableview.ToMapOperationExecutor;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.ToMapSettings;
 
@@ -17,24 +18,22 @@ class ToMapSettingsPanel extends AbstractOperationSettingsPanel
 {
 	private final JLabel							keyMappingLabel			= new JLabel("Key mapping:");
 	private final JPanel							keyMappingPanel;
-	private final CompiledExpressionInputTextField	keyMappingTF;
+	private final LambdaExpressionInputTextField	keyMappingTF;
 
 	private final JLabel							valueMappingLabel		= new JLabel("Value mapping:");
 	private final JPanel							valueMappingPanel;
-	private final CompiledExpressionInputTextField	valueMappingTF;
-
-	private final JLabel 							mappingInfoLabel		= new JLabel("'this' always refers to the element currently processed");
+	private final LambdaExpressionInputTextField	valueMappingTF;
 
 	ToMapSettingsPanel(Class<?> commonElementType, InspectionContext context) {
-		keyMappingTF = new CompiledExpressionInputTextField(context);
+		keyMappingTF = new LambdaExpressionInputTextField(ToMapOperationExecutor.FUNCTIONAL_INTERFACE_KEYS, context);
 		keyMappingPanel = new EvaluationTextFieldPanel(keyMappingTF, context);
-		keyMappingTF.setThisType(commonElementType);
-		keyMappingTF.setExpression("this");
+		keyMappingTF.setParameterTypes(commonElementType);
+		keyMappingTF.setExpression("x -> x");
 
-		valueMappingTF = new CompiledExpressionInputTextField(context);
+		valueMappingTF = new LambdaExpressionInputTextField(ToMapOperationExecutor.FUNCTIONAL_INTERFACE_VALUES, context);
 		valueMappingPanel = new EvaluationTextFieldPanel(valueMappingTF, context);
-		valueMappingTF.setThisType(commonElementType);
-		valueMappingTF.setExpression("1");
+		valueMappingTF.setParameterTypes(commonElementType);
+		valueMappingTF.setExpression("x -> 1");
 
 		int yPos = 0;
 		int xPos = 0;
@@ -44,9 +43,12 @@ class ToMapSettingsPanel extends AbstractOperationSettingsPanel
 		xPos = 0;
 		add(valueMappingLabel,		new GridBagConstraints(xPos++, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 		add(valueMappingPanel,		new GridBagConstraints(xPos++, yPos++, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+	}
 
-		xPos = 0;
-		add(mappingInfoLabel,	new GridBagConstraints(xPos++, yPos++, REMAINDER, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+	@Override
+	void setIterableType(Class<?> iterableType) {
+		keyMappingTF.setThisType(iterableType);
+		valueMappingTF.setThisType(iterableType);
 	}
 
 	@Override

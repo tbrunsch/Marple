@@ -12,6 +12,7 @@ abstract class AbstractOperationSettingsPanel extends JPanel
 		super(new GridBagLayout());
 	}
 
+	abstract void setIterableType(Class<?> iterableType);
 	abstract void setExceptionConsumer(Consumer<Throwable> exceptionConsumer);
 	abstract void setAction(Runnable action);
 	abstract OperationSettings getSettings();

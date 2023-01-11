@@ -2,7 +2,6 @@ package dd.kms.marple.impl.gui.inspector.views.iterableview.panels;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.gui.Disposable;
-import dd.kms.marple.impl.gui.common.GuiCommons;
 import dd.kms.marple.impl.gui.inspector.views.fieldview.FieldTree;
 
 import javax.swing.*;

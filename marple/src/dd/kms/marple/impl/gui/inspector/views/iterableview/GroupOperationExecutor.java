@@ -6,13 +6,15 @@ import com.google.common.collect.MultimapBuilder;
 import com.google.common.primitives.Primitives;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.GroupSettings;
-import dd.kms.zenodot.api.CompiledExpression;
-import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.CompiledLambdaExpression;
 
 import java.util.Objects;
+import java.util.function.Function;
 
-class GroupOperationExecutor extends AbstractOperationExecutor<GroupSettings>
+public class GroupOperationExecutor extends AbstractOperationExecutor<GroupSettings>
 {
+	public static final Class<Function>	FUNCTIONAL_INTERFACE	= Function.class;
+
 	GroupOperationExecutor(Object object, Iterable<?> iterable, Class<?> commonElementType, GroupSettings settings, InspectionContext context) {
 		super(object, iterable, commonElementType, settings, context);
 	}
@@ -20,17 +22,15 @@ class GroupOperationExecutor extends AbstractOperationExecutor<GroupSettings>
 	@Override
 	void execute() throws Exception {
 		String mappingExpression = settings.getMappingExpression();
-		CompiledExpression compiledExpression = compile(mappingExpression);
-		Class<?> resultClass = compiledExpression.getResultType();
-		if (Primitives.unwrap(resultClass) == void.class) {
-			throw new ParseException(mappingExpression, mappingExpression.length(), "The mapping expression must evaluate to something different than void", null);
-		}
+		CompiledLambdaExpression<Function> compiledExpression = compile(mappingExpression, FUNCTIONAL_INTERFACE, commonElementType);
+		Class<?> resultClass = compiledExpression.getLambdaResultType();
+		Function<Object, Object> mapping = compiledExpression.evaluate(object);
 		Multimap<Object, Object> result = Comparable.class.isAssignableFrom(Primitives.wrap(resultClass))
 										? MultimapBuilder.treeKeys(this::compare).linkedListValues().build()
 										: ArrayListMultimap.create();
-		for (Object element : iterable) {
+		for (Object element : iterableView) {
 			try {
-				Object group = compiledExpression.evaluate(element);
+				Object group = mapping.apply(element);
 				result.put(group, element);
 			} catch (Exception e) {
 				throw wrapEvaluationException(e, element);

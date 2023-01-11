@@ -5,6 +5,7 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.impl.evaluator.ExpressionEvaluators;
+import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.Operation;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
 import dd.kms.zenodot.api.*;
 
@@ -54,13 +55,13 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 		return new Exception("Error evaluating exception for '" + context.getDisplayText(element) + "'", e);
 	}
 
-	CompiledExpression compile(String expression) throws ParseException {
+	<F> CompiledLambdaExpression<F> compile(String expression, Class<F> functionalInterface, Class<?>... parameterTypes) throws ParseException {
 		ExpressionEvaluator evaluator = context.getEvaluator();
 		List<Variable> variables = evaluator.getVariables();
 		Variables variableCollection = ExpressionEvaluators.toVariableCollection(variables, true);
-		ExpressionParser parser = Parsers.createExpressionParserBuilder(evaluator.getParserSettings())
+		LambdaExpressionParser<F> parser = Parsers.createExpressionParserBuilder(evaluator.getParserSettings())
 			.variables(variableCollection)
-			.createExpressionParser();
-		return parser.compile(expression, commonElementType);
+			.createLambdaParser(functionalInterface, parameterTypes);
+		return parser.compile(expression, object);
 	}
 }

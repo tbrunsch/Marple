@@ -3,15 +3,17 @@ package dd.kms.marple.impl.gui.inspector.views.iterableview;
 import com.google.common.primitives.Primitives;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.CountSettings;
-import dd.kms.zenodot.api.CompiledExpression;
-import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.CompiledLambdaExpression;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
 
-class CountOperationExecutor extends AbstractOperationExecutor<CountSettings>
+public class CountOperationExecutor extends AbstractOperationExecutor<CountSettings>
 {
+	public static final Class<Function>	FUNCTIONAL_INTERFACE	=Function.class;
+
 	CountOperationExecutor(Object object, Iterable<?> iterable, Class<?> commonElementType, CountSettings settings, InspectionContext context) {
 		super(object, iterable, commonElementType, settings, context);
 	}
@@ -19,17 +21,15 @@ class CountOperationExecutor extends AbstractOperationExecutor<CountSettings>
 	@Override
 	void execute() throws Exception {
 		String mappingExpression = settings.getMappingExpression();
-		CompiledExpression compiledExpression = compile(mappingExpression);
-		Class<?> resultClass = compiledExpression.getResultType();
-		if (Primitives.unwrap(resultClass) == void.class) {
-			throw new ParseException(mappingExpression, mappingExpression.length(), "The mapping expression must evaluate to something different than void", null);
-		}
+		CompiledLambdaExpression<Function> compiledExpression = compile(mappingExpression, FUNCTIONAL_INTERFACE, commonElementType);
+		Class<?> resultClass = compiledExpression.getLambdaResultType();
+		Function<Object, Object> mapping = compiledExpression.evaluate(object);
 		Map<Object, Integer> result = Comparable.class.isAssignableFrom(Primitives.wrap(resultClass))
 										? new TreeMap<>()
 										: new HashMap<>();
-		for (Object element : iterable) {
+		for (Object element : iterableView) {
 			try {
-				Object group = compiledExpression.evaluate(element);
+				Object group = mapping.apply(element);
 				Integer count = result.get(group);
 				if (count == null) {
 					count = 0;

@@ -1,13 +1,14 @@
 package dd.kms.marple.impl.gui.inspector.views.iterableview.panels;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.impl.gui.inspector.views.iterableview.MapOperationExecutor;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.MapSettings;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
 
 class MapSettingsPanel extends AbstractMapSettingsPanel
 {
 	MapSettingsPanel(Class<?> commonElementType, InspectionContext context) {
-		super(commonElementType, context);
+		super(MapOperationExecutor.FUNCTIONAL_INTERFACE, commonElementType, context);
 	}
 
 	@Override

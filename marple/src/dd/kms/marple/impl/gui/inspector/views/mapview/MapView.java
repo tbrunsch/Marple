@@ -53,6 +53,7 @@ public class MapView extends JPanel implements ObjectView
 		add(operationPanel,	new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		add(resultPanel,	new GridBagConstraints(0, yPos++, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 
+		operationPanel.setMapType(map.getClass());
 		operationPanel.setExceptionConsumer(e -> resultPanel.displayException(e));
 		operationPanel.setAction(this::onRunOperation);
 	}
