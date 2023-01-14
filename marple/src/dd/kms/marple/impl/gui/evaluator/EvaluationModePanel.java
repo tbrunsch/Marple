@@ -27,30 +27,30 @@ class EvaluationModePanel extends JPanel
 
 	private static final int	NUM_EVALUATION_MODES	= EVALUATION_MODE_BY_VALUE.size();
 
-	private static final String	INFO_STATIC_TYPING		= "<html><p>" +
+	private static final String	INFO_STATIC_TYPING		= "<html><b>Static typing</b>" +
 		"<ul>" +
 		"<li>evaluation based on declared types</li>" +
 		"<li>no side-effects until expression evaluation has completed successfully</li>" +
 		"</ul>" +
-		"</p></html>";
+		"</html>";
 
-	private static final String	INFO_MIXED_TYPING		= "<html><p>" +
+	private static final String	INFO_MIXED_TYPING		= "<html><b>Mixed typing</b>" +
 		"<ul>" +
 		"<li>evaluation based on runtime types</li>" +
 		"<li>no methods are executed to determine their runtime return types</li>" +
 		"<li>no side-effects until expression evaluation has completed successfully</li>" +
 		"<li>avoids most casts</li>" +
 		"</ul>" +
-		"</p></html>";
+		"</html>";
 
-	private static final String	INFO_DYNAMIC_TYPING		= "<html><p>" +
+	private static final String	INFO_DYNAMIC_TYPING		= "<html><b>Dynamic typing</b>" +
 		"<ul>" +
 		"<li>evaluation based on runtime types</li>" +
 		"<li>methods are executed to determine their runtime return types</li>" +
 		"<li>possible side-effects even before expression evaluation has completed successfully</li>" +
 		"<li>avoids all casts</li>" +
 		"</ul>" +
-		"</p></html>";
+		"</html>";
 
 	private static final Map<EvaluationMode, String>	EVALUATION_MODE_TEXTS		= ImmutableMap.of(
 		EvaluationMode.STATIC_TYPING,	"static typing",
@@ -113,13 +113,14 @@ class EvaluationModePanel extends JPanel
 		EvaluationMode evaluationMode = getEvaluationMode();
 
 		int value = EVALUATION_MODE_BY_VALUE.inverse().get(evaluationMode);
-		evaluationModeSlider.setValue(value);
-
 		String evaluationModeText = EVALUATION_MODE_TEXTS.get(evaluationMode);
-		evaluationModeLabel.setText(evaluationModeText);
-
 		String evaluationModeInfoText = EVALUATION_MODE_INFO_TEXTS.get(evaluationMode);
+
+		evaluationModeSlider.setValue(value);
 		evaluationModeSlider.setToolTipText(evaluationModeInfoText);
+
+		evaluationModeLabel.setText(evaluationModeText);
+		evaluationModeLabel.setToolTipText(evaluationModeInfoText);
 	}
 
 	enum Alignment {HORIZONTAL, VERTICAL}
