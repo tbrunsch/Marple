@@ -49,7 +49,6 @@ Marple is a Swing-based Java library for analyzing Swing applications. Notable f
   - [Fields Tab](#fields-tab)
   - [Methods Tab](#methods-tab)
   - [Iterables Tab](#iterables-tab)
-    - [Lambdas](#lambdas)
     - [Filter](#filter)
     - [Map](#map)
     - [ForEach](#foreach)
