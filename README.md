@@ -6,7 +6,7 @@ Marple is a Swing-based Java library for analyzing Swing applications. Notable f
   - Highlighting of components referenced by fields
   - Analysis support for `Iterable`s, arrays, and `Map`s
   - Expression evaluation in the context of selected components
-  - An instance-based search
+  - Instance-based search
   - Support for data exchange with debuggers
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -427,16 +427,6 @@ The "Iterables" tab is only visible if the selected object is an `Iterable` or a
 
 ![Iterables Tab](images/inspection_dialog/iterables_tab.png)
 
-### Lambdas
-
-Zenodot, the library Marple uses to evaluate expressions, supports lambdas. However, due to the lack of type inference, implementing generic functional interfaces by a lambda is a bit tedious because you have to cast the parameters to the correct type when accessing them. This is why Marple uses a different notation for lambdas with one parameter for the "Iterables" tab: The body of the lambda is written as an expression or a statement expressed in terms of `this`. The keyword `this` refers to each element in the `Iterable`, one after another.
-
-*Examples:*
-
-  1. A predicate that checks whether an element is greater than 0.9 is written as `this > 0.9` (instead of `x -> x > 0.9`).
-  1. A function that maps an element to its String representation is written as `this.toString()` (instead of `x -> x.toString()` or `Object::toString`). Note that you can omit `this` in this case and simply write `toString()`.
-  1. A consumer that prints an element to the console is written as `System.out.println(this)` (instead of `x -> System.out.println(x)` or `System.out::println`).
-
 ### Filter
 
 You can specify an arbitrary predicate that is applicable to the elements of the `Iterable`. When pressing the "Run" button, the `Iterable` is filtered with this predicate and the result is displayed at the bottom.
@@ -463,7 +453,7 @@ You can specify an arbitrary (unary) function that is applicable to the elements
 
 ![Mapping Iterables](images/inspection_dialog/iterables_tab/map.png)
 
-In this example, each value is mapped to its square by using the expression `this*this`, which corresponds to the lambda `x -> x*x` in Java notation.  
+In this example, each value is mapped to its square.  
 
 ### ForEach
 
@@ -523,7 +513,7 @@ To resemble these in the "Iterables" tab, the following steps are required, assu
   1. Filter values that are greater than 0.999: <br/>   
   ![Step 1: Filter Values](images/inspection_dialog/iterables_tab/streaming/sample_1.png)   
 
-  1. Left-click onto the resulting `ArrayList` to use it as new context: <br/>  
+  1. Left-click onto the resulting `ArrayList` to use it as new context: <br/>
   ![Step 2: Select Filtered Result](images/inspection_dialog/iterables_tab/streaming/sample_2.png)
 
   1. Map values to the inverse cosine: <br/>    
@@ -541,15 +531,13 @@ The "Maps" tab is only visible if the selected object is a `Map`. This tab provi
 
 ![Maps Tab](images/inspection_dialog/maps_tab.png)
 
-All expressions have to be expressed in term of `this`. See [Lambdas](#lambdas) for details.
-
 ### Filter
 
 You can specify arbitrary predicates that are applicable to the keys or values of the `Map`, respectively. When pressing the "Run" button, the `Map` is filtered with these predicates and the result is displayed at the bottom:
 
 ![Filter](images/inspection_dialog/maps_tab/filter.png)
 
-In the previous example, a new map will be created with those entries whose keys exceed 0.6 and with values whose third character is not 9. Note that always both, keys and values, are filtered. If you only want to filter keys (values), then you can specify the filter expression `true` for the values (keys). 
+In the previous example, a new map will be created with those entries whose keys exceed 0.6 and with values whose third character is not 9. Note that always both, keys and values, are filtered. If you only want to filter keys (values), then you can specify the filter expression `x -> true` for the values (keys). 
 
 ### Map
 
@@ -557,7 +545,7 @@ You can specify arbitrary (unary) functions that are applicable to the keys and 
 
 ![Map](images/inspection_dialog/maps_tab/map.png)
 
-In the example above, a new map will be created with the squares of the original keys as new keys and the lengths of the original values as new values. Note that always both, keys and values, are mapped. If you only want to map keys (values), then you can specify the mapping expression `this` for the values (keys).
+In the example above, a new map will be created with the squares of the original keys as new keys and the lengths of the original values as new values. Note that always both, keys and values, are mapped. If you only want to map keys (values), then you can specify the mapping expression `x -> x` for the values (keys).
 
 # Evaluation Dialog
 

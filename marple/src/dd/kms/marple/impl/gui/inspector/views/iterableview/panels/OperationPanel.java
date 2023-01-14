@@ -58,7 +58,7 @@ public class OperationPanel extends JPanel
 		filterSettingsPanel		= new FilterSettingsPanel(commonElementType, context);
 		mapSettingsPanel		= new MapSettingsPanel(commonElementType, context);
 		forEachSettingsPanel	= new ForEachSettingsPanel(commonElementType, context);
-		collectSettingsPanel	= new CollectSettingsPanel(commonElementType, context);
+		collectSettingsPanel	= new CollectSettingsPanel(context);
 		toMapSettingsPanel		= new ToMapSettingsPanel(commonElementType, context);
 		countSettingsPanel		= new CountSettingsPanel(commonElementType, context);
 		groupSettingsPanel		= new GroupSettingsPanel(commonElementType, context);
@@ -97,6 +97,12 @@ public class OperationPanel extends JPanel
 			button.addActionListener(e -> showOperationSettings());
 		}
 		showOperationSettings();
+	}
+
+	public void setIterableType(Class<?> iterableType) {
+		for (AbstractOperationSettingsPanel operationSettingsPanel : operationToSettingsPanel.values()) {
+			operationSettingsPanel.setIterableType(iterableType);
+		}
 	}
 
 	public void setExceptionConsumer(Consumer<Throwable> exceptionConsumer) {

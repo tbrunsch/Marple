@@ -5,6 +5,7 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.impl.evaluator.ExpressionEvaluators;
+import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.Operation;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
 import dd.kms.zenodot.api.*;
 
@@ -13,16 +14,18 @@ import java.util.function.Consumer;
 
 abstract class AbstractOperationExecutor<T extends OperationSettings>
 {
-	final Iterable<?>			iterable;
-	private final Class<?>		commonElementType;
+	final Object				object;
+	final Iterable<?>			iterableView;
+	final Class<?>				commonElementType;
 	final T						settings;
 	final InspectionContext		context;
 
 	private Consumer<Object>	resultConsumer;
 	private Consumer<String>	textConsumer;
 
-	AbstractOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, T settings, InspectionContext context) {
-		this.iterable = iterable;
+	AbstractOperationExecutor(Object object, Iterable<?> iterableView, Class<?> commonElementType, T settings, InspectionContext context) {
+		this.object = object;
+		this.iterableView = iterableView;
 		this.commonElementType = commonElementType;
 		this.settings = settings;
 		this.context = context;
@@ -52,11 +55,13 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 		return new Exception("Error evaluating exception for '" + context.getDisplayText(element) + "'", e);
 	}
 
-	CompiledExpression compile(String expression) throws ParseException {
+	<F> CompiledLambdaExpression<F> compile(String expression, Class<F> functionalInterface, Class<?>... parameterTypes) throws ParseException {
 		ExpressionEvaluator evaluator = context.getEvaluator();
 		List<Variable> variables = evaluator.getVariables();
 		Variables variableCollection = ExpressionEvaluators.toVariableCollection(variables, true);
-		ExpressionParser parser = Parsers.createExpressionParser(evaluator.getParserSettings(), variableCollection);
-		return parser.compile(expression, commonElementType);
+		LambdaExpressionParser<F> parser = Parsers.createExpressionParserBuilder(evaluator.getParserSettings())
+			.variables(variableCollection)
+			.createLambdaParser(functionalInterface, parameterTypes);
+		return parser.compile(expression, object);
 	}
 }

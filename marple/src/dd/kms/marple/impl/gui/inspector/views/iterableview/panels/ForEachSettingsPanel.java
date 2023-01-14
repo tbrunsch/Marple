@@ -1,8 +1,9 @@
 package dd.kms.marple.impl.gui.inspector.views.iterableview.panels;
 
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.gui.evaluator.textfields.CompiledExpressionInputTextField;
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
+import dd.kms.marple.impl.gui.evaluator.textfields.LambdaExpressionInputTextField;
+import dd.kms.marple.impl.gui.inspector.views.iterableview.ForEachOperationExecutor;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.ForEachSettings;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
 
@@ -17,22 +18,23 @@ class ForEachSettingsPanel extends AbstractOperationSettingsPanel
 {
 	private final JLabel							consumerLabel			= new JLabel("Consumer:");
 	private final JPanel							consumerPanel;
-	private final CompiledExpressionInputTextField	consumerTF;
-	private final JLabel 							consumerInfoLabel		= new JLabel("'this' always refers to the element currently processed");
+	private final LambdaExpressionInputTextField	consumerTF;
 
 	ForEachSettingsPanel(Class<?> commonElementType, InspectionContext context) {
-		consumerTF = new CompiledExpressionInputTextField(context);
+		consumerTF = new LambdaExpressionInputTextField(ForEachOperationExecutor.FUNCTIONAL_INTERFACE, context);
 		consumerPanel = new EvaluationTextFieldPanel(consumerTF, context);
-		consumerTF.setThisType(commonElementType);
-		consumerTF.setExpression("System.out.println(this)");
+		consumerTF.setParameterTypes(commonElementType);
+		consumerTF.setExpression("x -> System.out.println(x)");
 
 		int yPos = 0;
 		int xPos = 0;
 		add(consumerLabel,		new GridBagConstraints(xPos++, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 		add(consumerPanel,		new GridBagConstraints(xPos++, yPos++, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+	}
 
-		xPos = 0;
-		add(consumerInfoLabel,	new GridBagConstraints(xPos++, yPos++, REMAINDER, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+	@Override
+	void setIterableType(Class<?> iterableType) {
+		consumerTF.setThisType(iterableType);
 	}
 
 	@Override

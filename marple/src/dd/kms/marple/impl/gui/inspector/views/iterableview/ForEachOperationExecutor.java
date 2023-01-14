@@ -2,22 +2,27 @@ package dd.kms.marple.impl.gui.inspector.views.iterableview;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.ForEachSettings;
-import dd.kms.zenodot.api.CompiledExpression;
+import dd.kms.zenodot.api.CompiledLambdaExpression;
 
-class ForEachOperationExecutor extends AbstractOperationExecutor<ForEachSettings>
+import java.util.function.Consumer;
+
+public class ForEachOperationExecutor extends AbstractOperationExecutor<ForEachSettings>
 {
-	ForEachOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, ForEachSettings settings, InspectionContext context) {
-		super(iterable, commonElementType, settings, context);
+	public static final Class<Consumer>	FUNCTIONAL_INTERFACE	= Consumer.class;
+
+	ForEachOperationExecutor(Object object, Iterable<?> iterable, Class<?> commonElementType, ForEachSettings settings, InspectionContext context) {
+		super(object, iterable, commonElementType, settings, context);
 	}
 
 	@Override
 	void execute() throws Exception {
 		String consumerExpression = settings.getConsumerExpression();
-		CompiledExpression compiledExpression = compile(consumerExpression);
+		CompiledLambdaExpression<Consumer> compiledExpression = compile(consumerExpression, FUNCTIONAL_INTERFACE, commonElementType);
+		Consumer<Object> consumer = compiledExpression.evaluate(object);
 		int count = 0;
-		for (Object element : iterable) {
+		for (Object element : iterableView) {
 			try {
-				compiledExpression.evaluate(element);
+				consumer.accept(element);
 			} catch (Exception e) {
 				throw wrapEvaluationException(e, element);
 			}

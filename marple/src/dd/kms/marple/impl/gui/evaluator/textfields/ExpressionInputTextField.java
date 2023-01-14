@@ -77,7 +77,9 @@ public class ExpressionInputTextField extends AbstractExpressionInputTextField<O
 	}
 
 	private ExpressionParser createParser(Variables variables) {
-		return Parsers.createExpressionParser(getParserSettings(), variables);
+		return Parsers.createExpressionParserBuilder(getParserSettings())
+			.variables(variables)
+			.createExpressionParser();
 	}
 
 	@Override

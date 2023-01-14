@@ -4,43 +4,44 @@ import com.google.common.collect.Lists;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.common.UniformView;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.CollectSettings;
-import dd.kms.zenodot.api.CompiledExpression;
+import dd.kms.zenodot.api.CompiledLambdaExpression;
 import dd.kms.zenodot.api.ParseException;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 
-class CollectOperationExecutor extends AbstractOperationExecutor<CollectSettings>
+public class CollectOperationExecutor extends AbstractOperationExecutor<CollectSettings>
 {
-	CollectOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, CollectSettings settings, InspectionContext context) {
-		super(iterable, commonElementType, settings, context);
+	public static final Class<Supplier>	FUNCTIONAL_INTERFACE	= Supplier.class;
+
+	CollectOperationExecutor(Object object, Iterable<?> iterable, Class<?> commonElementType, CollectSettings settings, InspectionContext context) {
+		super(object, iterable, commonElementType, settings, context);
 	}
 
 	@Override
 	void execute() throws Exception {
 		String constructorExpression = settings.getConstructorExpression();
-		CompiledExpression compiledExpression = compile(constructorExpression);
-		Class<?> resultClass = compiledExpression.getResultType();
+		CompiledLambdaExpression<Supplier> compiledExpression = compile(constructorExpression, FUNCTIONAL_INTERFACE);
+		Class<?> resultClass = compiledExpression.getLambdaResultType();
+		Supplier<Object> supplier = compiledExpression.evaluate(object);
 		if (Collection.class.isAssignableFrom(resultClass)) {
-			Collection<Object> collection = (Collection<Object>) compiledExpression.evaluate(null);
+			Collection<Object> collection = (Collection<Object>) supplier.get();
 			collection.clear();
-			for (Object element : iterable) {
+			for (Object element : iterableView) {
 				try {
 					collection.add(element);
 				} catch (Exception e) {
 					throw wrapEvaluationException(e, element);
 				}
 			}
-			displayResult(compiledExpression.evaluate(null));
+			displayResult(collection);
 		} else if (resultClass.isArray()) {
-			Object array = compiledExpression.evaluate(null);
-			final List<?> list;
-			if (UniformView.canViewAsList(iterable)) {
-				list = UniformView.asList(iterable);
-			} else {
-				list = Lists.newArrayList(iterable);
-			}
+			Object array = supplier.get();
+			List<?> list = UniformView.canViewAsList(iterableView)
+				? UniformView.asList(iterableView)
+				: Lists.newArrayList(iterableView);
 			int length = list.size();
 			if (Array.getLength(array) != length) {
 				array = Array.newInstance(array.getClass().getComponentType(), length);

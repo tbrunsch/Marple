@@ -1,33 +1,29 @@
 package dd.kms.marple.impl.gui.inspector.views.iterableview;
 
-import com.google.common.primitives.Primitives;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.FilterResultType;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.FilterSettings;
-import dd.kms.zenodot.api.CompiledExpression;
-import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.CompiledLambdaExpression;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
-class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
+public class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 {
-	FilterOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, FilterSettings settings, InspectionContext context) {
-		super(iterable, commonElementType, settings, context);
+	public static final Class<Predicate>	FUNCTIONAL_INTERFACE	= Predicate.class;
+
+	FilterOperationExecutor(Object object, Iterable<?> iterable, Class<?> commonElementType, FilterSettings settings, InspectionContext context) {
+		super(object, iterable, commonElementType, settings, context);
 	}
 
 	@Override
 	void execute() throws Exception {
 		String filterExpression = settings.getFilterExpression();
-		CompiledExpression compiledExpression = compile(filterExpression);
-		Class<?> resultClass = compiledExpression.getResultType();
-		if (Primitives.unwrap(resultClass) != boolean.class) {
-			throw new ParseException(filterExpression, filterExpression.length(), "The filter expression must be a predicate", null);
-		}
-		PredicateWithException filter = o -> filter(compiledExpression, o);
+		CompiledLambdaExpression<Predicate> compiledExpression = compile(filterExpression, FUNCTIONAL_INTERFACE, commonElementType);
+		Predicate<Object> filter = compiledExpression.evaluate(object);
 		final Object filterResult;
 		FilterResultType resultType = settings.getResultType();
 		switch (resultType) {
@@ -43,26 +39,9 @@ class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 		displayResult(filterResult);
 	}
 
-	private boolean filter(CompiledExpression compiledFilterExpression, Object element) throws Exception {
-		Object result = compiledFilterExpression.evaluate(element);
-		if (result == null) {
-			throw new NullPointerException();
-		}
-		Class<?> resultClass = result.getClass();
-		if (Primitives.unwrap(resultClass) != boolean.class) {
-			String error = MessageFormat.format(
-				"Predicate does not yield a boolean, but an element of type {0} for element {1}",
-				resultClass.getName(),
-				context.getDisplayText(element)
-			);
-			throw new IllegalStateException(error);
-		}
-		return (Boolean) result;
-	}
-
-	private List<?> filterToList(PredicateWithException filter) throws Exception {
+	private List<?> filterToList(Predicate<Object> filter) throws Exception {
 		List<Object> result = new ArrayList<>();
-		for (Object element : iterable) {
+		for (Object element : iterableView) {
 			try {
 				if (filter.test(element)) {
 					result.add(element);
@@ -74,10 +53,10 @@ class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 		return result;
 	}
 
-	private Map<Integer, ?> filterToIndexMap(PredicateWithException filter) throws Exception {
+	private Map<Integer, ?> filterToIndexMap(Predicate<Object> filter) throws Exception {
 		Map<Integer, Object> result = new LinkedHashMap<>();
 		int index = 0;
-		for (Object element : iterable) {
+		for (Object element : iterableView) {
 			try {
 				if (filter.test(element)) {
 					result.put(index, element);
@@ -88,11 +67,5 @@ class FilterOperationExecutor extends AbstractOperationExecutor<FilterSettings>
 			index++;
 		}
 		return result;
-	}
-
-	@FunctionalInterface
-	private interface PredicateWithException
-	{
-		boolean test(Object o) throws Exception;
 	}
 }

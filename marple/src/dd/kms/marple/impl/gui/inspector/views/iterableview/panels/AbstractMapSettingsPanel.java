@@ -1,8 +1,8 @@
 package dd.kms.marple.impl.gui.inspector.views.iterableview.panels;
 
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.gui.evaluator.textfields.CompiledExpressionInputTextField;
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
+import dd.kms.marple.impl.gui.evaluator.textfields.LambdaExpressionInputTextField;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,22 +15,23 @@ abstract class AbstractMapSettingsPanel extends AbstractOperationSettingsPanel
 {
 	private final JLabel							mappingLabel		= new JLabel("Mapping:");
 	private final JPanel							mappingPanel;
-	private final CompiledExpressionInputTextField	mappingTF;
-	private final JLabel 							mappingInfoLabel	= new JLabel("'this' always refers to the element currently processed");
+	private final LambdaExpressionInputTextField	mappingTF;
 
-	AbstractMapSettingsPanel(Class<?> commonElementType, InspectionContext context) {
-		mappingTF = new CompiledExpressionInputTextField(context);
+	AbstractMapSettingsPanel(Class<?> functionalInterface, Class<?> commonElementType, InspectionContext context) {
+		mappingTF = new LambdaExpressionInputTextField(functionalInterface, context);
 		mappingPanel = new EvaluationTextFieldPanel(mappingTF, context);
-		mappingTF.setThisType(commonElementType);
-		mappingTF.setExpression("this");
+		mappingTF.setParameterTypes(commonElementType);
+		mappingTF.setExpression("x -> x");
 
 		int yPos = 0;
 		int xPos = 0;
 		add(mappingLabel,		new GridBagConstraints(xPos++, yPos,   1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 		add(mappingPanel,		new GridBagConstraints(xPos++, yPos++, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+	}
 
-		xPos = 0;
-		add(mappingInfoLabel,	new GridBagConstraints(xPos++, yPos++, REMAINDER, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+	@Override
+	void setIterableType(Class<?> iterableType) {
+		mappingTF.setThisType(iterableType);
 	}
 
 	@Override

@@ -61,7 +61,7 @@ public class VisualSettingsUtils
 
 	private static ObjectView createIterableView(Object object, InspectionContext context) {
 		return dd.kms.marple.impl.common.UniformView.canViewAsIterable(object)
-				? new dd.kms.marple.impl.gui.inspector.views.iterableview.IterableView(dd.kms.marple.impl.common.UniformView.asIterable(object), context)
+				? new dd.kms.marple.impl.gui.inspector.views.iterableview.IterableView(object, dd.kms.marple.impl.common.UniformView.asIterable(object), context)
 				: null;
 	}
 

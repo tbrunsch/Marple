@@ -1,32 +1,30 @@
 package dd.kms.marple.impl.gui.inspector.views.iterableview;
 
-import com.google.common.primitives.Primitives;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.MapSettings;
-import dd.kms.zenodot.api.CompiledExpression;
-import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.CompiledLambdaExpression;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
-class MapOperationExecutor extends AbstractOperationExecutor<MapSettings>
+public class MapOperationExecutor extends AbstractOperationExecutor<MapSettings>
 {
-	MapOperationExecutor(Iterable<?> iterable, Class<?> commonElementType, MapSettings settings, InspectionContext context) {
-		super(iterable, commonElementType, settings, context);
+	public static final Class<Function>	FUNCTIONAL_INTERFACE	= Function.class;
+
+	MapOperationExecutor(Object object, Iterable<?> iterable, Class<?> commonElementType, MapSettings settings, InspectionContext context) {
+		super(object, iterable, commonElementType, settings, context);
 	}
 
 	@Override
 	void execute() throws Exception {
 		String mappingExpression = settings.getMappingExpression();
-		CompiledExpression compiledExpression = compile(mappingExpression);
-		Class<?> resultClass = compiledExpression.getResultType();
-		if (Primitives.unwrap(resultClass) == void.class) {
-			throw new ParseException(mappingExpression, mappingExpression.length(), "The mapping expression must evaluate to something different than void", null);
-		}
+		CompiledLambdaExpression<Function> compiledExpression = compile(mappingExpression, FUNCTIONAL_INTERFACE, commonElementType);
+		Function<Object, Object> mapping = compiledExpression.evaluate(object);
 		List<Object> result = new ArrayList<>();
-		for (Object element : iterable) {
+		for (Object element : iterableView) {
 			try {
-				result.add(compiledExpression.evaluate(element));
+				result.add(mapping.apply(element));
 			} catch (Exception e) {
 				throw wrapEvaluationException(e, element);
 			}

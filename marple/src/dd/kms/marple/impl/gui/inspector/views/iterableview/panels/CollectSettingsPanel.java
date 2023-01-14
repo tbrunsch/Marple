@@ -1,8 +1,9 @@
 package dd.kms.marple.impl.gui.inspector.views.iterableview.panels;
 
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.gui.evaluator.textfields.CompiledExpressionInputTextField;
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
+import dd.kms.marple.impl.gui.evaluator.textfields.LambdaExpressionInputTextField;
+import dd.kms.marple.impl.gui.inspector.views.iterableview.CollectOperationExecutor;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.CollectSettings;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
 
@@ -17,14 +18,13 @@ class CollectSettingsPanel extends AbstractOperationSettingsPanel
 {
 	private final JLabel							constructorLabel		= new JLabel("Constructor expression:");
 	private final JPanel							constructorPanel;
-	private final CompiledExpressionInputTextField	constructorTF;
+	private final LambdaExpressionInputTextField	constructorTF;
 	private final JLabel 							constructorInfoLabel	= new JLabel("Create a Collection or an array for holding the elements");
 
-	CollectSettingsPanel(Class<?> commonElementType, InspectionContext context) {
-		constructorTF = new CompiledExpressionInputTextField(context);
+	CollectSettingsPanel(InspectionContext context) {
+		constructorTF = new LambdaExpressionInputTextField(CollectOperationExecutor.FUNCTIONAL_INTERFACE, context);
 		constructorPanel = new EvaluationTextFieldPanel(constructorTF, context);
-		constructorTF.setThisType(commonElementType);
-		constructorTF.setExpression("new java.util.ArrayList()");
+		constructorTF.setExpression("() -> new java.util.ArrayList()");
 
 		int yPos = 0;
 		int xPos = 0;
@@ -33,6 +33,11 @@ class CollectSettingsPanel extends AbstractOperationSettingsPanel
 
 		xPos = 0;
 		add(constructorInfoLabel,	new GridBagConstraints(xPos++, yPos++, REMAINDER, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
+	}
+
+	@Override
+	void setIterableType(Class<?> iterableType) {
+		constructorTF.setThisType(iterableType);
 	}
 
 	@Override

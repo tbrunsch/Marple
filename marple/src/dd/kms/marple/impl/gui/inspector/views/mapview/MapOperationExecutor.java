@@ -1,16 +1,18 @@
 package dd.kms.marple.impl.gui.inspector.views.mapview;
 
-import com.google.common.primitives.Primitives;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.inspector.views.mapview.settings.MapSettings;
-import dd.kms.zenodot.api.CompiledExpression;
-import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.CompiledLambdaExpression;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
-class MapOperationExecutor extends AbstractOperationExecutor<MapSettings>
+public class MapOperationExecutor extends AbstractOperationExecutor<MapSettings>
 {
+	public static final Class<Function>	FUNCTIONAL_INTERFACE_KEYS	= Function.class;
+	public static final Class<Function>	FUNCTIONAL_INTERFACE_VALUES	= Function.class;
+
 	MapOperationExecutor(Map<?, ?> map, Class<?> commonKeyType, Class<?> commonValueType, MapSettings settings, InspectionContext context) {
 		super(map, commonKeyType, commonValueType, settings, context);
 	}
@@ -18,19 +20,20 @@ class MapOperationExecutor extends AbstractOperationExecutor<MapSettings>
 	@Override
 	void execute() throws Exception {
 		String keyMappingExpression = settings.getKeyMappingExpression();
-		CompiledExpression compiledKeyExpression = compileKeyExpression(keyMappingExpression);
-		checkMappingExpression(keyMappingExpression, compiledKeyExpression);
+		CompiledLambdaExpression<Function> compiledKeyExpression = compile(keyMappingExpression, FUNCTIONAL_INTERFACE_KEYS, commonKeyType);
 
 		String valueMappingExpression = settings.getValueMappingExpression();
-		CompiledExpression compiledValueExpression = compileValueExpression(valueMappingExpression);
-		checkMappingExpression(valueMappingExpression, compiledValueExpression);
+		CompiledLambdaExpression<Function> compiledValueExpression = compile(valueMappingExpression, FUNCTIONAL_INTERFACE_VALUES, commonValueType);
+
+		Function<Object, Object> keyMapping = compiledKeyExpression.evaluate(map);
+		Function<Object, Object> valueMapping = compiledValueExpression.evaluate(map);
 
 		Map<Object, Object> result = new LinkedHashMap<>();
 		for (Map.Entry<?, ?> entry : map.entrySet()) {
 			Object key = entry.getKey();
 			Object mappedKey;
 			try {
-				mappedKey = compiledKeyExpression.evaluate(key);
+				mappedKey = keyMapping.apply(key);
 			} catch (Exception e) {
 				throw wrapEvaluationException(e, key);
 			}
@@ -38,7 +41,7 @@ class MapOperationExecutor extends AbstractOperationExecutor<MapSettings>
 			Object value = entry.getValue();
 			Object mappedValue;
 			try {
-				mappedValue = compiledValueExpression.evaluate(value);
+				mappedValue = valueMapping.apply(value);
 			} catch (Exception e) {
 				throw wrapEvaluationException(e, value);
 			}
@@ -46,12 +49,5 @@ class MapOperationExecutor extends AbstractOperationExecutor<MapSettings>
 			result.put(mappedKey, mappedValue);
 		}
 		displayResult(result);
-	}
-
-	private void checkMappingExpression(String mappingExpression, CompiledExpression compiledExpression) throws ParseException {
-		Class<?> resultClass = compiledExpression.getResultType();
-		if (Primitives.unwrap(resultClass) == void.class) {
-			throw new ParseException(mappingExpression, mappingExpression.length(), "The mapping expression must evaluate to something different than void", null);
-		}
 	}
 }

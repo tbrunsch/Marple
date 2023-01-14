@@ -4,6 +4,7 @@
 
   - switched to Zenodot 0.3 (lambda support, new evaluation mode "mixed typing" that is similar to dynamic typing, but without side effects, accessing the field "length" of arrays)
   - made new evaluation mode "mixed typing" the default evaluation mode
+  - removed Marple workaround for specifying lambdas
   - improved display of lists
   - added possibility to provide an initial expression and to suggest related objects when evaluating certain objects
   - added expression evaluation history

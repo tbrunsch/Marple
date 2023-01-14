@@ -74,6 +74,12 @@ public class OperationPanel extends JPanel
 		showOperationSettings();
 	}
 
+	public void setMapType(Class<? extends Map> mapType) {
+		for (AbstractOperationSettingsPanel operationSettingsPanel : operationToSettingsPanel.values()) {
+			operationSettingsPanel.setMapType(mapType);
+		}
+	}
+
 	public void setExceptionConsumer(Consumer<Throwable> exceptionConsumer) {
 		for (AbstractOperationSettingsPanel operationSettingsPanel : operationToSettingsPanel.values()) {
 			operationSettingsPanel.setExceptionConsumer(exceptionConsumer);

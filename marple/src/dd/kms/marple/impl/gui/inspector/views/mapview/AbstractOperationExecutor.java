@@ -14,11 +14,11 @@ import java.util.function.Consumer;
 
 abstract class AbstractOperationExecutor<T extends OperationSettings>
 {
-	final Map<?, ?>				map;
-	private final Class<?>		commonKeyType;
-	private final Class<?>		commonValueType;
-	final T						settings;
-	final InspectionContext		context;
+	final Map<?, ?>			map;
+	final Class<?>			commonKeyType;
+	final Class<?>			commonValueType;
+	final T					settings;
+	final InspectionContext	context;
 
 	private Consumer<Object>	resultConsumer;
 	private Consumer<String>	textConsumer;
@@ -55,19 +55,13 @@ abstract class AbstractOperationExecutor<T extends OperationSettings>
 		return new Exception("Error evaluating exception for '" + context.getDisplayText(element) + "'", e);
 	}
 
-	CompiledExpression compileKeyExpression(String expression) throws ParseException {
-		return compile(expression, commonKeyType);
-	}
-
-	CompiledExpression compileValueExpression(String expression) throws ParseException {
-		return compile(expression, commonValueType);
-	}
-
-	private CompiledExpression compile(String expression, Class<?> type) throws ParseException {
+	<F> CompiledLambdaExpression<F> compile(String expression, Class<F> functionalInterface, Class<?>... parameterTypes) throws ParseException {
 		ExpressionEvaluator evaluator = context.getEvaluator();
 		List<Variable> variables = evaluator.getVariables();
 		Variables variableCollection = ExpressionEvaluators.toVariableCollection(variables, true);
-		ExpressionParser parser = Parsers.createExpressionParser(evaluator.getParserSettings(), variableCollection);
-		return parser.compile(expression, type);
+		LambdaExpressionParser<F> parser = Parsers.createExpressionParserBuilder(evaluator.getParserSettings())
+			.variables(variableCollection)
+			.createLambdaParser(functionalInterface, parameterTypes);
+		return parser.compile(expression, map);
 	}
 }
