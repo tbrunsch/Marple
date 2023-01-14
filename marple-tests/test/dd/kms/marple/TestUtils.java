@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 class TestUtils
@@ -65,6 +66,7 @@ class TestUtils
 		evaluator.setParserSettings(parserSettings);
 		evaluator.setVariables(ImmutableList.of(variable1, variable2));
 
+		CompletableFuture.runAsync(ObjectInspectionFramework::preloadClasses);
 		ObjectInspectionFramework.register(inspectionSettings);
 
 		DebugSupport.SLOTS[0] = "Use these slots for data exchange between Marple and your debugger.";

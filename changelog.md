@@ -9,6 +9,7 @@
   - added possibility to provide an initial expression and to suggest related objects when evaluating certain objects
   - added expression evaluation history
   - added possibility to change variable values via expressions
+  - added method `ObjectInspectionFramework.preloadClasses()` that allows loading classes before they are needed
 
 API changes:
 

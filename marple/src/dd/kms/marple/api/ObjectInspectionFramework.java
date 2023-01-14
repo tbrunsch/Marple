@@ -12,11 +12,18 @@ public class ObjectInspectionFramework
 {
 	private static dd.kms.marple.impl.ObjectInspectionFrameworkInstance FRAMEWORK_INSTANCE = null;
 
+	/**
+	 * This method to loads and initializes classes required by Marple whose initializers may require some time.
+	 * It is not necessary to call this method, but it can save some time when these classes are required later.
+	 */
+	public static void preloadClasses() {
+		Parsers.preloadClasses();
+	}
+
 	/*
 	 * Registration/Deregistration
 	 */
 	public static synchronized void register(InspectionSettings inspectionSettings) {
-		Parsers.preloadClasses();
 		dd.kms.marple.impl.ObjectInspectionFrameworkInstance frameworkInstance = getFrameworkInstance(true);
 		frameworkInstance.registerSettings(inspectionSettings);
 	}
