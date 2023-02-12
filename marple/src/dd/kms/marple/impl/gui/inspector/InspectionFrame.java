@@ -15,8 +15,6 @@ import dd.kms.marple.impl.gui.inspector.views.mapview.MapView;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

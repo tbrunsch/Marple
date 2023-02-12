@@ -18,7 +18,7 @@ public class DebugSupportPanel extends JPanel implements Disposable
 	private final CurrentObjectPanel		currentObjectPanel;
 	private final UnnamedSlotsPanel			unnamedSlotsPanel;
 	private final NamedSlotsPanel 			namedSlotsPanel;
-	private final BreakpointTriggerPanel	breakpointTriggerPanel;
+	private final TriggerBreakpointPanel	triggerBreakpointPanel;
 	private final JPanel					exceptionPanel			= new JPanel(new GridBagLayout());
 	private final JLabel					exceptionLabel			= new JLabel();
 
@@ -28,13 +28,13 @@ public class DebugSupportPanel extends JPanel implements Disposable
 		currentObjectPanel = new CurrentObjectPanel(context);
 		unnamedSlotsPanel = new UnnamedSlotsPanel(this::onException, context);
 		namedSlotsPanel = new NamedSlotsPanel(this::onException, context);
-		breakpointTriggerPanel = new BreakpointTriggerPanel(this::onException, context);
+		triggerBreakpointPanel = new TriggerBreakpointPanel(this::onException, context);
 
 		int yPos = 0;
 		add(currentObjectPanel,		new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		add(unnamedSlotsPanel,		new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.3, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		add(namedSlotsPanel,		new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.3, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
-		add(breakpointTriggerPanel,	new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.1, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
+		add(triggerBreakpointPanel,	new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.1, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		add(exceptionPanel,			new GridBagConstraints(0, yPos++, 1, 1, 1.0, 0.1, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 
 		exceptionPanel.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -49,7 +49,7 @@ public class DebugSupportPanel extends JPanel implements Disposable
 		currentObjectPanel.setCurrentObject(thisValue);
 		unnamedSlotsPanel.setThisValue(thisValue);
 		namedSlotsPanel.setThisValue(thisValue);
-		breakpointTriggerPanel.setThisValue(thisValue);
+		triggerBreakpointPanel.setThisValue(thisValue);
 	}
 
 	public void updateContent() {
@@ -68,6 +68,6 @@ public class DebugSupportPanel extends JPanel implements Disposable
 		currentObjectPanel.dispose();
 		unnamedSlotsPanel.dispose();
 		namedSlotsPanel.dispose();
-		breakpointTriggerPanel.dispose();
+		triggerBreakpointPanel.dispose();
 	}
 }

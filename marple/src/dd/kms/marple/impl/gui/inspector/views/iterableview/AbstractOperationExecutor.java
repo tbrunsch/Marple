@@ -5,7 +5,6 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.impl.evaluator.ExpressionEvaluators;
-import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.Operation;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.OperationSettings;
 import dd.kms.zenodot.api.*;
 

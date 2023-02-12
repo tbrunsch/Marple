@@ -98,6 +98,10 @@ public class ObjectInspectionFrameworkInstance
 		performAction(context, component, position, context::createDebugSupportAction);
 	}
 
+	private void triggerBreakpoint(InspectionContext context, Component component, Point position) {
+		performAction(context, component, position, context::createTriggerBreakpointAction);
+	}
+
 	private void openQuickHelp(InspectionContext context) {
 		KeySettings keySettings = context.getSettings().getKeySettings();
 		dd.kms.marple.impl.gui.common.WindowManager.showInFrame(
@@ -181,6 +185,7 @@ public class ObjectInspectionFrameworkInstance
 		KeyRepresentation evaluationKey = keySettings.getEvaluationKey();
 		KeyRepresentation findInstancesKey = keySettings.getFindInstancesKey();
 		KeyRepresentation debugSupportKey = keySettings.getDebugSupportKey();
+		KeyRepresentation triggerBreakpointKey = keySettings.getTriggerBreakpointKey();
 		KeyRepresentation quickHelpKey = keySettings.getQuickHelpKey();
 
 		if (key.matches(inspectionKey)) {
@@ -191,6 +196,8 @@ public class ObjectInspectionFrameworkInstance
 			performSearch(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 		} else if (key.matches(debugSupportKey)) {
 			openDebugSupportDialog(context, lastComponentUnderMouse, lastMousePositionOnComponent);
+		} else if (key.matches(triggerBreakpointKey)) {
+			triggerBreakpoint(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 		} else if (key.matches(quickHelpKey)) {
 			openQuickHelp(context);
 		}

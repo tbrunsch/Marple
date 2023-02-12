@@ -8,7 +8,6 @@ import dd.kms.marple.api.settings.evaluation.NamedObject;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
-import dd.kms.marple.impl.gui.common.GuiCommons;
 
 import javax.swing.*;
 import java.awt.*;

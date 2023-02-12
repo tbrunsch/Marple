@@ -100,7 +100,8 @@ public class ActionProviderBuilder
 		actionsBuilder.add(context.createSearchInstancesFromHereAction(object));
 		actionsBuilder.add(context.createSearchInstanceAction(object));
 		actionsBuilder.add(new CopyStringRepresentationAction(object));
-		actionsBuilder.add(context.createDebugSupportAction(this.object));
+		actionsBuilder.add(context.createDebugSupportAction(object));
+		actionsBuilder.add(context.createTriggerBreakpointAction(object));
 		return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
 	}
 

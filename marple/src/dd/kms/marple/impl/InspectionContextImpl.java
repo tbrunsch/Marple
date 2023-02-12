@@ -72,6 +72,11 @@ public class InspectionContextImpl implements InspectionContext
 	}
 
 	@Override
+	public InspectionAction createTriggerBreakpointAction(Object thisValue) {
+		return new TriggerBreakpointAction(this, thisValue);
+	}
+
+	@Override
 	public <T> InspectionAction createSnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction) {
 		return new SnapshotAction<>(snapshotTarget, snapshotFunction, this);
 	}

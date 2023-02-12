@@ -15,6 +15,7 @@ public interface InspectionSettings
 	EvaluationSettings getEvaluationSettings();
 	VisualSettings getVisualSettings();
 	SecuritySettings getSecuritySettings();
-	DebugSettings getDebugSettings();
 	KeySettings getKeySettings();
+	String getTriggerBreakpointExpression();
+	void setTriggerBreakpointExpression(String triggerBreakpointExpression);
 }

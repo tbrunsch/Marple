@@ -21,6 +21,7 @@ public interface InspectionContext
 	InspectionAction createSearchInstancesFromHereAction(Object root);
 	InspectionAction createSearchInstanceAction(Object target);
 	InspectionAction createDebugSupportAction(Object thisValue);
+	InspectionAction createTriggerBreakpointAction(Object thisValue);
 	<T> InspectionAction createSnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction);
 
 	String getDisplayText(Object object);

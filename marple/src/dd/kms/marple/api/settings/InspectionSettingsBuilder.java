@@ -15,7 +15,7 @@ public interface InspectionSettingsBuilder
 	InspectionSettingsBuilder evaluationSettings(EvaluationSettings evaluationSettings);
 	InspectionSettingsBuilder visualSettings(VisualSettings visualSettings);
 	InspectionSettingsBuilder securitySettings(SecuritySettings securitySettings);
-	InspectionSettingsBuilder debugSettings(DebugSettings debugSettings);
 	InspectionSettingsBuilder keySettings(KeySettings keySettings);
+	InspectionSettingsBuilder triggerBreakpointExpression(String triggerBreakpointExpression);
 	InspectionSettings build();
 }

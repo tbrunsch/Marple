@@ -12,6 +12,7 @@ public class KeySettingsBuilderImpl implements KeySettingsBuilder
 	private KeyRepresentation	evaluationKey			= new KeyRepresentation(KeyEvent.ALT_MASK,							KeyEvent.VK_F8);
 	private KeyRepresentation	findInstancesKey		= new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK,	KeyEvent.VK_F);
 	private KeyRepresentation	debugSupportKey			= new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK,	KeyEvent.VK_D);
+	private KeyRepresentation	triggerBreakpointKey	= new KeyRepresentation(KeyEvent.CTRL_MASK,							KeyEvent.VK_B);
 	private KeyRepresentation	codeCompletionKey		= new KeyRepresentation(KeyEvent.CTRL_MASK,							KeyEvent.VK_SPACE);
 	private KeyRepresentation	showMethodArgumentsKey	= new KeyRepresentation(KeyEvent.CTRL_MASK,							KeyEvent.VK_P);
 	private KeyRepresentation	quickHelpKey			= new KeyRepresentation(KeyEvent.CTRL_MASK,							KeyEvent.VK_F1);
@@ -40,6 +41,11 @@ public class KeySettingsBuilderImpl implements KeySettingsBuilder
 		return this;
 	}
 
+	public KeySettingsBuilder triggerBreakpointKey(KeyRepresentation triggerBreakpointKey) {
+		this.triggerBreakpointKey = triggerBreakpointKey;
+		return this;
+	}
+
 	@Override
 	public KeySettingsBuilder codeCompletionKey(KeyRepresentation codeCompletionKey) {
 		this.codeCompletionKey = codeCompletionKey;
@@ -60,6 +66,6 @@ public class KeySettingsBuilderImpl implements KeySettingsBuilder
 
 	@Override
 	public KeySettings build() {
-		return new KeySettingsImpl(inspectionKey, evaluationKey, findInstancesKey, debugSupportKey, codeCompletionKey, showMethodArgumentsKey, quickHelpKey);
+		return new KeySettingsImpl(inspectionKey, evaluationKey, findInstancesKey, debugSupportKey, triggerBreakpointKey, codeCompletionKey, showMethodArgumentsKey, quickHelpKey);
 	}
 }

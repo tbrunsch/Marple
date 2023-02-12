@@ -1,6 +1,5 @@
 package dd.kms.marple.impl.settings;
 
-import dd.kms.marple.api.settings.DebugSettings;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.InspectionSettingsBuilder;
 import dd.kms.marple.api.settings.SecuritySettings;
@@ -15,12 +14,12 @@ import dd.kms.marple.api.settings.visual.VisualSettingsBuilder;
 
 public class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 {
-	private ComponentHierarchyModel	componentHierarchyModel	= ComponentHierarchyModelBuilder.create().build();
-	private EvaluationSettings		evaluationSettings		= EvaluationSettingsBuilder.create().build();
-	private VisualSettings			visualSettings			= VisualSettingsBuilder.create().build();
-	private SecuritySettings		securitySettings		= NoSecuritySettings.INSTANCE;
-	private DebugSettings			debugSettings			= DefaultDebugSettings.INSTANCE;
-	private KeySettings				keySettings				= KeySettingsBuilder.create().build();
+	private ComponentHierarchyModel	componentHierarchyModel		= ComponentHierarchyModelBuilder.create().build();
+	private EvaluationSettings		evaluationSettings			= EvaluationSettingsBuilder.create().build();
+	private VisualSettings			visualSettings				= VisualSettingsBuilder.create().build();
+	private SecuritySettings		securitySettings			= NoSecuritySettings.INSTANCE;
+	private KeySettings				keySettings					= KeySettingsBuilder.create().build();
+	private String					triggerBreakpointExpression	= "dd.kms.marple.api.DebugSupport.triggerBreakpoint(this)";
 
 	@Override
 	public InspectionSettingsBuilder componentHierarchyModel(ComponentHierarchyModel componentHierarchyModel) {
@@ -47,19 +46,19 @@ public class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 	}
 
 	@Override
-	public InspectionSettingsBuilder debugSettings(DebugSettings debugSettings) {
-		this.debugSettings = debugSettings;
-		return this;
-	}
-
-	@Override
 	public InspectionSettingsBuilder keySettings(KeySettings keySettings) {
 		this.keySettings = keySettings;
 		return this;
 	}
 
 	@Override
+	public InspectionSettingsBuilder triggerBreakpointExpression(String triggerBreakpointExpression) {
+		this.triggerBreakpointExpression = triggerBreakpointExpression;
+		return this;
+	}
+
+	@Override
 	public InspectionSettings build() {
-		return new InspectionSettingsImpl(componentHierarchyModel, evaluationSettings, visualSettings, securitySettings, debugSettings, keySettings);
+		return new InspectionSettingsImpl(componentHierarchyModel, evaluationSettings, visualSettings, securitySettings, keySettings, triggerBreakpointExpression);
 	}
 }

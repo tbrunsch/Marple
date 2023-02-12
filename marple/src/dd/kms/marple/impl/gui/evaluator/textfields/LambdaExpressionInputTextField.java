@@ -6,7 +6,6 @@ import dd.kms.marple.impl.evaluator.ExpressionEvaluators;
 import dd.kms.zenodot.api.*;
 import dd.kms.zenodot.api.result.CodeCompletion;
 import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
-import dd.kms.zenodot.impl.wrappers.InfoProvider;
 
 import java.util.List;
 import java.util.Optional;

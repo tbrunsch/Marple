@@ -2,7 +2,6 @@ package dd.kms.marple.impl.settings;
 
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.inspector.ObjectInspector;
-import dd.kms.marple.api.settings.DebugSettings;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.SecuritySettings;
 import dd.kms.marple.api.settings.components.ComponentHierarchyModel;
@@ -18,19 +17,20 @@ class InspectionSettingsImpl implements InspectionSettings
 	private final EvaluationSettings		evaluationSettings;
 	private final VisualSettings			visualSettings;
 	private final SecuritySettings			securitySettings;
-	private final DebugSettings				debugSettings;
 	private final KeySettings				keySettings;
 
+	private String							triggerBreakpointExpression;
+
 	InspectionSettingsImpl(ComponentHierarchyModel componentHierarchyModel, EvaluationSettings evaluationSettings, VisualSettings visualSettings,
-						   SecuritySettings securitySettings, DebugSettings debugSettings, KeySettings keySettings) {
+						   SecuritySettings securitySettings, KeySettings keySettings, String triggerBreakpointExpression) {
 		this.evaluationSettings = evaluationSettings;
-		this.debugSettings = debugSettings;
 		this.inspector = ObjectInspector.create();
 		this.evaluator = ExpressionEvaluator.create();
 		this.componentHierarchyModel = componentHierarchyModel;
 		this.visualSettings = visualSettings;
 		this.securitySettings = securitySettings;
 		this.keySettings = keySettings;
+		this.triggerBreakpointExpression = triggerBreakpointExpression;
 	}
 
 	@Override
@@ -64,12 +64,17 @@ class InspectionSettingsImpl implements InspectionSettings
 	}
 
 	@Override
-	public DebugSettings getDebugSettings() {
-		return debugSettings;
+	public KeySettings getKeySettings() {
+		return keySettings;
 	}
 
 	@Override
-	public KeySettings getKeySettings() {
-		return keySettings;
+	public String getTriggerBreakpointExpression() {
+		return triggerBreakpointExpression;
+	}
+
+	@Override
+	public void setTriggerBreakpointExpression(String triggerBreakpointExpression) {
+		this.triggerBreakpointExpression = triggerBreakpointExpression;
 	}
 }
