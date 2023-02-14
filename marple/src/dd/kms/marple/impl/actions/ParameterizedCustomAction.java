@@ -2,7 +2,7 @@ package dd.kms.marple.impl.actions;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.actions.InspectionAction;
-import dd.kms.marple.api.evaluator.ExpressionEvaluator;
+import dd.kms.marple.api.settings.actions.CustomAction;
 import dd.kms.zenodot.api.ExpressionParser;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.Parsers;
@@ -10,13 +10,15 @@ import dd.kms.zenodot.api.Parsers;
 import javax.swing.*;
 import java.awt.*;
 
-public class TriggerBreakpointAction implements InspectionAction
+public class ParameterizedCustomAction implements InspectionAction
 {
-	private final InspectionContext	context;
+	private final InspectionContext context;
+	private final CustomAction		customAction;
 	private final Object			thisValue;
 
-	public TriggerBreakpointAction(InspectionContext context, Object thisValue) {
+	public ParameterizedCustomAction(InspectionContext context, CustomAction customAction, Object thisValue) {
 		this.context = context;
+		this.customAction = customAction;
 		this.thisValue = thisValue;
 	}
 
@@ -27,26 +29,26 @@ public class TriggerBreakpointAction implements InspectionAction
 
 	@Override
 	public String getName() {
-		return "Trigger breakpoint";
+		return customAction.getName();
 	}
 
 	@Override
 	public String getDescription() {
-		return "Evaluates the specified breakpoint trigger expression (see Debug Support)";
+		return null;
 	}
 
 	@Override
 	public boolean isEnabled() {
-		return true;
+		return customAction.getThisClass().isInstance(thisValue);
 	}
 
 	@Override
 	public void perform() {
-		String triggerBreakpointExpression = context.getSettings().getTriggerBreakpointExpression();
+		String expression = customAction.getActionExpression();
 		ExpressionParser expressionParser = Parsers.createExpressionParserBuilder(context.getEvaluator().getParserSettings())
 			.createExpressionParser();
 		try {
-			expressionParser.evaluate(triggerBreakpointExpression, thisValue);
+			expressionParser.evaluate(expression, thisValue);
 		} catch (ParseException e) {
 			JOptionPane.showMessageDialog(thisValue instanceof Component ? (Component) thisValue : null,
 				e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

@@ -12,34 +12,34 @@ import static java.awt.GridBagConstraints.*;
 
 public class QuickHelpPanel extends JPanel implements Disposable
 {
-	public static final String	TITLE							= "Marple Quick Help";
+	public static final String	TITLE						= "Marple Quick Help";
 
-	private static final String INSPECTION_TITLE				= "Inspect";
-	private static final String INSPECTION_DESCRIPTION			= "Open the inspection dialog for the component under the mouse";
-	private static final String INSPECTION_INFO					= "Use this feature to analyze your GUI and any data that is connected to it.";
-	private static final String EVALUATION_TITLE				= "Evaluate";
-	private static final String EVALUATION_DESCRIPTION			= "Evaluate an expression";
-	private static final String EVALUATION_INFO					= "Use the literal \"this\" to refer to the component under the mouse.";
-	private static final String FIND_INSTANCES_TITLE			= "Find Instances";
-	private static final String FIND_INSTANCES_DESCRIPTION		= "Find a concrete instance or all instances of a class that match a certain filter";
-	private static final String FIND_INSTANCES_INFO				= "The search starts at the component under the mouse.";
-	private static final String DEBUG_SUPPORT_TITLE				= "Debug Support";
-	private static final String DEBUG_SUPPORT_DESCRIPTION		= "Open the debug support dialog";
-	private static final String DEBUG_SUPPORT_INFO				= "Use this feature for exchanging data with your debugger or to trigger breakpoints.";
-	private static final String TRIGGER_BREAKPOINT_TITLE		= "Trigger Breakpoint";
-	private static final String TRIGGER_BREAKPOINT_DESCRIPTION	= "Evaluates the user-defined breakpoint trigger expression";
-	private static final String TRIGGER_BREAKPOINT_INFO			= "You can define this expression in the Debug Support dialog.<br>Let the expression call a method in which you set a breakpoint.";
+	private static final String INSPECTION_TITLE			= "Inspect";
+	private static final String INSPECTION_DESCRIPTION		= "Open the inspection dialog for the component under the mouse";
+	private static final String INSPECTION_INFO				= "Use this feature to analyze your GUI and any data that is connected to it.";
+	private static final String EVALUATION_TITLE			= "Evaluate";
+	private static final String EVALUATION_DESCRIPTION		= "Evaluate an expression";
+	private static final String EVALUATION_INFO				= "Use the literal \"this\" to refer to the component under the mouse.";
+	private static final String FIND_INSTANCES_TITLE		= "Find Instances";
+	private static final String FIND_INSTANCES_DESCRIPTION	= "Find a concrete instance or all instances of a class that match a certain filter";
+	private static final String FIND_INSTANCES_INFO			= "The search starts at the component under the mouse.";
+	private static final String DEBUG_SUPPORT_TITLE			= "Debug Support";
+	private static final String DEBUG_SUPPORT_DESCRIPTION	= "Open the debug support dialog";
+	private static final String DEBUG_SUPPORT_INFO			= "Use this feature for exchanging data with your debugger.";
+	private static final String CUSTOM_ACTION_TITLE			= "Custom Actions";
+	private static final String CUSTOM_ACTION_DESCRIPTION	= "Define custom actions including shortcuts";
+	private static final String CUSTOM_ACTION_INFO			= "Each action is defined via an expression.";
 
 	private int yPos;
 
 	public QuickHelpPanel(KeySettings keySettings) {
 		super(new GridBagLayout());
 
-		addCategory(INSPECTION_TITLE,			INSPECTION_DESCRIPTION,			INSPECTION_INFO,			keySettings.getInspectionKey());
-		addCategory(EVALUATION_TITLE,			EVALUATION_DESCRIPTION,			EVALUATION_INFO,			keySettings.getEvaluationKey());
-		addCategory(FIND_INSTANCES_TITLE,		FIND_INSTANCES_DESCRIPTION,		FIND_INSTANCES_INFO,		keySettings.getFindInstancesKey());
-		addCategory(DEBUG_SUPPORT_TITLE,		DEBUG_SUPPORT_DESCRIPTION,		DEBUG_SUPPORT_INFO,			keySettings.getDebugSupportKey());
-		addCategory(TRIGGER_BREAKPOINT_TITLE,	TRIGGER_BREAKPOINT_DESCRIPTION,	TRIGGER_BREAKPOINT_INFO,	keySettings.getTriggerBreakpointKey());
+		addCategory(INSPECTION_TITLE,		INSPECTION_DESCRIPTION,		INSPECTION_INFO,			keySettings.getInspectionKey());
+		addCategory(EVALUATION_TITLE,		EVALUATION_DESCRIPTION,		EVALUATION_INFO,			keySettings.getEvaluationKey());
+		addCategory(FIND_INSTANCES_TITLE,	FIND_INSTANCES_DESCRIPTION,	FIND_INSTANCES_INFO,		keySettings.getFindInstancesKey());
+		addCategory(DEBUG_SUPPORT_TITLE,	DEBUG_SUPPORT_DESCRIPTION,	DEBUG_SUPPORT_INFO,			keySettings.getDebugSupportKey());
+		addCategory(CUSTOM_ACTION_TITLE,	CUSTOM_ACTION_DESCRIPTION,	CUSTOM_ACTION_INFO,			keySettings.getCustomActionsKey());
 
 		JPanel evaluationKeysPanel = new EvaluationKeysPanel(keySettings);
 		add(evaluationKeysPanel, new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));

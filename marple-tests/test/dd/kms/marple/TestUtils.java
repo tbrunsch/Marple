@@ -7,15 +7,20 @@ import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.api.settings.InspectionSettings;
+import dd.kms.marple.api.settings.actions.CustomAction;
+import dd.kms.marple.api.settings.actions.CustomActionSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
 import dd.kms.marple.api.settings.evaluation.NamedObject;
+import dd.kms.marple.api.settings.keys.KeyRepresentation;
+import dd.kms.marple.api.settings.keys.KeySettings;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.settings.*;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,8 +64,17 @@ class TestUtils
 			.addRelatedObjectsProvider(DefaultMutableTreeNode.class, node -> Collections.singletonList(new NamedObject("Root", node.getRoot())))
 			.build();
 
+		CustomAction triggerBreakpointAction = CustomAction.create(
+			"Trigger breakpoint",
+			DebugSupport.class.getName() + ".triggerBreakpoint(this)",
+			Object.class,
+			new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK, KeyEvent.VK_B)
+		);
+		CustomActionSettings customActionSettings = CustomActionSettings.of(triggerBreakpointAction);
+
 		InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspectionSettingsBuilder()
 			.evaluationSettings(evaluationSettings)
+			.customActionSettings(customActionSettings)
 			.build();
 		ExpressionEvaluator evaluator = inspectionSettings.getEvaluator();
 		evaluator.setParserSettings(parserSettings);

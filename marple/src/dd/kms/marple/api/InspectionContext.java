@@ -3,6 +3,7 @@ package dd.kms.marple.api;
 import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.settings.InspectionSettings;
+import dd.kms.marple.api.settings.actions.CustomAction;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.visual.ObjectView;
 
@@ -21,7 +22,7 @@ public interface InspectionContext
 	InspectionAction createSearchInstancesFromHereAction(Object root);
 	InspectionAction createSearchInstanceAction(Object target);
 	InspectionAction createDebugSupportAction(Object thisValue);
-	InspectionAction createTriggerBreakpointAction(Object thisValue);
+	InspectionAction createParameterizedCustomAction(CustomAction customAction, Object thisValue);
 	<T> InspectionAction createSnapshotAction(T snapshotTarget, Function<T, BufferedImage> snapshotFunction);
 
 	String getDisplayText(Object object);

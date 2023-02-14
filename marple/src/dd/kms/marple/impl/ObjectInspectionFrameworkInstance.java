@@ -4,6 +4,8 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.SecuritySettings;
+import dd.kms.marple.api.settings.actions.CustomAction;
+import dd.kms.marple.api.settings.actions.CustomActionSettings;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
@@ -13,6 +15,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.security.AccessControlException;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -98,8 +101,8 @@ public class ObjectInspectionFrameworkInstance
 		performAction(context, component, position, context::createDebugSupportAction);
 	}
 
-	private void triggerBreakpoint(InspectionContext context, Component component, Point position) {
-		performAction(context, component, position, context::createTriggerBreakpointAction);
+	private void performCustomAction(InspectionContext context, Component component, Point position, CustomAction customAction) {
+		performAction(context, component, position, thisValue -> context.createParameterizedCustomAction(customAction, thisValue));
 	}
 
 	private void openQuickHelp(InspectionContext context) {
@@ -185,7 +188,7 @@ public class ObjectInspectionFrameworkInstance
 		KeyRepresentation evaluationKey = keySettings.getEvaluationKey();
 		KeyRepresentation findInstancesKey = keySettings.getFindInstancesKey();
 		KeyRepresentation debugSupportKey = keySettings.getDebugSupportKey();
-		KeyRepresentation triggerBreakpointKey = keySettings.getTriggerBreakpointKey();
+		KeyRepresentation customActionsKey = keySettings.getCustomActionsKey();
 		KeyRepresentation quickHelpKey = keySettings.getQuickHelpKey();
 
 		if (key.matches(inspectionKey)) {
@@ -196,10 +199,18 @@ public class ObjectInspectionFrameworkInstance
 			performSearch(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 		} else if (key.matches(debugSupportKey)) {
 			openDebugSupportDialog(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-		} else if (key.matches(triggerBreakpointKey)) {
-			triggerBreakpoint(context, lastComponentUnderMouse, lastMousePositionOnComponent);
+		} else if (key.matches(customActionsKey)) {
+			// TODO
 		} else if (key.matches(quickHelpKey)) {
 			openQuickHelp(context);
+		}
+		CustomActionSettings customActionSettings = settings.getCustomActionSettings();
+		List<CustomAction> customActions = customActionSettings.getCustomActions();
+		for (CustomAction customAction : customActions) {
+			KeyRepresentation customActionKey = customAction.getKey();
+			if (key.matches(customActionKey)) {
+				performCustomAction(context, lastComponentUnderMouse, lastMousePositionOnComponent, customAction);
+			}
 		}
 	}
 
