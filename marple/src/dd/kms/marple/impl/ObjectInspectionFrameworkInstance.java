@@ -105,6 +105,15 @@ public class ObjectInspectionFrameworkInstance
 		performAction(context, component, position, thisValue -> context.createParameterizedCustomAction(customAction, thisValue));
 	}
 
+	private void openCustomActionsDialog(InspectionContext context) {
+		dd.kms.marple.impl.gui.common.WindowManager.showInFrame(
+			dd.kms.marple.impl.gui.customactions.CustomActionsPanel.TITLE,
+			() -> new dd.kms.marple.impl.gui.customactions.CustomActionsPanel(context),
+			p -> {},
+			p -> {}
+		);
+	}
+
 	private void openQuickHelp(InspectionContext context) {
 		InspectionSettings settings = context.getSettings();
 		KeySettings keySettings = settings.getKeySettings();
@@ -202,7 +211,7 @@ public class ObjectInspectionFrameworkInstance
 		} else if (key.matches(debugSupportKey)) {
 			openDebugSupportDialog(context, lastComponentUnderMouse, lastMousePositionOnComponent);
 		} else if (key.matches(customActionsKey)) {
-			// TODO
+			openCustomActionsDialog(context);
 		} else if (key.matches(quickHelpKey)) {
 			openQuickHelp(context);
 		}

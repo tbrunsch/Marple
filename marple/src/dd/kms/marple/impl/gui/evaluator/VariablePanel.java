@@ -32,7 +32,6 @@ public class VariablePanel extends JPanel implements Disposable
 	private final JScrollPane					scrollPane;
 	private final JTable						table;
 	private final ListBasedTableModel<Variable>	tableModel;
-	private final ClassCellEditor				classCellEditor;
 
 	private final JPanel						exceptionPanel		= new JPanel(new GridBagLayout());
 	private final JLabel						exceptionLabel		= new JLabel();
@@ -57,8 +56,7 @@ public class VariablePanel extends JPanel implements Disposable
 
 		TableColumnModel columnModel = table.getColumnModel();
 		columnModel.getColumn(1).setCellRenderer(new ActionProviderRenderer());
-		classCellEditor = new ClassCellEditor(this::onException, context);
-		columnModel.getColumn(2).setCellEditor(classCellEditor);
+		columnModel.getColumn(2).setCellEditor(new ClassCellEditor(this::onException, context));
 
 		table.setDefaultRenderer(Class.class, new ClassRenderer(context));
 
