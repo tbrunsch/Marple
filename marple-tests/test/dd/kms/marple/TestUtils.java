@@ -13,9 +13,10 @@ import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
 import dd.kms.marple.api.settings.evaluation.NamedObject;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
-import dd.kms.marple.api.settings.keys.KeySettings;
 import dd.kms.zenodot.api.common.AccessModifier;
-import dd.kms.zenodot.api.settings.*;
+import dd.kms.zenodot.api.settings.ObjectTreeNode;
+import dd.kms.zenodot.api.settings.ParserSettings;
+import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
 
 import javax.annotation.Nullable;
 import javax.swing.*;

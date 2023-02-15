@@ -106,10 +106,12 @@ public class ObjectInspectionFrameworkInstance
 	}
 
 	private void openQuickHelp(InspectionContext context) {
-		KeySettings keySettings = context.getSettings().getKeySettings();
+		InspectionSettings settings = context.getSettings();
+		KeySettings keySettings = settings.getKeySettings();
+		CustomActionSettings customActionSettings = settings.getCustomActionSettings();
 		dd.kms.marple.impl.gui.common.WindowManager.showInFrame(
 			dd.kms.marple.impl.gui.help.QuickHelpPanel.TITLE,
-			() -> new dd.kms.marple.impl.gui.help.QuickHelpPanel(keySettings),
+			() -> new dd.kms.marple.impl.gui.help.QuickHelpPanel(keySettings, customActionSettings),
 			p -> {},
 			p -> {}
 		);

@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.gui.help;
 
 import dd.kms.marple.api.gui.Disposable;
+import dd.kms.marple.api.settings.actions.CustomActionSettings;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
 import dd.kms.marple.api.settings.keys.KeySettings;
 
@@ -32,7 +33,7 @@ public class QuickHelpPanel extends JPanel implements Disposable
 
 	private int yPos;
 
-	public QuickHelpPanel(KeySettings keySettings) {
+	public QuickHelpPanel(KeySettings keySettings, CustomActionSettings customActionSettings) {
 		super(new GridBagLayout());
 
 		addCategory(INSPECTION_TITLE,		INSPECTION_DESCRIPTION,		INSPECTION_INFO,			keySettings.getInspectionKey());
@@ -43,6 +44,9 @@ public class QuickHelpPanel extends JPanel implements Disposable
 
 		JPanel evaluationKeysPanel = new EvaluationKeysPanel(keySettings);
 		add(evaluationKeysPanel, new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));
+
+		JPanel customActionKeysPanel = new CustomActionKeysPanel(customActionSettings);
+		add(customActionKeysPanel, new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));
 	}
 
 	private void addCategory(String title, String description, String info, KeyRepresentation key) {
