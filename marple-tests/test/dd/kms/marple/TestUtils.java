@@ -37,6 +37,7 @@ class TestUtils
 
 		String importPackage1 = "javax.swing";
 		String importPackage2 = "dd.kms.marple";
+		String importPackage3 = DebugSupport.class.getPackage().getName();
 
 		String importClass1 = "com.google.common.collect.ImmutableList";
 		String importClass2 = "com.google.common.collect.ImmutableSet";
@@ -45,7 +46,7 @@ class TestUtils
 
 		ParserSettings parserSettings = ParserSettingsBuilder.create()
 			.minimumAccessModifier(AccessModifier.PRIVATE)
-			.importPackages(ImmutableSet.of(importPackage1, importPackage2))
+			.importPackages(ImmutableSet.of(importPackage1, importPackage2, importPackage3))
 			.importClassesByName(ImmutableSet.of(importClass1, importClass2))
 			.considerAllClassesForClassCompletions(true)
 			.customHierarchyRoot(customHierarchyRoot)
@@ -67,7 +68,7 @@ class TestUtils
 
 		CustomAction triggerBreakpointAction = CustomAction.create(
 			"Trigger breakpoint",
-			DebugSupport.class.getName() + ".triggerBreakpoint(this)",
+			DebugSupport.class.getSimpleName() + ".triggerBreakpoint(this)",
 			Object.class,
 			new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK, KeyEvent.VK_B)
 		);
