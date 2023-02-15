@@ -10,9 +10,7 @@ import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.impl.gui.common.ExceptionFormatter;
-import dd.kms.marple.impl.gui.evaluator.textfields.ClassInputTextField;
 import dd.kms.marple.impl.gui.table.*;
-import dd.kms.zenodot.api.ParseException;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -23,7 +21,6 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
-import java.util.function.Consumer;
 
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
@@ -35,7 +32,7 @@ public class VariablePanel extends JPanel implements Disposable
 	private final JScrollPane					scrollPane;
 	private final JTable						table;
 	private final ListBasedTableModel<Variable>	tableModel;
-	private final CellEditor					cellEditor;
+	private final ClassCellEditor				classCellEditor;
 
 	private final JPanel						exceptionPanel		= new JPanel(new GridBagLayout());
 	private final JLabel						exceptionLabel		= new JLabel();
@@ -60,8 +57,8 @@ public class VariablePanel extends JPanel implements Disposable
 
 		TableColumnModel columnModel = table.getColumnModel();
 		columnModel.getColumn(1).setCellRenderer(new ActionProviderRenderer());
-		cellEditor = new CellEditor(this::onException, context);
-		columnModel.getColumn(2).setCellEditor(cellEditor);
+		classCellEditor = new ClassCellEditor(this::onException, context);
+		columnModel.getColumn(2).setCellEditor(classCellEditor);
 
 		table.setDefaultRenderer(Class.class, new ClassRenderer(context));
 
@@ -270,46 +267,4 @@ public class VariablePanel extends JPanel implements Disposable
 	}
 
 
-	private static class CellEditor extends AbstractCellEditor implements TableCellEditor
-	{
-		private final ClassInputTextField		editorTextField;
-
-		private final Map<Integer, String>		rowToTypeNames = new HashMap<>();
-
-		private boolean							editingFinished	= false;
-		private int								currentRow		= -1;
-
-		CellEditor(Consumer<Throwable> exceptionConsumer, InspectionContext context) {
-			editorTextField = new ClassInputTextField(context);
-			editorTextField.requestFocus();
-			editorTextField.setEvaluationResultConsumer(o -> {
-				editingFinished = true;
-				rowToTypeNames.put(currentRow, editorTextField.getText());
-				stopCellEditing();
-			});
-			editorTextField.setExceptionConsumer(exceptionConsumer);
-		}
-
-		@Override
-		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-			currentRow = row;
-			editingFinished = false;
-			editorTextField.setText(value instanceof Class<?> ? ((Class<?>) value).getName() : String.valueOf(value));
-			return editorTextField;
-		}
-
-		@Override
-		public Object getCellEditorValue() {
-			try {
-				return editorTextField.evaluateText();
-			} catch (ParseException e) {
-				return null;
-			}
-		}
-
-		@Override
-		public boolean stopCellEditing() {
-			return editingFinished && super.stopCellEditing();
-		}
-	}
 }
