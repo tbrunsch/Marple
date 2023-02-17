@@ -46,6 +46,7 @@ public class CustomActionsPanel extends JPanel implements Disposable
 		scrollPane = new JScrollPane(table);
 
 		TableColumnModel columnModel = table.getColumnModel();
+		columnModel.getColumn(1).setCellEditor(new ActionExpressionCellEditor(this::getRequiredClass, this::onException, context));
 		columnModel.getColumn(2).setCellEditor(new ClassCellEditor(this::onException, context));
 
 		table.setDefaultRenderer(Class.class, new ClassRenderer(context));
@@ -70,6 +71,12 @@ public class CustomActionsPanel extends JPanel implements Disposable
 		customActionSettings.setCustomActions(customActions);
 
 		updateButtons();
+	}
+
+	private Class<?> getRequiredClass(int row) {
+		return 0 <= row && row < customActions.size()
+			? customActions.get(row).getThisClass()
+			: Object.class;
 	}
 
 	private void onException(@Nullable Throwable exception) {
