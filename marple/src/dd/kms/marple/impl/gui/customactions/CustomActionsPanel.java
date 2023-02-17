@@ -48,6 +48,7 @@ public class CustomActionsPanel extends JPanel implements Disposable
 		TableColumnModel columnModel = table.getColumnModel();
 		columnModel.getColumn(1).setCellEditor(new ActionExpressionCellEditor(this::getRequiredClass, this::onException, context));
 		columnModel.getColumn(2).setCellEditor(new ClassCellEditor(this::onException, context));
+		columnModel.getColumn(3).setCellEditor(new KeyRepresentationCellEditor());
 
 		table.setDefaultRenderer(Class.class, new ClassRenderer(context));
 
