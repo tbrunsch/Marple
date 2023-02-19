@@ -51,7 +51,7 @@ public class ParameterizedCustomAction implements InspectionAction
 			expressionParser.evaluate(expression, thisValue);
 		} catch (ParseException e) {
 			JOptionPane.showMessageDialog(thisValue instanceof Component ? (Component) thisValue : null,
-				e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				"Error executing custom action '" + getName() + "': " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }
