@@ -15,6 +15,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
@@ -27,8 +28,12 @@ public class CustomActionsPanel extends JPanel implements Disposable
 	private final JTable							table;
 	private final ListBasedTableModel<CustomAction>	tableModel;
 
-	private final JPanel							exceptionPanel		= new JPanel(new GridBagLayout());
-	private final JLabel							exceptionLabel		= new JLabel();
+	private final JPanel							exceptionPanel			= new JPanel(new GridBagLayout());
+	private final JLabel							exceptionLabel			= new JLabel();
+
+	private final JButton							newActionButton			= new JButton("New action");
+	private final JButton							deleteActionsButton		= new JButton("Delete action(s)");
+	private final JButton							deleteShortcutButton	= new JButton("Delete shortcut(s)");
 
 	private final CustomActionSettings				customActionSettings;
 	private final List<CustomAction>				customActions;
@@ -54,7 +59,12 @@ public class CustomActionsPanel extends JPanel implements Disposable
 
 		add(scrollPane,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
 
-		add(exceptionPanel,	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 0.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		add(new JLabel(),			new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		add(newActionButton,		new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+		add(deleteActionsButton,	new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+		add(deleteShortcutButton,	new GridBagConstraints(3, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+
+		add(exceptionPanel,	new GridBagConstraints(0, 2, REMAINDER, 1, 1.0, 0.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
 		exceptionPanel.setVisible(false);
 		exceptionPanel.add(exceptionLabel,	new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
@@ -66,6 +76,49 @@ public class CustomActionsPanel extends JPanel implements Disposable
 		onTableContentChanged();
 
 		addListeners();
+	}
+
+	private void addListeners() {
+		tableModel.addTableModelListener(e -> onTableContentChanged());
+
+		newActionButton.addActionListener(e -> addNewAction());
+		deleteActionsButton.addActionListener(e -> deleteSelectedActions());
+		deleteShortcutButton.addActionListener(e -> deleteShortcutsOfSelectedActions());
+	}
+
+	private void addNewAction() {
+		int row = customActions.size();
+		CustomAction newAction = CustomAction.create("New action", "System.out.println(this)", Object.class);
+		customActions.add(newAction);
+		tableModel.fireTableRowsInserted(row, row);
+	}
+
+	private void deleteSelectedActions() {
+		int[] selectedRows = IntStream.of(table.getSelectedRows()).sorted().toArray();
+		int numSelectedRows = selectedRows.length;
+		if (numSelectedRows == 0) {
+			return;
+		}
+		for (int i = numSelectedRows - 1; i >= 0; i--) {
+			int row = selectedRows[i];
+			customActions.remove(row);
+		}
+		tableModel.fireTableRowsDeleted(selectedRows[0], selectedRows[numSelectedRows - 1]);
+	}
+
+	private void deleteShortcutsOfSelectedActions() {
+		int[] selectedRows = IntStream.of(table.getSelectedRows()).sorted().toArray();
+		int numSelectedRows = selectedRows.length;
+		if (numSelectedRows == 0) {
+			return;
+		}
+		for (int i = 0; i < numSelectedRows; i++) {
+			int row = selectedRows[i];
+			CustomAction oldAction = customActions.get(row);
+			CustomAction newAction = CustomAction.create(oldAction.getName(), oldAction.getActionExpression(), oldAction.getThisClass());
+			customActions.set(row, newAction);
+		}
+		tableModel.fireTableRowsDeleted(selectedRows[0], selectedRows[numSelectedRows - 1]);
 	}
 
 	private void onTableContentChanged() {
@@ -84,12 +137,6 @@ public class CustomActionsPanel extends JPanel implements Disposable
 		exceptionPanel.setVisible(exception != null);
 		String exceptionMessage = exception == null ? null : ExceptionFormatter.formatException(exception, true);
 		exceptionLabel.setText(exceptionMessage);
-	}
-
-	private void addListeners() {
-		tableModel.addTableModelListener(e -> onTableContentChanged());
-
-		// ...
 	}
 
 	private void updateButtons() {
