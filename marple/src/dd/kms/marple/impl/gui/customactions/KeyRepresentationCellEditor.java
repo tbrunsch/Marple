@@ -6,12 +6,13 @@ import dd.kms.marple.impl.gui.common.KeyInput;
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.util.EventObject;
 
 public class KeyRepresentationCellEditor extends AbstractCellEditor implements TableCellEditor
 {
-	private final KeyInput		keyInput		= new KeyInput(this::onKeyEntered);
-	private KeyRepresentation	key				= null;
-
+	private final KeyInput		keyInput	= new KeyInput(this::onKeyEntered);
+	private KeyRepresentation	key			= null;
 
 	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
@@ -31,5 +32,13 @@ public class KeyRepresentationCellEditor extends AbstractCellEditor implements T
 	private void onKeyEntered(KeyRepresentation key) {
 		this.key = key;
 		stopCellEditing();
+	}
+
+	@Override
+	public boolean isCellEditable(EventObject e) {
+		if (e instanceof MouseEvent) {
+			return ((MouseEvent) e).getClickCount() >= 2;
+		}
+		return true;
 	}
 }

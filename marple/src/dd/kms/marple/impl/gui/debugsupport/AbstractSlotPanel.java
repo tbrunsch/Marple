@@ -16,6 +16,8 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.util.EventObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +122,11 @@ abstract class AbstractSlotPanel<T> extends JPanel implements Disposable
 	{
 		private final ExpressionInputTextField	editorTextField;
 
+		/**
+		 * This field and {@link #currentRow} are required to store the expressions entered
+		 * by the user. These cannot be reconstructed because only the {@link Object} instances
+		 * are known.
+		 */
 		private final Map<Integer, String>		rowToExpression	= new HashMap<>();
 
 		private boolean							editingFinished	= false;
@@ -160,6 +167,14 @@ abstract class AbstractSlotPanel<T> extends JPanel implements Disposable
 		@Override
 		public boolean stopCellEditing() {
 			return editingFinished && super.stopCellEditing();
+		}
+
+		@Override
+		public boolean isCellEditable(EventObject e) {
+			if (e instanceof MouseEvent) {
+				return ((MouseEvent) e).getClickCount() >= 2;
+			}
+			return true;
 		}
 	}
 }

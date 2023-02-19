@@ -7,6 +7,8 @@ import dd.kms.zenodot.api.ParseException;
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.util.EventObject;
 import java.util.function.Consumer;
 
 public class ClassCellEditor extends AbstractCellEditor implements TableCellEditor
@@ -14,7 +16,6 @@ public class ClassCellEditor extends AbstractCellEditor implements TableCellEdit
 	private final ClassInputTextField	editorTextField;
 
 	private boolean						editingFinished	= false;
-	private int							currentRow		= -1;
 
 	public ClassCellEditor(Consumer<Throwable> exceptionConsumer, InspectionContext context) {
 		editorTextField = new ClassInputTextField(context);
@@ -28,7 +29,6 @@ public class ClassCellEditor extends AbstractCellEditor implements TableCellEdit
 
 	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-		currentRow = row;
 		editingFinished = false;
 		editorTextField.setText(value instanceof Class<?> ? ((Class<?>) value).getName() : String.valueOf(value));
 		return editorTextField;
@@ -46,5 +46,13 @@ public class ClassCellEditor extends AbstractCellEditor implements TableCellEdit
 	@Override
 	public boolean stopCellEditing() {
 		return editingFinished && super.stopCellEditing();
+	}
+
+	@Override
+	public boolean isCellEditable(EventObject e) {
+		if (e instanceof MouseEvent) {
+			return ((MouseEvent) e).getClickCount() >= 2;
+		}
+		return true;
 	}
 }
