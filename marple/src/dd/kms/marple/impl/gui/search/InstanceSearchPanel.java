@@ -7,13 +7,12 @@ import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNodes;
 import dd.kms.marple.impl.gui.common.ExceptionFormatter;
 import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorators;
 import dd.kms.marple.impl.gui.evaluator.textfields.ClassInputTextField;
-import dd.kms.marple.impl.gui.evaluator.textfields.LambdaExpressionInputTextField;
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
+import dd.kms.marple.impl.gui.evaluator.textfields.LambdaExpressionInputTextField;
 import dd.kms.marple.impl.instancesearch.InstancePath;
 import dd.kms.marple.impl.instancesearch.InstancePathFinder;
 import dd.kms.marple.impl.instancesearch.settings.SearchSettings;
 import dd.kms.marple.impl.instancesearch.settings.SearchSettingsBuilders;
-import dd.kms.zenodot.api.CompiledExpression;
 import dd.kms.zenodot.api.CompiledLambdaExpression;
 import dd.kms.zenodot.api.ParseException;
 

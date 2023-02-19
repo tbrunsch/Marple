@@ -29,8 +29,9 @@ Marple is a Swing-based Java library for analyzing Swing applications. Notable f
   - [Evaluation Settings](#evaluation-settings)
   - [Visual Settings](#visual-settings)
     - [Object Views](#object-views)
+  - [Custom Action Settings](#custom-action-settings)
+    - [Example](#example)
   - [Security Settings](#security-settings)
-  - [Debug Settings](#debug-settings)
   - [Key Settings](#key-settings)
   - [Parser Settings](#parser-settings)
 - [Navigable Elements](#navigable-elements)
@@ -71,7 +72,7 @@ Marple is a Swing-based Java library for analyzing Swing applications. Notable f
     - [Unnamed Slots](#unnamed-slots)
     - [Named Slots](#named-slots)
     - [Importing and Exporting Variables](#importing-and-exporting-variables)
-    - [Breakpoint Trigger](#breakpoint-trigger)
+- [Custom Actions](#custom-actions)
 - [Search Dialog](#search-dialog)
 - [Open Source License Acknowledgement](#open-source-license-acknowledgement)
   - [AutoComplete](#autocomplete)
@@ -143,6 +144,7 @@ All shortcuts can be configured. Unless changed, the shortcuts are as follows:
 |`Alt + F8`|Expression Evaluation dialog|
 |`Ctrl + Shift + F`|Find Instance dialog|
 |`Ctrl + Shift + D`|Debug Support dialog|
+|`Ctrl + Shift + A`|Custom Actions dialog|
 |`Ctrl + Space`|Suggest code completions for expressions|
 |`Ctrl + P`|Show method argument types|
 
@@ -176,7 +178,7 @@ The first call creates an empty builder, while the second call creates a preconf
   * an immutable part that has to be configured by the `InspectionSettingsBuilder` and
   * a mutable part that is intended to be configurable by the user.
 
-The only mutable settings are the [settings for the parser](#parser-settings) that can be configured in the [evaluation settings dialog](#evaluation-settings-1).  
+The only mutable settings are the [settings for the parser](#parser-settings) that can be configured in the [evaluation settings dialog](#evaluation-settings-1) and the [settings for custom actions](#custom-action-settings) that can be defined in the [custom actions dialog](#custom-actions).  
     
 In the remainder of this section we discuss the different types of settings.
 
@@ -246,13 +248,45 @@ As a rule of thumb, general settings are always applied, whereas object-dependen
 
 When the dialog that holds the `ObjectView`'s view component is closed, then the method `ObjectView.dispose()` is called which is meant for cleanup.
 
+## Custom Action Settings
+
+You can extend Marple by defining custom actions. Custom actions are essentially expressions that are evaluated in the context of a certain object that can be referred to via the literal `this`. For each action you can specify a name, for which types of objects it is applicable, and optionally a keyboard shortcut. When using the keyboard shortcut, the GUI element under the mouse cursor will be used as the object for which the expression is evaluated.
+
+Custom actions also appear in the context menu (cf. [navigable elements](#navigable-elements)). When executing them via such a menu item, then the object for which the context menu has been created will be the one the expression is evaluated for.
+
+Note that the user can change custom actions in the [custom action dialog](#custom-actions).
+
+### Example
+
+Earlier versions of Marple contained a feature called "breakpoint trigger". There you could specify a runnable that has been executed when pressing a certain button in the "Debug Settings" dialog. The idea is that at some point you want to trigger a breakpoint just to start debugging the current state in your IDE. So you just had to set a breakpoint in a static method of choice and call this via the breakpoint trigger feature.
+
+Although we still find this feature valuable, we decided that it could be more general and flexible. This is why we dropped that feature and added custom actions instead. With custom actions you can mimic breakpoint triggers:
+
+The class `DebugSupport` has a method `triggerBreakpoint(Object)` that we want to use for our example. You need to do the following in order to define a custom action that calls this method:
+
+```
+CustomAction triggerBreakpointAction = CustomAction.create(
+	"Trigger breakpoint",
+	"dd.kms.marple.api.DebugSupport.triggerBreakpoint(this)",
+	Object.class,
+	new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK, KeyEvent.VK_B)
+);
+CustomActionSettings customActionSettings = CustomActionSettings.of(triggerBreakpointAction);
+InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspectionSettingsBuilder()
+	.customActionSettings(customActionSettings)
+	.build();
+```
+
+This defines a custom action "Trigger breakpoint" that is defined on arbitrary `Object`s and can also be triggered by pressing Ctrl + Shift + B. Note that the expression is quite cumbersome because the class `DebugSupport` is not imported by default. You could change this by adapting the [parser settings](#parser-settings) appropriately.
+
+This custom action will then also appear in the context menu:
+
+![Trigger breakpoint sample](images/custom_actions/sample.png)
+ 
+
 ## Security Settings
 
 If you decide to ship Marple with your application, then you might want to prevent your customers from analyzing your application with Marple. To do so, you can subclass the interface `SecuritySettings` to protect the Marple access by a password prompt. Marple does neither restrict the way the password prompt is implemented nor does it provide utilities for implementing it. 
-
-## Debug Settings
-
-The interface `DebugSettings` currently only contains information about the configurable breakpoint trigger. You have to subclass it in order to specify a custom breakpoint trigger. The breakpoint trigger is a `Runnable` that is called when the user presses the "Trigger" button in the [debug support dialog](#debug-support). By default, the method `DebugSupport.triggerBreakpoint()` is called. See [Breakpoint Trigger](#breakpoint-trigger) for a detailed explanation.
 
 ## Key Settings
 
@@ -700,7 +734,7 @@ The class `DebugSupport` contains an array `SLOTS` of 5 elements. These elements
 
 Unnamed slots are easy to access from a debugger (just type, e.g., `DebugSupport.SLOTS[0]`) and useful if you want to transfer a small number of instance to the debugger.
 
-To set a value of one of these slots, you can simply click onto the text field and enter an expression:
+To set a value of one of these slots, you can simply double-click onto the text field and enter an expression:
 
 ![Adding Slot Values](images/debug_support/adding_slot_values.png)
 
@@ -719,17 +753,21 @@ As the term suggests, named slots allow you to assign instances a name under whi
 
 Named slots are a bit less convenient to use than unnamed slots, but you can use expressive names, which can be helpful if you have to transfer multiple instances between Marple and the debugger.
 
-You can manage named slots with the "Add slot" and "Delete selected slots" buttons. You can rename named slots by simply clicking into their name text field. To set the value of a named slot you have to click into the text field and enter an expression.    
+You can manage named slots with the "Add slot" and "Delete selected slots" buttons. You can rename named slots by simply double-clicking into their name text field. To set the value of a named slot you have to double-click into the text field and enter an expression.    
 
 ### Importing and Exporting Variables
 
 [Variables](#variables) and named slots are very similar, but they have a different purpose: Variables are meant to be reference from within expressions, whereas named slots are meant to be accessible by external debuggers. Nevertheless, they share enough similarity that Marple provides a way to import/export variables to/from named slots. You can do so in the variables dialog, which will be opened by clicking onto the "Open variable dialog" button, or as described in the section [Variables](#variables). The export feature is an easy way to share all variables you introduced in Marple with the debugger.
 
-### Breakpoint Trigger
+# Custom Actions
 
-In order to start the debugging process, you need the debugger to pause at a breakpoint. For this, you have to find a way to trigger that breakpoint. This can be difficult since you need detailed information about the application's workflow. This is the motivation for the breakpoint trigger feature.
+Custom actions can be defined at compile time as [custom action settings](#custom-action-settings), but can be changed by the user at runtime in the "Custom Actions" dialog. The only way to open this dialog is to press its shortcut. By default, this is Ctrl + Shift + A.
 
-In the debug support dialog, you can specify a method that is called when clicking the "Trigger" button. You can choose between a preconfigured method and a custom method. The default preconfigured method is `DebugSupport.triggerBreakpoint()`. After choosing a trigger method, you must set a breakpoint in there, click the "Trigger" button and the debugger will pause at that breakpoint.
+![Custom Action Dialog](images/custom_actions/custom_action_dialog.png)
+
+Every custom action consists of a name, an expression that will be executed when the custom action is performed, a class this action is applicable to, and optionally a keyboard shortcut. To change any of these settings, double-click onto the corresponding cell and change it as needed.
+
+The expression will be executed in the context of a certain object that may be referenced by the literal `this`. By specifying the required class you can restrict when a custom action is applicable, which also allows to write more specific expressions.
 
 # Search Dialog
 

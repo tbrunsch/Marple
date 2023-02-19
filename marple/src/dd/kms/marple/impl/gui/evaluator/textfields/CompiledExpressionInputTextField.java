@@ -10,19 +10,12 @@ import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
 import java.util.List;
 import java.util.Optional;
 
-public class LambdaExpressionInputTextField extends AbstractExpressionInputTextField<CompiledLambdaExpression<?>>
+public class CompiledExpressionInputTextField extends AbstractExpressionInputTextField<CompiledExpression>
 {
-	private final Class<?>	functionalInterface;
-	private Class<?>[] 		parameterTypes			= new Class[0];
-	private Class<?>		thisType				= Object.class;
+	private Class<?>	thisType	= Object.class;
 
-	public LambdaExpressionInputTextField(Class<?> functionalInterface, InspectionContext context) {
+	public CompiledExpressionInputTextField(InspectionContext context) {
 		super(context);
-		this.functionalInterface = functionalInterface;
-	}
-
-	public void setParameterTypes(Class<?>... parameterTypes) {
-		this.parameterTypes = parameterTypes;
 	}
 
 	public void setThisType(Class<?> thisType) {
@@ -42,16 +35,16 @@ public class LambdaExpressionInputTextField extends AbstractExpressionInputTextF
 	}
 
 	@Override
-	CompiledLambdaExpression<?> evaluate(String text) throws ParseException {
-		LambdaExpressionParser<?> parser = createParser();
+	CompiledExpression evaluate(String text) throws ParseException {
+		ExpressionParser parser = createParser();
 		return parser.compile(text, thisType);
 	}
 
-	private LambdaExpressionParser<?> createParser() {
+	private ExpressionParser createParser() {
 		List<Variable> variables = getVariables();
 		Variables variableCollection = ExpressionEvaluators.toVariableCollection(variables, true);
 		return Parsers.createExpressionParserBuilder(getParserSettings())
 			.variables(variableCollection)
-			.createLambdaParser(functionalInterface, parameterTypes);
+			.createExpressionParser();
 	}
 }

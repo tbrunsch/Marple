@@ -7,15 +7,21 @@ import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.api.settings.InspectionSettings;
+import dd.kms.marple.api.settings.actions.CustomAction;
+import dd.kms.marple.api.settings.actions.CustomActionSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
 import dd.kms.marple.api.settings.evaluation.NamedObject;
+import dd.kms.marple.api.settings.keys.KeyRepresentation;
 import dd.kms.zenodot.api.common.AccessModifier;
-import dd.kms.zenodot.api.settings.*;
+import dd.kms.zenodot.api.settings.ObjectTreeNode;
+import dd.kms.zenodot.api.settings.ParserSettings;
+import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,6 +37,7 @@ class TestUtils
 
 		String importPackage1 = "javax.swing";
 		String importPackage2 = "dd.kms.marple";
+		String importPackage3 = DebugSupport.class.getPackage().getName();
 
 		String importClass1 = "com.google.common.collect.ImmutableList";
 		String importClass2 = "com.google.common.collect.ImmutableSet";
@@ -39,7 +46,7 @@ class TestUtils
 
 		ParserSettings parserSettings = ParserSettingsBuilder.create()
 			.minimumAccessModifier(AccessModifier.PRIVATE)
-			.importPackages(ImmutableSet.of(importPackage1, importPackage2))
+			.importPackages(ImmutableSet.of(importPackage1, importPackage2, importPackage3))
 			.importClassesByName(ImmutableSet.of(importClass1, importClass2))
 			.considerAllClassesForClassCompletions(true)
 			.customHierarchyRoot(customHierarchyRoot)
@@ -59,8 +66,17 @@ class TestUtils
 			.addRelatedObjectsProvider(DefaultMutableTreeNode.class, node -> Collections.singletonList(new NamedObject("Root", node.getRoot())))
 			.build();
 
+		CustomAction triggerBreakpointAction = CustomAction.create(
+			"Trigger breakpoint",
+			DebugSupport.class.getSimpleName() + ".triggerBreakpoint(this)",
+			Object.class,
+			new KeyRepresentation(KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK, KeyEvent.VK_B)
+		);
+		CustomActionSettings customActionSettings = CustomActionSettings.of(triggerBreakpointAction);
+
 		InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspectionSettingsBuilder()
 			.evaluationSettings(evaluationSettings)
+			.customActionSettings(customActionSettings)
 			.build();
 		ExpressionEvaluator evaluator = inspectionSettings.getEvaluator();
 		evaluator.setParserSettings(parserSettings);

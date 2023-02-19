@@ -4,6 +4,7 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.settings.InspectionSettings;
+import dd.kms.marple.api.settings.actions.CustomAction;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.actions.*;
@@ -69,6 +70,11 @@ public class InspectionContextImpl implements InspectionContext
 	@Override
 	public InspectionAction createDebugSupportAction(Object thisValue) {
 		return new DebugSupportAction(this, thisValue);
+	}
+
+	@Override
+	public InspectionAction createParameterizedCustomAction(CustomAction customAction, Object thisValue) {
+		return new ParameterizedCustomAction(this, customAction, thisValue);
 	}
 
 	@Override

@@ -1,9 +1,10 @@
 package dd.kms.marple.impl.settings;
 
-import dd.kms.marple.api.settings.DebugSettings;
+import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.InspectionSettingsBuilder;
 import dd.kms.marple.api.settings.SecuritySettings;
+import dd.kms.marple.api.settings.actions.CustomActionSettings;
 import dd.kms.marple.api.settings.components.ComponentHierarchyModel;
 import dd.kms.marple.api.settings.components.ComponentHierarchyModelBuilder;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
@@ -15,12 +16,12 @@ import dd.kms.marple.api.settings.visual.VisualSettingsBuilder;
 
 public class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 {
-	private ComponentHierarchyModel	componentHierarchyModel	= ComponentHierarchyModelBuilder.create().build();
-	private EvaluationSettings		evaluationSettings		= EvaluationSettingsBuilder.create().build();
-	private VisualSettings			visualSettings			= VisualSettingsBuilder.create().build();
-	private SecuritySettings		securitySettings		= NoSecuritySettings.INSTANCE;
-	private DebugSettings			debugSettings			= DefaultDebugSettings.INSTANCE;
-	private KeySettings				keySettings				= KeySettingsBuilder.create().build();
+	private ComponentHierarchyModel	componentHierarchyModel		= ComponentHierarchyModelBuilder.create().build();
+	private EvaluationSettings		evaluationSettings			= EvaluationSettingsBuilder.create().build();
+	private VisualSettings			visualSettings				= VisualSettingsBuilder.create().build();
+	private CustomActionSettings	customActionSettings		= CustomActionSettings.of(ImmutableList.of());
+	private SecuritySettings		securitySettings			= NoSecuritySettings.INSTANCE;
+	private KeySettings				keySettings					= KeySettingsBuilder.create().build();
 
 	@Override
 	public InspectionSettingsBuilder componentHierarchyModel(ComponentHierarchyModel componentHierarchyModel) {
@@ -41,14 +42,14 @@ public class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 	}
 
 	@Override
-	public InspectionSettingsBuilder securitySettings(SecuritySettings securitySettings) {
-		this.securitySettings = securitySettings;
+	public InspectionSettingsBuilder customActionSettings(CustomActionSettings customActionSettings) {
+		this.customActionSettings = CustomActionSettings.of(customActionSettings.getCustomActions());
 		return this;
 	}
 
 	@Override
-	public InspectionSettingsBuilder debugSettings(DebugSettings debugSettings) {
-		this.debugSettings = debugSettings;
+	public InspectionSettingsBuilder securitySettings(SecuritySettings securitySettings) {
+		this.securitySettings = securitySettings;
 		return this;
 	}
 
@@ -60,6 +61,6 @@ public class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 
 	@Override
 	public InspectionSettings build() {
-		return new InspectionSettingsImpl(componentHierarchyModel, evaluationSettings, visualSettings, securitySettings, debugSettings, keySettings);
+		return new InspectionSettingsImpl(componentHierarchyModel, evaluationSettings, visualSettings, customActionSettings, securitySettings, keySettings);
 	}
 }

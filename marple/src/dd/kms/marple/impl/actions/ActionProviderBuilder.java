@@ -3,6 +3,8 @@ package dd.kms.marple.impl.actions;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.actions.InspectionAction;
+import dd.kms.marple.api.settings.actions.CustomAction;
+import dd.kms.marple.api.settings.actions.CustomActionSettings;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.marple.impl.gui.snapshot.Snapshots;
@@ -100,7 +102,17 @@ public class ActionProviderBuilder
 		actionsBuilder.add(context.createSearchInstancesFromHereAction(object));
 		actionsBuilder.add(context.createSearchInstanceAction(object));
 		actionsBuilder.add(new CopyStringRepresentationAction(object));
-		actionsBuilder.add(context.createDebugSupportAction(this.object));
+		actionsBuilder.add(context.createDebugSupportAction(object));
+
+		CustomActionSettings customActionSettings = context.getSettings().getCustomActionSettings();
+		List<CustomAction> customActions = customActionSettings.getCustomActions();
+		for (CustomAction customAction : customActions) {
+			Class<?> customActionClass = customAction.getThisClass();
+			if (customActionClass.isInstance(object)) {
+				actionsBuilder.add(context.createParameterizedCustomAction(customAction, object));
+			}
+		}
+
 		return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
 	}
 

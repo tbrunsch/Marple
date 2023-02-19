@@ -3,7 +3,6 @@ package dd.kms.marple.impl.gui.actionprovidertree;
 import dd.kms.marple.api.settings.visual.VisualSettingsUtils;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
 import java.util.Objects;

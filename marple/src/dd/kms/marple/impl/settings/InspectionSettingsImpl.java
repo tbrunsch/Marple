@@ -2,9 +2,9 @@ package dd.kms.marple.impl.settings;
 
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.inspector.ObjectInspector;
-import dd.kms.marple.api.settings.DebugSettings;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.SecuritySettings;
+import dd.kms.marple.api.settings.actions.CustomActionSettings;
 import dd.kms.marple.api.settings.components.ComponentHierarchyModel;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.keys.KeySettings;
@@ -17,18 +17,18 @@ class InspectionSettingsImpl implements InspectionSettings
 	private final ComponentHierarchyModel	componentHierarchyModel;
 	private final EvaluationSettings		evaluationSettings;
 	private final VisualSettings			visualSettings;
+	private final CustomActionSettings		customActionSettings;
 	private final SecuritySettings			securitySettings;
-	private final DebugSettings				debugSettings;
 	private final KeySettings				keySettings;
 
 	InspectionSettingsImpl(ComponentHierarchyModel componentHierarchyModel, EvaluationSettings evaluationSettings, VisualSettings visualSettings,
-						   SecuritySettings securitySettings, DebugSettings debugSettings, KeySettings keySettings) {
+						   CustomActionSettings customActionSettings, SecuritySettings securitySettings, KeySettings keySettings) {
 		this.evaluationSettings = evaluationSettings;
-		this.debugSettings = debugSettings;
 		this.inspector = ObjectInspector.create();
 		this.evaluator = ExpressionEvaluator.create();
 		this.componentHierarchyModel = componentHierarchyModel;
 		this.visualSettings = visualSettings;
+		this.customActionSettings = customActionSettings;
 		this.securitySettings = securitySettings;
 		this.keySettings = keySettings;
 	}
@@ -59,13 +59,13 @@ class InspectionSettingsImpl implements InspectionSettings
 	}
 
 	@Override
-	public SecuritySettings getSecuritySettings() {
-		return securitySettings;
+	public CustomActionSettings getCustomActionSettings() {
+		return customActionSettings;
 	}
 
 	@Override
-	public DebugSettings getDebugSettings() {
-		return debugSettings;
+	public SecuritySettings getSecuritySettings() {
+		return securitySettings;
 	}
 
 	@Override

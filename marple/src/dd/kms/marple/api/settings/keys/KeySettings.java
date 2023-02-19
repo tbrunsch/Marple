@@ -6,6 +6,7 @@ public interface KeySettings
 	KeyRepresentation getEvaluationKey();
 	KeyRepresentation getFindInstancesKey();
 	KeyRepresentation getDebugSupportKey();
+	KeyRepresentation getCustomActionsKey();
 	KeyRepresentation getCodeCompletionKey();
 	KeyRepresentation getShowMethodArgumentsKey();
 	KeyRepresentation getQuickHelpKey();

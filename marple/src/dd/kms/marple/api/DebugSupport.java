@@ -23,7 +23,7 @@ public class DebugSupport
 	 */
 	private static int BREAKPOINT_DUMMY = 1;
 
-	public static void triggerBreakpoint() {
+	public static void triggerBreakpoint(Object thisValue) {
 		/*
 		 * Dummy code that will hopefully not be optimized away by the compiler
 		 *
