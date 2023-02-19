@@ -73,13 +73,14 @@ public class CustomActionsPanel extends JPanel implements Disposable
 
 		setPreferredSize(new Dimension(800, 300));
 
-		onTableContentChanged();
+		updateButtons();
 
 		addListeners();
 	}
 
 	private void addListeners() {
 		tableModel.addTableModelListener(e -> onTableContentChanged());
+		table.getSelectionModel().addListSelectionListener(e -> updateButtons());
 
 		newActionButton.addActionListener(e -> addNewAction());
 		deleteActionsButton.addActionListener(e -> deleteSelectedActions());
@@ -123,8 +124,6 @@ public class CustomActionsPanel extends JPanel implements Disposable
 
 	private void onTableContentChanged() {
 		customActionSettings.setCustomActions(customActions);
-
-		updateButtons();
 	}
 
 	private Class<?> getRequiredClass(int row) {
@@ -140,7 +139,9 @@ public class CustomActionsPanel extends JPanel implements Disposable
 	}
 
 	private void updateButtons() {
-		// TODO
+		boolean actionsSelected = table.getSelectedRowCount() > 0;
+		deleteActionsButton.setEnabled(actionsSelected);
+		deleteShortcutButton.setEnabled(actionsSelected);
 	}
 
 	private List<ColumnDescription<CustomAction>> createColumnDescriptions() {
