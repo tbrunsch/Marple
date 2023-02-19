@@ -39,7 +39,7 @@ public class DebugSupportPanel extends JPanel implements Disposable
 		exceptionPanel.add(exceptionLabel,	new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		exceptionLabel.setForeground(Color.RED);
 
-		setPreferredSize(new Dimension(640, 800));
+		setPreferredSize(new Dimension(640, 560));
 	}
 
 	public void setThisValue(Object thisValue) {
