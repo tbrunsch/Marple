@@ -59,12 +59,12 @@ public class CustomActionsPanel extends JPanel implements Disposable
 
 		add(scrollPane,		new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 1.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.BOTH, DEFAULT_INSETS, 0, 0));
 
-		add(new JLabel(),			new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.HORIZONTAL, DEFAULT_INSETS, 0, 0));
-		add(newActionButton,		new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
-		add(deleteActionsButton,	new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
-		add(deleteShortcutButton,	new GridBagConstraints(3, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+		add(exceptionPanel,	new GridBagConstraints(0, 1, REMAINDER, 1, 1.0, 0.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.HORIZONTAL, DEFAULT_INSETS, 0, 0));
 
-		add(exceptionPanel,	new GridBagConstraints(0, 2, REMAINDER, 1, 1.0, 0.0, GridBagConstraints.NORTHWEST,	GridBagConstraints.HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		add(new JLabel(),			new GridBagConstraints(0, 2, 1, 1, 1.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		add(newActionButton,		new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+		add(deleteActionsButton,	new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
+		add(deleteShortcutButton,	new GridBagConstraints(3, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST,	GridBagConstraints.NONE, DEFAULT_INSETS, 0, 0));
 
 		exceptionPanel.setVisible(false);
 		exceptionPanel.add(exceptionLabel,	new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
