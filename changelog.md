@@ -10,12 +10,14 @@
   - added expression evaluation history
   - added possibility to change variable values via expressions
   - added method `ObjectInspectionFramework.preloadClasses()` that allows loading classes before they are needed
+  - added "Custom Action" panel that allows defining actions for certain classes and an optional keyboard shortcut; removed breakpoint trigger facility from "Debug Support" panel as this can now be realized via a custom action
 
 API changes:
 
   - several changes resulting from API changes of Zenodot, most notably replacement of wrapper class `ObjectInfo` by `Object`
-  - Variables are not part of the Zenodot configuration stored in `ParserSettings`, but part of Marple's `ExpressionEvaluator`. You can now specify their type and whether they are `final`. If they are not final, then you can change their value within expressions.
-  - `ObjectView`s are now `Disposable`, so you have to implement `dispose()` when you provide such a view. This method is called when the inspection dialog is closed and gives you a chance to release certain data.   
+  - Variables are not part of the Zenodot configuration stored in `ParserSettings` anymore, but part of Marple's `ExpressionEvaluator`. You can now specify their type and whether they are `final`. If they are not final, then you can change their value within expressions.
+  - `ObjectView`s are now `Disposable`, so you have to implement `dispose()` when you provide such a view. This method is called when the inspection dialog is closed and gives you a chance to release certain data.
+  - There are no `DebugSettings` for specifying a breakpoint trigger command anymore. Instead, you can specify arbitrary `CustomAction`s as part of the `CustomActionSettings`.
 
 ## v0.3.1
 
