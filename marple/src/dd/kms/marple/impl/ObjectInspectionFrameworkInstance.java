@@ -1,5 +1,6 @@
 package dd.kms.marple.impl;
 
+import com.google.common.collect.ImmutableMap;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.api.settings.InspectionSettings;
@@ -8,6 +9,7 @@ import dd.kms.marple.api.settings.actions.CustomAction;
 import dd.kms.marple.api.settings.actions.CustomActionSettings;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
+import dd.kms.marple.api.settings.keys.KeyFunction;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
 import dd.kms.marple.api.settings.keys.KeySettings;
 
@@ -16,12 +18,22 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.security.AccessControlException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ObjectInspectionFrameworkInstance
 {
+	private final Map<KeyFunction, FunctionExecutor>	functionExecutors	= ImmutableMap.<KeyFunction, FunctionExecutor>builder()
+		.put(KeyFunction.INSPECTION,		this::performInspection)
+		.put(KeyFunction.EVALUATION,		this::performEvaluation)
+		.put(KeyFunction.FIND_INSTANCES,	this::performSearch)
+		.put(KeyFunction.DEBUG_SUPPORT,		this::openDebugSupportDialog)
+		.put(KeyFunction.CUSTOM_ACTIONS,	(context, component, position) -> openCustomActionsDialog(context))
+		.put(KeyFunction.QUICK_HELP,		(context, component, position) -> openQuickHelp(context))
+		.build();
+
 	private InspectionContext	context;
 
 	private Component			lastComponentUnderMouse;
@@ -195,26 +207,14 @@ public class ObjectInspectionFrameworkInstance
 
 		InspectionSettings settings = context.getSettings();
 		KeySettings keySettings = settings.getKeySettings();
-		KeyRepresentation inspectionKey = keySettings.getInspectionKey();
-		KeyRepresentation evaluationKey = keySettings.getEvaluationKey();
-		KeyRepresentation findInstancesKey = keySettings.getFindInstancesKey();
-		KeyRepresentation debugSupportKey = keySettings.getDebugSupportKey();
-		KeyRepresentation customActionsKey = keySettings.getCustomActionsKey();
-		KeyRepresentation quickHelpKey = keySettings.getQuickHelpKey();
-
-		if (key.matches(inspectionKey)) {
-			performInspection(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-		} else if (key.matches(evaluationKey)) {
-			performEvaluation(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-		} else if (key.matches(findInstancesKey)) {
-			performSearch(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-		} else if (key.matches(debugSupportKey)) {
-			openDebugSupportDialog(context, lastComponentUnderMouse, lastMousePositionOnComponent);
-		} else if (key.matches(customActionsKey)) {
-			openCustomActionsDialog(context);
-		} else if (key.matches(quickHelpKey)) {
-			openQuickHelp(context);
+		for (KeyFunction function : KeyFunction.values()) {
+			KeyRepresentation functionKey = keySettings.getKey(function);
+			if (key.matches(functionKey)) {
+				FunctionExecutor executor = functionExecutors.get(function);
+				executor.execute(context, lastComponentUnderMouse, lastMousePositionOnComponent);
+			}
 		}
+
 		CustomActionSettings customActionSettings = settings.getCustomActionSettings();
 		List<CustomAction> customActions = customActionSettings.getCustomActions();
 		for (CustomAction customAction : customActions) {
@@ -229,5 +229,11 @@ public class ObjectInspectionFrameworkInstance
 		lastComponentUnderMouse = component;
 		lastMousePositionOnComponent = mousePosOnComponent;
 		lastMousePositionOnScreen = dd.kms.marple.impl.gui.common.GuiCommons.getMousePositionOnScreen();
+	}
+
+	@FunctionalInterface
+	private interface FunctionExecutor
+	{
+		void execute(InspectionContext context, Component component, Point position);
 	}
 }

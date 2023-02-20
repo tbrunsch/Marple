@@ -1,5 +1,6 @@
 package dd.kms.marple.impl.gui.help;
 
+import dd.kms.marple.api.settings.keys.KeyFunction;
 import dd.kms.marple.api.settings.keys.KeySettings;
 
 class EvaluationKeysPanel extends AbstractKeysPanel
@@ -10,7 +11,7 @@ class EvaluationKeysPanel extends AbstractKeysPanel
 	EvaluationKeysPanel(KeySettings keySettings) {
 		super("Keys for expression evaluation");
 
-		addKeyDescription(CODE_COMPLETION_DESCRIPTION,			keySettings.getCodeCompletionKey());
-		addKeyDescription(SHOW_METHOD_ARGUMENTS_DESCRIPTION,	keySettings.getShowMethodArgumentsKey());
+		addKeyDescription(CODE_COMPLETION_DESCRIPTION,			keySettings.getKey(KeyFunction.CODE_COMPLETION));
+		addKeyDescription(SHOW_METHOD_ARGUMENTS_DESCRIPTION,	keySettings.getKey(KeyFunction.SHOW_METHOD_ARGUMENTS));
 	}
 }

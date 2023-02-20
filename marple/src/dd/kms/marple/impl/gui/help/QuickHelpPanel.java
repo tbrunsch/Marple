@@ -2,6 +2,7 @@ package dd.kms.marple.impl.gui.help;
 
 import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.api.settings.actions.CustomActionSettings;
+import dd.kms.marple.api.settings.keys.KeyFunction;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
 import dd.kms.marple.api.settings.keys.KeySettings;
 
@@ -36,11 +37,11 @@ public class QuickHelpPanel extends JPanel implements Disposable
 	public QuickHelpPanel(KeySettings keySettings, CustomActionSettings customActionSettings) {
 		super(new GridBagLayout());
 
-		addCategory(INSPECTION_TITLE,		INSPECTION_DESCRIPTION,		INSPECTION_INFO,			keySettings.getInspectionKey());
-		addCategory(EVALUATION_TITLE,		EVALUATION_DESCRIPTION,		EVALUATION_INFO,			keySettings.getEvaluationKey());
-		addCategory(FIND_INSTANCES_TITLE,	FIND_INSTANCES_DESCRIPTION,	FIND_INSTANCES_INFO,		keySettings.getFindInstancesKey());
-		addCategory(DEBUG_SUPPORT_TITLE,	DEBUG_SUPPORT_DESCRIPTION,	DEBUG_SUPPORT_INFO,			keySettings.getDebugSupportKey());
-		addCategory(CUSTOM_ACTION_TITLE,	CUSTOM_ACTION_DESCRIPTION,	CUSTOM_ACTION_INFO,			keySettings.getCustomActionsKey());
+		addCategory(INSPECTION_TITLE,		INSPECTION_DESCRIPTION,		INSPECTION_INFO,			keySettings.getKey(KeyFunction.INSPECTION));
+		addCategory(EVALUATION_TITLE,		EVALUATION_DESCRIPTION,		EVALUATION_INFO,			keySettings.getKey(KeyFunction.EVALUATION));
+		addCategory(FIND_INSTANCES_TITLE,	FIND_INSTANCES_DESCRIPTION,	FIND_INSTANCES_INFO,		keySettings.getKey(KeyFunction.FIND_INSTANCES));
+		addCategory(DEBUG_SUPPORT_TITLE,	DEBUG_SUPPORT_DESCRIPTION,	DEBUG_SUPPORT_INFO,			keySettings.getKey(KeyFunction.DEBUG_SUPPORT));
+		addCategory(CUSTOM_ACTION_TITLE,	CUSTOM_ACTION_DESCRIPTION,	CUSTOM_ACTION_INFO,			keySettings.getKey(KeyFunction.CUSTOM_ACTIONS));
 
 		JPanel evaluationKeysPanel = new EvaluationKeysPanel(keySettings);
 		add(evaluationKeysPanel, new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));

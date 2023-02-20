@@ -18,6 +18,7 @@ API changes:
   - Variables are not part of the Zenodot configuration stored in `ParserSettings` anymore, but part of Marple's `ExpressionEvaluator`. You can now specify their type and whether they are `final`. If they are not final, then you can change their value within expressions.
   - `ObjectView`s are now `Disposable`, so you have to implement `dispose()` when you provide such a view. This method is called when the inspection dialog is closed and gives you a chance to release certain data.
   - There are no `DebugSettings` for specifying a breakpoint trigger command anymore. Instead, you can specify arbitrary `CustomAction`s as part of the `CustomActionSettings`.
+  - `KeySettingsBuilder` not only contains a single parameterized setter `key` instead of one key setter for each function.
 
 ## v0.3.1
 
