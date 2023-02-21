@@ -28,9 +28,8 @@ public class KeyInput extends JTextField implements KeyListener
 	private int									keyCode;
 
 	public KeyInput(Consumer<KeyRepresentation> keyListener) {
-		super("Press any key combination");
-
 		setEditable(false);
+		setHighlighter(null);	// to prevent displaying text selection
 
 		this.keyListener = keyListener;
 
@@ -38,6 +37,8 @@ public class KeyInput extends JTextField implements KeyListener
 	}
 
 	public void waitForKey() {
+		setText("Press keys...");
+
 		modifiers = 0;
 		keyCode = 0;
 		waitingForKey = true;
@@ -60,6 +61,7 @@ public class KeyInput extends JTextField implements KeyListener
 			keyListener.accept(pressedKey);
 		}
 		waitingForKey = false;
+		setText(pressedKey.toString());
 	}
 
 	@Override
