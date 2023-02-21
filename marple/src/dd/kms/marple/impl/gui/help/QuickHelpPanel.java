@@ -8,6 +8,8 @@ import dd.kms.marple.api.settings.keys.KeySettings;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 import static java.awt.GridBagConstraints.*;
@@ -16,32 +18,51 @@ public class QuickHelpPanel extends JPanel implements Disposable
 {
 	public static final String	TITLE						= "Marple Quick Help";
 
-	private static final String INSPECTION_TITLE			= "Inspect";
-	private static final String INSPECTION_DESCRIPTION		= "Open the inspection dialog for the component under the mouse";
-	private static final String INSPECTION_INFO				= "Use this feature to analyze your GUI and any data that is connected to it.";
-	private static final String EVALUATION_TITLE			= "Evaluate";
-	private static final String EVALUATION_DESCRIPTION		= "Evaluate an expression";
-	private static final String EVALUATION_INFO				= "Use the literal \"this\" to refer to the component under the mouse.";
-	private static final String FIND_INSTANCES_TITLE		= "Find Instances";
-	private static final String FIND_INSTANCES_DESCRIPTION	= "Find a concrete instance or all instances of a class that match a certain filter";
-	private static final String FIND_INSTANCES_INFO			= "The search starts at the component under the mouse.";
-	private static final String DEBUG_SUPPORT_TITLE			= "Debug Support";
-	private static final String DEBUG_SUPPORT_DESCRIPTION	= "Open the debug support dialog";
-	private static final String DEBUG_SUPPORT_INFO			= "Use this feature for exchanging data with your debugger.";
-	private static final String CUSTOM_ACTION_TITLE			= "Custom Actions";
-	private static final String CUSTOM_ACTION_DESCRIPTION	= "Define custom actions including shortcuts";
-	private static final String CUSTOM_ACTION_INFO			= "Each action is defined via an expression.";
+	private static final Map<KeyFunction, FunctionMetaData>	FUNCTION_META_DATA	= new LinkedHashMap<>();
+
+	private static void registerFunction(KeyFunction function, String title, String description, String info) {
+		FunctionMetaData metaData = new FunctionMetaData(title, description, info);
+		FUNCTION_META_DATA.put(function, metaData);
+	}
+
+	static {
+		registerFunction(KeyFunction.INSPECTION,
+			"Inspect",
+			"Open the inspection dialog for the component under the mouse",
+			"Use this feature to analyze your GUI and any data that is connected to it."
+		);
+		registerFunction(KeyFunction.EVALUATION,
+			"Evaluate",
+			"Evaluate an expression",
+			"Use the literal \"this\" to refer to the component under the mouse."
+		);
+		registerFunction(KeyFunction.FIND_INSTANCES,
+			"Find Instances",
+			"Find a concrete instance or all instances of a class that match a certain filter",
+			"The search starts at the component under the mouse."
+		);
+		registerFunction(KeyFunction.DEBUG_SUPPORT,
+			"Debug Support",
+			"Open the debug support dialog",
+			"Use this feature for exchanging data with your debugger."
+		);
+		registerFunction(KeyFunction.CUSTOM_ACTIONS,
+			"Custom Actions",
+			"Define custom actions including shortcuts",
+			"Each action is defined via an expression."
+		);
+	}
 
 	private int yPos;
 
 	public QuickHelpPanel(KeySettings keySettings, CustomActionSettings customActionSettings) {
 		super(new GridBagLayout());
 
-		addCategory(INSPECTION_TITLE,		INSPECTION_DESCRIPTION,		INSPECTION_INFO,			keySettings.getKey(KeyFunction.INSPECTION));
-		addCategory(EVALUATION_TITLE,		EVALUATION_DESCRIPTION,		EVALUATION_INFO,			keySettings.getKey(KeyFunction.EVALUATION));
-		addCategory(FIND_INSTANCES_TITLE,	FIND_INSTANCES_DESCRIPTION,	FIND_INSTANCES_INFO,		keySettings.getKey(KeyFunction.FIND_INSTANCES));
-		addCategory(DEBUG_SUPPORT_TITLE,	DEBUG_SUPPORT_DESCRIPTION,	DEBUG_SUPPORT_INFO,			keySettings.getKey(KeyFunction.DEBUG_SUPPORT));
-		addCategory(CUSTOM_ACTION_TITLE,	CUSTOM_ACTION_DESCRIPTION,	CUSTOM_ACTION_INFO,			keySettings.getKey(KeyFunction.CUSTOM_ACTIONS));
+		for (KeyFunction function : FUNCTION_META_DATA.keySet()) {
+			FunctionMetaData metaData = FUNCTION_META_DATA.get(function);
+			KeyRepresentation key = keySettings.getKey(function);
+			addCategory(metaData, key);
+		}
 
 		JPanel evaluationKeysPanel = new EvaluationKeysPanel(keySettings);
 		add(evaluationKeysPanel, new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));
@@ -50,11 +71,11 @@ public class QuickHelpPanel extends JPanel implements Disposable
 		add(customActionKeysPanel, new GridBagConstraints(0, yPos++, REMAINDER, 1, 1.0, 0.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));
 	}
 
-	private void addCategory(String title, String description, String info, KeyRepresentation key) {
-		String htmlDescription = "<html><p>" + description + "</p></html>";
-		String htmlInfo = "<html><p>" + info + "</p></html>";
+	private void addCategory(FunctionMetaData metaData, KeyRepresentation key) {
+		String htmlDescription = "<html><p>" + metaData.description + "</p></html>";
+		String htmlInfo = "<html><p>" + metaData.info + "</p></html>";
 
-		JPanel categoryPanel = new CategoryPanel(title, key);
+		JPanel categoryPanel = new CategoryPanel(metaData.title, key);
 		JPanel descriptionPanel = new DescriptionPanel(htmlDescription, htmlInfo);
 
 		add(categoryPanel,		new GridBagConstraints(0, yPos,   1, 1, 0.0, 0.0, WEST, BOTH, DEFAULT_INSETS, 0, 0));
@@ -64,5 +85,18 @@ public class QuickHelpPanel extends JPanel implements Disposable
 	@Override
 	public void dispose() {
 		/* Currently there is nothing to do */
+	}
+
+	private static class FunctionMetaData
+	{
+		final String	title;
+		final String	description;
+		final String	info;
+
+		FunctionMetaData(String title, String description, String info) {
+			this.title = title;
+			this.description = description;
+			this.info = info;
+		}
 	}
 }
