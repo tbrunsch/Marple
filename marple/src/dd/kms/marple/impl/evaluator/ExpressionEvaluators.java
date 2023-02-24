@@ -3,6 +3,7 @@ package dd.kms.marple.impl.evaluator;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
+import dd.kms.marple.impl.common.PreferenceUtils;
 import dd.kms.zenodot.api.Variables;
 import dd.kms.zenodot.api.settings.ParserSettings;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
@@ -19,6 +20,7 @@ public class ExpressionEvaluators
 		valueSetter.accept(builder, value);
 		ParserSettings parserSettings = builder.build();
 		evaluator.setParserSettings(parserSettings);
+		PreferenceUtils.writeSettings(context.getSettings());
 	}
 
 	public static <T> T getValue(Function<ParserSettings, T> valueGetter, InspectionContext context) {

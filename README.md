@@ -178,7 +178,7 @@ The first call creates an empty builder, while the second call creates a preconf
   * an immutable part that has to be configured by the `InspectionSettingsBuilder` and
   * a mutable part that is intended to be configurable by the user.
 
-The only mutable settings are the [settings for the parser](#parser-settings) that can be configured in the [evaluation settings dialog](#evaluation-settings-1) and the [settings for custom actions](#custom-action-settings) that can be defined in the [custom actions dialog](#custom-actions).  
+The only mutable settings are the [settings for the parser](#parser-settings) that can be configured in the [evaluation settings dialog](#evaluation-settings-1) and the [settings for custom actions](#custom-action-settings) that can be defined in the [custom actions dialog](#custom-actions). If a preferences file has been specified via `InspectionSettingsBuilder.preferencesFile()`, then these settings will also be stored and loaded when the next session is started.
     
 In the remainder of this section we discuss the different types of settings.
 
@@ -768,6 +768,8 @@ Custom actions can be defined at compile time as [custom action settings](#custo
 Every custom action consists of a name, an expression that will be executed when the custom action is performed, a class this action is applicable to, and optionally a keyboard shortcut. To change any of these settings, double-click onto the corresponding cell and change it as needed.
 
 The expression will be executed in the context of a certain object that may be referenced by the literal `this`. By specifying the required class you can restrict when a custom action is applicable, which also allows to write more specific expressions.
+
+If the user has specified a preferences file via `InspectionSettingsBuilder.preferencesFile()`, then these custom actions will be stored there and loaded when the next session is started. 
 
 # Search Dialog
 

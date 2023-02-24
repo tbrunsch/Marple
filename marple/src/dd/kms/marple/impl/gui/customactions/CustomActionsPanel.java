@@ -5,6 +5,7 @@ import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.api.settings.actions.CustomAction;
 import dd.kms.marple.api.settings.actions.CustomActionSettings;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
+import dd.kms.marple.impl.common.PreferenceUtils;
 import dd.kms.marple.impl.gui.common.ExceptionFormatter;
 import dd.kms.marple.impl.gui.table.*;
 
@@ -35,12 +36,14 @@ public class CustomActionsPanel extends JPanel implements Disposable
 	private final JButton							deleteActionsButton		= new JButton("Delete action(s)");
 	private final JButton							deleteShortcutButton	= new JButton("Delete shortcut(s)");
 
+	private final InspectionContext					context;
 	private final CustomActionSettings				customActionSettings;
 	private final List<CustomAction>				customActions;
 
 	public CustomActionsPanel(InspectionContext context) {
 		super(new GridBagLayout());
 
+		this.context = context;
 		this.customActionSettings = context.getSettings().getCustomActionSettings();
 		this.customActions = new ArrayList<>(customActionSettings.getCustomActions());
 
@@ -124,6 +127,7 @@ public class CustomActionsPanel extends JPanel implements Disposable
 
 	private void onTableContentChanged() {
 		customActionSettings.setCustomActions(customActions);
+		PreferenceUtils.writeSettings(context.getSettings());
 	}
 
 	private Class<?> getRequiredClass(int row) {

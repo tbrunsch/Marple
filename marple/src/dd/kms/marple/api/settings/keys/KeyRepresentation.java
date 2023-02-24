@@ -80,6 +80,14 @@ public class KeyRepresentation
 		this.keyCode = keyCode;
 	}
 
+	public int getModifiers() {
+		return modifiers;
+	}
+
+	public int getKeyCode() {
+		return keyCode;
+	}
+
 	public boolean matches(KeyRepresentation expectedKey) {
 		return expectedKey != null && keyCode == expectedKey.keyCode && modifiers == expectedKey.modifiers;
 	}
