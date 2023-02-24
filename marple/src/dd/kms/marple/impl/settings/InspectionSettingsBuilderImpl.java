@@ -14,6 +14,9 @@ import dd.kms.marple.api.settings.keys.KeySettingsBuilder;
 import dd.kms.marple.api.settings.visual.VisualSettings;
 import dd.kms.marple.api.settings.visual.VisualSettingsBuilder;
 
+import javax.annotation.Nullable;
+import java.nio.file.Path;
+
 public class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 {
 	private ComponentHierarchyModel	componentHierarchyModel		= ComponentHierarchyModelBuilder.create().build();
@@ -22,6 +25,8 @@ public class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 	private CustomActionSettings	customActionSettings		= CustomActionSettings.of(ImmutableList.of());
 	private SecuritySettings		securitySettings			= NoSecuritySettings.INSTANCE;
 	private KeySettings				keySettings					= KeySettingsBuilder.create().build();
+	@Nullable
+	private Path					preferencesFile;
 
 	@Override
 	public InspectionSettingsBuilder componentHierarchyModel(ComponentHierarchyModel componentHierarchyModel) {
@@ -60,7 +65,13 @@ public class InspectionSettingsBuilderImpl implements InspectionSettingsBuilder
 	}
 
 	@Override
+	public InspectionSettingsBuilder preferencesFile(Path preferencesFile) {
+		this.preferencesFile = preferencesFile;
+		return this;
+	}
+
+	@Override
 	public InspectionSettings build() {
-		return new InspectionSettingsImpl(componentHierarchyModel, evaluationSettings, visualSettings, customActionSettings, securitySettings, keySettings);
+		return new InspectionSettingsImpl(componentHierarchyModel, evaluationSettings, visualSettings, customActionSettings, securitySettings, keySettings, preferencesFile);
 	}
 }

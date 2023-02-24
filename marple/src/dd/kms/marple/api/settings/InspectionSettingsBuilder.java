@@ -6,6 +6,8 @@ import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.keys.KeySettings;
 import dd.kms.marple.api.settings.visual.VisualSettings;
 
+import java.nio.file.Path;
+
 public interface InspectionSettingsBuilder
 {
 	static InspectionSettingsBuilder create() {
@@ -18,5 +20,6 @@ public interface InspectionSettingsBuilder
 	InspectionSettingsBuilder customActionSettings(CustomActionSettings customActionSettings);
 	InspectionSettingsBuilder securitySettings(SecuritySettings securitySettings);
 	InspectionSettingsBuilder keySettings(KeySettings keySettings);
+	InspectionSettingsBuilder preferencesFile(Path preferencesFile);
 	InspectionSettings build();
 }

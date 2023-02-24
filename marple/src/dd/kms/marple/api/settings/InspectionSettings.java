@@ -8,6 +8,9 @@ import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.keys.KeySettings;
 import dd.kms.marple.api.settings.visual.VisualSettings;
 
+import javax.annotation.Nullable;
+import java.nio.file.Path;
+
 public interface InspectionSettings
 {
 	ObjectInspector getInspector();
@@ -18,4 +21,6 @@ public interface InspectionSettings
 	CustomActionSettings getCustomActionSettings();
 	SecuritySettings getSecuritySettings();
 	KeySettings getKeySettings();
+	@Nullable
+	Path getPreferencesFile();
 }

@@ -23,14 +23,20 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class TestUtils
 {
+	private static final String	PREFERENCES_FOLDER		= "Marple";
+	private static final String	PREFERENCES_FILE_NAME	= "Settings.xml";
+
 	static void setupInspectionFramework(JFrame testFrame) throws ClassNotFoundException {
 		Variable variable1 = Variable.create("testFrame", JFrame.class, testFrame, true, false);
 		Variable variable2 = Variable.create("testData", TestData.class, new TestData(), true, true);
@@ -74,9 +80,12 @@ class TestUtils
 		);
 		CustomActionSettings customActionSettings = CustomActionSettings.of(triggerBreakpointAction);
 
+		Path preferencesFile = suggestPreferencesFile();
+
 		InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspectionSettingsBuilder()
 			.evaluationSettings(evaluationSettings)
 			.customActionSettings(customActionSettings)
+			.preferencesFile(preferencesFile)
 			.build();
 		ExpressionEvaluator evaluator = inspectionSettings.getEvaluator();
 		evaluator.setParserSettings(parserSettings);
@@ -92,6 +101,36 @@ class TestUtils
 		DebugSupport.setSlotValue("variableImport",	42);
 		DebugSupport.setSlotValue("successful",		1.41);
 		DebugSupport.setSlotValue("expectedValues",	Arrays.asList("Yes!", 42, 1.41));
+	}
+
+	private static Path suggestPreferencesFile() {
+		File rootDirectory = suggestPreferencesRootDirectory();
+		if (rootDirectory == null) {
+			return null;
+		}
+		File preferencesFolder = new File(rootDirectory, PREFERENCES_FOLDER);
+		if (preferencesFolder.exists() && !preferencesFolder.isDirectory()) {
+			return null;
+		}
+		try {
+			preferencesFolder.mkdir();
+		} catch (Throwable t) {
+			return null;
+		}
+		return new File(preferencesFolder, PREFERENCES_FILE_NAME).toPath();
+	}
+
+	private static File suggestPreferencesRootDirectory() {
+		return suggestPreferencesRootDirectoryPaths()
+			.map(File::new)
+			.filter(File::exists)
+			.findFirst().orElse(null);
+	}
+
+	private static Stream<String> suggestPreferencesRootDirectoryPaths() {
+		String localAppDataDirectory = System.getenv("LOCALAPPDATA");
+		String homeDirectory = System.getProperty("user.home");
+		return Stream.of(localAppDataDirectory, homeDirectory).filter(Objects::nonNull);
 	}
 
 	private static class FileNode implements ObjectTreeNode

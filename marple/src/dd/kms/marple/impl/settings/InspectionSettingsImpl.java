@@ -10,6 +10,9 @@ import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.keys.KeySettings;
 import dd.kms.marple.api.settings.visual.VisualSettings;
 
+import javax.annotation.Nullable;
+import java.nio.file.Path;
+
 class InspectionSettingsImpl implements InspectionSettings
 {
 	private final ObjectInspector			inspector;
@@ -20,10 +23,13 @@ class InspectionSettingsImpl implements InspectionSettings
 	private final CustomActionSettings		customActionSettings;
 	private final SecuritySettings			securitySettings;
 	private final KeySettings				keySettings;
+	@Nullable
+	private final Path						preferencesFile;
 
 	InspectionSettingsImpl(ComponentHierarchyModel componentHierarchyModel, EvaluationSettings evaluationSettings, VisualSettings visualSettings,
-						   CustomActionSettings customActionSettings, SecuritySettings securitySettings, KeySettings keySettings) {
+						   CustomActionSettings customActionSettings, SecuritySettings securitySettings, KeySettings keySettings, @Nullable Path preferencesFile) {
 		this.evaluationSettings = evaluationSettings;
+		this.preferencesFile = preferencesFile;
 		this.inspector = ObjectInspector.create();
 		this.evaluator = ExpressionEvaluator.create();
 		this.componentHierarchyModel = componentHierarchyModel;
@@ -71,5 +77,11 @@ class InspectionSettingsImpl implements InspectionSettings
 	@Override
 	public KeySettings getKeySettings() {
 		return keySettings;
+	}
+
+	@Override
+	@Nullable
+	public Path getPreferencesFile() {
+		return preferencesFile;
 	}
 }
