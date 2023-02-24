@@ -11,6 +11,7 @@
   - added possibility to change variable values via expressions
   - added method `ObjectInspectionFramework.preloadClasses()` that allows loading classes before they are needed
   - added "Custom Action" panel that allows defining actions for certain classes and an optional keyboard shortcut; removed breakpoint trigger facility from "Debug Support" panel as this can now be realized via a custom action
+  - added possibility to specify a preferences file via `InspectionSettingsBuilder.preferencesFile()`; if specified, then mutable parts of the `InspectionSettings` will be stored there and loaded when next session is started 
 
 API changes:
 
