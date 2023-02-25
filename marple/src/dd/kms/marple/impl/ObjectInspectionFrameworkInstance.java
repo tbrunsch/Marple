@@ -207,7 +207,7 @@ public class ObjectInspectionFrameworkInstance
 
 		InspectionSettings settings = context.getSettings();
 		KeySettings keySettings = settings.getKeySettings();
-		for (KeyFunction function : KeyFunction.values()) {
+		for (KeyFunction function : functionExecutors.keySet()) {
 			KeyRepresentation functionKey = keySettings.getKey(function);
 			if (key.matches(functionKey)) {
 				FunctionExecutor executor = functionExecutors.get(function);
