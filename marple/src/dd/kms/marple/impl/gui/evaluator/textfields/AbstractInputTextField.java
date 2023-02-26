@@ -3,6 +3,7 @@ package dd.kms.marple.impl.gui.evaluator.textfields;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.api.settings.keys.KeyFunction;
 import dd.kms.marple.api.settings.keys.KeySettings;
@@ -18,11 +19,14 @@ import javax.swing.text.JTextComponent;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public abstract class AbstractInputTextField<T> extends JTextField
 {
+	private static volatile boolean	PRELOADED_CLASSES	= false;
+
 	static List<CodeCompletion> filterCompletions(List<CodeCompletion> completions) {
 		return completions.stream()
 			.filter(completion -> completion.getRating().getNameMatch() != StringMatch.NONE)
@@ -44,6 +48,11 @@ public abstract class AbstractInputTextField<T> extends JTextField
 
 	AbstractInputTextField(InspectionContext context) {
 		this.context = context;
+
+		if (!PRELOADED_CLASSES) {
+			PRELOADED_CLASSES = true;
+			CompletableFuture.runAsync(ObjectInspectionFramework::preloadClasses);
+		}
 
 		KeySettings keySettings = context.getSettings().getKeySettings();
 		CodeCompletionDecorators.decorate(
