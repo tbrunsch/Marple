@@ -209,7 +209,7 @@ Note that the bi-function that you have to specify for the method `createSingleS
 
 The interface `EvaluationSettings` contains information about what will be displayed when the evaluation dialog is opened for certain objects. You can create an instance of `EvaluationSettings` via its builder that you obtain via `EvaluationSettingsBuilder.create()`.
 
-`EvaluationSettings` do not influence how expressions are evaluated. This can be achieved by specifying `ParserSettings` (see Section [Parser Settings](#parser-settings)). Instead, `EvaluationSettings` allow you to specify
+`EvaluationSettings` do not influence how expressions are evaluated. This can be achieved by specifying `ParserSettings` (see Section [Parser Settings](#parser-settings)).
 
 The `EvaluationSettingsBuilder` provides 2 methods:
 
