@@ -65,6 +65,7 @@ public class PreferenceUtils
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 			transformer.transform(domSource, streamResult);
 		} catch (ParserConfigurationException | IOException | TransformerException e) {
 			/* nothing we can do */
