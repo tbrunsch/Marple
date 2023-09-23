@@ -15,8 +15,8 @@ class CustomAutoCompletion extends AutoCompletion
 {
 	private final Runnable onShowExecutableArguments;
 
-	CustomAutoCompletion(ParserMediator parserMediator, KeyRepresentation completionSuggestionKey, Runnable onShowExecutableArguments, @Nullable Consumer<Throwable> exceptionConsumer) {
-		super(new CodeCompletionProvider(parserMediator, exceptionConsumer));
+	CustomAutoCompletion(ParserMediator parserMediator, KeyRepresentation completionSuggestionKey, Runnable onShowExecutableArguments) {
+		super(new CodeCompletionProvider(parserMediator));
 
 		this.onShowExecutableArguments = onShowExecutableArguments;
 

@@ -23,14 +23,14 @@ public class CodeCompletionProvider implements CompletionProvider
 
 	private ListCellRenderer<Object>	renderer;
 
-	public CodeCompletionProvider(ParserMediator parserMediator, @Nullable Consumer<Throwable> exceptionConsumer) {
+	public CodeCompletionProvider(ParserMediator parserMediator) {
 		this.parserMediator = parserMediator;
-		this.completionsFactory = new CompletionsFactory(this, exceptionConsumer);
+		this.completionsFactory = new CompletionsFactory(this);
 		setListCellRenderer(new CompletionRenderer());
 	}
 
-	List<CodeCompletion> provideCodeCompletions(String text, int caretPosition) throws ParseException {
-		return parserMediator.provideCodeCompletions(text, caretPosition);
+	ParserMediator getParserMediator() {
+		return getParserMediator();
 	}
 
 	@Override

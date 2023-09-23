@@ -5,13 +5,11 @@ import dd.kms.zenodot.api.result.CodeCompletion;
 import dd.kms.zenodot.api.result.CodeCompletionType;
 import dd.kms.zenodot.api.result.codecompletions.CodeCompletionMethod;
 import org.fife.ui.autocomplete.Completion;
-import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.ParameterizedCompletion;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 class CompletionsFactory
@@ -24,11 +22,9 @@ class CompletionsFactory
 	}
 
 	private final CodeCompletionProvider	completionProvider;
-	private final Consumer<Throwable>		exceptionConsumer;
 
-	CompletionsFactory(CodeCompletionProvider completionProvider, Consumer<Throwable> exceptionConsumer) {
+	CompletionsFactory(CodeCompletionProvider completionProvider) {
 		this.completionProvider = completionProvider;
-		this.exceptionConsumer = exceptionConsumer;
 	}
 
 	List<Completion> getCompletions(String text, int caretPosition) {
@@ -53,17 +49,16 @@ class CompletionsFactory
 	}
 
 	private List<CodeCompletion> getCodeCompletions(String text, int caretPosition) {
+		ParserMediator parserMediator = completionProvider.getParserMediator();
 		List<CodeCompletion> completions;
 		Throwable throwable = null;
 		try {
-			completions = completionProvider.provideCodeCompletions(text, caretPosition);
+			completions = parserMediator.provideCodeCompletions(text, caretPosition);
 		} catch (Throwable t) {
 			throwable = t;
 			completions = ImmutableList.of();
 		}
-		if (exceptionConsumer != null) {
-			exceptionConsumer.accept(throwable);
-		}
+		parserMediator.consumeException(throwable);
 		return completions;
 	}
 

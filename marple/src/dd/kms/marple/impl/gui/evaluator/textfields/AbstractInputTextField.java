@@ -15,6 +15,7 @@ import dd.kms.zenodot.api.result.CodeCompletion;
 import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
 import dd.kms.zenodot.api.settings.ParserSettings;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.util.List;
@@ -67,15 +68,23 @@ public abstract class AbstractInputTextField<T> extends JTextField
 			public Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String expression, int caretPosition) throws ParseException {
 				return AbstractInputTextField.this.getExecutableArgumentInfo(expression, caretPosition);
 			}
+
+			@Override
+			public void consumeText(String text) {
+				AbstractInputTextField.this.consumeText(text);
+			}
+
+			@Override
+			public void consumeException(@Nullable Throwable t) {
+				AbstractInputTextField.this.consumeException(t);
+			}
 		};
 
 		CodeCompletionDecorators.decorate(
 			this,
 			parserMediator,
 			keySettings.getKey(KeyFunction.CODE_COMPLETION),
-			keySettings.getKey(KeyFunction.SHOW_METHOD_ARGUMENTS),
-			this::consumeText,
-			this::consumeException
+			keySettings.getKey(KeyFunction.SHOW_METHOD_ARGUMENTS)
 		);
 	}
 
