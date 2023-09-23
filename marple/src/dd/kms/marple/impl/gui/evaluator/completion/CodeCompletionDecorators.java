@@ -3,7 +3,6 @@ package dd.kms.marple.impl.gui.evaluator.completion;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
 import dd.kms.marple.impl.gui.common.GuiCommons;
 import org.fife.ui.autocomplete.AutoCompletion;
-import org.fife.ui.autocomplete.CompletionProvider;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -23,8 +22,6 @@ public class CodeCompletionDecorators
 	public static void decorate(JTextComponent textComponent, ParserMediator parserMediator, KeyRepresentation completionSuggestionKey,
 			@Nullable ExecutableArgumentInfoProvider executableArgumentInfoProvider, @Nullable KeyRepresentation showExecutableArgumentsKey,
 			@Nullable Consumer<String> inputConsumer, @Nullable Consumer<Throwable> exceptionConsumer) {
-		CompletionProvider provider = new CodeCompletionProvider(parserMediator, exceptionConsumer);
-
 		if (exceptionConsumer != null) {
 			/*
 			 * The auto completion library does not request completions when, among others, removing characters.
@@ -35,7 +32,7 @@ public class CodeCompletionDecorators
 
 		Runnable onShowExecutableArguments = () -> showExecutableArguments(textComponent, executableArgumentInfoProvider);
 
-		AutoCompletion ac = new CustomAutoCompletion(provider, completionSuggestionKey, onShowExecutableArguments);
+		AutoCompletion ac = new CustomAutoCompletion(parserMediator, completionSuggestionKey, onShowExecutableArguments, exceptionConsumer);
 		ac.install(textComponent);
 
 		if (showExecutableArgumentsKey != null && executableArgumentInfoProvider != null) {

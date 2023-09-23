@@ -2,18 +2,21 @@ package dd.kms.marple.impl.gui.evaluator.completion;
 
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
 import dd.kms.zenodot.api.result.CodeCompletion;
+import dd.kms.zenodot.api.result.codecompletions.CodeCompletionClass;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
 
+import javax.annotation.Nullable;
 import javax.swing.text.JTextComponent;
+import java.util.function.Consumer;
 
 class CustomAutoCompletion extends AutoCompletion
 {
 	private final Runnable onShowExecutableArguments;
 
-	CustomAutoCompletion(CompletionProvider provider, KeyRepresentation completionSuggestionKey, Runnable onShowExecutableArguments) {
-		super(provider);
+	CustomAutoCompletion(ParserMediator parserMediator, KeyRepresentation completionSuggestionKey, Runnable onShowExecutableArguments, @Nullable Consumer<Throwable> exceptionConsumer) {
+		super(new CodeCompletionProvider(parserMediator, exceptionConsumer));
 
 		this.onShowExecutableArguments = onShowExecutableArguments;
 
