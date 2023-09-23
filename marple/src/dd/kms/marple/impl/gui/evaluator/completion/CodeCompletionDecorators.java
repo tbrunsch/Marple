@@ -20,7 +20,7 @@ public class CodeCompletionDecorators
 	private static final KeyRepresentation	DOWN_KEY	= new KeyRepresentation(0, KeyEvent.VK_DOWN);
 
 	public static void decorate(JTextComponent textComponent, ParserMediator parserMediator, KeyRepresentation completionSuggestionKey,
-			@Nullable ExecutableArgumentInfoProvider executableArgumentInfoProvider, @Nullable KeyRepresentation showExecutableArgumentsKey,
+			@Nullable KeyRepresentation showExecutableArgumentsKey,
 			@Nullable Consumer<String> inputConsumer, @Nullable Consumer<Throwable> exceptionConsumer) {
 		if (exceptionConsumer != null) {
 			/*
@@ -30,12 +30,12 @@ public class CodeCompletionDecorators
 			registerExceptionConsumer(textComponent, parserMediator, exceptionConsumer);
 		}
 
-		Runnable onShowExecutableArguments = () -> showExecutableArguments(textComponent, executableArgumentInfoProvider);
+		Runnable onShowExecutableArguments = () -> showExecutableArguments(textComponent, parserMediator);
 
 		AutoCompletion ac = new CustomAutoCompletion(parserMediator, completionSuggestionKey, onShowExecutableArguments, exceptionConsumer);
 		ac.install(textComponent);
 
-		if (showExecutableArgumentsKey != null && executableArgumentInfoProvider != null) {
+		if (showExecutableArgumentsKey != null) {
 			GuiCommons.installKeyHandler(textComponent, showExecutableArgumentsKey, "Display method argument info", onShowExecutableArguments);
 		}
 		if (inputConsumer != null) {
@@ -81,11 +81,11 @@ public class CodeCompletionDecorators
 		});
 	}
 
-	private static void showExecutableArguments(JTextComponent textComponent, ExecutableArgumentInfoProvider executableArgumentInfoProvider)  {
+	private static void showExecutableArguments(JTextComponent textComponent, ParserMediator parserMediator)  {
 		if (textComponent.getComponentPopupMenu() instanceof ExecutableArgumentPopup) {
 			return;
 		}
-		ExecutableArgumentPopup.register(textComponent, executableArgumentInfoProvider);
+		ExecutableArgumentPopup.register(textComponent, parserMediator);
 	}
 
 	private static void evaluateInput(JTextComponent textComponent, Consumer<String> inputConsumer, ExpressionHistory expressionHistory) {

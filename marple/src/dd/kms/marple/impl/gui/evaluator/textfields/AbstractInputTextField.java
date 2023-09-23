@@ -8,6 +8,7 @@ import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.api.settings.keys.KeyFunction;
 import dd.kms.marple.api.settings.keys.KeySettings;
 import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorators;
+import dd.kms.marple.impl.gui.evaluator.completion.ParserMediator;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.matching.StringMatch;
 import dd.kms.zenodot.api.result.CodeCompletion;
@@ -55,11 +56,23 @@ public abstract class AbstractInputTextField<T> extends JTextField
 		}
 
 		KeySettings keySettings = context.getSettings().getKeySettings();
+
+		ParserMediator parserMediator = new ParserMediator() {
+			@Override
+			public List<CodeCompletion> provideCodeCompletions(String text, int caretPosition) throws ParseException {
+				return AbstractInputTextField.this.provideCodeCompletions(text, caretPosition);
+			}
+
+			@Override
+			public Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String expression, int caretPosition) throws ParseException {
+				return AbstractInputTextField.this.getExecutableArgumentInfo(expression, caretPosition);
+			}
+		};
+
 		CodeCompletionDecorators.decorate(
 			this,
-			this::provideCodeCompletions,
+			parserMediator,
 			keySettings.getKey(KeyFunction.CODE_COMPLETION),
-			this::getExecutableArgumentInfo,
 			keySettings.getKey(KeyFunction.SHOW_METHOD_ARGUMENTS),
 			this::consumeText,
 			this::consumeException
