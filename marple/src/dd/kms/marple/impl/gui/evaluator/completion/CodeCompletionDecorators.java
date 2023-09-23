@@ -20,17 +20,17 @@ public class CodeCompletionDecorators
 	private static final KeyRepresentation	UP_KEY		= new KeyRepresentation(0, KeyEvent.VK_UP);
 	private static final KeyRepresentation	DOWN_KEY	= new KeyRepresentation(0, KeyEvent.VK_DOWN);
 
-	public static void decorate(JTextComponent textComponent, CompletionSuggestionProvider completionSuggestionProvider, KeyRepresentation completionSuggestionKey,
+	public static void decorate(JTextComponent textComponent, ParserMediator parserMediator, KeyRepresentation completionSuggestionKey,
 			@Nullable ExecutableArgumentInfoProvider executableArgumentInfoProvider, @Nullable KeyRepresentation showExecutableArgumentsKey,
 			@Nullable Consumer<String> inputConsumer, @Nullable Consumer<Throwable> exceptionConsumer) {
-		CompletionProvider provider = new CodeCompletionProvider(completionSuggestionProvider, exceptionConsumer);
+		CompletionProvider provider = new CodeCompletionProvider(parserMediator, exceptionConsumer);
 
 		if (exceptionConsumer != null) {
 			/*
 			 * The auto completion library does not request completions when, among others, removing characters.
 			 * However, we need instant feedback about parse exceptions.
 			 */
-			registerExceptionConsumer(textComponent, completionSuggestionProvider, exceptionConsumer);
+			registerExceptionConsumer(textComponent, parserMediator, exceptionConsumer);
 		}
 
 		Runnable onShowExecutableArguments = () -> showExecutableArguments(textComponent, executableArgumentInfoProvider);
@@ -49,7 +49,7 @@ public class CodeCompletionDecorators
 		}
 	}
 
-	private static void registerExceptionConsumer(JTextComponent textComponent, CompletionSuggestionProvider completionSuggestionProvider, Consumer<Throwable> exceptionConsumer) {
+	private static void registerExceptionConsumer(JTextComponent textComponent, ParserMediator parserMediator, Consumer<Throwable> exceptionConsumer) {
 		textComponent.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
 			public void insertUpdate(DocumentEvent e) {
@@ -74,7 +74,7 @@ public class CodeCompletionDecorators
 						return;
 					}
 					try {
-						completionSuggestionProvider.provideCodeCompletions(text, caretPosition);
+						parserMediator.provideCodeCompletions(text, caretPosition);
 						exceptionConsumer.accept(null);
 					} catch (Throwable t) {
 						exceptionConsumer.accept(t);

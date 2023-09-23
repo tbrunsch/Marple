@@ -5,8 +5,7 @@ import dd.kms.zenodot.api.result.CodeCompletion;
 
 import java.util.List;
 
-@FunctionalInterface
-public interface CompletionSuggestionProvider
+public interface ParserMediator
 {
 	List<CodeCompletion> provideCodeCompletions(String text, int caretPosition) throws ParseException;
 }

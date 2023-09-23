@@ -18,19 +18,19 @@ import java.util.function.Consumer;
 
 public class CodeCompletionProvider implements CompletionProvider
 {
-	private final CompletionSuggestionProvider	suggestionProvider;
-	private final CompletionsFactory			completionsFactory;
+	private final ParserMediator		parserMediator;
+	private final CompletionsFactory	completionsFactory;
 
 	private ListCellRenderer<Object>	renderer;
 
-	public CodeCompletionProvider(CompletionSuggestionProvider suggestionProvider, @Nullable Consumer<Throwable> exceptionConsumer) {
-		this.suggestionProvider = suggestionProvider;
+	public CodeCompletionProvider(ParserMediator parserMediator, @Nullable Consumer<Throwable> exceptionConsumer) {
+		this.parserMediator = parserMediator;
 		this.completionsFactory = new CompletionsFactory(this, exceptionConsumer);
 		setListCellRenderer(new CompletionRenderer());
 	}
 
 	List<CodeCompletion> provideCodeCompletions(String text, int caretPosition) throws ParseException {
-		return suggestionProvider.provideCodeCompletions(text, caretPosition);
+		return parserMediator.provideCodeCompletions(text, caretPosition);
 	}
 
 	@Override
