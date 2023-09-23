@@ -1,6 +1,5 @@
 package dd.kms.marple.impl.gui.evaluator.completion;
 
-import com.google.common.collect.Range;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
 import dd.kms.zenodot.api.result.CodeCompletion;
 import org.fife.ui.autocomplete.AutoCompletion;
@@ -38,14 +37,15 @@ class CustomAutoCompletion extends AutoCompletion
 		JTextComponent textComponent = getTextComponent();
 		String text = textComponent.getText();
 
-		Range<Integer> insertionRange = codeCompletion.getInsertionRange();
 		StringBuilder builder = new StringBuilder();
-		if (insertionRange.lowerEndpoint() > 0) {
-			builder.append(text, 0, insertionRange.lowerEndpoint());
+		int insertionBegin = codeCompletion.getInsertionBegin();
+		if (insertionBegin > 0) {
+			builder.append(text, 0, insertionBegin);
 		}
 		builder.append(codeCompletion.getTextToInsert());
-		if (insertionRange.upperEndpoint() < text.length()) {
-			builder.append(text.substring(insertionRange.upperEndpoint()));
+		int insertionEnd = codeCompletion.getInsertionEnd();
+		if (insertionEnd < text.length()) {
+			builder.append(text.substring(insertionEnd));
 		}
 		textComponent.setCaretPosition(0);	// must reset caret to avoid "invalid caret" exception when setting text
 		textComponent.setText(builder.toString());
