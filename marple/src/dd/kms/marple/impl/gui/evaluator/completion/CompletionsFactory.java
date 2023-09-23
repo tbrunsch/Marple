@@ -23,13 +23,11 @@ class CompletionsFactory
 		return rating * NUM_COMPLETION_TYPES + (NUM_COMPLETION_TYPES - 1 - completion.getType().ordinal());
 	}
 
-	private final CompletionProvider			completionProvider;
-	private final CompletionSuggestionProvider	suggestionProvider;
-	private final Consumer<Throwable>			exceptionConsumer;
+	private final CodeCompletionProvider	completionProvider;
+	private final Consumer<Throwable>		exceptionConsumer;
 
-	CompletionsFactory(CompletionProvider completionProvider, CompletionSuggestionProvider suggestionProvider, Consumer<Throwable> exceptionConsumer) {
+	CompletionsFactory(CodeCompletionProvider completionProvider, Consumer<Throwable> exceptionConsumer) {
 		this.completionProvider = completionProvider;
-		this.suggestionProvider = suggestionProvider;
 		this.exceptionConsumer = exceptionConsumer;
 	}
 
@@ -58,7 +56,7 @@ class CompletionsFactory
 		List<CodeCompletion> completions;
 		Throwable throwable = null;
 		try {
-			completions = suggestionProvider.provideCodeCompletions(text, caretPosition);
+			completions = completionProvider.provideCodeCompletions(text, caretPosition);
 		} catch (Throwable t) {
 			throwable = t;
 			completions = ImmutableList.of();

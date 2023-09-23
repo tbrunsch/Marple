@@ -2,6 +2,8 @@ package dd.kms.marple.impl.gui.evaluator.completion;
 
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.impl.gui.common.GuiCommons;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.result.CodeCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.ParameterChoicesProvider;
@@ -16,13 +18,19 @@ import java.util.function.Consumer;
 
 public class CodeCompletionProvider implements CompletionProvider
 {
-	private final CompletionsFactory	completionsFactory;
+	private final CompletionSuggestionProvider	suggestionProvider;
+	private final CompletionsFactory			completionsFactory;
 
 	private ListCellRenderer<Object>	renderer;
 
 	public CodeCompletionProvider(CompletionSuggestionProvider suggestionProvider, @Nullable Consumer<Throwable> exceptionConsumer) {
-		completionsFactory = new CompletionsFactory(this, suggestionProvider, exceptionConsumer);
+		this.suggestionProvider = suggestionProvider;
+		this.completionsFactory = new CompletionsFactory(this, exceptionConsumer);
 		setListCellRenderer(new CompletionRenderer());
+	}
+
+	List<CodeCompletion> provideCodeCompletions(String text, int caretPosition) throws ParseException {
+		return suggestionProvider.provideCodeCompletions(text, caretPosition);
 	}
 
 	@Override
