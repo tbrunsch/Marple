@@ -30,7 +30,7 @@ public class CodeCompletionProvider implements CompletionProvider
 	}
 
 	ParserMediator getParserMediator() {
-		return getParserMediator();
+		return parserMediator;
 	}
 
 	@Override
