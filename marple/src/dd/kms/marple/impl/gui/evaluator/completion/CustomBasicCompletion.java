@@ -9,35 +9,35 @@ import javax.swing.text.JTextComponent;
 
 class CustomBasicCompletion extends BasicCompletion implements CustomCompletion
 {
-	private final CodeCompletion	completion;
+	private final CodeCompletion	codeCompletion;
 
-	CustomBasicCompletion(CodeCompletion completion, int relevance, CompletionProvider completionProvider) {
-		super(completionProvider, completion.getTextToInsert(), completion.getType().toString());
+	CustomBasicCompletion(CodeCompletion codeCompletion, int relevance, CompletionProvider completionProvider) {
+		super(completionProvider, codeCompletion.getTextToInsert(), codeCompletion.getType().toString());
 
-		this.completion = completion;
+		this.codeCompletion = codeCompletion;
 
 		setRelevance(relevance);
-		setIcon(IconFactory.getIcon(completion));
+		setIcon(IconFactory.getIcon(codeCompletion));
 	}
 
 	@Override
 	public int compareTo(Completion completion) {
-		return Integer.compare(getRelevance(), completion.getRelevance());
+		return CompletionsFactory.COMPLETION_COMPARATOR.compare(this, completion);
 	}
 
 	@Override
 	public String getAlreadyEntered(JTextComponent textComponent) {
 		String text = textComponent.getText();
-		return text.substring(completion.getInsertionBegin(), completion.getInsertionEnd());
+		return text.substring(codeCompletion.getInsertionBegin(), codeCompletion.getInsertionEnd());
 	}
 
 	@Override
 	public CodeCompletion getCodeCompletion() {
-		return completion;
+		return codeCompletion;
 	}
 
 	@Override
 	public String toString() {
-		return completion.toString();
+		return codeCompletion.toString();
 	}
 }

@@ -42,7 +42,7 @@ class CustomFunctionCompletion extends FunctionCompletion implements CustomCompl
 
 	@Override
 	public int compareTo(Completion completion) {
-		return Integer.compare(getRelevance(), completion.getRelevance());
+		return CompletionsFactory.COMPLETION_COMPARATOR.compare(this, completion);
 	}
 
 	@Override
