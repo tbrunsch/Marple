@@ -22,7 +22,7 @@ public class CodeCompletionProvider implements CompletionProvider
 	public CodeCompletionProvider(ParserMediator parserMediator) {
 		this.parserMediator = parserMediator;
 		this.completionsFactory = new CompletionsFactory(this);
-		setListCellRenderer(new CompletionRenderer());
+		setListCellRenderer(new CompletionRenderer(parserMediator));
 	}
 
 	ParserMediator getParserMediator() {
