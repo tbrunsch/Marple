@@ -24,7 +24,7 @@ public class ClassInputTextField extends AbstractInputTextField<Class<?>>
 	}
 
 	@Override
-	Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String text, int caretPosition) {
+	public Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String text, int caretPosition) {
 		return Optional.empty();
 	}
 

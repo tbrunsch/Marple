@@ -1,6 +1,5 @@
 package dd.kms.marple.impl.gui.evaluator.completion;
 
-import com.google.common.collect.Range;
 import dd.kms.zenodot.api.result.CodeCompletion;
 import dd.kms.zenodot.api.result.codecompletions.CodeCompletionMethod;
 import org.fife.ui.autocomplete.Completion;
@@ -43,14 +42,13 @@ class CustomFunctionCompletion extends FunctionCompletion implements CustomCompl
 
 	@Override
 	public int compareTo(Completion completion) {
-		return Integer.compare(getRelevance(), completion.getRelevance());
+		return CompletionsFactory.COMPLETION_COMPARATOR.compare(this, completion);
 	}
 
 	@Override
 	public String getAlreadyEntered(JTextComponent textComponent) {
 		String text = textComponent.getText();
-		Range<Integer> insertionRange = completion.getInsertionRange();
-		return text.substring(insertionRange.lowerEndpoint(), insertionRange.upperEndpoint());
+		return text.substring(completion.getInsertionBegin(), completion.getInsertionEnd());
 	}
 
 	@Override

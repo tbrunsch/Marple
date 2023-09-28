@@ -22,25 +22,25 @@ class ExecutableArgumentPopup extends JPopupMenu
 {
 	private static final int DELTA_Y	= -5;
 
-	static void register(JTextComponent textComponent, ExecutableArgumentInfoProvider executableArgumentInfoProvider) {
+	static void register(JTextComponent textComponent, ParserMediator parserMediator) {
 		if (textComponent.getComponentPopupMenu() instanceof ExecutableArgumentPopup) {
 			return;
 		}
-		ExecutableArgumentPopup popup = new ExecutableArgumentPopup(textComponent, executableArgumentInfoProvider);
+		ExecutableArgumentPopup popup = new ExecutableArgumentPopup(textComponent, parserMediator);
 		popup.register();
 	}
 
-	private final JTextComponent					textComponent;
-	private final ExecutableArgumentInfoProvider	executableArgumentInfoProvider;
+	private final JTextComponent	textComponent;
+	private final ParserMediator	parserMediator;
 
-	private DocumentListener						documentListener;
-	private CaretListener							caretListener;
-	private FocusListener							focusListener;
-	private KeyListener								keyListener;
+	private DocumentListener		documentListener;
+	private CaretListener			caretListener;
+	private FocusListener			focusListener;
+	private KeyListener				keyListener;
 
-	ExecutableArgumentPopup(JTextComponent textComponent, ExecutableArgumentInfoProvider executableArgumentInfoProvider) {
+	ExecutableArgumentPopup(JTextComponent textComponent, ParserMediator parserMediator) {
 		this.textComponent = textComponent;
-		this.executableArgumentInfoProvider = executableArgumentInfoProvider;
+		this.parserMediator = parserMediator;
 		setInvoker(textComponent);
 		setFocusable(false);
 	}
@@ -158,7 +158,7 @@ class ExecutableArgumentPopup extends JPopupMenu
 		String text = textComponent.getText();
 		int caretPosition = textComponent.getCaretPosition();
 		Optional<ExecutableArgumentInfo> executableArgumentInfo = GuiCommons.isCaretPositionValid(text, caretPosition)
-			? executableArgumentInfoProvider.getExecutableArgumentInfo(text, caretPosition)
+			? parserMediator.getExecutableArgumentInfo(text, caretPosition)
 			: Optional.empty();
 		if (!executableArgumentInfo.isPresent()) {
 			unregister();

@@ -7,22 +7,26 @@ import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.ParameterChoicesProvider;
 import org.fife.ui.autocomplete.ParameterizedCompletion;
 
-import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class CodeCompletionProvider implements CompletionProvider
 {
+	private final ParserMediator		parserMediator;
 	private final CompletionsFactory	completionsFactory;
 
 	private ListCellRenderer<Object>	renderer;
 
-	public CodeCompletionProvider(CompletionSuggestionProvider suggestionProvider, @Nullable Consumer<Throwable> exceptionConsumer) {
-		completionsFactory = new CompletionsFactory(this, suggestionProvider, exceptionConsumer);
-		setListCellRenderer(new CompletionRenderer());
+	public CodeCompletionProvider(ParserMediator parserMediator) {
+		this.parserMediator = parserMediator;
+		this.completionsFactory = new CompletionsFactory(this);
+		setListCellRenderer(new CompletionRenderer(parserMediator));
+	}
+
+	ParserMediator getParserMediator() {
+		return parserMediator;
 	}
 
 	@Override
