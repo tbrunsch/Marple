@@ -1,23 +1,24 @@
 package dd.kms.marple.impl.gui.evaluator.completion;
 
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
+import dd.kms.zenodot.api.common.ClassInfo;
 import dd.kms.zenodot.api.result.CodeCompletion;
+import dd.kms.zenodot.api.result.CodeCompletionType;
 import dd.kms.zenodot.api.result.codecompletions.CodeCompletionClass;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.Completion;
-import org.fife.ui.autocomplete.CompletionProvider;
 
-import javax.annotation.Nullable;
 import javax.swing.text.JTextComponent;
-import java.util.function.Consumer;
 
 class CustomAutoCompletion extends AutoCompletion
 {
-	private final Runnable onShowExecutableArguments;
+	private final ParserMediator	parserMediator;
+	private final Runnable			onShowExecutableArguments;
 
 	CustomAutoCompletion(ParserMediator parserMediator, KeyRepresentation completionSuggestionKey, Runnable onShowExecutableArguments) {
 		super(new CodeCompletionProvider(parserMediator));
 
+		this.parserMediator = parserMediator;
 		this.onShowExecutableArguments = onShowExecutableArguments;
 
 		setAutoActivationEnabled(true);
@@ -37,6 +38,25 @@ class CustomAutoCompletion extends AutoCompletion
 		}
 		CustomCompletion customCompletion = (CustomCompletion) completion;
 		CodeCompletion codeCompletion = customCompletion.getCodeCompletion();
+		if (codeCompletion.getType() == CodeCompletionType.CLASS) {
+			CodeCompletionClass classCompletion = (CodeCompletionClass) codeCompletion;
+			if (classCompletion.isQualifiedCompletion()) {
+				CodeCompletionClass unqualifiedCompletion = classCompletion.asUnqualifiedCompletion();
+				String unqualifiedClassName = unqualifiedCompletion.getTextToInsert();
+				if (!parserMediator.isClassImported(unqualifiedClassName)) {
+					Class<?> clazz;
+					try {
+						ClassInfo classInfo = classCompletion.getClassInfo();
+						clazz = classInfo.asClass();
+					} catch (IllegalStateException e) {
+						parserMediator.consumeException(e);
+						return;
+					}
+					parserMediator.importClassTemporarily(clazz);
+					codeCompletion = classCompletion.asUnqualifiedCompletion();
+				}
+			}
+		}
 		JTextComponent textComponent = getTextComponent();
 		String text = textComponent.getText();
 
