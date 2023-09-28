@@ -7,6 +7,7 @@ import org.fife.ui.autocomplete.FunctionCompletion;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
 
 class CompletionRenderer implements ListCellRenderer<Object>
 {
@@ -15,6 +16,8 @@ class CompletionRenderer implements ListCellRenderer<Object>
 	private final DefaultListCellRenderer	rightRenderer		= new DefaultListCellRenderer();
 
 	private final ParserMediator		parserMediator;
+
+	private boolean registeredMouseListener;
 
 	CompletionRenderer(ParserMediator parserMediator) {
 		this.parserMediator = parserMediator;
@@ -25,6 +28,12 @@ class CompletionRenderer implements ListCellRenderer<Object>
 
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+		if (!registeredMouseListener) {
+			MouseListener mouseListener = new CompletionListPopupMouseListener(list, parserMediator);
+			list.addMouseListener(mouseListener);
+			registeredMouseListener = true;
+		}
+
 		leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
 		if (value instanceof FunctionCompletion) {
