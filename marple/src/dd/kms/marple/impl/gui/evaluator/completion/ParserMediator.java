@@ -14,4 +14,8 @@ public interface ParserMediator
 	Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String expression, int caretPosition) throws ParseException;
 	void consumeText(String text);
 	void consumeException(@Nullable Throwable t);
+	boolean isClassImported(String unqualifiedClassName);
+	boolean isClassImportedTemporarily(String normalizedClassName);
+	void importClassTemporarily(Class<?> clazz);
+	void removeClassFromTemporaryImports(Class<?> clazz);
 }

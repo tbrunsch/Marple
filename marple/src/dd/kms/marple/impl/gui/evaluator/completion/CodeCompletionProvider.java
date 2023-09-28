@@ -2,19 +2,15 @@ package dd.kms.marple.impl.gui.evaluator.completion;
 
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.impl.gui.common.GuiCommons;
-import dd.kms.zenodot.api.ParseException;
-import dd.kms.zenodot.api.result.CodeCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.ParameterChoicesProvider;
 import org.fife.ui.autocomplete.ParameterizedCompletion;
 
-import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class CodeCompletionProvider implements CompletionProvider
 {

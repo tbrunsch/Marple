@@ -32,7 +32,7 @@ public class ExpressionInputTextField extends AbstractExpressionInputTextField<O
 	}
 
 	@Override
-	Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String text, int caretPosition) throws ParseException  {
+	public Optional<ExecutableArgumentInfo> getExecutableArgumentInfo(String text, int caretPosition) throws ParseException  {
 		ExpressionParser parser = createParser();
 		return parser.getExecutableArgumentInfo(text, caretPosition, thisValue);
 	}

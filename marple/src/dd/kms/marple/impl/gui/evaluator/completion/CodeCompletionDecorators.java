@@ -11,7 +11,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.util.function.Consumer;
 
 public class CodeCompletionDecorators
 {
