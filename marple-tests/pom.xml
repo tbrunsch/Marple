@@ -22,6 +22,11 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>dd.kms.zenodot</groupId>
+			<artifactId>custom-hierarchy-parser</artifactId>
+			<version>0.4-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 

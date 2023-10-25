@@ -13,10 +13,12 @@ import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
 import dd.kms.marple.api.settings.evaluation.NamedObject;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
+import dd.kms.zenodot.api.CustomHierarchyParsers;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.settings.ObjectTreeNode;
 import dd.kms.zenodot.api.settings.ParserSettings;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
+import dd.kms.zenodot.api.settings.parsers.AdditionalParserSettings;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -49,13 +51,14 @@ class TestUtils
 		String importClass2 = "com.google.common.collect.ImmutableSet";
 
 		ObjectTreeNode customHierarchyRoot = new FileNode(new File(System.getProperty("user.home")));
+		AdditionalParserSettings customHierarchyParserSettings = CustomHierarchyParsers.createCustomHierarchyParserSettings(customHierarchyRoot);
 
 		ParserSettings parserSettings = ParserSettingsBuilder.create()
 			.minimumAccessModifier(AccessModifier.PRIVATE)
 			.importPackages(ImmutableSet.of(importPackage1, importPackage2, importPackage3))
 			.importClassesByName(ImmutableSet.of(importClass1, importClass2))
 			.considerAllClassesForClassCompletions(true)
-			.customHierarchyRoot(customHierarchyRoot)
+			.additionalParserSettings(customHierarchyParserSettings)
 			.build();
 
 		EvaluationSettings evaluationSettings = EvaluationSettingsBuilder.create()

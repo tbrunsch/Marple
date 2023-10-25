@@ -18,7 +18,6 @@ import java.lang.reflect.Method;
 class IconFactory
 {
 	private static final Color	COLOR_VARIABLE			= Color.BLUE.brighter();
-	private static final Color	COLOR_OBJECT_TREE_NODE	= COLOR_VARIABLE;
 	private static final Color	COLOR_PACKAGE			= Color.ORANGE;
 	private static final Color	COLOR_KEYWORD			= Color.BLUE;
 	private static final Color	COLOR_CLASS				= Color.LIGHT_GRAY;
@@ -38,32 +37,27 @@ class IconFactory
 	}
 
 	private static Color determineColor(CodeCompletion completion) {
-		switch (completion.getType()) {
-			case VARIABLE:
-				return COLOR_VARIABLE;
-			case OBJECT_TREE_NODE:
-				return COLOR_OBJECT_TREE_NODE;
-			case FIELD: {
-				CodeCompletionField fieldCompletion = (CodeCompletionField) completion;
-				GeneralizedField field = fieldCompletion.getField();
-				AccessModifier accessModifier = AccessModifier.getValue(field.getModifiers());
-				return getColor(accessModifier);
-			}
-			case METHOD: {
-				CodeCompletionMethod methodCompletion = (CodeCompletionMethod) completion;
-				Method method = methodCompletion.getMethod();
-				AccessModifier accessModifier = AccessModifier.getValue(method.getModifiers());
-				return getColor(accessModifier);
-			}
-			case CLASS:
-				return COLOR_CLASS;
-			case PACKAGE:
-				return COLOR_PACKAGE;
-			case KEYWORD:
-				return COLOR_KEYWORD;
-			default:
-				return Color.WHITE;
+		CodeCompletionType type = completion.getType();
+		if (type == CodeCompletionType.VARIABLE) {
+			return COLOR_VARIABLE;
+		} else if (type == CodeCompletionType.FIELD) {
+			CodeCompletionField fieldCompletion = (CodeCompletionField) completion;
+			GeneralizedField field = fieldCompletion.getField();
+			AccessModifier accessModifier = AccessModifier.getValue(field.getModifiers());
+			return getColor(accessModifier);
+		} else if (type == CodeCompletionType.METHOD) {
+			CodeCompletionMethod methodCompletion = (CodeCompletionMethod) completion;
+			Method method = methodCompletion.getMethod();
+			AccessModifier accessModifier = AccessModifier.getValue(method.getModifiers());
+			return getColor(accessModifier);
+		} else if (type == CodeCompletionType.CLASS) {
+			return COLOR_CLASS;
+		} else if (type == CodeCompletionType.PACKAGE) {
+			return COLOR_PACKAGE;
+		} else if (type == CodeCompletionType.KEYWORD) {
+			return COLOR_KEYWORD;
 		}
+		return COLOR_VARIABLE;
 	}
 
 	private static Color getColor(AccessModifier accessModifier) {
