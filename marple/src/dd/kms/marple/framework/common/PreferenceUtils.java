@@ -1,13 +1,16 @@
-package dd.kms.marple.impl.common;
+package dd.kms.marple.framework.common;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.actions.CustomAction;
 import dd.kms.marple.api.settings.actions.CustomActionSettings;
+import dd.kms.marple.api.settings.evaluation.AdditionalEvaluationSettings;
+import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
-import dd.kms.marple.impl.common.XmlUtils.ParseException;
+import dd.kms.marple.framework.common.XmlUtils.ParseException;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.settings.EvaluationMode;
 import dd.kms.zenodot.api.settings.ParserSettings;
@@ -72,7 +75,8 @@ public class PreferenceUtils
 		}
 	}
 
-	public static void readSettings(InspectionSettings settings) {
+	public static void readSettings(InspectionContext context) {
+		InspectionSettings settings = context.getSettings();
 		Path preferencesFile = settings.getPreferencesFile();
 		if (!checkPreferenceFile(preferencesFile, true)) {
 			return;
@@ -81,7 +85,7 @@ public class PreferenceUtils
 			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			Document document = builder.parse(stream);
 			Element root = document.getDocumentElement();
-			readSettings(root, settings);
+			readSettings(root, context);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			/* nothing we can do */
 		}
@@ -108,14 +112,15 @@ public class PreferenceUtils
 		writeImportedPackages(root, evaluator);
 		writeImportedClasses(root, evaluator);
 		writeCustomActions(root, customActionSettings);
-
+		writeAdditionalEvaluationSettings(root, settings.getEvaluationSettings().getAdditionalSettings());
 	}
 
-	private static void readSettings(Element root, InspectionSettings settings) throws ParseException {
+	private static void readSettings(Element root, InspectionContext context) throws ParseException {
 		int majorVersion = XmlUtils.readValueFromChild(root, "MajorVersion", XmlUtils::parseInt);
 		if (majorVersion != 1) {
 			throw new ParseException("Major version " + majorVersion + " of settings file is not supported");
 		}
+		InspectionSettings settings = context.getSettings();
 		ExpressionEvaluator evaluator = settings.getEvaluator();
 		CustomActionSettings customActionSettings = settings.getCustomActionSettings();
 		readEvaluationMode(root, evaluator);
@@ -123,6 +128,16 @@ public class PreferenceUtils
 		readImportedPackages(root, evaluator);
 		readImportedClasses(root, evaluator);
 		readCustomActions(root, customActionSettings);
+
+		EvaluationSettings evaluationSettings = settings.getEvaluationSettings();
+		Collection<AdditionalEvaluationSettings> additionalSettings = evaluationSettings.getAdditionalSettings().values();
+		try {
+			readAdditionalEvaluationSettings(root, additionalSettings);
+		} finally {
+			for (AdditionalEvaluationSettings additionalEvalSettings : additionalSettings) {
+				additionalEvalSettings.applySettings(context);
+			}
+		}
 	}
 
 	private static void writeEvaluationMode(Element root, ExpressionEvaluator evaluator) {
@@ -246,5 +261,47 @@ public class PreferenceUtils
 		int modifiers = XmlUtils.readValueFromChild(keyNode, "Modifiers", XmlUtils::parseInt);
 		int keyCode = XmlUtils.readValueFromChild(keyNode, "KeyCode", XmlUtils::parseInt);
 		return new KeyRepresentation(modifiers, keyCode);
+	}
+
+	private static void writeAdditionalEvaluationSettings(Element root, Map<String, AdditionalEvaluationSettings> additionalEvaluationSettings) {
+		Element additionalEvaluationSettingsElement = XmlUtils.createChildElement(root, "AdditionalEvaluationSettings");
+		for (AdditionalEvaluationSettings additionalEvalSettings : additionalEvaluationSettings.values()) {
+			String childName = additionalEvalSettings.getXmlElementName();
+			if (childName == null) {
+				continue;
+			}
+			Element settingsElement = XmlUtils.createChildElement(additionalEvaluationSettingsElement, childName);
+			additionalEvalSettings.writeSettings(settingsElement);
+		}
+	}
+
+	private static void readAdditionalEvaluationSettings(Element root, Collection<AdditionalEvaluationSettings> additionalEvaluationSettings) throws ParseException {
+		Element additionalEvaluationSettingsElement;
+		try {
+			additionalEvaluationSettingsElement = XmlUtils.getUniqueChild(root, "AdditionalEvaluationSettings");
+		} catch (ParseException e) {
+			// no settings stored
+			return;
+		}
+		for (AdditionalEvaluationSettings additionalEvalSettings : additionalEvaluationSettings) {
+			String childName = additionalEvalSettings.getXmlElementName();
+			if (childName == null) {
+				continue;
+			}
+			Element settingsElement;
+			try {
+				settingsElement = XmlUtils.getUniqueChild(additionalEvaluationSettingsElement, childName);
+			} catch (ParseException e) {
+				// no settings stored
+				continue;
+			}
+			try {
+				additionalEvalSettings.readSettings(settingsElement);
+			} catch (ParseException e) {
+				throw e;
+			} catch (IOException e) {
+				throw new ParseException(e.getMessage());
+			}
+		}
 	}
 }

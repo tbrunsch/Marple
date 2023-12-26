@@ -5,7 +5,7 @@ import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.api.settings.actions.CustomAction;
 import dd.kms.marple.api.settings.actions.CustomActionSettings;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
-import dd.kms.marple.impl.common.PreferenceUtils;
+import dd.kms.marple.framework.common.PreferenceUtils;
 import dd.kms.marple.impl.gui.common.ExceptionFormatter;
 import dd.kms.marple.impl.gui.table.*;
 

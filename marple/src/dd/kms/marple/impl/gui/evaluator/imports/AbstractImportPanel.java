@@ -2,7 +2,7 @@ package dd.kms.marple.impl.gui.evaluator.imports;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.settings.InspectionSettings;
-import dd.kms.marple.impl.common.PreferenceUtils;
+import dd.kms.marple.framework.common.PreferenceUtils;
 import dd.kms.marple.impl.gui.evaluator.textfields.AbstractInputTextField;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.settings.ParserSettings;
