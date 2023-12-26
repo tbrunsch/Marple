@@ -11,6 +11,7 @@
 	<modules>
 		<module>marple</module>
 		<module>marple-tests</module>
+		<module>directory-completions-ui</module>
 	</modules>
 	<dependencies>
 		<dependency>

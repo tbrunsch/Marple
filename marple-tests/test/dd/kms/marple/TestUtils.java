@@ -3,6 +3,7 @@ package dd.kms.marple;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import dd.kms.marple.api.DebugSupport;
+import dd.kms.marple.api.DirectoryCompletions;
 import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
@@ -14,6 +15,7 @@ import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
 import dd.kms.marple.api.settings.evaluation.NamedObject;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
 import dd.kms.zenodot.api.CustomHierarchyParsers;
+import dd.kms.zenodot.api.DirectoryCompletions.CompletionTarget;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.settings.ObjectTreeNode;
 import dd.kms.zenodot.api.settings.ParserSettings;
@@ -26,10 +28,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,7 +61,7 @@ class TestUtils
 			.additionalParserSettings(customHierarchyParserSettings)
 			.build();
 
-		EvaluationSettings evaluationSettings = EvaluationSettingsBuilder.create()
+		EvaluationSettingsBuilder evaluationSettingsBuilder = EvaluationSettingsBuilder.create()
 			.suggestExpressionToEvaluate(DefaultMutableTreeNode.class, "this.getUserObject()")
 			.addRelatedObjectsProvider(JTable.class, table ->
 				Arrays.asList(
@@ -72,8 +72,29 @@ class TestUtils
 					new NamedObject("Num rows", table.getRowHeight())
 				)
 			)
-			.addRelatedObjectsProvider(DefaultMutableTreeNode.class, node -> Collections.singletonList(new NamedObject("Root", node.getRoot())))
-			.build();
+			.addRelatedObjectsProvider(DefaultMutableTreeNode.class, node -> Collections.singletonList(new NamedObject("Root", node.getRoot())));
+
+		String workingDir = System.getProperty("user.dir");
+		String userHome = System.getProperty("user.home");
+		List<String> favoriteURIs = new ArrayList<>();
+		try {
+			favoriteURIs.add(Paths.get(workingDir).toUri().toString());
+		} catch (Exception e) {
+			/* ignore this URI */
+		}
+		try {
+			favoriteURIs.add(Paths.get(userHome).toUri().toString());
+		} catch (Exception e) {
+			/* ignore this URI */
+		}
+		DirectoryCompletions.create()
+			.setCompletionTargets(ImmutableList.of(CompletionTarget.FILE_CREATION, CompletionTarget.PATH_CREATION, CompletionTarget.PATH_RESOLUTION, CompletionTarget.URI_CREATION))
+			.setFavoritePaths(ImmutableList.of(workingDir, userHome))
+			.setFavoriteURIs(favoriteURIs)
+			.setCacheFileSystemAccess(true)
+			.setFileSystemAccessCacheTimeMs(3000)
+			.register(evaluationSettingsBuilder);
+		EvaluationSettings evaluationSettings = evaluationSettingsBuilder.build();
 
 		CustomAction triggerBreakpointAction = CustomAction.create(
 			"Trigger breakpoint",
