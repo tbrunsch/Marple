@@ -2,6 +2,7 @@ package dd.kms.marple.impl.settings.evaluation;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import dd.kms.marple.api.settings.evaluation.AdditionalEvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.NamedObject;
 import dd.kms.marple.impl.common.ReflectionUtils;
@@ -13,10 +14,12 @@ class EvaluationSettingsImpl implements EvaluationSettings
 {
 	private final Map<Class<?>, String>										suggestedExpressions;
 	private final List<Function<Object, ? extends Collection<NamedObject>>>	relatedObjectProviders;
+	private final Map<String, AdditionalEvaluationSettings>					additionalSettings;
 
-	EvaluationSettingsImpl(Map<Class<?>, String> suggestedExpressions, List<Function<Object, ? extends Collection<NamedObject>>> relatedObjectProviders) {
+	EvaluationSettingsImpl(Map<Class<?>, String> suggestedExpressions, List<Function<Object, ? extends Collection<NamedObject>>> relatedObjectProviders, Map<String, AdditionalEvaluationSettings> additionalSettings) {
 		this.suggestedExpressions = ImmutableMap.copyOf(suggestedExpressions);
 		this.relatedObjectProviders = ImmutableList.copyOf(relatedObjectProviders);
+		this.additionalSettings = ImmutableMap.copyOf(additionalSettings);
 	}
 
 	@Override
@@ -45,5 +48,10 @@ class EvaluationSettingsImpl implements EvaluationSettings
 			allRelatedObjects.addAll(relatedObjects);
 		}
 		return allRelatedObjects != null ? allRelatedObjects : Collections.emptyList();
+	}
+
+	@Override
+	public Map<String, AdditionalEvaluationSettings> getAdditionalSettings() {
+		return additionalSettings;
 	}
 }

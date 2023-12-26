@@ -13,5 +13,7 @@ public interface EvaluationSettingsBuilder
 
 	<T> EvaluationSettingsBuilder addRelatedObjectsProvider(Class<T> objectClass, Function<T, ? extends Collection<NamedObject>> relatedObjectProvider);
 
+	EvaluationSettingsBuilder setAdditionalSettings(String settingsTitle, AdditionalEvaluationSettings additionalSettings);
+
 	EvaluationSettings build();
 }

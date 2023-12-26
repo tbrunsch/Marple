@@ -2,10 +2,13 @@ package dd.kms.marple.impl.gui.evaluator;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.gui.Disposable;
+import dd.kms.marple.api.settings.evaluation.AdditionalEvaluationSettings;
 import dd.kms.marple.impl.gui.evaluator.imports.ImportPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map;
+import java.util.function.Function;
 
 public class EvaluationSettingsPane extends JTabbedPane implements Disposable
 {
@@ -22,6 +25,14 @@ public class EvaluationSettingsPane extends JTabbedPane implements Disposable
 		addTab("Variables",			variablePanel);
 		addTab("Imports",			importPanel);
 
+		Map<String, AdditionalEvaluationSettings> additionalEvaluationSettings = context.getSettings().getEvaluationSettings().getAdditionalSettings();
+		for (Map.Entry<String, AdditionalEvaluationSettings> entry : additionalEvaluationSettings.entrySet()) {
+			String title = entry.getKey();
+			AdditionalEvaluationSettings additionalEvalSettings = entry.getValue();
+			JPanel additionalSettingsPanel = additionalEvalSettings.createSettingsPanel(context);
+			addTab(title, additionalSettingsPanel);
+		}
+
 		setPreferredSize(new Dimension(600, 500));
 	}
 
@@ -33,8 +44,12 @@ public class EvaluationSettingsPane extends JTabbedPane implements Disposable
 
 	@Override
 	public void dispose() {
-		generalSettingsPanel.dispose();
-		variablePanel.dispose();
-		importPanel.dispose();
+		int tabCount = getTabCount();
+		for (int i = 0; i < tabCount; i++) {
+			Component panel = getComponentAt(i);
+			if (panel instanceof Disposable) {
+				((Disposable) panel).dispose();
+			}
+		}
 	}
 }
