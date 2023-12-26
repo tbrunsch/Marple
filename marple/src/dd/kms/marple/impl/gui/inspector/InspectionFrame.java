@@ -199,6 +199,7 @@ public class InspectionFrame extends JFrame implements ObjectView
 	public void dispose() {
 		currentObjectPanel.dispose();
 		history.clear();
+		views.forEach(ObjectView::dispose);
 		viewGenerator = null;
 
 		super.dispose();
