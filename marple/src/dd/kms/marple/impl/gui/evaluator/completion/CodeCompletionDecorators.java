@@ -1,13 +1,12 @@
 package dd.kms.marple.impl.gui.evaluator.completion;
 
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
+import dd.kms.marple.framework.common.UniformDocumentListener;
 import dd.kms.marple.impl.gui.common.GuiCommons;
 import org.fife.ui.autocomplete.AutoCompletion;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -41,23 +40,9 @@ public class CodeCompletionDecorators
 	}
 
 	private static void registerExceptionConsumer(JTextComponent textComponent, ParserMediator parserMediator) {
-		textComponent.getDocument().addDocumentListener(new DocumentListener() {
+		textComponent.getDocument().addDocumentListener(new UniformDocumentListener() {
 			@Override
-			public void insertUpdate(DocumentEvent e) {
-				checkParseException();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				checkParseException();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				checkParseException();
-			}
-
-			private void checkParseException() {
+			protected void onDocumentChanged() {
 				SwingUtilities.invokeLater(() -> {
 					String text = textComponent.getText();
 					int caretPosition = textComponent.getCaretPosition();

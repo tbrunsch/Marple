@@ -1,10 +1,9 @@
 package dd.kms.marple.impl.gui.filters;
 
+import dd.kms.marple.framework.common.UniformDocumentListener;
 import dd.kms.zenodot.api.common.RegexUtils;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -23,29 +22,14 @@ class ValueFilterWildcard extends AbstractValueFilter
 		filterTF = new JTextField();
 		filterTF.requestFocus();
 		filterTF.selectAll();
-		filterTF.getDocument().addDocumentListener(new DocumentListener() {
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				onFilterTextChanged();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				onFilterTextChanged();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				onFilterTextChanged();
-			}
-		});
+		filterTF.getDocument().addDocumentListener(UniformDocumentListener.create(this::onFilterTextChanged));
 
 		filterPattern = RegexUtils.createRegexForWildcardString(getText());
 	}
 
 	@Override
 	public boolean isActive() {
-		return !getText().equals("");
+		return !getText().isEmpty();
 	}
 
 	@Override
