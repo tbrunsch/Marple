@@ -76,21 +76,21 @@ class TestUtils
 
 		String workingDir = System.getProperty("user.dir");
 		String userHome = System.getProperty("user.home");
-		List<String> favoriteURIs = new ArrayList<>();
+		List<String> favoriteUris = new ArrayList<>();
 		try {
-			favoriteURIs.add(Paths.get(workingDir).toUri().toString());
+			favoriteUris.add(Paths.get(workingDir).toUri().toString());
 		} catch (Exception e) {
 			/* ignore this URI */
 		}
 		try {
-			favoriteURIs.add(Paths.get(userHome).toUri().toString());
+			favoriteUris.add(Paths.get(userHome).toUri().toString());
 		} catch (Exception e) {
 			/* ignore this URI */
 		}
 		DirectoryCompletions.create()
 			.setCompletionTargets(ImmutableList.of(CompletionTarget.FILE_CREATION, CompletionTarget.PATH_CREATION, CompletionTarget.PATH_RESOLUTION, CompletionTarget.URI_CREATION))
 			.setFavoritePaths(ImmutableList.of(workingDir, userHome))
-			.setFavoriteURIs(favoriteURIs)
+			.setFavoriteUris(favoriteUris)
 			.setCacheFileSystemAccess(true)
 			.setFileSystemAccessCacheTimeMs(3000)
 			.register(evaluationSettingsBuilder);

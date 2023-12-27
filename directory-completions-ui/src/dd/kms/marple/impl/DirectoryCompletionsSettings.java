@@ -28,7 +28,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 
 	private List<CompletionTarget>	completionTargets			= ImmutableList.of();
 	private List<String>			favoritePaths				= ImmutableList.of();
-	private List<String>			favoriteURIs				= ImmutableList.of();
+	private List<String>			favoriteUris				= ImmutableList.of();
 	private boolean					cacheFileSystemAccess		= true;
 	private long					fileSystemAccessCacheTimeMs	= DEFAULT_CACHE_TIME_MS;
 
@@ -52,13 +52,13 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 		return this;
 	}
 
-	public List<String> getFavoriteURIs() {
-		return favoriteURIs;
+	public List<String> getFavoriteUris() {
+		return favoriteUris;
 	}
 
 	@Override
-	public DirectoryCompletions setFavoriteURIs(List<String> favoriteURIs) {
-		this.favoriteURIs = ImmutableList.copyOf(favoriteURIs);
+	public DirectoryCompletions setFavoriteUris(List<String> favoriteUris) {
+		this.favoriteUris = ImmutableList.copyOf(favoriteUris);
 		return this;
 	}
 
@@ -98,7 +98,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	public void writeSettings(Element settingsElement) {
 		XmlUtils.writeList(settingsElement, "CompletionTargets", "CompletionTarget", completionTargets, XmlUtils::writeEnumAttribute);
 		XmlUtils.writeList(settingsElement, "FavoritePaths", "Path", favoritePaths, Element::setTextContent);
-		XmlUtils.writeList(settingsElement, "FavoriteURIs", "URI", favoriteURIs, Element::setTextContent);
+		XmlUtils.writeList(settingsElement, "FavoriteUris", "Uri", favoriteUris, Element::setTextContent);
 
 		Element fileSystemAccessElement = XmlUtils.createChildElement(settingsElement, "FileSystemAccess");
 		fileSystemAccessElement.setAttribute("cache", Boolean.toString(cacheFileSystemAccess));
@@ -113,8 +113,8 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 		List<String> favoritePaths = XmlUtils.readList(settingsElement, "FavoritePaths", "Path", Node::getTextContent);
 		setFavoritePaths(favoritePaths);
 
-		List<String> favoriteURIs = XmlUtils.readList(settingsElement, "FavoriteURIs", "URI", Node::getTextContent);
-		setFavoriteURIs(favoriteURIs);
+		List<String> favoriteUris = XmlUtils.readList(settingsElement, "FavoriteUris", "Uri", Node::getTextContent);
+		setFavoriteUris(favoriteUris);
 
 		Element fileSystemAccessElement = XmlUtils.getUniqueChild(settingsElement, "FileSystemAccess");
 		boolean cacheFileSystemAccess = Boolean.parseBoolean(fileSystemAccessElement.getAttribute("cache"));
@@ -140,7 +140,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 			.fileDirectoryStructure(fileDirectoryStructure)
 			.pathDirectoryStructure(pathDirectoryStructure);
 
-		List<URI> favoriteUris = this.favoriteURIs.stream()
+		List<URI> favoriteUris = this.favoriteUris.stream()
 			.map(s -> {
 				try {
 					return URI.create(s);
@@ -152,7 +152,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 			.collect(Collectors.toList());
 		directoryCompletions
 			.favoritePaths(favoritePaths)
-			.favoriteURIs(favoriteUris);
+			.favoriteUris(favoriteUris);
 
 		ExpressionEvaluator evaluator = context.getEvaluator();
 		ParserSettingsBuilder builder = evaluator.getParserSettings().builder();

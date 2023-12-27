@@ -57,8 +57,8 @@ class DirectoryCompletionsSettingsPanel extends JPanel implements Disposable
 	private final ActionListener			settingsChangedActionListener	= e -> updateSettings();
 	private final ActionListener			addFavoritePathListener			= e -> addFavoritePath();
 	private final ActionListener			removeFavoritePathsListener		= e -> removeFavoritePaths();
-	private final ActionListener			addFavoriteUriListener			= e -> addFavoriteURI();
-	private final ActionListener			removeFavoriteUrisListener		= e -> removeFavoriteURIs();
+	private final ActionListener			addFavoriteUriListener			= e -> addFavoriteUri();
+	private final ActionListener			removeFavoriteUrisListener		= e -> removeFavoriteUris();
 	private final ListSelectionListener		favoriteSelectionListener		= e -> updateEnabilities();
 	private final DocumentListener			favoriteDocumentListener		= UniformDocumentListener.create(this::updateEnabilities);
 	private final DocumentListener			fileSystemCacheDocumentListener	= UniformDocumentListener.create(this::updateSettings);
@@ -164,8 +164,8 @@ class DirectoryCompletionsSettingsPanel extends JPanel implements Disposable
 			favoritePathsListModel.addElement(favoritePath);
 		}
 
-		for (String favoriteURI : settings.getFavoriteURIs()) {
-			favoriteUrisListModel.addElement(favoriteURI);
+		for (String favoriteUri : settings.getFavoriteUris()) {
+			favoriteUrisListModel.addElement(favoriteUri);
 		}
 
 		cacheFileSystemAccessesCB.setSelected(settings.isCacheFileSystemAccess());
@@ -196,8 +196,8 @@ class DirectoryCompletionsSettingsPanel extends JPanel implements Disposable
 		List<String> favoritePaths = getElements(favoritePathsListModel);
 		settings.setFavoritePaths(favoritePaths);
 
-		List<String> favoriteURIs = getElements(favoriteUrisListModel);
-		settings.setFavoriteURIs(favoriteURIs);
+		List<String> favoriteUris = getElements(favoriteUrisListModel);
+		settings.setFavoriteUris(favoriteUris);
 
 		updateEnabilities();
 		settings.applySettings(context);
@@ -285,14 +285,14 @@ class DirectoryCompletionsSettingsPanel extends JPanel implements Disposable
 		}
 		updateSettings();
 	}
-	private void addFavoriteURI() {
-		String favoriteURI = favoritePathTF.getText().trim();
-		String error = getUriInterpretationError(favoriteURI);
+	private void addFavoriteUri() {
+		String favoriteUri = favoritePathTF.getText().trim();
+		String error = getUriInterpretationError(favoriteUri);
 		if (error != null) {
 			displayError("The string does not represent a valid URI: " + error);
 			return;
 		}
-		favoriteUrisListModel.addElement(favoriteURI);
+		favoriteUrisListModel.addElement(favoriteUri);
 		favoriteUriTF.setText("");
 		updateSettings();
 	}
@@ -306,7 +306,7 @@ class DirectoryCompletionsSettingsPanel extends JPanel implements Disposable
 			return e.getMessage();
 		}
 	}
-	private void removeFavoriteURIs() {
+	private void removeFavoriteUris() {
 		int[] selectedRows = favoriteUrisList.getSelectedIndices();
 		for (int i = selectedRows.length - 1; i >= 0; i--) {
 			int row = selectedRows[i];

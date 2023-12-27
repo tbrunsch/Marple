@@ -14,7 +14,7 @@ public interface DirectoryCompletions
 
 	DirectoryCompletions setCompletionTargets(List<CompletionTarget> completionTargets);
 	DirectoryCompletions setFavoritePaths(List<String> favoritePaths);
-	DirectoryCompletions setFavoriteURIs(List<String> favoriteURIs);
+	DirectoryCompletions setFavoriteUris(List<String> favoriteUris);
 	DirectoryCompletions setCacheFileSystemAccess(boolean cacheFileSystemAccess);
 	DirectoryCompletions setFileSystemAccessCacheTimeMs(long cacheTimeMs);
 
