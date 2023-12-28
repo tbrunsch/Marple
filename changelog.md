@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5
+
+  - switched to Zenodot 0.4 (support for parser extensions, code completions for inner classes)
+  - applying code completions for non-imported classes imports these classes temporarily instead of inserting the fully qualified class name
+  - Marple can now be extended by additional evaluation settings via `EvaluationSettingsBuilder.setAdditionalSettings()`
+
 ## v0.4
 
   - switched to Zenodot 0.3 (lambda support, new evaluation mode "mixed typing" that is similar to dynamic typing, but without side effects, accessing the field "length" of arrays)
