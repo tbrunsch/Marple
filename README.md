@@ -207,15 +207,17 @@ Note that the bi-function that you have to specify for the method `createSingleS
 
 ## Evaluation Settings
 
-The interface `EvaluationSettings` contains information about what will be displayed when the evaluation dialog is opened for certain objects. You can create an instance of `EvaluationSettings` via its builder that you obtain via `EvaluationSettingsBuilder.create()`.
+The interface `EvaluationSettings` contains information about what will be displayed when the evaluation dialog is opened for certain objects. Additionally, it tells Marple how to let the user configure additional settings when evaluating expressions that are beyond the core of Marple and Zenodot.
 
-`EvaluationSettings` do not influence how expressions are evaluated. This can be achieved by specifying `ParserSettings` (see Section [Parser Settings](#parser-settings)).
+You can create an instance of `EvaluationSettings` via its builder that you obtain via `EvaluationSettingsBuilder.create()`.
 
-The `EvaluationSettingsBuilder` provides 2 methods:
+The `EvaluationSettingsBuilder` provides 3 methods:
 
   1. The method `suggestExpressionToEvaluate` lets you specify which expression to display initially for which object. When nothing is specified for a certain object, then `this` is displayed.
   
   1. The method `addRelatedObjectsProvider` lets you specify which related objects to show in a dedicated panel when evaluating a certain object.
+
+  1. The method `setAdditionalSettings` lets you specify how users can specify certain additional settings via UI that influence, e.g., how expressions are evaluated or how code completions are generated. One example that calls this method is the Marple extension "Directory Completions UI".
 
 ## Visual Settings
 
