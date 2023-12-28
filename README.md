@@ -310,7 +310,6 @@ The builder allows you, among others,
   * to specify the [imports](#imports) (classes and packages),
   * to specify the minimum access modifier (`private`, `package private`, `protected`, or `public`) a field or method must have in order to be accessed from within expressions
   * to choose the [evaluation mode](#evaluation-modes)
-  * to specify a [custom hierarchy](#custom-hierarchy)   
 
 See the [parser settings](https://github.com/tbrunsch/Zenodot#parser-settings) documentation of Zenodot for more details on these features.
 
@@ -332,9 +331,8 @@ Marple uses GUI components of your application as entry points for you analysis.
 * Nodes in all result panels like in the [evaluation dialog](#evaluation-dialog):<br/>
 ![Result Panel](images/navigable_elements/evaluation_dialog/result_panel.png)
 
-* Values in the variables tab and nodes in the custom hierarchy tab in the [settings](#evaluation-settings-1) for expression evaluation:<br/>
-![Variable Settings](images/navigable_elements/evaluation_dialog/variables_settings.png)<br/><br/>
-![Custom Hierarchy Settings](images/navigable_elements/evaluation_dialog/custom_hierarchy_settings.png)
+* Values in the variables tab in the [settings](#evaluation-settings-1) for expression evaluation:<br/>
+![Variable Settings](images/navigable_elements/evaluation_dialog/variables_settings.png)
 
 * Values of unnamed and named slots in the [debug support dialog](#debug-support):<br/>
 ![Unnamed Slots](images/navigable_elements/debug_support/unnamed_slots.png)<br/><br/>
@@ -606,12 +604,11 @@ Expression text fields have two features that simplify writing expressions:
 
 ## Evaluation Settings
 
-The evaluation settings dialog consists of for tabs:  
+The evaluation settings dialog consists of three tabs:  
 
   1. General Settings
   1. Variables
   1. Imports
-  1. Custom Hierarchy
 
 In the "General Settings" tab you can specify the minimum access modifier fields and methods must have in order to be accessible in expressions. Additionally, you can specify the [evaluation mode](#evaluation-modes):
 
@@ -624,16 +621,6 @@ In the "Variables" tab you can see which [variables](#variables) are currently d
 In the "Imports" tab you can manage the [imported packages and classes](#imports).
 
 ![Imports](images/evaluation_dialog/settings/imports.png)
-
-In the "Custom Hierarchy" tab you can see the whole hierarchy that can be accessed in expressions via a language extension: 
-
-![Custom Hierarchy](images/custom_hierarchy/sample.png)
-
-In this example, we wrapped the file/directory structure under the user home directory as custom hierarchy using `File`s as user objects attached to the nodes. With the expression "{AppData#Local#Programs}" we can then retrieve the `File` instance that points to the file "C:\Users\Yoda\AppData\Local\Programs":<br/>
-
-![Custom Hierarchy](images/custom_hierarchy/expression.png)
-
-Note that this hierarchy is not hard-coded, but users can configure Marple to support arbitrary hierarchies. Additionally, Marple supports code completion for these hierarchies, even if they contain spaces. See [Custom Hierarchy](#custom-hierarchy) for details. 
 
 ### Evaluation Modes
 
@@ -688,24 +675,6 @@ In the variables dialog you can import all named slots from the [debug support](
 ### Imports
 
 When you specify imports, then you do not have to fully qualify classes in the specified package or specified classes. Imports can be preconfigured via the API and can be changed by the user at runtime. 
-
-### Custom Hierarchy
-
-Some applications hold some of their data in a tree. Since the classic Java syntax is class-based, it does not distinguish between different instances of the same class. In a typical API, accessing the 10th child of a node is done via a cryptic call like node.getChild(9) or something similar. From Java's point of view, the 10th node is nothing special but only one of many nodes. For a user, this more or less anonymous access is unsatisfying because in most cases the nodes have individual names that are displayed to him. This can be, e.g., file names in a directory. Accessing the files only by index is as unintuitive as labeling the files in a directory just "file 0", "file 1", etc.
-
-The concept of a custom hierarchy overcomes this anonymity of nodes by preconfiguring Marple with a custom hierarchy. The custom hierarchy specifies which node has which children by specifying the available names. Additionally, each node may carry an object it represents. The objects are the pieces of data that are organized in a tree-structure. The structure is only there for classification and navigation.
-
-Note that the custom hierarchy configuration cannot be changed at runtime, but only at compile time. However, nodes are queried on demand, so the configured hierarchy can be dynamic and change over time, but according to a fixed logic. 
-
-To access the data object of a certain node in the tree, we had to extend the Java syntax. Let us consider again the example above where the custom hierarchy represents the file/directory structure, say in the user home directory. The node names are the file or directory names and the data behind a node is the `File` instance that points to that file. The syntax for accessing the `File` instance corresponding the directory "\<user home\>\AppData\Local\Programs" is
-
-    {AppData#Local#Programs}
-
-Hence, with the custom hierarchy configured as described in this example, you could reference arbitrary files within an expression using this extended Java syntax. One benefit of this approach is code completion: While typing, Marple will automatically suggest nodes under the current node:
-
-![Code Completion](images/custom_hierarchy/code_completion.png)
-
-This example is, of course, not very interesting. It is much easier to use your favorite file browser to navigate to the file you are interested in, copy its file path and then call the `File` constructor. However, this alternative does not exist for application-specific data that is organized in a custom tree structure. 
 
 # Snapshot Dialog
 
