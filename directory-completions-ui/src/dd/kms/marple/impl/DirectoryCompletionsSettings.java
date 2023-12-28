@@ -1,7 +1,7 @@
 package dd.kms.marple.impl;
 
 import com.google.common.collect.ImmutableList;
-import dd.kms.marple.api.DirectoryCompletions;
+import dd.kms.marple.api.DirectoryCompletionsUI;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.settings.evaluation.AdditionalEvaluationSettings;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class DirectoryCompletionsSettings implements AdditionalEvaluationSettings, DirectoryCompletions
+public class DirectoryCompletionsSettings implements AdditionalEvaluationSettings, DirectoryCompletionsUI
 {
 	static final long	DEFAULT_CACHE_TIME_MS	= 5000;
 
@@ -37,7 +37,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	}
 
 	@Override
-	public DirectoryCompletions setCompletionTargets(List<CompletionTarget> completionTargets) {
+	public DirectoryCompletionsUI setCompletionTargets(List<CompletionTarget> completionTargets) {
 		this.completionTargets = ImmutableList.copyOf(completionTargets);
 		return this;
 	}
@@ -47,7 +47,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	}
 
 	@Override
-	public DirectoryCompletions setFavoritePaths(List<String> favoritePaths) {
+	public DirectoryCompletionsUI setFavoritePaths(List<String> favoritePaths) {
 		this.favoritePaths = ImmutableList.copyOf(favoritePaths);
 		return this;
 	}
@@ -57,7 +57,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	}
 
 	@Override
-	public DirectoryCompletions setFavoriteUris(List<String> favoriteUris) {
+	public DirectoryCompletionsUI setFavoriteUris(List<String> favoriteUris) {
 		this.favoriteUris = ImmutableList.copyOf(favoriteUris);
 		return this;
 	}
@@ -67,7 +67,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	}
 
 	@Override
-	public DirectoryCompletions setCacheFileSystemAccess(boolean cacheFileSystemAccess) {
+	public DirectoryCompletionsUI setCacheFileSystemAccess(boolean cacheFileSystemAccess) {
 		this.cacheFileSystemAccess = cacheFileSystemAccess;
 		return this;
 	}
@@ -77,7 +77,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	}
 
 	@Override
-	public DirectoryCompletions setFileSystemAccessCacheTimeMs(long cacheTimeMs) {
+	public DirectoryCompletionsUI setFileSystemAccessCacheTimeMs(long cacheTimeMs) {
 		this.fileSystemAccessCacheTimeMs = Math.max(cacheTimeMs, 0L);
 		return this;
 	}

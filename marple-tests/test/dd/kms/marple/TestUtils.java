@@ -3,7 +3,7 @@ package dd.kms.marple;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import dd.kms.marple.api.DebugSupport;
-import dd.kms.marple.api.DirectoryCompletions;
+import dd.kms.marple.api.DirectoryCompletionsUI;
 import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
@@ -87,7 +87,7 @@ class TestUtils
 		} catch (Exception e) {
 			/* ignore this URI */
 		}
-		DirectoryCompletions.create()
+		DirectoryCompletionsUI.create()
 			.setCompletionTargets(ImmutableList.of(CompletionTarget.FILE_CREATION, CompletionTarget.PATH_CREATION, CompletionTarget.PATH_RESOLUTION, CompletionTarget.URI_CREATION))
 			.setFavoritePaths(ImmutableList.of(workingDir, userHome))
 			.setFavoriteUris(favoriteUris)
