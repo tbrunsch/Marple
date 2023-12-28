@@ -161,7 +161,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	}
 
 	@Override
-	public JPanel createSettingsPanel(InspectionContext context) {
+	public JPanel createSettingsComponent(InspectionContext context) {
 		return new DirectoryCompletionsSettingsPanel(this, context);
 	}
 

@@ -35,14 +35,14 @@ public interface AdditionalEvaluationSettings
 
 	/**
 	 * Applies the settings to the current context. This is necessary if an implementation of this interface
-	 * explicitly holds the settings for displaying and changing them in the UI (see {@link #createSettingsPanel(InspectionContext)}),
+	 * explicitly holds the settings for displaying and changing them in the UI (see {@link #createSettingsComponent(InspectionContext)}),
 	 * but not as part of the {@link InspectionContext}. This method triggers the transfer of these explicit settings
 	 * to {@code InspectionContext}.
 	 */
 	void applySettings(InspectionContext context);
 
 	/**
-	 * Creates a panel in which the settings can be configured by the user.
+	 * Creates a component in which the settings can be configured by the user.
 	 */
-	JPanel createSettingsPanel(InspectionContext context);
+	JComponent createSettingsComponent(InspectionContext context);
 }

@@ -8,7 +8,6 @@ import dd.kms.marple.impl.gui.evaluator.imports.ImportPanel;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
-import java.util.function.Function;
 
 public class EvaluationSettingsPane extends JTabbedPane implements Disposable
 {
@@ -29,8 +28,8 @@ public class EvaluationSettingsPane extends JTabbedPane implements Disposable
 		for (Map.Entry<String, AdditionalEvaluationSettings> entry : additionalEvaluationSettings.entrySet()) {
 			String title = entry.getKey();
 			AdditionalEvaluationSettings additionalEvalSettings = entry.getValue();
-			JPanel additionalSettingsPanel = additionalEvalSettings.createSettingsPanel(context);
-			addTab(title, additionalSettingsPanel);
+			JComponent additionalSettingsComponent = additionalEvalSettings.createSettingsComponent(context);
+			addTab(title, additionalSettingsComponent);
 		}
 
 		setPreferredSize(new Dimension(600, 500));
