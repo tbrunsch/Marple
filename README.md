@@ -66,7 +66,6 @@ Marple is a Swing-based Java library for analyzing Swing applications. Notable f
     - [Evaluation Modes](#evaluation-modes)
     - [Variables](#variables)
     - [Imports](#imports)
-    - [Custom Hierarchy](#custom-hierarchy)
 - [Snapshot Dialog](#snapshot-dialog)
 - [Debug Support](#debug-support)
     - [Unnamed Slots](#unnamed-slots)
