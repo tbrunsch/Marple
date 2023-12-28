@@ -286,7 +286,7 @@ class DirectoryCompletionsSettingsPanel extends JPanel implements Disposable
 		updateSettings();
 	}
 	private void addFavoriteUri() {
-		String favoriteUri = favoritePathTF.getText().trim();
+		String favoriteUri = favoriteUriTF.getText().trim();
 		String error = getUriInterpretationError(favoriteUri);
 		if (error != null) {
 			displayError("The string does not represent a valid URI: " + error);
