@@ -217,7 +217,7 @@ The `EvaluationSettingsBuilder` provides 3 methods:
   
   1. The method `addRelatedObjectsProvider` lets you specify which related objects to show in a dedicated panel when evaluating a certain object.
 
-  1. The method `setAdditionalSettings` lets you specify how users can specify certain additional settings via UI that influence, e.g., how expressions are evaluated or how code completions are generated. One example that calls this method is the Marple extension "Directory Completions UI".
+  1. The method `setAdditionalSettings` lets you specify how users can specify certain additional settings via UI that influence, e.g., how expressions are evaluated or how code completions are generated. One example that calls this method is the Marple extension "Directory Completions UI". The UI component for the user is provided by `AdditionalEvaluationSettings.createSettingsComponent()` and will be displayed as tab in the evaluation settings dialog (see [Evaluation Settings](#evaluation-settings-1)).
 
 ## Visual Settings
 
@@ -609,6 +609,8 @@ The evaluation settings dialog consists of three tabs:
   1. General Settings
   1. Variables
   1. Imports
+
+If you have registered additional evaluation settings via `EvaluationSettingsBuilder.setAdditionalSettings()`, then one additional tab per additional settings with the specified titles will be displayed.
 
 In the "General Settings" tab you can specify the minimum access modifier fields and methods must have in order to be accessible in expressions. Additionally, you can specify the [evaluation mode](#evaluation-modes):
 
