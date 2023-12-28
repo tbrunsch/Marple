@@ -97,6 +97,10 @@ InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspecti
 ObjectInspectionFramework.register(inspectionSettings);
 ```
 
+After registering this Marple extension there will be a new tab "Directory/File Completions" in the evaluation settings dialog:
+
+![Directory/File completions tab](directory_completion_settings.png)
+
 # Options
 
 You can specify three kinds of options (cf. the README of the Zenodot extension "Directory Completions" for details):
