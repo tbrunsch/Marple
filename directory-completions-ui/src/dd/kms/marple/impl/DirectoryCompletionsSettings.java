@@ -1,14 +1,15 @@
 package dd.kms.marple.impl;
 
 import com.google.common.collect.ImmutableList;
-import dd.kms.marple.api.DirectoryCompletionsUI;
+import dd.kms.marple.api.DirectoryCompletionExtensionUI;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.settings.evaluation.AdditionalEvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
 import dd.kms.marple.framework.common.XmlUtils;
 import dd.kms.marple.framework.common.XmlUtils.ParseException;
-import dd.kms.zenodot.api.DirectoryCompletions.CompletionTarget;
+import dd.kms.zenodot.api.DirectoryCompletionExtension;
+import dd.kms.zenodot.api.DirectoryCompletionExtension.CompletionTarget;
 import dd.kms.zenodot.api.directories.FileDirectoryStructure;
 import dd.kms.zenodot.api.directories.PathDirectoryStructure;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class DirectoryCompletionsSettings implements AdditionalEvaluationSettings, DirectoryCompletionsUI
+public class DirectoryCompletionsSettings implements AdditionalEvaluationSettings, DirectoryCompletionExtensionUI
 {
 	static final long	DEFAULT_CACHE_TIME_MS	= 5000;
 
@@ -37,7 +38,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	}
 
 	@Override
-	public DirectoryCompletionsUI setCompletionTargets(List<CompletionTarget> completionTargets) {
+	public DirectoryCompletionExtensionUI setCompletionTargets(List<CompletionTarget> completionTargets) {
 		this.completionTargets = ImmutableList.copyOf(completionTargets);
 		return this;
 	}
@@ -47,7 +48,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	}
 
 	@Override
-	public DirectoryCompletionsUI setFavoritePaths(List<String> favoritePaths) {
+	public DirectoryCompletionExtensionUI setFavoritePaths(List<String> favoritePaths) {
 		this.favoritePaths = ImmutableList.copyOf(favoritePaths);
 		return this;
 	}
@@ -57,7 +58,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	}
 
 	@Override
-	public DirectoryCompletionsUI setFavoriteUris(List<String> favoriteUris) {
+	public DirectoryCompletionExtensionUI setFavoriteUris(List<String> favoriteUris) {
 		this.favoriteUris = ImmutableList.copyOf(favoriteUris);
 		return this;
 	}
@@ -67,7 +68,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	}
 
 	@Override
-	public DirectoryCompletionsUI setCacheFileSystemAccess(boolean cacheFileSystemAccess) {
+	public DirectoryCompletionExtensionUI setCacheFileSystemAccess(boolean cacheFileSystemAccess) {
 		this.cacheFileSystemAccess = cacheFileSystemAccess;
 		return this;
 	}
@@ -77,7 +78,7 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	}
 
 	@Override
-	public DirectoryCompletionsUI setFileSystemAccessCacheTimeMs(long cacheTimeMs) {
+	public DirectoryCompletionExtensionUI setFileSystemAccessCacheTimeMs(long cacheTimeMs) {
 		this.fileSystemAccessCacheTimeMs = Math.max(cacheTimeMs, 0L);
 		return this;
 	}
@@ -131,12 +132,12 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 
 	@Override
 	public void applySettings(InspectionContext context) {
-		dd.kms.zenodot.api.DirectoryCompletions directoryCompletions = dd.kms.zenodot.api.DirectoryCompletions.create();
-		directoryCompletions.completionTargets(completionTargets.toArray(new CompletionTarget[0]));
+		DirectoryCompletionExtension directoryCompletionExtension = DirectoryCompletionExtension.create();
+		directoryCompletionExtension.completionTargets(completionTargets.toArray(new CompletionTarget[0]));
 
 		FileDirectoryStructure fileDirectoryStructure = getFileDirectoryStructure(fileSystemAccessCacheTimeMs);
 		PathDirectoryStructure pathDirectoryStructure = getPathDirectoryStructure(fileSystemAccessCacheTimeMs);
-		directoryCompletions
+		directoryCompletionExtension
 			.fileDirectoryStructure(fileDirectoryStructure)
 			.pathDirectoryStructure(pathDirectoryStructure);
 
@@ -150,13 +151,13 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 			})
 			.filter(Objects::nonNull)
 			.collect(Collectors.toList());
-		directoryCompletions
+		directoryCompletionExtension
 			.favoritePaths(favoritePaths)
 			.favoriteUris(favoriteUris);
 
 		ExpressionEvaluator evaluator = context.getEvaluator();
 		ParserSettingsBuilder builder = evaluator.getParserSettings().builder();
-		directoryCompletions.configure(builder);
+		directoryCompletionExtension.configure(builder);
 		evaluator.setParserSettings(builder.build());
 	}
 

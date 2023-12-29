@@ -4,7 +4,7 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.gui.Disposable;
 import dd.kms.marple.framework.common.PreferenceUtils;
 import dd.kms.marple.framework.common.UniformDocumentListener;
-import dd.kms.zenodot.api.DirectoryCompletions.CompletionTarget;
+import dd.kms.zenodot.api.DirectoryCompletionExtension.CompletionTarget;
 
 import javax.annotation.Nullable;
 import javax.swing.*;

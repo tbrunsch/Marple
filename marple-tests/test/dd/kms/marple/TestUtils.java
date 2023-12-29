@@ -3,7 +3,7 @@ package dd.kms.marple;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import dd.kms.marple.api.DebugSupport;
-import dd.kms.marple.api.DirectoryCompletionsUI;
+import dd.kms.marple.api.DirectoryCompletionExtensionUI;
 import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
@@ -14,13 +14,12 @@ import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
 import dd.kms.marple.api.settings.evaluation.NamedObject;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
-import dd.kms.zenodot.api.CustomHierarchyParsers;
-import dd.kms.zenodot.api.DirectoryCompletions.CompletionTarget;
+import dd.kms.zenodot.api.CustomHierarchyParserExtension;
+import dd.kms.zenodot.api.DirectoryCompletionExtension.CompletionTarget;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.settings.ObjectTreeNode;
 import dd.kms.zenodot.api.settings.ParserSettings;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
-import dd.kms.zenodot.api.settings.parsers.AdditionalParserSettings;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -50,15 +49,16 @@ class TestUtils
 		String importClass1 = "com.google.common.collect.ImmutableList";
 		String importClass2 = "com.google.common.collect.ImmutableSet";
 
-		ObjectTreeNode customHierarchyRoot = new FileNode(new File(System.getProperty("user.home")));
-		AdditionalParserSettings customHierarchyParserSettings = CustomHierarchyParsers.createCustomHierarchyParserSettings(customHierarchyRoot);
+		ParserSettingsBuilder parserSettingsBuilder = ParserSettingsBuilder.create();
 
-		ParserSettings parserSettings = ParserSettingsBuilder.create()
+		ObjectTreeNode customHierarchyRoot = new FileNode(new File(System.getProperty("user.home")));
+		CustomHierarchyParserExtension customHierarchyParserExtension = CustomHierarchyParserExtension.create(customHierarchyRoot);
+
+		ParserSettings parserSettings = customHierarchyParserExtension.configure(parserSettingsBuilder)
 			.minimumAccessModifier(AccessModifier.PRIVATE)
 			.importPackages(ImmutableSet.of(importPackage1, importPackage2, importPackage3))
 			.importClassesByName(ImmutableSet.of(importClass1, importClass2))
 			.considerAllClassesForClassCompletions(true)
-			.additionalParserSettings(customHierarchyParserSettings)
 			.build();
 
 		EvaluationSettingsBuilder evaluationSettingsBuilder = EvaluationSettingsBuilder.create()
@@ -87,7 +87,7 @@ class TestUtils
 		} catch (Exception e) {
 			/* ignore this URI */
 		}
-		DirectoryCompletionsUI.create()
+		DirectoryCompletionExtensionUI.create()
 			.setCompletionTargets(ImmutableList.of(CompletionTarget.FILE_CREATION, CompletionTarget.PATH_CREATION, CompletionTarget.PATH_RESOLUTION, CompletionTarget.URI_CREATION))
 			.setFavoritePaths(ImmutableList.of(workingDir, userHome))
 			.setFavoriteUris(favoriteUris)
