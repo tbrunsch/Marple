@@ -1,5 +1,6 @@
 package dd.kms.marple.impl.settings.evaluation;
 
+import dd.kms.marple.api.settings.evaluation.AdditionalEvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
 import dd.kms.marple.api.settings.evaluation.NamedObject;
@@ -11,6 +12,7 @@ public class EvaluationSettingsBuilderImpl implements EvaluationSettingsBuilder
 {
 	private final Map<Class<?>, String> 									suggestedExpressions	= new HashMap<>();
 	private final List<Function<Object, ? extends Collection<NamedObject>>>	relatedObjectProviders	= new ArrayList<>();
+	private final Map<String, AdditionalEvaluationSettings>					additionalSettings		= new LinkedHashMap<>();
 
 	@Override
 	public EvaluationSettingsBuilder suggestExpressionToEvaluate(Class<?> objectClass, String expression) {
@@ -28,7 +30,13 @@ public class EvaluationSettingsBuilderImpl implements EvaluationSettingsBuilder
 	}
 
 	@Override
+	public EvaluationSettingsBuilder setAdditionalSettings(String title, AdditionalEvaluationSettings additionalSettings) {
+		this.additionalSettings.put(title, additionalSettings);
+		return this;
+	}
+
+	@Override
 	public EvaluationSettings build() {
-		return new EvaluationSettingsImpl(suggestedExpressions, relatedObjectProviders);
+		return new EvaluationSettingsImpl(suggestedExpressions, relatedObjectProviders, additionalSettings);
 	}
 }

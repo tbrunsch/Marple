@@ -3,7 +3,7 @@ package dd.kms.marple.impl.evaluator;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
-import dd.kms.marple.impl.common.PreferenceUtils;
+import dd.kms.marple.framework.common.PreferenceUtils;
 import dd.kms.zenodot.api.Variables;
 import dd.kms.zenodot.api.settings.ParserSettings;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;

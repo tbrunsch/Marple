@@ -1,13 +1,13 @@
 package dd.kms.marple.impl.gui.evaluator.completion;
 
 import com.google.common.collect.ImmutableList;
+import dd.kms.marple.framework.common.UniformDocumentListener;
 import dd.kms.marple.impl.gui.common.GuiCommons;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.result.ExecutableArgumentInfo;
 
 import javax.swing.*;
 import javax.swing.event.CaretListener;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
@@ -48,22 +48,7 @@ class ExecutableArgumentPopup extends JPopupMenu
 	private void register() {
 		textComponent.setComponentPopupMenu(this);
 
-		documentListener = new DocumentListener() {
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				updatePopup();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				updatePopup();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				updatePopup();
-			}
-		};
+		documentListener = UniformDocumentListener.create(this::updatePopup);
 		textComponent.getDocument().addDocumentListener(documentListener);
 
 		caretListener = e -> updatePopup();

@@ -7,10 +7,11 @@
 	<groupId>dd.kms.marple</groupId>
 	<artifactId>marple-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.4-SNAPSHOT</version>
+	<version>0.5-SNAPSHOT</version>
 	<modules>
 		<module>marple</module>
 		<module>marple-tests</module>
+		<module>directory-completions-ui</module>
 	</modules>
 	<dependencies>
 		<dependency>
