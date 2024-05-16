@@ -19,6 +19,7 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -154,7 +155,11 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 		}
 
 		@Override
-		public ActionProvider getActionProvider() {
+		public ActionProvider getActionProvider(JTree tree, MouseEvent e) {
+			return getActionProvider();
+		}
+
+		private ActionProvider getActionProvider() {
 			return (ActionProvider) getUserObject();
 		}
 

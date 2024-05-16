@@ -7,7 +7,9 @@ import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
 import dd.kms.marple.impl.instancesearch.InstancePath;
 
 import javax.annotation.Nullable;
+import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.event.MouseEvent;
 
 class SearchNode extends DefaultMutableTreeNode implements ActionProviderTreeNode
 {
@@ -19,7 +21,7 @@ class SearchNode extends DefaultMutableTreeNode implements ActionProviderTreeNod
 	}
 
 	@Override
-	public @Nullable ActionProvider getActionProvider() {
+	public @Nullable ActionProvider getActionProvider(JTree tree, MouseEvent e) {
 		return new ActionProviderBuilder(getFullText(), getObject(), context).build();
 	}
 

@@ -34,7 +34,7 @@ public class ActionProviderListeners
 	}
 
 	public static void addMouseListeners(JTree tree) {
-		Function<MouseEvent, ActionProvider> actionProviderFunction = e -> getTreeNodeAsActionProvider(tree, e.getPoint());
+		Function<MouseEvent, ActionProvider> actionProviderFunction = e -> getTreeNodeAsActionProvider(tree, e);
 		addMouseListeners(tree, actionProviderFunction);
 	}
 
@@ -83,14 +83,15 @@ public class ActionProviderListeners
 	}
 
 
-	private static ActionProvider getTreeNodeAsActionProvider(JTree tree, Point p) {
+	private static ActionProvider getTreeNodeAsActionProvider(JTree tree, MouseEvent e) {
+		Point p = e.getPoint();
 		TreePath path = tree.getPathForLocation(p.x, p.y);
 		if (path == null) {
 			return null;
 		}
 		Object node = path.getLastPathComponent();
 		return node instanceof ActionProviderTreeNode
-			? ((ActionProviderTreeNode) node).getActionProvider()
+			? ((ActionProviderTreeNode) node).getActionProvider(tree, e)
 			: null;
 	}
 }

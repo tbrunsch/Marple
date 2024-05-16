@@ -72,7 +72,7 @@ class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 	}
 
 	@Override
-	public ActionProvider getActionProvider() {
+	public ActionProvider getActionProvider(JTree tree, MouseEvent e) {
 		return new ActionProviderBuilder(toString(), container, context)
 			.suggestVariableName(fieldName)
 			.build();

@@ -42,7 +42,7 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 	}
 
 	@Override
-	public ActionProvider getActionProvider() {
+	public ActionProvider getActionProvider(JTree tree, MouseEvent e) {
 		return new ActionProviderBuilder(toString(), object, context)
 			.suggestVariableName(displayKey)
 			.build();
