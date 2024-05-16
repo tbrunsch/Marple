@@ -2,7 +2,6 @@ package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
@@ -29,25 +28,12 @@ public class InspectionTreeNodes
 	public static void enableMoreChildrenNodeReplacement(JTree tree) {
 		tree.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mousePressed(MouseEvent e) {
-				TreeMouseEvent treeMouseEvent = new TreeMouseEvent(tree, e);
-				InspectionTreeNode node = treeMouseEvent.getNode();
-				if (node != null) {
-					if (e.isPopupTrigger()) {
-						node.handlePopupRequested(treeMouseEvent);
-					}
-				}
-			}
-
-			@Override
 			public void mouseReleased(MouseEvent e) {
 				TreeMouseEvent treeMouseEvent = new TreeMouseEvent(tree, e);
 				InspectionTreeNode node = treeMouseEvent.getNode();
 				if (node != null) {
 					if (SwingUtilities.isLeftMouseButton(e)) {
 						node.handleLeftMouseButtonClicked(treeMouseEvent);
-					} else if (e.isPopupTrigger()) {
-						node.handlePopupRequested(treeMouseEvent);
 					}
 				}
 			}
