@@ -12,6 +12,7 @@ import dd.kms.marple.impl.gui.snapshot.Snapshots;
 import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -27,6 +28,8 @@ public class ActionProviderBuilder
 	private @Nullable String				suggestedVariableName;
 	private @Nullable EvaluationData		evaluationData;
 	private boolean							executeDefaultAction	= true;
+
+	private final List<InspectionAction>	additionalActions		= new ArrayList<>();
 
 	public ActionProviderBuilder(String displayText, ComponentHierarchy componentHierarchy, InspectionContext context) {
 		this.displayText = displayText;
@@ -61,6 +64,11 @@ public class ActionProviderBuilder
 
 	public ActionProviderBuilder executeDefaultAction(boolean executeDefaultAction) {
 		this.executeDefaultAction = executeDefaultAction;
+		return this;
+	}
+
+	public ActionProviderBuilder addAdditionalAction(InspectionAction additionalAction) {
+		this.additionalActions.add(additionalAction);
 		return this;
 	}
 
@@ -112,6 +120,8 @@ public class ActionProviderBuilder
 				actionsBuilder.add(context.createParameterizedCustomAction(customAction, object));
 			}
 		}
+
+		actionsBuilder.addAll(additionalActions);
 
 		return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
 	}

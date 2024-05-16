@@ -1,8 +1,11 @@
 package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.common.UniformView;
 
 import javax.annotation.Nullable;
@@ -11,10 +14,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class InspectionTreeNodes
@@ -55,13 +55,21 @@ public class InspectionTreeNodes
 	}
 
 	static void replaceNode(TreePath parentPath, InspectionTreeNode parent, InspectionTreeNode node, List<InspectionTreeNode> newNodes, InspectionTreeModel treeModel) {
+		if (parent == null) {
+			// replace root
+			Preconditions.checkArgument(newNodes.size() == 1, "The root node must be replaced by a single node");
+			InspectionTreeNode newRoot = newNodes.get(0);
+			treeModel.setRoot(newRoot);
+			treeModel.fireTreeStructureChanged();
+			return;
+		}
+
 		int childIndex = parent.getChildIndex(node);
 		List<InspectionTreeNode> children = parent.getChildren();
 		children.remove(node);
 		treeModel.fireTreeNodesRemoved(parentPath.getPath(), new int[]{ childIndex }, new Object[]{ node });
 		children.addAll(childIndex, newNodes);
 		treeModel.fireTreeNodesInserted(parentPath.getPath(), IntStream.range(childIndex, childIndex + newNodes.size()).toArray(), newNodes.toArray());
-
 	}
 
 	static List<InspectionTreeNode> getChildren(Iterator<List<InspectionTreeNode>> childIterator, int maxNumVisibleChildren) {
@@ -119,27 +127,70 @@ public class InspectionTreeNodes
 	}
 
 	static InspectionTreeNode create(@Nullable String displayKey, Object object, InspectionContext context) {
-		if (UniformView.canViewAsList(object)) {
-			List<?> list = UniformView.asList(object);
-			//return new ListTreeNode(displayKey, object, list, context);
-			return new ListTreeNode(displayKey, object, list, context);
-		}
-
-		if (object instanceof Iterable) {
-			Iterable<?> iterable = (Iterable<?>) object;
-			return new IterableBasedObjectContainerTreeNode(displayKey, object, iterable, null, context);
-		}
-		if (object instanceof Map) {
-			Map<?, ?> map = (Map<?, ?>) object;
-			Set<?> keySet = map.keySet();
-			return new IterableBasedObjectContainerTreeNode(displayKey, object, keySet, map::get, context);
-		}
-		if (object instanceof Multimap) {
-			Multimap<Object, ?> multimap = (Multimap) object;
-			Set<?> keySet = multimap.keySet();
-			return new IterableBasedObjectContainerTreeNode(displayKey, object, keySet, multimap::get, context);
-		}
-		return new DefaultObjectTreeNode(displayKey, object, context);
+		return create(displayKey, object, context, ViewOption.DEFAULT);
 	}
 
+	static InspectionTreeNode create(@Nullable String displayKey, Object object, InspectionContext context, ViewOption viewOption) {
+		List<ViewOption> supportedViews = getSupportedViews(object);
+
+		for (ViewOption view : supportedViews) {
+			if (viewOption != ViewOption.DEFAULT && viewOption != view) {
+				continue;
+			}
+			List<ViewOption> alternativeViews = new ArrayList<>(supportedViews);
+			alternativeViews.remove(view);
+
+			switch (view) {
+				case AS_LIST: {
+					List<?> list = UniformView.asList(object);
+					return new ListTreeNode(displayKey, object, list, context, alternativeViews);
+				}
+				case AS_ITERABLE: {
+					Iterable<?> iterable = (Iterable<?>) object;
+					return new IterableBasedObjectContainerTreeNode(displayKey, object, iterable, null, context, alternativeViews);
+				}
+				case AS_MAP: {
+					Map<?, ?> map = (Map<?, ?>) object;
+					Set<?> keySet = map.keySet();
+					return new IterableBasedObjectContainerTreeNode(displayKey, object, keySet, map::get, context, alternativeViews);
+				}
+				case AS_MULTIMAP: {
+					Multimap<Object, ?> multimap = (Multimap) object;
+					Set<?> keySet = multimap.keySet();
+					return new IterableBasedObjectContainerTreeNode(displayKey, object, keySet, multimap::get, context, alternativeViews);
+				}
+				case AS_OBJECT:
+					return new DefaultObjectTreeNode(displayKey, object, context, alternativeViews);
+				default:
+					throw new UnsupportedOperationException("Unsupported view: " + view);
+			}
+		}
+		throw new IllegalStateException("No view available for this object");
+	}
+
+	private static List<ViewOption> getSupportedViews(Object object) {
+		ImmutableList.Builder<ViewOption> builder = ImmutableList.builder();
+		boolean hasListView = UniformView.canViewAsList(object);
+		if (hasListView) {
+			builder.add(ViewOption.AS_LIST);
+		}
+		if (!hasListView && object instanceof Iterable) {
+			builder.add(ViewOption.AS_ITERABLE);
+		}
+		if (object instanceof Map) {
+			builder.add(ViewOption.AS_MAP);
+		}
+		if (object instanceof Multimap) {
+			builder.add(ViewOption.AS_MULTIMAP);
+		}
+		builder.add(ViewOption.AS_OBJECT);
+		return builder.build();
+	}
+
+	static void addAlternativeViewActions(ActionProviderBuilder actionProviderBuilder, AbstractInspectionTreeNode node, List<ViewOption> alternativeViews, JTree tree, MouseEvent e) {
+		TreeMouseEvent treeMouseEvent = new TreeMouseEvent(tree, e);
+		for (ViewOption alternativeView : alternativeViews) {
+			actionProviderBuilder.addAdditionalAction(new ChangeNodeViewAction(node, alternativeView, treeMouseEvent));
+		}
+	}
 }

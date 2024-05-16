@@ -2,8 +2,6 @@ package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.actions.ActionProvider;
-import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.actions.Actions;
 import dd.kms.marple.impl.common.ReflectionUtils;
 
@@ -19,19 +17,14 @@ class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 
 	private static final int	UNKNOWN_SIZE		= -1;
 
-	private final @Nullable String				fieldName;
-	private final Object						container;
 	private final Iterable<?>					keys;
 	private final @Nullable Function<Object, ?>	elementAccessor;
-	private final InspectionContext				context;
 	private final int							size;
 
-	IterableBasedObjectContainerTreeNode(@Nullable String fieldName, Object container, Iterable<?> keys, @Nullable Function<Object, ?> elementAccessor, InspectionContext context) {
-		this.fieldName = fieldName;
-		this.container = container;
+	IterableBasedObjectContainerTreeNode(@Nullable String fieldName, Object container, Iterable<?> keys, @Nullable Function<Object, ?> elementAccessor, InspectionContext context, List<ViewOption> alternativeViews) {
+		super(fieldName, container, context, alternativeViews);
 		this.keys = keys;
 		this.elementAccessor = elementAccessor;
-		this.context = context;
 		this.size = keys instanceof Collection<?> ? ((Collection<?>) keys).size() : UNKNOWN_SIZE;
 	}
 
@@ -42,17 +35,17 @@ class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 
 	private InspectionTreeNode createKeyNode(int entryIndex, Object key) {
 		String displayText = getKeyNodeDisplayText(entryIndex);
-		return InspectionTreeNodes.create(displayText, key, context);
+		return InspectionTreeNodes.create(displayText, key, getContext());
 	}
 
 	private InspectionTreeNode createValueNode(int entryIndex, Object value) {
 		String displayText = getValueNodeDisplayText(entryIndex);
-		return InspectionTreeNodes.create(displayText, value, context);
+		return InspectionTreeNodes.create(displayText, value, getContext());
 	}
 
 	private InspectionTreeNode createKeyValueNode(Object key, Object value) {
 		String displayText = getKeyValueNodeDisplayText(key);
-		return InspectionTreeNodes.create(displayText, value, context);
+		return InspectionTreeNodes.create(displayText, value, getContext());
 	}
 
 	private String getKeyNodeDisplayText(int entryIndex) {
@@ -64,18 +57,11 @@ class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 	}
 
 	private String getKeyValueNodeDisplayText(Object key) {
-		return "[" + context.getDisplayText(key) + "]";
+		return "[" + getContext().getDisplayText(key) + "]";
 	}
 
 	private boolean withValueNodes() {
 		return elementAccessor != null;
-	}
-
-	@Override
-	public ActionProvider getActionProvider(JTree tree, MouseEvent e) {
-		return new ActionProviderBuilder(toString(), container, context)
-			.suggestVariableName(fieldName)
-			.build();
 	}
 
 	@Override
@@ -89,12 +75,14 @@ class IterableBasedObjectContainerTreeNode extends AbstractInspectionTreeNode
 	}
 
 	private String getText(boolean trimmed) {
-		String valueDisplayText = context.getDisplayText(container);
+		Object container = getObject();
+		String valueDisplayText = getContext().getDisplayText(container);
 		if (trimmed) {
 			valueDisplayText = Actions.trimDisplayText(valueDisplayText);
 		}
 		String sizeText = size == UNKNOWN_SIZE ? "?" : Integer.toString(size);
 		valueDisplayText += (" size = " + sizeText);
+		String fieldName = getDisplayKey();
 		return fieldName == null ? valueDisplayText : fieldName + " = " + valueDisplayText;
 	}
 
