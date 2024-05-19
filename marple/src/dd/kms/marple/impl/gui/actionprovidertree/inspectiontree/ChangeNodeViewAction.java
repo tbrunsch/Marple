@@ -2,6 +2,8 @@ package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
 import dd.kms.marple.api.actions.InspectionAction;
 
+import javax.swing.*;
+import javax.swing.tree.TreePath;
 import java.util.Collections;
 
 class ChangeNodeViewAction implements InspectionAction
@@ -39,6 +41,12 @@ class ChangeNodeViewAction implements InspectionAction
 	@Override
 	public void perform() {
 		InspectionTreeNode alternativeNode = InspectionTreeNodes.create(node.getDisplayKey(), node.getObject(), node.getContext(), viewOption);
-		InspectionTreeNodes.replaceNode(treeMouseEvent.getParentPath(), treeMouseEvent.getParentNode(), node, Collections.singletonList(alternativeNode), treeMouseEvent.getTreeModel());
+		TreePath parentPath = treeMouseEvent.getParentPath();
+		InspectionTreeNodes.replaceNode(parentPath, treeMouseEvent.getParentNode(), node, Collections.singletonList(alternativeNode), treeMouseEvent.getTreeModel());
+		JTree tree = treeMouseEvent.getTree();
+		TreePath alternativeNodePath = parentPath != null
+				? parentPath.pathByAddingChild(alternativeNode)
+				: new TreePath(alternativeNode);
+		tree.expandPath(alternativeNodePath);
 	}
 }
