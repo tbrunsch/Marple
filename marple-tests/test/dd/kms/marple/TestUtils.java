@@ -14,6 +14,8 @@ import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
 import dd.kms.marple.api.settings.evaluation.NamedObject;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
+import dd.kms.marple.api.settings.visual.VisualSettings;
+import dd.kms.marple.api.settings.visual.VisualSettingsBuilder;
 import dd.kms.zenodot.api.CustomHierarchyParserExtension;
 import dd.kms.zenodot.api.DirectoryCompletionExtension.CompletionTarget;
 import dd.kms.zenodot.api.common.AccessModifier;
@@ -106,7 +108,22 @@ class TestUtils
 
 		Path preferencesFile = suggestPreferencesFile();
 
+		VisualSettings visualSettings = VisualSettingsBuilder.create()
+			.listView(String.class, s -> new AbstractList<Object>() {
+				@Override
+				public int size() {
+					return s.length();
+				}
+
+				@Override
+				public Object get(int index) {
+					return s.charAt(index);
+				}
+			}, false)
+			.build();
+
 		InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspectionSettingsBuilder()
+			.visualSettings(visualSettings)
 			.evaluationSettings(evaluationSettings)
 			.customActionSettings(customActionSettings)
 			.preferencesFile(preferencesFile)

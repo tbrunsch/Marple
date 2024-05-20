@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.settings.visual.ObjectView;
+import dd.kms.marple.api.settings.visual.UniformView;
 import dd.kms.marple.api.settings.visual.VisualSettings;
 import dd.kms.marple.impl.common.ReflectionUtils;
 
@@ -23,11 +24,13 @@ class VisualSettingsImpl implements VisualSettings
 
 	private final String																nullDisplayText;
 	private final Map<Class<?>, Function<Object, String>>								displayTextFunctions;
+	private final UniformView															uniformView;
 	private final Multimap<Class<?>, BiFunction<Object, InspectionContext, ObjectView>>	objectViewConstructors;
 
-	VisualSettingsImpl(String nullDisplayText, Map<Class<?>, Function<Object, String>> displayTextFunctions, Multimap<Class<?>, BiFunction<Object, InspectionContext, ObjectView>> objectViewConstructors) {
+	VisualSettingsImpl(String nullDisplayText, Map<Class<?>, Function<Object, String>> displayTextFunctions, UniformView uniformView, Multimap<Class<?>, BiFunction<Object, InspectionContext, ObjectView>> objectViewConstructors) {
 		this.nullDisplayText = nullDisplayText;
 		this.displayTextFunctions = ImmutableMap.copyOf(displayTextFunctions);
+		this.uniformView = uniformView;
 		this.objectViewConstructors = ImmutableMultimap.copyOf(objectViewConstructors);
 	}
 
@@ -43,6 +46,10 @@ class VisualSettingsImpl implements VisualSettings
 		return objectClass == null
 				? object.toString()
 				: displayTextFunctions.get(objectClass).apply(object);
+	}
+
+	public UniformView getUniformView() {
+		return uniformView;
 	}
 
 	private String getArrayDisplayText(Object array) {

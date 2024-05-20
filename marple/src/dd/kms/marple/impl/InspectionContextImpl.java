@@ -7,6 +7,7 @@ import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.actions.CustomAction;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.visual.ObjectView;
+import dd.kms.marple.api.settings.visual.UniformView;
 import dd.kms.marple.impl.actions.*;
 import dd.kms.marple.framework.common.PreferenceUtils;
 import dd.kms.marple.impl.evaluator.ExpressionEvaluatorImpl;
@@ -87,6 +88,11 @@ public class InspectionContextImpl implements InspectionContext
 	@Override
 	public String getDisplayText(Object object) {
 		return settings.getVisualSettings().getDisplayText(object);
+	}
+
+	@Override
+	public UniformView getUniformView() {
+		return settings.getVisualSettings().getUniformView();
 	}
 
 	@Override

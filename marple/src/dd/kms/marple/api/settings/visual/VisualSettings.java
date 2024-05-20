@@ -7,5 +7,6 @@ import java.util.List;
 public interface VisualSettings
 {
 	String getDisplayText(Object object);
+	UniformView getUniformView();
 	List<ObjectView> getInspectionViews(Object object, InspectionContext context);
 }

@@ -4,8 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.settings.visual.UniformView;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
-import dd.kms.marple.impl.common.UniformView;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -14,6 +14,7 @@ import javax.swing.tree.TreePath;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class InspectionTreeNodes
@@ -117,7 +118,8 @@ public class InspectionTreeNodes
 	}
 
 	static InspectionTreeNode create(@Nullable String displayKey, Object object, InspectionContext context, ViewOption viewOption) {
-		List<ViewOption> supportedViews = getSupportedViews(object);
+		UniformView uniformView = context.getUniformView();
+		List<ViewOption> supportedViews = getSupportedViews(object, uniformView);
 
 		for (ViewOption view : supportedViews) {
 			if (viewOption != ViewOption.DEFAULT && viewOption != view) {
@@ -128,15 +130,15 @@ public class InspectionTreeNodes
 
 			switch (view) {
 				case AS_LIST: {
-					List<?> list = UniformView.asList(object);
+					List<?> list = uniformView.asList(object);
 					return new ListTreeNode(displayKey, object, list, context, alternativeViews);
 				}
 				case AS_ITERABLE: {
-					Iterable<?> iterable = (Iterable<?>) object;
+					Iterable<?> iterable = uniformView.asIterable(object);
 					return new IterableBasedObjectContainerTreeNode(displayKey, object, iterable, null, context, alternativeViews);
 				}
 				case AS_MAP: {
-					Map<?, ?> map = (Map<?, ?>) object;
+					Map<?, ?> map = uniformView.asMap(object);
 					Set<?> keySet = map.keySet();
 					return new IterableBasedObjectContainerTreeNode(displayKey, object, keySet, map::get, context, alternativeViews);
 				}
@@ -154,23 +156,27 @@ public class InspectionTreeNodes
 		throw new IllegalStateException("No view available for this object");
 	}
 
-	private static List<ViewOption> getSupportedViews(Object object) {
+	private static List<ViewOption> getSupportedViews(Object object, UniformView uniformView) {
 		ImmutableList.Builder<ViewOption> builder = ImmutableList.builder();
-		boolean hasListView = UniformView.canViewAsList(object);
-		if (hasListView) {
-			builder.add(ViewOption.AS_LIST);
+
+		for (boolean considerOnlyPreferredViews : new boolean[]{true, false}) {
+			boolean hasListView = uniformView.canViewAsList(object, considerOnlyPreferredViews);
+			if (hasListView) {
+				builder.add(ViewOption.AS_LIST);
+			}
+			if (!hasListView && uniformView.canViewAsIterable(object, considerOnlyPreferredViews)) {
+				builder.add(ViewOption.AS_ITERABLE);
+			}
+			if (uniformView.canViewAsMap(object, considerOnlyPreferredViews)) {
+				builder.add(ViewOption.AS_MAP);
+			}
+			if (object instanceof Multimap) {
+				builder.add(ViewOption.AS_MULTIMAP);
+			}
+			builder.add(ViewOption.AS_OBJECT);
 		}
-		if (!hasListView && object instanceof Iterable) {
-			builder.add(ViewOption.AS_ITERABLE);
-		}
-		if (object instanceof Map) {
-			builder.add(ViewOption.AS_MAP);
-		}
-		if (object instanceof Multimap) {
-			builder.add(ViewOption.AS_MULTIMAP);
-		}
-		builder.add(ViewOption.AS_OBJECT);
-		return builder.build();
+		List<ViewOption> supportedViewsWithDuplicates = builder.build();
+		return supportedViewsWithDuplicates.stream().distinct().collect(Collectors.toList());
 	}
 
 	static void addAlternativeViewActions(ActionProviderBuilder actionProviderBuilder, AbstractInspectionTreeNode node, List<ViewOption> alternativeViews, JTree tree, MouseEvent e) {

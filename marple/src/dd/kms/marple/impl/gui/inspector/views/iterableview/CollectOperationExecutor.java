@@ -2,7 +2,7 @@ package dd.kms.marple.impl.gui.inspector.views.iterableview;
 
 import com.google.common.collect.Lists;
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.common.UniformView;
+import dd.kms.marple.api.settings.visual.UniformView;
 import dd.kms.marple.impl.gui.inspector.views.iterableview.settings.CollectSettings;
 import dd.kms.zenodot.api.CompiledLambdaExpression;
 import dd.kms.zenodot.api.ParseException;
@@ -39,8 +39,9 @@ public class CollectOperationExecutor extends AbstractOperationExecutor<CollectS
 			displayResult(collection);
 		} else if (resultClass.isArray()) {
 			Object array = supplier.get();
-			List<?> list = UniformView.canViewAsList(iterableView)
-				? UniformView.asList(iterableView)
+			UniformView uniformView = context.getUniformView();
+			List<?> list = uniformView.canViewAsList(iterableView, false)
+				? uniformView.asList(iterableView)
 				: Lists.newArrayList(iterableView);
 			int length = list.size();
 			if (Array.getLength(array) != length) {
