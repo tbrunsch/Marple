@@ -108,7 +108,7 @@ class TestUtils
 
 		Path preferencesFile = suggestPreferencesFile();
 
-		VisualSettings visualSettings = VisualSettingsBuilder.create()
+		VisualSettings visualSettings = ObjectInspectionFramework.createVisualSettingsBuilder()
 			.listView(String.class, s -> new AbstractList<Object>() {
 				@Override
 				public int size() {
