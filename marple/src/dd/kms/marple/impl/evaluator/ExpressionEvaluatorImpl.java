@@ -2,6 +2,7 @@ package dd.kms.marple.impl.evaluator;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
+import dd.kms.marple.api.evaluator.StringHistory;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.impl.gui.common.WindowManager;
 import dd.kms.marple.impl.gui.evaluator.EvaluationFrame;
@@ -14,8 +15,9 @@ import java.util.List;
 
 public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 {
-	private ParserSettings					parserSettings	= ParserSettingsBuilder.create().build();
-	private final List<DisposableVariable>	variables		= new ArrayList<>();
+	private ParserSettings					parserSettings		= ParserSettingsBuilder.create().build();
+	private final List<DisposableVariable>	variables			= new ArrayList<>();
+	private final StringHistory				expressionHistory	= new StringHistoryImpl();
 	private InspectionContext				context;
 
 	public void setInspectionContext(InspectionContext context) {
@@ -60,6 +62,11 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 	@Override
 	public void evaluate(String expression, int caretPosition, Object thisValue) {
 		showEvaluationFrame(expression, caretPosition, thisValue);
+	}
+
+	@Override
+	public StringHistory getExpressionHistory() {
+		return expressionHistory;
 	}
 
 	/*

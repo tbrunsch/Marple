@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.ObjectInspectionFramework;
+import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.api.settings.keys.KeyFunction;
 import dd.kms.marple.api.settings.keys.KeySettings;
@@ -32,7 +33,7 @@ public abstract class AbstractInputTextField<T> extends JTextField implements Pa
 			.collect(Collectors.toList());
 	}
 
-	private final InspectionContext		context;
+	private final ExpressionEvaluator	expressionEvaluator;
 	private final List<Class<?>>		temporarilyImportedClasses	= new ArrayList<>();
 
 	private Consumer<T>					evaluationResultConsumer	= result -> {};
@@ -47,7 +48,7 @@ public abstract class AbstractInputTextField<T> extends JTextField implements Pa
 	private ParseException				cachedParseException		= null;
 
 	AbstractInputTextField(InspectionContext context) {
-		this.context = context;
+		this.expressionEvaluator = context.getEvaluator();
 
 		if (!PRELOADED_CLASSES) {
 			PRELOADED_CLASSES = true;
@@ -61,7 +62,8 @@ public abstract class AbstractInputTextField<T> extends JTextField implements Pa
 			this,
 			this,
 			keySettings.getKey(KeyFunction.CODE_COMPLETION),
-			keySettings.getKey(KeyFunction.SHOW_METHOD_ARGUMENTS)
+			keySettings.getKey(KeyFunction.SHOW_METHOD_ARGUMENTS),
+			expressionEvaluator.getExpressionHistory()
 		);
 	}
 
@@ -89,7 +91,7 @@ public abstract class AbstractInputTextField<T> extends JTextField implements Pa
 	}
 
 	ParserSettings getParserSettings() {
-		ParserSettings parserSettings = context.getEvaluator().getParserSettings();
+		ParserSettings parserSettings = expressionEvaluator.getParserSettings();
 		if (temporarilyImportedClasses.isEmpty()) {
 			return parserSettings;
 		}
@@ -102,11 +104,11 @@ public abstract class AbstractInputTextField<T> extends JTextField implements Pa
 	}
 
 	List<Variable> getVariables() {
-		return context.getEvaluator().getVariables();
+		return expressionEvaluator.getVariables();
 	}
 
 	void setVariables(List<Variable> variables) {
-		context.getEvaluator().setVariables(variables);
+		expressionEvaluator.setVariables(variables);
 	}
 
 	@Override

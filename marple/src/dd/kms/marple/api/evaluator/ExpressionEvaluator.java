@@ -17,4 +17,5 @@ public interface ExpressionEvaluator
 	void setVariables(List<Variable> variables);
 
 	void evaluate(String expression, int caretPosition, Object thisValue);
+	StringHistory getExpressionHistory();
 }

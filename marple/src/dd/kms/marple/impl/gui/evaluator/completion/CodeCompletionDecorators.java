@@ -1,5 +1,6 @@
 package dd.kms.marple.impl.gui.evaluator.completion;
 
+import dd.kms.marple.api.evaluator.StringHistory;
 import dd.kms.marple.api.settings.keys.KeyRepresentation;
 import dd.kms.marple.framework.common.UniformDocumentListener;
 import dd.kms.marple.impl.gui.common.GuiCommons;
@@ -18,7 +19,7 @@ public class CodeCompletionDecorators
 	private static final KeyRepresentation	DOWN_KEY	= new KeyRepresentation(0, KeyEvent.VK_DOWN);
 
 	public static void decorate(JTextComponent textComponent, ParserMediator parserMediator, KeyRepresentation completionSuggestionKey,
-			@Nullable KeyRepresentation showExecutableArgumentsKey) {
+			@Nullable KeyRepresentation showExecutableArgumentsKey, StringHistory expressionHistory) {
 		/*
 		 * The auto completion library does not request completions when, among others, removing characters.
 		 * However, we need instant feedback about parse exceptions.
@@ -33,10 +34,9 @@ public class CodeCompletionDecorators
 		if (showExecutableArgumentsKey != null) {
 			GuiCommons.installKeyHandler(textComponent, showExecutableArgumentsKey, "Display method argument info", onShowExecutableArguments);
 		}
-		ExpressionHistory expressionHistory = new ExpressionHistory();
 		GuiCommons.installKeyHandler(textComponent, APPLY_KEY, "Evaluate result", () -> evaluateInput(textComponent, parserMediator, expressionHistory));
-		GuiCommons.installKeyHandler(textComponent, UP_KEY, "Show previous expression", () -> lookUpInExpressionHistory(textComponent, expressionHistory, ExpressionHistory.PREVIOUS));
-		GuiCommons.installKeyHandler(textComponent, DOWN_KEY, "Show next expression", () -> lookUpInExpressionHistory(textComponent, expressionHistory, ExpressionHistory.NEXT));
+		GuiCommons.installKeyHandler(textComponent, UP_KEY, "Show previous expression", () -> lookUpInExpressionHistory(textComponent, expressionHistory, StringHistory.LookupDirection.PREVIOUS));
+		GuiCommons.installKeyHandler(textComponent, DOWN_KEY, "Show next expression", () -> lookUpInExpressionHistory(textComponent, expressionHistory, StringHistory.LookupDirection.NEXT));
 	}
 
 	private static void registerExceptionConsumer(JTextComponent textComponent, ParserMediator parserMediator) {
@@ -67,14 +67,14 @@ public class CodeCompletionDecorators
 		ExecutableArgumentPopup.register(textComponent, parserMediator);
 	}
 
-	private static void evaluateInput(JTextComponent textComponent, ParserMediator parserMediator, ExpressionHistory expressionHistory) {
+	private static void evaluateInput(JTextComponent textComponent, ParserMediator parserMediator, StringHistory expressionHistory) {
 		String expression = textComponent.getText();
-		expressionHistory.addExpression(expression);
+		expressionHistory.addString(expression);
 		parserMediator.consumeText(expression);
 	}
 
-	private static void lookUpInExpressionHistory(JTextComponent textComponent, ExpressionHistory expressionHistory, int searchDirection) {
-		String expression = expressionHistory.lookup(searchDirection);
+	private static void lookUpInExpressionHistory(JTextComponent textComponent, StringHistory expressionHistory, StringHistory.LookupDirection lookupDirection) {
+		String expression = expressionHistory.lookup(lookupDirection);
 		if (expression != null) {
 			textComponent.setText(expression);
 			textComponent.setCaretPosition(expression.length());
