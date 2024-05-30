@@ -44,6 +44,8 @@ Marple is a Swing-based Java library for analyzing Swing applications. Notable f
   - [Search Instances from Here and Search this Instance Action](#search-instances-from-here-and-search-this-instance-action)
   - [Copy String Representation Action](#copy-string-representation-action)
   - [Debug Support Action](#debug-support-action)
+  - [View as Object Action](#view-as-object-action)
+  - [View As List/Iterable/Map Action](#view-as-listiterablemap-action)
   - [Invoke Action](#invoke-action)
 - [Inspection Dialog](#inspection-dialog)
   - [Component Hierarchy Tab](#component-hierarchy-tab)
