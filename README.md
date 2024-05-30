@@ -227,13 +227,17 @@ The interface `VisualSettings` describes how to display objects as text and whic
 
 You can also create an empty builder and call `VisualSettingsUtils.addDefaultDisplayTextFunctions(builder)` or `VisualSettingsUtils.addDefaultViews(builder)` to add the Marple default settings of only one of the two aspects of `VisualSettings`.
 
-The `VisualSettingsBuilder` provides 3 methods:
+The `VisualSettingsBuilder` provides the following methods:
 
   1. The method `nullDisplayText` lets you specify a String that is used to display the value `null`.
 
   1. The method `displayText` lets you specify how to display objects of a certain class. Marple currently defines special logic to display instances of the following classes: `String`, `char`/`Character`, `Object`, `Frame`, `AbstractButton`, `JLabel`, and `JTextComponent`. A sample usage of the method is `builder.displayText(char.class, c -> "'" + c + "'")`. 
 
   1. The method `objectView` lets you specify constructors/factory methods for `ObjectView` instances for a certain type of object. Each `ObjectView` describes one tab in the inspection dialog. The available tabs depend on the inspected object. Note that the class argument only serves as a first filter for deciding which tabs to create and which not. The factory method you provide may return `null` if there should be no tab for a given object although the class is as expected.
+
+  1. The methods `listView`, `iterableView`, and `mapView` let you specify alternative views (as `List`, as `Iterable`, or as `Map`) on objects of certain classes. Additionally, you have to specify whether this should be the default view or not. These alternative views serve two purposes:
+     1. When viewing an object, you can switch between the regular object view and the alternative view(s).
+     1. When you provide one of these views for a certain object class, then the ["Iterables" tab](#iterables-tab) or the ["Maps" tab](#maps-tab) will be available in the [Inspection Dialog](#inspection-dialog) even if they don't implement one of these interfaces inherently.
 
 ### Object Views
 
@@ -379,6 +383,14 @@ This action copies the value returned by `toString()` of the object represented 
 
 This action opens the [debug support dialog](#debug-support).
 
+## View as Object Action
+
+This action is only available if the object also has a different view (a `List` view, an `Iterable` view, or a `Map` view), which is currently shown. Objects with such a view are arrays, `List`s, `Iterable`s, `Map`s, but also objects for which such an alternative view has been defined (see [Visual Settings](#visual-settings)).
+
+## View As List/Iterable/Map Action
+
+This action is only available if the object has a `List` view, an `Iterable` view, or a `Map` view (cf. [View as Object Action](#view-as-object-action)) which is currently not shown.
+
 ## Invoke Action
 
 This action is only available for navigable elements that represent methods without argument. When this action is executed, then this method is executed and its result is used as new context of the inspection dialog. 
@@ -455,7 +467,7 @@ Like in the "Detailed View" of the "Fields" tab, you can sort methods according 
 
 ## Iterables Tab
 
-The "Iterables" tab is only visible if the selected object is an `Iterable` or an array. This tab provides common operations on `Iterable`s (Filter, Map, ForEach, Collect, ToMap, Count, and Group). We will discuss these operations in the remainder and how to use them for a stream-like analysis. 
+The "Iterables" tab is only visible if the selected object is an `Iterable` or an array or if you have provided a `List` or an `Iterable` view for the class of this object (see [Visual Settings](#visual-settings)). This tab provides common operations on `Iterable`s (Filter, Map, ForEach, Collect, ToMap, Count, and Group). We will discuss these operations in the remainder and how to use them for a stream-like analysis. 
 
 ![Iterables Tab](images/inspection_dialog/iterables_tab.png)
 
@@ -559,7 +571,7 @@ To resemble these in the "Iterables" tab, the following steps are required, assu
 
 ## Maps Tab
 
-The "Maps" tab is only visible if the selected object is a `Map`. This tab provides common operations on `Map`s (Filter and Map):
+The "Maps" tab is only visible if the selected object is a `Map` or if you have provided a `Map` view for the class of this object (see [Visual Settings](#visual-settings)). This tab provides common operations on `Map`s (Filter and Map):
 
 ![Maps Tab](images/inspection_dialog/maps_tab.png)
 
