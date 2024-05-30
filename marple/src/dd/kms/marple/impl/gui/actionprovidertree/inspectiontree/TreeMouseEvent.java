@@ -16,6 +16,10 @@ class TreeMouseEvent
 		this.mouseEvent = mouseEvent;
 	}
 
+	JTree getTree() {
+		return tree;
+	}
+
 	InspectionTreeModel getTreeModel() {
 		TreeModel model = tree.getModel();
 		return model instanceof InspectionTreeModel ? (InspectionTreeModel) model : null;

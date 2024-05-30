@@ -11,10 +11,14 @@ import java.util.Set;
 
 class InspectionTreeModel implements TreeModel
 {
-	private final InspectionTreeNode		root;
+	private InspectionTreeNode				root;
 	private final Set<TreeModelListener>	listeners	= new HashSet<>();
 
 	InspectionTreeModel(InspectionTreeNode root) {
+		this.root = root;
+	}
+
+	void setRoot(InspectionTreeNode root) {
 		this.root = root;
 	}
 
@@ -72,6 +76,13 @@ class InspectionTreeModel implements TreeModel
 		TreeModelEvent e = new TreeModelEvent(this, path, childIndices, children);
 		for (TreeModelListener listener : listeners) {
 			listener.treeNodesInserted(e);
+		}
+	}
+
+	void fireTreeStructureChanged() {
+		TreeModelEvent e = new TreeModelEvent(this, (Object[]) null, new int[0], new Object[0]);
+		for (TreeModelListener listener : listeners) {
+			listener.treeStructureChanged(e);
 		}
 	}
 

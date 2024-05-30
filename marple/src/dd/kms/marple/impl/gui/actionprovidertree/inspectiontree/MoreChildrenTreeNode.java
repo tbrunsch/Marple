@@ -12,7 +12,7 @@ abstract class MoreChildrenTreeNode implements InspectionTreeNode
 	abstract List<InspectionTreeNode> getHiddenChildren();
 
 	@Override
-	public ActionProvider getActionProvider() {
+	public ActionProvider getActionProvider(JTree tree, MouseEvent e) {
 		return null;
 	}
 

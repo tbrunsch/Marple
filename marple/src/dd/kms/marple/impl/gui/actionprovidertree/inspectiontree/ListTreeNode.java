@@ -1,8 +1,6 @@
 package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.actions.ActionProvider;
-import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.actions.Actions;
 
 import javax.annotation.Nullable;
@@ -13,28 +11,16 @@ import java.util.List;
  */
 class ListTreeNode extends AbstractInspectionTreeNode
 {
-	private final @Nullable String	displayKey;
-	private final Object 			container;
 	private final List<?>			list;
-	private final InspectionContext context;
 
-	ListTreeNode(@Nullable String displayKey, Object container, List<?> list, InspectionContext context) {
-		this.displayKey = displayKey;
-		this.container = container;
+	ListTreeNode(@Nullable String displayKey, Object container, List<?> list, InspectionContext context, List<ViewOption> alternativeViews) {
+		super(displayKey, container, context, alternativeViews);
 		this.list = list;
-		this.context = context;
 	}
 
 	@Override
 	List<? extends InspectionTreeNode> doGetChildren() {
-		return InspectionTreeNodes.getListElementNodes(list, 0, list.size(), 0, context);
-	}
-
-	@Override
-	public ActionProvider getActionProvider() {
-		return new ActionProviderBuilder(toString(), container, context)
-			.suggestVariableName(displayKey)
-			.build();
+		return InspectionTreeNodes.getListElementNodes(list, 0, list.size(), 0, getContext());
 	}
 
 	@Override
@@ -48,11 +34,13 @@ class ListTreeNode extends AbstractInspectionTreeNode
 	}
 
 	private String getText(boolean trimmed) {
-		String valueDisplayText = context.getDisplayText(container);
+		Object container = getObject();
+		String valueDisplayText = getContext().getDisplayText(container);
 		if (trimmed) {
 			valueDisplayText = Actions.trimDisplayText(valueDisplayText);
 		}
 		valueDisplayText += (" size = " + list.size());
+		String displayKey = getDisplayKey();
 		return displayKey == null ? valueDisplayText : displayKey + " = " + valueDisplayText;
 	}
 }

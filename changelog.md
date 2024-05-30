@@ -4,7 +4,12 @@
 
   - switched to Zenodot 0.4 (support for parser extensions, code completions for inner classes)
   - applying code completions for non-imported classes imports these classes temporarily instead of inserting the fully qualified class name
+  - added possibility to switch between the plain object view and `List`, `Iterable`, and `Map` views (if available)
+  - added possibility to specify custom `List`, `Iterable`, and `Map` views for certain objects via `VisualSettingsBuilder.listView()`, `VisualSettingsBuilder.iterableView()`, and `VisualSettingsBuilder.mapView()`
   - Marple can now be extended by additional evaluation settings via `EvaluationSettingsBuilder.setAdditionalSettings()`
+
+Behavioral changes:
+  - Marple does not inherently provide `List` views for Apache primitive lists anymore because they can now be specified by the API user if required.
 
 ## v0.4
 

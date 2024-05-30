@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.actions.InspectionAction;
 import dd.kms.marple.impl.actions.ActionProvider;
-import dd.kms.marple.impl.actions.Actions;
 
+import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
@@ -24,30 +24,24 @@ class MoreListChildrenTreeNode extends MoreChildrenTreeNode
 	}
 
 	@Override
-	public List<InspectionTreeNode> getHiddenChildren() {
-		return InspectionTreeNodes.getListElementNodes(list, start, end, start, context);
-	}
-
-	@Override
-	public void handlePopupRequested(TreeMouseEvent e) {
-		MouseEvent mouseEvent = e.getMouseEvent();
-		if (!InspectionTreeNodes.canDisplayAllSubListElements(start, end)) {
-			ActionProvider actionProvider = createReplaceNodeActionProvider(e);
-			Actions.showActionPopup(actionProvider, mouseEvent);
-		}
-	}
-
-	ActionProvider createReplaceNodeActionProvider(TreeMouseEvent e) {
+	public ActionProvider getActionProvider(JTree tree, MouseEvent e) {
 		if (InspectionTreeNodes.canDisplayAllSubListElements(start, end)) {
 			return null;
 		}
 
-		InspectionAction showNextElements = new InspectionActionImpl("Show next elements", () -> showElementsAt(start, e), true);
-		InspectionAction showMiddleElements = new InspectionActionImpl("Show element in the middle", () -> showElementsAt((start + end)/2, e), false);
-		InspectionAction showLastElements = new InspectionActionImpl("Show last elements", () -> showElementsAt(end - 1, e), false);
+		TreeMouseEvent treeMouseEvent = new TreeMouseEvent(tree, e);
+
+		InspectionAction showNextElements = new InspectionActionImpl("Show next elements", () -> showElementsAt(start, treeMouseEvent), true);
+		InspectionAction showMiddleElements = new InspectionActionImpl("Show element in the middle", () -> showElementsAt((start + end)/2, treeMouseEvent), false);
+		InspectionAction showLastElements = new InspectionActionImpl("Show last elements", () -> showElementsAt(end - 1, treeMouseEvent), false);
 		ImmutableList<InspectionAction> actions = ImmutableList.of(showNextElements, showMiddleElements, showLastElements);
 
 		return ActionProvider.of("Extend view of list", actions, true);
+	}
+
+	@Override
+	public List<InspectionTreeNode> getHiddenChildren() {
+		return InspectionTreeNodes.getListElementNodes(list, start, end, start, context);
 	}
 
 	private void showElementsAt(int index, TreeMouseEvent e) {

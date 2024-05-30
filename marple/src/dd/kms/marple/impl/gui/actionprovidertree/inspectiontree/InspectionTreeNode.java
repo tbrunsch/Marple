@@ -9,5 +9,4 @@ interface InspectionTreeNode extends ActionProviderTreeNode
 	int getChildIndex(Object child);
 	List<InspectionTreeNode> getChildren();
 	default void handleLeftMouseButtonClicked(TreeMouseEvent e) {}
-	default void handlePopupRequested(TreeMouseEvent e) {}
 }

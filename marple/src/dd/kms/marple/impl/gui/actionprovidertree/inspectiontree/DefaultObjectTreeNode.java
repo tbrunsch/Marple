@@ -2,8 +2,6 @@ package dd.kms.marple.impl.gui.actionprovidertree.inspectiontree;
 
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
-import dd.kms.marple.impl.actions.ActionProvider;
-import dd.kms.marple.impl.actions.ActionProviderBuilder;
 import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.zenodot.api.common.FieldScanner;
 import dd.kms.zenodot.api.common.FieldScannerBuilder;
@@ -15,18 +13,13 @@ import java.util.List;
 
 class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 {
-	private final @Nullable String	displayKey;
-	private final Object			object;
-	private final InspectionContext	context;
-
-	DefaultObjectTreeNode(@Nullable String displayKey, Object object, InspectionContext context) {
-		this.displayKey = displayKey;
-		this.object = object;
-		this.context = context;
+	DefaultObjectTreeNode(@Nullable String displayKey, Object object, InspectionContext context, List<ViewOption> alternativeViews) {
+		super(displayKey, object, context, alternativeViews);
 	}
 
 	@Override
 	List<? extends InspectionTreeNode> doGetChildren() {
+		Object object = getObject();
 		if (!ReflectionUtils.isObjectInspectable(object)) {
 			return ImmutableList.of();
 		}
@@ -35,21 +28,17 @@ class DefaultObjectTreeNode extends AbstractInspectionTreeNode
 		ImmutableList.Builder<InspectionTreeNode> childBuilder = ImmutableList.builder();
 		for (GeneralizedField field : fields) {
 			Object fieldValue = ReflectionUtils.getFieldValue(field, object);
-			InspectionTreeNode child = InspectionTreeNodes.create(field.getName(), fieldValue, context);
+			InspectionTreeNode child = InspectionTreeNodes.create(field.getName(), fieldValue, getContext());
 			childBuilder.add(child);
 		}
 		return childBuilder.build();
 	}
 
 	@Override
-	public ActionProvider getActionProvider() {
-		return new ActionProviderBuilder(toString(), object, context)
-			.suggestVariableName(displayKey)
-			.build();
-	}
-
-	@Override
 	public String getFullText() {
+		String displayKey = getDisplayKey();
+		Object object = getObject();
+		InspectionContext context = getContext();
 		String valueDisplayText = context.getDisplayText(object);
 		return displayKey == null
 			? valueDisplayText + " (" + (object != null ? context.getDisplayText(object.getClass()) : null) + ")"
