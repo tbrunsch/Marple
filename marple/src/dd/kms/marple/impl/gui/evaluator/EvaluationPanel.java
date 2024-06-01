@@ -59,6 +59,10 @@ public class EvaluationPanel extends JPanel implements Disposable
 		return evaluationTextField.getCaretPosition();
 	}
 
+	public void evaluate() {
+		evaluationTextField.evaluate();
+	}
+
 	void updateContent() {
 		evaluationModePanel.updateControls();
 	}

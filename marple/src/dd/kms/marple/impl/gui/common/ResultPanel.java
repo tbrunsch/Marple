@@ -2,7 +2,7 @@ package dd.kms.marple.impl.gui.common;
 
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.gui.Disposable;
-import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorators;
+import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorator;
 import dd.kms.marple.impl.gui.inspector.views.fieldview.FieldTree;
 
 import javax.annotation.Nullable;
@@ -14,19 +14,27 @@ import static java.awt.GridBagConstraints.NORTH;
 
 public class ResultPanel extends JPanel implements Disposable
 {
-	private final InspectionContext context;
+	private final JLabel			exceptionLabel	= new JLabel();
+
+	private final InspectionContext	context;
+
 
 	public ResultPanel(InspectionContext context) {
 		super(new GridBagLayout());
 		this.context = context;
 
 		setBorder(BorderFactory.createTitledBorder("Result"));
+
+		CodeCompletionDecorator.configureExceptionComponent(exceptionLabel);
 	}
 
 	public void displayException(@Nullable Throwable t) {
+		if (t == null && exceptionLabel.getParent() == null) {
+			// nothing to do
+			return;
+		}
 		String error = ExceptionFormatter.formatParseException(t);
-		JLabel exceptionLabel = new JLabel(error);
-		CodeCompletionDecorators.configureExceptionComponent(exceptionLabel);
+		exceptionLabel.setText(error);
 		displayComponent(exceptionLabel);
 	}
 

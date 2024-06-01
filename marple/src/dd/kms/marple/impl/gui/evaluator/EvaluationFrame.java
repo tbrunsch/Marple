@@ -88,6 +88,8 @@ public class EvaluationFrame extends JFrame implements Disposable
 		GuiCommons.reevaluateButtonAction(prevButton);
 		GuiCommons.reevaluateButtonAction(nextButton);
 
+		evaluationPanel.evaluate();
+
 		setVisible(true);
 	}
 

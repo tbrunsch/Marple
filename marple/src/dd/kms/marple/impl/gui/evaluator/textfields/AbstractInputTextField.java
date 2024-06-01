@@ -8,7 +8,7 @@ import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.api.settings.keys.KeyFunction;
 import dd.kms.marple.api.settings.keys.KeySettings;
-import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorators;
+import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorator;
 import dd.kms.marple.impl.gui.evaluator.completion.ParserMediator;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.matching.StringMatch;
@@ -33,19 +33,20 @@ public abstract class AbstractInputTextField<T> extends JTextField implements Pa
 			.collect(Collectors.toList());
 	}
 
-	private final ExpressionEvaluator	expressionEvaluator;
-	private final List<Class<?>>		temporarilyImportedClasses	= new ArrayList<>();
+	private final ExpressionEvaluator		expressionEvaluator;
+	private final CodeCompletionDecorator	codeCompletionDecorator;
+	private final List<Class<?>>			temporarilyImportedClasses	= new ArrayList<>();
 
-	private Consumer<T>					evaluationResultConsumer	= result -> {};
-	private Consumer<Throwable>			exceptionConsumer			= e -> {};
+	private Consumer<T>						evaluationResultConsumer	= result -> {};
+	private Consumer<Throwable>				exceptionConsumer			= e -> {};
 
 	/*
 	 * Cached Data
 	 */
-	private String						cachedText					= null;
-	private int							cachedCaretPosition			= -1;
-	private List<CodeCompletion>		cachedRatedSuggestions		= ImmutableList.of();
-	private ParseException				cachedParseException		= null;
+	private String							cachedText					= null;
+	private int								cachedCaretPosition			= -1;
+	private List<CodeCompletion>			cachedRatedSuggestions		= ImmutableList.of();
+	private ParseException					cachedParseException		= null;
 
 	AbstractInputTextField(InspectionContext context) {
 		this.expressionEvaluator = context.getEvaluator();
@@ -58,13 +59,14 @@ public abstract class AbstractInputTextField<T> extends JTextField implements Pa
 		KeySettings keySettings = context.getSettings().getKeySettings();
 
 
-		CodeCompletionDecorators.decorate(
+		codeCompletionDecorator = new CodeCompletionDecorator(
 			this,
 			this,
 			keySettings.getKey(KeyFunction.CODE_COMPLETION),
 			keySettings.getKey(KeyFunction.SHOW_METHOD_ARGUMENTS),
 			expressionEvaluator.getExpressionHistory()
 		);
+		codeCompletionDecorator.decorate();
 	}
 
 	abstract List<CodeCompletion> doProvideCompletions(String text, int caretPosition) throws ParseException;
@@ -84,6 +86,10 @@ public abstract class AbstractInputTextField<T> extends JTextField implements Pa
 
 	public void addInputVerifier() {
 		setInputVerifier(new ParserVerifier());
+	}
+
+	public void evaluate() {
+		codeCompletionDecorator.evaluateInput();
 	}
 
 	public T evaluateText() throws ParseException {

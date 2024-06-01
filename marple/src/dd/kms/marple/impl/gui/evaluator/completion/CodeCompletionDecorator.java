@@ -12,21 +12,35 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
-public class CodeCompletionDecorators
+public class CodeCompletionDecorator
 {
 	private static final KeyRepresentation	APPLY_KEY	= new KeyRepresentation(0, KeyEvent.VK_ENTER);
 	private static final KeyRepresentation	UP_KEY		= new KeyRepresentation(0, KeyEvent.VK_UP);
 	private static final KeyRepresentation	DOWN_KEY	= new KeyRepresentation(0, KeyEvent.VK_DOWN);
 
-	public static void decorate(JTextComponent textComponent, ParserMediator parserMediator, KeyRepresentation completionSuggestionKey,
-			@Nullable KeyRepresentation showExecutableArgumentsKey, StringHistory expressionHistory) {
+	private final JTextComponent	textComponent;
+	private final ParserMediator	parserMediator;
+	private final KeyRepresentation	completionSuggestionKey;
+	@Nullable
+	private final KeyRepresentation	showExecutableArgumentsKey;
+	private final StringHistory		expressionHistory;
+
+	public CodeCompletionDecorator(JTextComponent textComponent, ParserMediator parserMediator, KeyRepresentation completionSuggestionKey, @Nullable KeyRepresentation showExecutableArgumentsKey, StringHistory expressionHistory) {
+		this.textComponent = textComponent;
+		this.parserMediator = parserMediator;
+		this.completionSuggestionKey = completionSuggestionKey;
+		this.showExecutableArgumentsKey = showExecutableArgumentsKey;
+		this.expressionHistory = expressionHistory;
+	}
+
+	public void decorate() {
 		/*
 		 * The auto completion library does not request completions when, among others, removing characters.
 		 * However, we need instant feedback about parse exceptions.
 		 */
-		registerExceptionConsumer(textComponent, parserMediator);
+		registerExceptionConsumer();
 
-		Runnable onShowExecutableArguments = () -> showExecutableArguments(textComponent, parserMediator);
+		Runnable onShowExecutableArguments = this::showExecutableArguments;
 
 		AutoCompletion ac = new CustomAutoCompletion(parserMediator, completionSuggestionKey, onShowExecutableArguments);
 		ac.install(textComponent);
@@ -34,12 +48,12 @@ public class CodeCompletionDecorators
 		if (showExecutableArgumentsKey != null) {
 			GuiCommons.installKeyHandler(textComponent, showExecutableArgumentsKey, "Display method argument info", onShowExecutableArguments);
 		}
-		GuiCommons.installKeyHandler(textComponent, APPLY_KEY, "Evaluate result", () -> evaluateInput(textComponent, parserMediator, expressionHistory));
-		GuiCommons.installKeyHandler(textComponent, UP_KEY, "Show previous expression", () -> lookUpInExpressionHistory(textComponent, expressionHistory, StringHistory.LookupDirection.PREVIOUS));
-		GuiCommons.installKeyHandler(textComponent, DOWN_KEY, "Show next expression", () -> lookUpInExpressionHistory(textComponent, expressionHistory, StringHistory.LookupDirection.NEXT));
+		GuiCommons.installKeyHandler(textComponent, APPLY_KEY,	"Evaluate result",			this::evaluateInput);
+		GuiCommons.installKeyHandler(textComponent, UP_KEY,		"Show previous expression", () -> lookUpInExpressionHistory(StringHistory.LookupDirection.PREVIOUS));
+		GuiCommons.installKeyHandler(textComponent, DOWN_KEY,	"Show next expression",		() -> lookUpInExpressionHistory(StringHistory.LookupDirection.NEXT));
 	}
 
-	private static void registerExceptionConsumer(JTextComponent textComponent, ParserMediator parserMediator) {
+	private void registerExceptionConsumer() {
 		textComponent.getDocument().addDocumentListener(new UniformDocumentListener() {
 			@Override
 			protected void onDocumentChanged() {
@@ -60,20 +74,20 @@ public class CodeCompletionDecorators
 		});
 	}
 
-	private static void showExecutableArguments(JTextComponent textComponent, ParserMediator parserMediator)  {
+	private void showExecutableArguments()  {
 		if (textComponent.getComponentPopupMenu() instanceof ExecutableArgumentPopup) {
 			return;
 		}
 		ExecutableArgumentPopup.register(textComponent, parserMediator);
 	}
 
-	private static void evaluateInput(JTextComponent textComponent, ParserMediator parserMediator, StringHistory expressionHistory) {
+	public void evaluateInput() {
 		String expression = textComponent.getText();
 		expressionHistory.addString(expression);
 		parserMediator.consumeText(expression);
 	}
 
-	private static void lookUpInExpressionHistory(JTextComponent textComponent, StringHistory expressionHistory, StringHistory.LookupDirection lookupDirection) {
+	private void lookUpInExpressionHistory(StringHistory.LookupDirection lookupDirection) {
 		String expression = expressionHistory.lookup(lookupDirection);
 		if (expression != null) {
 			textComponent.setText(expression);
@@ -85,5 +99,4 @@ public class CodeCompletionDecorators
 		GuiCommons.setFontStyle(exceptionComponent, Font.PLAIN);
 		exceptionComponent.setForeground(Color.RED);
 	}
-
 }

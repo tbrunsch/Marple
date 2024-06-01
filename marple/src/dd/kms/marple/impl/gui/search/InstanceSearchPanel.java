@@ -5,7 +5,7 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNodes;
 import dd.kms.marple.impl.gui.common.ExceptionFormatter;
-import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorators;
+import dd.kms.marple.impl.gui.evaluator.completion.CodeCompletionDecorator;
 import dd.kms.marple.impl.gui.evaluator.textfields.ClassInputTextField;
 import dd.kms.marple.impl.gui.evaluator.textfields.EvaluationTextFieldPanel;
 import dd.kms.marple.impl.gui.evaluator.textfields.LambdaExpressionInputTextField;
@@ -92,7 +92,7 @@ class InstanceSearchPanel extends JPanel
 
 		instancePathFinder = new InstancePathFinder(this::onPathDetected);
 
-		CodeCompletionDecorators.configureExceptionComponent(errorLabel);
+		CodeCompletionDecorator.configureExceptionComponent(errorLabel);
 
 		add(configurationPanel,	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.1, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
 		add(resultPanel,		new GridBagConstraints(0, 1, 1, 1, 1.0, 0.9, CENTER, BOTH, DEFAULT_INSETS, 0, 0));
