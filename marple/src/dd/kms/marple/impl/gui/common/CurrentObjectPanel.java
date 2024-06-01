@@ -48,9 +48,7 @@ public class CurrentObjectPanel extends JPanel implements Disposable
 	}
 
 	private ActionProvider createActionProvider() {
-		return new ActionProviderBuilder(getDisplayText(), currentObject, context)
-			.executeDefaultAction(true)
-			.build();
+		return new ActionProviderBuilder(getDisplayText(), currentObject, context).build();
 	}
 
 	@Override

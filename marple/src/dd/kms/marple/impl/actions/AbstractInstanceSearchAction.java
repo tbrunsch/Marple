@@ -20,11 +20,6 @@ abstract class AbstractInstanceSearchAction implements InspectionAction
 	abstract void configureSearchFrame(InstanceSearchFrame searchFrame, Object thisValue);
 
 	@Override
-	public boolean isDefaultAction() {
-		return false;
-	}
-
-	@Override
 	public boolean isEnabled() {
 		return context.getEvaluator() != null;
 	}

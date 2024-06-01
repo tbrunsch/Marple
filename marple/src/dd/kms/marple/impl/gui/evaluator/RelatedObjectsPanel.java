@@ -53,9 +53,7 @@ class RelatedObjectsPanel extends JPanel implements Disposable
 	}
 
 	private ActionProvider createActionProvider(String displayText, Object object) {
-		return new ActionProviderBuilder(displayText, object, context)
-			.executeDefaultAction(true)
-			.build();
+		return new ActionProviderBuilder(displayText, object, context).build();
 	}
 
 	@Override

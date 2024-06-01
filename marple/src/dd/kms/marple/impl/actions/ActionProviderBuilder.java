@@ -7,13 +7,17 @@ import dd.kms.marple.api.settings.actions.CustomAction;
 import dd.kms.marple.api.settings.actions.CustomActionSettings;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.impl.common.ReflectionUtils;
+import dd.kms.marple.impl.gui.evaluator.EvaluationFrame;
+import dd.kms.marple.impl.gui.inspector.InspectionFrame;
 import dd.kms.marple.impl.gui.snapshot.Snapshots;
 
 import javax.annotation.Nullable;
+import javax.swing.FocusManager;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class ActionProviderBuilder
@@ -27,7 +31,6 @@ public class ActionProviderBuilder
 	private @Nullable ComponentHierarchy	componentHierarchy;
 	private @Nullable String				suggestedVariableName;
 	private @Nullable EvaluationData		evaluationData;
-	private boolean							executeDefaultAction	= true;
 
 	private final List<InspectionAction>	additionalActions		= new ArrayList<>();
 
@@ -62,11 +65,6 @@ public class ActionProviderBuilder
 		return this;
 	}
 
-	public ActionProviderBuilder executeDefaultAction(boolean executeDefaultAction) {
-		this.executeDefaultAction = executeDefaultAction;
-		return this;
-	}
-
 	public ActionProviderBuilder addAdditionalAction(InspectionAction additionalAction) {
 		this.additionalActions.add(additionalAction);
 		return this;
@@ -75,7 +73,7 @@ public class ActionProviderBuilder
 	public ActionProvider build() {
 		ImmutableList.Builder<InspectionAction> actionsBuilder = ImmutableList.builder();
 		if (object == null) {
-			return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
+			return ActionProvider.of(displayText, actionsBuilder.build(), null);
 		}
 		boolean isInspectable = ReflectionUtils.isObjectInspectable(object);
 		if (componentHierarchy == null) {
@@ -123,7 +121,29 @@ public class ActionProviderBuilder
 
 		actionsBuilder.addAll(additionalActions);
 
-		return ActionProvider.of(displayText, actionsBuilder.build(), executeDefaultAction);
+		ImmutableList<InspectionAction> actions = actionsBuilder.build();
+		InspectionAction defaultAction = determineDefaultAction(actions);
+
+		return ActionProvider.of(displayText, actions, defaultAction);
+	}
+
+	@Nullable
+	private InspectionAction determineDefaultAction(List<InspectionAction> actions) {
+		Window activeWindow = FocusManager.getCurrentManager().getActiveWindow();
+		if (activeWindow instanceof InspectionFrame) {
+			Predicate<InspectionAction> inspectActionFilter = action ->
+				action instanceof InspectObjectAction ||
+				action instanceof InspectComponentAction;
+			InspectionAction inspectAction = actions.stream().filter(inspectActionFilter).findFirst().orElse(null);
+			return inspectAction;
+		}
+		if (activeWindow instanceof EvaluationFrame) {
+			Predicate<InspectionAction> evaluateActionFilter = action ->
+				action instanceof EvaluateExpressionAction;
+			InspectionAction evaluateAction = actions.stream().filter(evaluateActionFilter).findFirst().orElse(null);
+			return evaluateAction;
+		}
+		return null;
 	}
 
 	private static class ComponentHierarchyData

@@ -23,11 +23,6 @@ public class ParameterizedCustomAction implements InspectionAction
 	}
 
 	@Override
-	public boolean isDefaultAction() {
-		return false;
-	}
-
-	@Override
 	public String getName() {
 		return customAction.getName();
 	}

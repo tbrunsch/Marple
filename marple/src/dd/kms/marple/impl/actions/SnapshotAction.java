@@ -23,11 +23,6 @@ public class SnapshotAction<T> implements ImmediateInspectionAction
 	}
 
 	@Override
-	public final boolean isDefaultAction() {
-		return false;
-	}
-
-	@Override
 	public final String getName() {
 		return "Snapshot";
 	}

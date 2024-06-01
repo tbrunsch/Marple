@@ -18,11 +18,6 @@ public class InspectComponentAction implements InspectionAction
 	}
 
 	@Override
-	public boolean isDefaultAction() {
-		return true;
-	}
-
-	@Override
 	public String getName() {
 		return "Inspect";
 	}

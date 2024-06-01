@@ -18,11 +18,6 @@ public class DebugSupportAction implements InspectionAction
 	}
 
 	@Override
-	public boolean isDefaultAction() {
-		return false;
-	}
-
-	@Override
 	public String getName() {
 		return "Debug support";
 	}

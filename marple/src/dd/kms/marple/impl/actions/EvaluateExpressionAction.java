@@ -18,11 +18,6 @@ public class EvaluateExpressionAction implements InspectionAction
 	}
 
 	@Override
-	public boolean isDefaultAction() {
-		return false;
-	}
-
-	@Override
 	public String getName() {
 		return "this".equals(expression) ? "Evaluate" : "Evaluate as '" + expression + "'";
 	}

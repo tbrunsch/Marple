@@ -1,8 +1,8 @@
 package dd.kms.marple.impl.actions;
 
-import com.google.common.collect.Iterables;
 import dd.kms.marple.api.actions.InspectionAction;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,18 +10,19 @@ import java.util.stream.Collectors;
 
 public class ActionProvider
 {
-	public static ActionProvider of(String displayText, List<InspectionAction> actions, boolean executeDefaultAction) {
-		return new ActionProvider(displayText, actions, executeDefaultAction);
+	public static ActionProvider of(String displayText, List<InspectionAction> actions, @Nullable InspectionAction defaultAction) {
+		return new ActionProvider(displayText, actions, defaultAction);
 	}
 
 	private final String					displayText;
 	private final List<InspectionAction>	actions;
-	private final boolean					executeDefaultAction;
+	@Nullable
+	private final InspectionAction			defaultAction;
 
-	private ActionProvider(String displayText, List<InspectionAction> actions, boolean executeDefaultAction) {
+	private ActionProvider(String displayText, List<InspectionAction> actions, @Nullable InspectionAction defaultAction) {
 		this.displayText = displayText;
 		this.actions = actions.stream().filter(Objects::nonNull).collect(Collectors.toList());
-		this.executeDefaultAction = executeDefaultAction;
+		this.defaultAction = defaultAction;
 	}
 
 	public List<InspectionAction> getActions() {
@@ -29,12 +30,7 @@ public class ActionProvider
 	}
 
 	public Optional<InspectionAction> getDefaultAction() {
-		List<InspectionAction> defaultActions = actions.stream()
-			.filter(InspectionAction::isDefaultAction)
-			.collect(Collectors.toList());
-		return executeDefaultAction && defaultActions.size() == 1
-				? Optional.of(Iterables.getOnlyElement(defaultActions))
-				: Optional.empty();
+		return Optional.ofNullable(defaultAction);
 	}
 
 	@Override

@@ -31,12 +31,12 @@ class MoreListChildrenTreeNode extends MoreChildrenTreeNode
 
 		TreeMouseEvent treeMouseEvent = new TreeMouseEvent(tree, e);
 
-		InspectionAction showNextElements = new InspectionActionImpl("Show next elements", () -> showElementsAt(start, treeMouseEvent), true);
-		InspectionAction showMiddleElements = new InspectionActionImpl("Show element in the middle", () -> showElementsAt((start + end)/2, treeMouseEvent), false);
-		InspectionAction showLastElements = new InspectionActionImpl("Show last elements", () -> showElementsAt(end - 1, treeMouseEvent), false);
+		InspectionAction showNextElements = new InspectionActionImpl("Show next elements", () -> showElementsAt(start, treeMouseEvent));
+		InspectionAction showMiddleElements = new InspectionActionImpl("Show element in the middle", () -> showElementsAt((start + end)/2, treeMouseEvent));
+		InspectionAction showLastElements = new InspectionActionImpl("Show last elements", () -> showElementsAt(end - 1, treeMouseEvent));
 		ImmutableList<InspectionAction> actions = ImmutableList.of(showNextElements, showMiddleElements, showLastElements);
 
-		return ActionProvider.of("Extend view of list", actions, true);
+		return ActionProvider.of("Extend view of list", actions, showNextElements);
 	}
 
 	@Override
@@ -53,17 +53,10 @@ class MoreListChildrenTreeNode extends MoreChildrenTreeNode
 	{
 		private final String	name;
 		private final Runnable	runnable;
-		private final boolean	defaultAction;
 
-		private InspectionActionImpl(String name, Runnable runnable, boolean defaultAction) {
+		private InspectionActionImpl(String name, Runnable runnable) {
 			this.name = name;
 			this.runnable = runnable;
-			this.defaultAction = defaultAction;
-		}
-
-		@Override
-		public boolean isDefaultAction() {
-			return defaultAction;
 		}
 
 		@Override

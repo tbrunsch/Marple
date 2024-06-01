@@ -128,7 +128,6 @@ public class VariablePanel extends JPanel implements Disposable
 		Object valueInfo = variable.getValue();
 		return new ActionProviderBuilder(context.getDisplayText(valueInfo), valueInfo, context)
 			.evaluateAs(variable.getName())
-			.executeDefaultAction(true)
 			.build();
 	}
 

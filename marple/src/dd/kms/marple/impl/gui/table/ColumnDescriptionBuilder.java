@@ -30,7 +30,7 @@ public class ColumnDescriptionBuilder<T>
 		return this;
 	}
 
-	public ColumnDescription build() {
+	public ColumnDescription<T> build() {
 		return new ColumnDescriptionImpl<>(name, clazz, valueExtractor, valueFilter, editorSettings);
 	}
 }

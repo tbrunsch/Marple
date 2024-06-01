@@ -50,7 +50,6 @@ class UnnamedSlotsPanel extends AbstractSlotPanel<Integer>
 		return new ActionProviderBuilder(context.getDisplayText(slotValue), slotValue, context)
 			.evaluateAs("DebugSupport." + unnamedSlotName)
 			.suggestVariableName(unnamedSlotName)
-			.executeDefaultAction(false)
 			.build();
 	}
 

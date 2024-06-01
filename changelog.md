@@ -11,6 +11,7 @@
 
 Behavioral changes:
   - Marple does not inherently provide `List` views for Apache primitive lists anymore because they can now be specified by the API user if required.
+  - The "Inspect Object" and "Inspect Component" actions are not always the default action (the action that is performed when clicking onto a navigable element) anymore, but only in the "Inspection Dialog". In the "Evaluation Dialog", the "Evaluate Expression" action is now the default action. 
 
 ## v0.4
 
