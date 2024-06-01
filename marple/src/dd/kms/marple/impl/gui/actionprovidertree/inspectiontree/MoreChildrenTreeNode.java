@@ -15,7 +15,7 @@ abstract class MoreChildrenTreeNode implements InspectionTreeNode
 	public ActionProvider getActionProvider(JTree tree, MouseEvent e) {
 		TreeMouseEvent treeMouseEvent = new TreeMouseEvent(tree, e);
 		ShowNextElementsAction showNextElementsAction = new ShowNextElementsAction(this, treeMouseEvent);
-		return ActionProvider.of("", Collections.singletonList(showNextElementsAction), showNextElementsAction);
+		return ActionProvider.of("", Collections.singletonList(showNextElementsAction), () -> showNextElementsAction);
 	}
 
 	@Override

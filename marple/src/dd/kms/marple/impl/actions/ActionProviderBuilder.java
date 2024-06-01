@@ -73,7 +73,7 @@ public class ActionProviderBuilder
 	public ActionProvider build() {
 		ImmutableList.Builder<InspectionAction> actionsBuilder = ImmutableList.builder();
 		if (object == null) {
-			return ActionProvider.of(displayText, actionsBuilder.build(), null);
+			return ActionProvider.of(displayText, actionsBuilder.build(), () -> null);
 		}
 		boolean isInspectable = ReflectionUtils.isObjectInspectable(object);
 		if (componentHierarchy == null) {
@@ -122,9 +122,8 @@ public class ActionProviderBuilder
 		actionsBuilder.addAll(additionalActions);
 
 		ImmutableList<InspectionAction> actions = actionsBuilder.build();
-		InspectionAction defaultAction = determineDefaultAction(actions);
 
-		return ActionProvider.of(displayText, actions, defaultAction);
+		return ActionProvider.of(displayText, actions, () -> determineDefaultAction(actions));
 	}
 
 	@Nullable

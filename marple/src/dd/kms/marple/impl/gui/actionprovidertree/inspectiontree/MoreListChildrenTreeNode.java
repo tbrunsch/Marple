@@ -36,7 +36,7 @@ class MoreListChildrenTreeNode extends MoreChildrenTreeNode
 		InspectionAction showLastElements = new InspectionActionImpl("Show last elements", () -> showElementsAt(end - 1, treeMouseEvent));
 		ImmutableList<InspectionAction> actions = ImmutableList.of(showNextElements, showMiddleElements, showLastElements);
 
-		return ActionProvider.of("Extend view of list", actions, showNextElements);
+		return ActionProvider.of("Extend view of list", actions, () -> showNextElements);
 	}
 
 	@Override
