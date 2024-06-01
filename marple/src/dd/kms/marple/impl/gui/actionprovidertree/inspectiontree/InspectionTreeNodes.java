@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,21 +23,6 @@ public class InspectionTreeNodes
 	public static TreeModel createModel(@Nullable String fieldName, Object object, InspectionContext context) {
 		InspectionTreeNode treeNode = create(fieldName, object, context);
 		return new InspectionTreeModel(treeNode);
-	}
-
-	public static void enableMoreChildrenNodeReplacement(JTree tree) {
-		tree.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				TreeMouseEvent treeMouseEvent = new TreeMouseEvent(tree, e);
-				InspectionTreeNode node = treeMouseEvent.getNode();
-				if (node != null) {
-					if (SwingUtilities.isLeftMouseButton(e)) {
-						node.handleLeftMouseButtonClicked(treeMouseEvent);
-					}
-				}
-			}
-		});
 	}
 
 	static void replaceNode(TreePath parentPath, InspectionTreeNode parent, InspectionTreeNode node, List<InspectionTreeNode> newNodes, InspectionTreeModel treeModel) {

@@ -28,7 +28,6 @@ public class FieldTree extends JPanel implements ObjectView
 
 		ActionProviderListeners.addMouseListeners(tree);
 		ActionProviderTreeNodes.enableFullTextToolTips(tree);
-		InspectionTreeNodes.enableMoreChildrenNodeReplacement(tree);
 	}
 
 	@Override

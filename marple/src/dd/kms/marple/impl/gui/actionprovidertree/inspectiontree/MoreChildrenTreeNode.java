@@ -13,7 +13,9 @@ abstract class MoreChildrenTreeNode implements InspectionTreeNode
 
 	@Override
 	public ActionProvider getActionProvider(JTree tree, MouseEvent e) {
-		return null;
+		TreeMouseEvent treeMouseEvent = new TreeMouseEvent(tree, e);
+		ShowNextElementsAction showNextElementsAction = new ShowNextElementsAction(this, treeMouseEvent);
+		return ActionProvider.of("", Collections.singletonList(showNextElementsAction), showNextElementsAction);
 	}
 
 	@Override
@@ -34,15 +36,5 @@ abstract class MoreChildrenTreeNode implements InspectionTreeNode
 	@Override
 	public final String toString() {
 		return getTrimmedText();
-	}
-
-	@Override
-	public void handleLeftMouseButtonClicked(TreeMouseEvent e) {
-		MouseEvent mouseEvent = e.getMouseEvent();
-		if (!SwingUtilities.isLeftMouseButton(mouseEvent)) {
-			return;
-		}
-		List<InspectionTreeNode> hiddenChildren = getHiddenChildren();
-		InspectionTreeNodes.replaceNode(e.getParentPath(), e.getParentNode(), this, hiddenChildren, e.getTreeModel());
 	}
 }
