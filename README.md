@@ -313,7 +313,7 @@ The builder allows you, among others,
 
   * to configure the behavior of code completions (currently not configurable via API)
   * to specify the [imports](#imports) (classes and packages),
-  * to specify the minimum access modifier (`private`, `package private`, `protected`, or `public`) a field or method must have in order to be accessed from within expressions
+  * to specify the minimum access modifier (`private`, `package private`, `protected`, or `public`) a field, method, or constructor must have in order to be accessed from within expressions
   * to choose the [evaluation mode](#evaluation-modes)
 
 See the [parser settings](https://github.com/tbrunsch/Zenodot#parser-settings) documentation of Zenodot for more details on these features.
@@ -625,7 +625,7 @@ The evaluation settings dialog consists of three tabs:
 
 If you have registered additional evaluation settings via `EvaluationSettingsBuilder.setAdditionalSettings()`, then one additional tab per additional settings with the specified titles will be displayed.
 
-In the "General Settings" tab you can specify the minimum access modifier fields and methods must have in order to be accessible in expressions. Additionally, you can specify the [evaluation mode](#evaluation-modes):
+In the "General Settings" tab you can specify the minimum access modifier fields, methods, and constructors must have in order to be accessible in expressions. Additionally, you can specify the [evaluation mode](#evaluation-modes):
 
 ![General Settings](images/evaluation_dialog/settings/general.png)
 

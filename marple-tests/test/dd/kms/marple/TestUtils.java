@@ -57,7 +57,8 @@ class TestUtils
 		CustomHierarchyParserExtension customHierarchyParserExtension = CustomHierarchyParserExtension.create(customHierarchyRoot);
 
 		ParserSettings parserSettings = customHierarchyParserExtension.configure(parserSettingsBuilder)
-			.minimumAccessModifier(AccessModifier.PRIVATE)
+			.minimumFieldAccessModifier(AccessModifier.PRIVATE)
+			.minimumMethodAccessModifier(AccessModifier.PUBLIC)
 			.importPackages(ImmutableSet.of(importPackage1, importPackage2, importPackage3))
 			.importClassesByName(ImmutableSet.of(importClass1, importClass2))
 			.considerAllClassesForClassCompletions(true)

@@ -8,6 +8,7 @@
   - added possibility to specify custom `List`, `Iterable`, and `Map` views for certain objects via `VisualSettingsBuilder.listView()`, `VisualSettingsBuilder.iterableView()`, and `VisualSettingsBuilder.mapView()`
   - Marple can now be extended by additional evaluation settings via `EvaluationSettingsBuilder.setAdditionalSettings()`
   - The expression history is not cleared anymore when the evaluation dialog is closed.
+  - Marple now distinguished between the minimum access modifier for fields and the minimum access modifier for methods (and constructors).
 
 Behavioral changes:
   - Marple does not inherently provide `List` views for Apache primitive lists anymore because they can now be specified by the API user if required.

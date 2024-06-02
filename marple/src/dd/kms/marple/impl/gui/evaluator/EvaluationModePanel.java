@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.impl.evaluator.ExpressionEvaluators;
+import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.settings.EvaluationMode;
 import dd.kms.zenodot.api.settings.ParserSettings;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
@@ -69,29 +70,33 @@ class EvaluationModePanel extends JPanel
 
 	private final InspectionContext	context;
 
-	EvaluationModePanel(InspectionContext context, Alignment alignment) {
+	EvaluationModePanel(InspectionContext context) {
 		super(new GridBagLayout());
 
 		this.context = context;
 
-		switch (alignment) {
-			case HORIZONTAL:
-				add(evaluationModeSlider,	new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-				add(evaluationModeLabel,	new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
-				break;
-			case VERTICAL:
-				add(evaluationModeSlider,	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
-				add(evaluationModeLabel,	new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(3, 5, 10, 5), 0, 0));
-				break;
-			default:
-				throw new UnsupportedOperationException("Unsupported alignment: " + alignment);
-		}
+		add(evaluationModeSlider,	new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, WEST, HORIZONTAL, DEFAULT_INSETS, 0, 0));
+		add(evaluationModeLabel,	new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, WEST, NONE, DEFAULT_INSETS, 0, 0));
 
 		evaluationModeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+		setPreferredEvaluationModeLabelSize();
 
 		updateControls();
 
 		evaluationModeSlider.addChangeListener(e -> onTypingChangedBySlider());
+	}
+
+	private void setPreferredEvaluationModeLabelSize() {
+		String oldText = evaluationModeLabel.getText();
+		Dimension maxPreferredSize = new Dimension(0, 0);
+		for (EvaluationMode evaluationMode : EvaluationMode.values()) {
+			evaluationModeLabel.setText(EVALUATION_MODE_TEXTS.get(evaluationMode));
+			Dimension preferredSize = evaluationModeLabel.getPreferredSize();
+			maxPreferredSize = new Dimension(Math.max(maxPreferredSize.width, preferredSize.width + 20), Math.max(maxPreferredSize.height, preferredSize.height));
+		}
+		evaluationModeLabel.setText(oldText);
+		evaluationModeLabel.setPreferredSize(maxPreferredSize);
 	}
 
 	private EvaluationMode getEvaluationMode() {
@@ -122,6 +127,4 @@ class EvaluationModePanel extends JPanel
 		evaluationModeLabel.setText(evaluationModeText);
 		evaluationModeLabel.setToolTipText(evaluationModeInfoText);
 	}
-
-	enum Alignment {HORIZONTAL, VERTICAL}
 }

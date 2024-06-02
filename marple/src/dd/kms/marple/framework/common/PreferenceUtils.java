@@ -14,6 +14,7 @@ import dd.kms.marple.framework.common.XmlUtils.ParseException;
 import dd.kms.zenodot.api.common.AccessModifier;
 import dd.kms.zenodot.api.settings.EvaluationMode;
 import dd.kms.zenodot.api.settings.ParserSettings;
+import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -108,7 +109,7 @@ public class PreferenceUtils
 		ExpressionEvaluator evaluator = settings.getEvaluator();
 		CustomActionSettings customActionSettings = settings.getCustomActionSettings();
 		writeEvaluationMode(root, evaluator);
-		writeMinimumAccessModifier(root, evaluator);
+		writeMinimumAccessModifiers(root, evaluator);
 		writeImportedPackages(root, evaluator);
 		writeImportedClasses(root, evaluator);
 		writeCustomActions(root, customActionSettings);
@@ -124,7 +125,7 @@ public class PreferenceUtils
 		ExpressionEvaluator evaluator = settings.getEvaluator();
 		CustomActionSettings customActionSettings = settings.getCustomActionSettings();
 		readEvaluationMode(root, evaluator);
-		readMinimumAccessModifier(root, evaluator);
+		readMinimumAccessModifiers(root, evaluator);
 		readImportedPackages(root, evaluator);
 		readImportedClasses(root, evaluator);
 		readCustomActions(root, customActionSettings);
@@ -153,17 +154,36 @@ public class PreferenceUtils
 		}
 	}
 
-	private static void writeMinimumAccessModifier(Element root, ExpressionEvaluator evaluator) {
-		AccessModifier minimumAccessModifier = evaluator.getParserSettings().getMinimumAccessModifier();
-		XmlUtils.writeValueToChild(root, "MinimumAccessModifier", minimumAccessModifier, ACCESS_MODIFIER_STRING_REPRESENTATIONS::get);
+	private static void writeMinimumAccessModifiers(Element root, ExpressionEvaluator evaluator) {
+		AccessModifier minimumFieldAccessModifier = evaluator.getParserSettings().getMinimumFieldAccessModifier();
+		AccessModifier minimumMethodAccessModifier = evaluator.getParserSettings().getMinimumMethodAccessModifier();
+		XmlUtils.writeValueToChild(root, "MinimumFieldAccessModifier", minimumFieldAccessModifier, ACCESS_MODIFIER_STRING_REPRESENTATIONS::get);
+		XmlUtils.writeValueToChild(root, "MinimumMethodAccessModifier", minimumMethodAccessModifier, ACCESS_MODIFIER_STRING_REPRESENTATIONS::get);
 	}
 
-	private static void readMinimumAccessModifier(Element root, ExpressionEvaluator evaluator) throws ParseException {
+	private static void readMinimumAccessModifiers(Element root, ExpressionEvaluator evaluator) throws ParseException {
+		ParserSettingsBuilder parserSettingsBuilder = evaluator.getParserSettings().builder();
+
+		AccessModifier minimumFieldAccessModifier = XmlUtils.readValueFromChild(root, "MinimumFieldAccessModifier", ACCESS_MODIFIER_STRING_REPRESENTATIONS.inverse()::get);
+		if (minimumFieldAccessModifier != null) {
+			parserSettingsBuilder.minimumFieldAccessModifier(minimumFieldAccessModifier);
+		}
+
+		AccessModifier minimumMethodAccessModifier = XmlUtils.readValueFromChild(root, "MinimumMethodAccessModifier", ACCESS_MODIFIER_STRING_REPRESENTATIONS.inverse()::get);
+		if (minimumMethodAccessModifier != null) {
+			parserSettingsBuilder.minimumMethodAccessModifier(minimumMethodAccessModifier);
+		}
+
+
 		AccessModifier minimumAccessModifier = XmlUtils.readValueFromChild(root, "MinimumAccessModifier", ACCESS_MODIFIER_STRING_REPRESENTATIONS.inverse()::get);
 		if (minimumAccessModifier != null) {
-			ParserSettings parserSettings = evaluator.getParserSettings().builder().minimumAccessModifier(minimumAccessModifier).build();
-			evaluator.setParserSettings(parserSettings);
+			// old serialization
+			parserSettingsBuilder
+				.minimumFieldAccessModifier(minimumAccessModifier)
+				.minimumMethodAccessModifier(minimumAccessModifier);
 		}
+		ParserSettings parserSettings = parserSettingsBuilder.build();
+		evaluator.setParserSettings(parserSettings);
 	}
 
 	private static void writeImportedPackages(Element root, ExpressionEvaluator evaluator) {

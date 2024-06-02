@@ -27,7 +27,7 @@ public class EvaluationPanel extends JPanel implements Disposable
 
 		this.evaluationTextField = new ExpressionInputTextField(context);
 		this.evaluationTextFieldPanel = new EvaluationTextFieldPanel(evaluationTextField, context);
-		this.evaluationModePanel = new EvaluationModePanel(context, EvaluationModePanel.Alignment.HORIZONTAL);
+		this.evaluationModePanel = new EvaluationModePanel(context);
 		this.resultPanel = new ResultPanel(context);
 
 		add(expressionPanel,	new GridBagConstraints(0, 0, REMAINDER, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(0, 0, 5, 0), 0, 0));

@@ -9,7 +9,8 @@ import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
 
 class MinimumAccessModifierControls
 {
-	private final AccessModifierInput	minimumAccessModifierInput	= new AccessModifierInput();
+	private final AccessModifierInput	minimumFieldAccessModifierInput		= new AccessModifierInput();
+	private final AccessModifierInput	minimumMethodAccessModifierInput	= new AccessModifierInput();
 
 	private final InspectionContext		context;
 
@@ -18,26 +19,44 @@ class MinimumAccessModifierControls
 
 		updateControls();
 
-		minimumAccessModifierInput.addChangeListener(e -> onMinimumAccessModifierChanged());
+		minimumFieldAccessModifierInput.addChangeListener(e -> onMinimumFieldAccessModifierChanged());
+		minimumMethodAccessModifierInput.addChangeListener(e -> onMinimumMethodAccessModifierChanged());
 	}
 
 	void updateControls() {
-		minimumAccessModifierInput.setAccessModifier(getMinimumAccessModifier());
+		minimumFieldAccessModifierInput.setAccessModifier(getMinimumFieldAccessModifier());
+		minimumMethodAccessModifierInput.setAccessModifier(getMinimumMethodAccessModifier());
 	}
 
-	AccessModifierInput getInput() {
-		return minimumAccessModifierInput;
+	AccessModifierInput getMinimumFieldAccessModifierInput() {
+		return minimumFieldAccessModifierInput;
 	}
 
-	private AccessModifier getMinimumAccessModifier() {
-		return ExpressionEvaluators.getValue(ParserSettings::getMinimumAccessModifier, context);
+	AccessModifierInput getMinimumMethodAccessModifierInput() {
+		return minimumMethodAccessModifierInput;
 	}
 
-	private void setMinimumAccessModifier(AccessModifier minimumAccessModifier) {
-		ExpressionEvaluators.setValue(minimumAccessModifier, ParserSettingsBuilder::minimumAccessModifier, context);
+	private AccessModifier getMinimumFieldAccessModifier() {
+		return ExpressionEvaluators.getValue(ParserSettings::getMinimumFieldAccessModifier, context);
 	}
 
-	private void onMinimumAccessModifierChanged() {
-		setMinimumAccessModifier(minimumAccessModifierInput.getAccessModifier());
+	private AccessModifier getMinimumMethodAccessModifier() {
+		return ExpressionEvaluators.getValue(ParserSettings::getMinimumMethodAccessModifier, context);
+	}
+
+	private void setMinimumFieldAccessModifier(AccessModifier minimumFieldAccessModifier) {
+		ExpressionEvaluators.setValue(minimumFieldAccessModifier, ParserSettingsBuilder::minimumFieldAccessModifier, context);
+	}
+
+	private void setMinimumMethodAccessModifier(AccessModifier minimumMethodAccessModifier) {
+		ExpressionEvaluators.setValue(minimumMethodAccessModifier, ParserSettingsBuilder::minimumMethodAccessModifier, context);
+	}
+
+	private void onMinimumFieldAccessModifierChanged() {
+		setMinimumFieldAccessModifier(minimumFieldAccessModifierInput.getAccessModifier());
+	}
+
+	private void onMinimumMethodAccessModifierChanged() {
+		setMinimumMethodAccessModifier(minimumMethodAccessModifierInput.getAccessModifier());
 	}
 }
