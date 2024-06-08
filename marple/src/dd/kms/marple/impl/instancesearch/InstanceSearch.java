@@ -10,6 +10,7 @@ import dd.kms.marple.impl.instancesearch.elementcollectors.CollectionElementColl
 import dd.kms.marple.impl.instancesearch.elementcollectors.MapElementCollector;
 import dd.kms.marple.impl.instancesearch.elementcollectors.MultimapElementCollector;
 import dd.kms.marple.impl.instancesearch.settings.SearchSettings;
+import dd.kms.zenodot.api.common.AccessDeniedException;
 import dd.kms.zenodot.api.common.FieldScannerBuilder;
 import dd.kms.zenodot.api.common.GeneralizedField;
 import dd.kms.zenodot.api.common.StaticMode;
@@ -146,7 +147,7 @@ class InstanceSearch
 					child = new InstancePath(field.get(object), "." + fieldName, parent);
 				}
 				children.add(child);
-			} catch (IllegalAccessException ignored) {
+			} catch (AccessDeniedException | IllegalAccessException ignored) {
 				/* we only discover what can be discovered */
 			}
 		}

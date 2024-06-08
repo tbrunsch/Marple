@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.primitives.Primitives;
+import dd.kms.zenodot.api.common.AccessDeniedException;
 import dd.kms.zenodot.api.common.FieldScannerBuilder;
 import dd.kms.zenodot.api.common.GeneralizedField;
 import dd.kms.zenodot.api.common.StaticMode;
@@ -12,7 +13,8 @@ import java.util.*;
 
 public class ReflectionUtils
 {
-	private static final int				MAX_NUM_ITERABLE_ELEMENTS_TO_CONSIDER	= 1000;
+	public static final Object	NOT_ACCESSIBLE							= "Access denied";
+	private static final int	MAX_NUM_ITERABLE_ELEMENTS_TO_CONSIDER	= 1000;
 
 	/**
 	 * We consider an object worth being inspected if it is
@@ -77,13 +79,15 @@ public class ReflectionUtils
 		return result;
 	}
 
+	/**
+	 * @return The value of the field or {@link #NOT_ACCESSIBLE} if the field is not accessible.
+	 */
 	public static Object getFieldValue(GeneralizedField field, Object object) {
 		try {
 			field.setAccessible(true);
 			return field.get(object);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			return NOT_ACCESSIBLE;
 		}
 	}
 
@@ -108,7 +112,7 @@ public class ReflectionUtils
 				if (fieldValues.contains(fieldValue)) {
 					fieldsByValue.put(fieldValue, field);
 				}
-			} catch (IllegalAccessException e) {
+			} catch (AccessDeniedException | IllegalAccessException e) {
 				/* do nothing */
 			}
 		}
