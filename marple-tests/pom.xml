@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>dd.kms.zenodot</groupId>
 			<artifactId>custom-hierarchy-parser</artifactId>
-			<version>0.4-SNAPSHOT</version>
+			<version>0.4.0</version>
 		</dependency>
 	</dependencies>
 

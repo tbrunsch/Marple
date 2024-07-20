@@ -25,7 +25,7 @@
 		<dependency>
             <groupId>dd.kms.zenodot</groupId>
             <artifactId>directory-completions</artifactId>
-            <version>0.4-SNAPSHOT</version>
+            <version>0.4.0</version>
         </dependency>
     </dependencies>
 </project>
