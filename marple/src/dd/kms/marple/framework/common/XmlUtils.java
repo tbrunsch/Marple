@@ -34,11 +34,16 @@ public class XmlUtils
 	}
 
 	public static Element getUniqueChild(Element node, String childName) throws ParseException {
-		List<Element> childElements = getChildElements(node, childName);
-		if (childElements.size() == 1) {
-			return childElements.get(0);
+		Element uniqueChild = getUniqueChildOrNull(node, childName);
+		if (uniqueChild == null) {
+			throw new ParseException(node.getNodeName() + " does not have a unique child '" + childName + "'");
 		}
-		throw new ParseException(node.getNodeName() + " does not have a unique child '" + childName + "'");
+		return uniqueChild;
+	}
+
+	public static Element getUniqueChildOrNull(Element node, String childName) {
+		List<Element> childElements = getChildElements(node, childName);
+		return childElements.size() == 1 ? childElements.get(0) : null;
 	}
 
 	public static <T> void writeValueToChild(Element node, String childName, T value, Formatter<T> formatter) {
@@ -54,6 +59,20 @@ public class XmlUtils
 		String stringRepresentation = child.getTextContent();
 		stringRepresentation = stringRepresentation.trim();
 		return parser.parse(stringRepresentation);
+	}
+
+	public static <T> T readValueFromChildOrNull(Element node, String childName, Parser<T> parser) {
+		Element child = getUniqueChildOrNull(node, childName);
+		if (child == null) {
+			return null;
+		}
+		String stringRepresentation = child.getTextContent();
+		stringRepresentation = stringRepresentation.trim();
+		try {
+			return parser.parse(stringRepresentation);
+		} catch (ParseException e) {
+			return null;
+		}
 	}
 
 	public static <T extends Enum<T>> void writeEnumAttribute(Element node, T value) {
@@ -75,6 +94,20 @@ public class XmlUtils
 		throw new ParseException("Unknown enum value '" + enumClass.getSimpleName() + "." + valueName + "'");
 	}
 
+	public static <T extends Enum<T>> T readEnumAttributeOrNull(Element node, Class<T> enumClass) {
+		String valueName = node.getAttribute("value");
+		if (valueName == null) {
+			return null;
+		}
+		T[] enumConstants = enumClass.getEnumConstants();
+		for (T enumConstant : enumConstants) {
+			if (Objects.equals(enumConstant.name(), valueName)) {
+				return enumConstant;
+			}
+		}
+		return null;
+	}
+
 	public static <T> void writeList(Element root, String listNodeName, String listElementName, Collection<T> list, StructWriter<T> elementWriter) {
 		Element listNode = createChildElement(root, listNodeName);
 		for (T element : list) {
@@ -89,6 +122,25 @@ public class XmlUtils
 		List<T> list = new ArrayList<>(childNodes.size());
 		for (Element childNode : childNodes) {
 			T element = elementReader.readStruct(childNode);
+			list.add(element);
+		}
+		return list;
+	}
+
+	public static <T> List<T> readListOrNull(Element root, String listNodeName, String listElementName, StructReader<T> elementReader) {
+		Element listNode = getUniqueChildOrNull(root, listNodeName);
+		if (listNode == null) {
+			return null;
+		}
+		List<Element> childNodes = getChildElements(listNode, listElementName);
+		List<T> list = new ArrayList<>(childNodes.size());
+		for (Element childNode : childNodes) {
+			T element;
+			try {
+				element = elementReader.readStruct(childNode);
+			} catch (ParseException e) {
+				return null;
+			}
 			list.add(element);
 		}
 		return list;
@@ -138,7 +190,7 @@ public class XmlUtils
 
 	public static class ParseException extends IOException
 	{
-		ParseException(String message) {
+		public ParseException(String message) {
 			super(message);
 		}
 	}
