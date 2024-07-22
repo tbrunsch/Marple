@@ -89,7 +89,18 @@ public class PreferenceUtils
 			readSettings(root, context);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			/* nothing we can do */
+		} finally {
+			EvaluationSettings evaluationSettings = settings.getEvaluationSettings();
+			Collection<AdditionalEvaluationSettings> additionalSettings = evaluationSettings.getAdditionalSettings().values();
+			for (AdditionalEvaluationSettings additionalEvalSettings : additionalSettings) {
+				additionalEvalSettings.applySettings(context);
+			}
 		}
+
+	}
+
+	public static void logParseExceptionAsWarning(ParseException parseException) {
+		System.out.println("Warning while reading Marple preferences: " + parseException.getMessage());
 	}
 
 	private static boolean checkPreferenceFile(Path preferencesFile, boolean fileMustExist) {
@@ -116,10 +127,15 @@ public class PreferenceUtils
 		writeAdditionalEvaluationSettings(root, settings.getEvaluationSettings().getAdditionalSettings());
 	}
 
-	private static void readSettings(Element root, InspectionContext context) throws ParseException {
-		int majorVersion = XmlUtils.readValueFromChild(root, "MajorVersion", XmlUtils::parseInt);
+	private static void readSettings(Element root, InspectionContext context) {
+		Integer majorVersion = XmlUtils.readValueFromChildOrNull(root, "MajorVersion", XmlUtils::parseInt);
+		if (majorVersion == null) {
+			logParseExceptionAsWarning(new ParseException("Cannot read major version"));
+			return;
+		}
 		if (majorVersion != 1) {
-			throw new ParseException("Major version " + majorVersion + " of settings file is not supported");
+			logParseExceptionAsWarning(new ParseException("Major version " + majorVersion + " of settings file is not supported"));
+			return;
 		}
 		InspectionSettings settings = context.getSettings();
 		ExpressionEvaluator evaluator = settings.getEvaluator();
@@ -132,13 +148,7 @@ public class PreferenceUtils
 
 		EvaluationSettings evaluationSettings = settings.getEvaluationSettings();
 		Collection<AdditionalEvaluationSettings> additionalSettings = evaluationSettings.getAdditionalSettings().values();
-		try {
-			readAdditionalEvaluationSettings(root, additionalSettings);
-		} finally {
-			for (AdditionalEvaluationSettings additionalEvalSettings : additionalSettings) {
-				additionalEvalSettings.applySettings(context);
-			}
-		}
+		readAdditionalEvaluationSettings(root, additionalSettings);
 	}
 
 	private static void writeEvaluationMode(Element root, ExpressionEvaluator evaluator) {
@@ -146,42 +156,44 @@ public class PreferenceUtils
 		XmlUtils.writeValueToChild(root, "EvaluationMode", evaluationMode, EVALUATION_MODE_STRING_REPRESENTATIONS::get);
 	}
 
-	private static void readEvaluationMode(Element root, ExpressionEvaluator evaluator) throws ParseException {
-		EvaluationMode evaluationMode = XmlUtils.readValueFromChild(root, "EvaluationMode", EVALUATION_MODE_STRING_REPRESENTATIONS.inverse()::get);
-		if (evaluationMode != null) {
-			ParserSettings parserSettings = evaluator.getParserSettings().builder().evaluationMode(evaluationMode).build();
-			evaluator.setParserSettings(parserSettings);
+	private static void readEvaluationMode(Element root, ExpressionEvaluator evaluator) {
+		EvaluationMode evaluationMode = XmlUtils.readValueFromChildOrNull(root, "EvaluationMode", EVALUATION_MODE_STRING_REPRESENTATIONS.inverse()::get);
+		if (evaluationMode == null) {
+			logParseExceptionAsWarning(new ParseException("Cannot read evaluation mode"));
+			return;
 		}
+		ParserSettings parserSettings = evaluator.getParserSettings().builder().evaluationMode(evaluationMode).build();
+		evaluator.setParserSettings(parserSettings);
 	}
 
 	private static void writeMinimumAccessModifiers(Element root, ExpressionEvaluator evaluator) {
 		AccessModifier minimumFieldAccessModifier = evaluator.getParserSettings().getMinimumFieldAccessModifier();
 		AccessModifier minimumMethodAccessModifier = evaluator.getParserSettings().getMinimumMethodAccessModifier();
-		XmlUtils.writeValueToChild(root, "MinimumFieldAccessModifier", minimumFieldAccessModifier, ACCESS_MODIFIER_STRING_REPRESENTATIONS::get);
+		XmlUtils.writeValueToChild(root, "MinimumAccessModifier", minimumFieldAccessModifier, ACCESS_MODIFIER_STRING_REPRESENTATIONS::get);
 		XmlUtils.writeValueToChild(root, "MinimumMethodAccessModifier", minimumMethodAccessModifier, ACCESS_MODIFIER_STRING_REPRESENTATIONS::get);
 	}
 
-	private static void readMinimumAccessModifiers(Element root, ExpressionEvaluator evaluator) throws ParseException {
+	private static void readMinimumAccessModifiers(Element root, ExpressionEvaluator evaluator) {
 		ParserSettingsBuilder parserSettingsBuilder = evaluator.getParserSettings().builder();
 
-		AccessModifier minimumFieldAccessModifier = XmlUtils.readValueFromChild(root, "MinimumFieldAccessModifier", ACCESS_MODIFIER_STRING_REPRESENTATIONS.inverse()::get);
-		if (minimumFieldAccessModifier != null) {
-			parserSettingsBuilder.minimumFieldAccessModifier(minimumFieldAccessModifier);
+		AccessModifier minimumAccessModifier = XmlUtils.readValueFromChildOrNull(root, "MinimumAccessModifier", ACCESS_MODIFIER_STRING_REPRESENTATIONS.inverse()::get);
+		if (minimumAccessModifier == null) {
+			logParseExceptionAsWarning(new ParseException("Cannot read minimum access modifier"));
+		} else {
+			/*
+			 * In older versions, "MinimumAccessModifier" represented both, the
+			 * minimum access modifier for fields and for methods.
+			 */
+			parserSettingsBuilder.minimumFieldAccessModifier(minimumAccessModifier);
+			parserSettingsBuilder.minimumMethodAccessModifier(minimumAccessModifier);
 		}
 
-		AccessModifier minimumMethodAccessModifier = XmlUtils.readValueFromChild(root, "MinimumMethodAccessModifier", ACCESS_MODIFIER_STRING_REPRESENTATIONS.inverse()::get);
+		// Will be null for old preferences files
+		AccessModifier minimumMethodAccessModifier = XmlUtils.readValueFromChildOrNull(root, "MinimumMethodAccessModifier", ACCESS_MODIFIER_STRING_REPRESENTATIONS.inverse()::get);
 		if (minimumMethodAccessModifier != null) {
 			parserSettingsBuilder.minimumMethodAccessModifier(minimumMethodAccessModifier);
 		}
 
-
-		AccessModifier minimumAccessModifier = XmlUtils.readValueFromChild(root, "MinimumAccessModifier", ACCESS_MODIFIER_STRING_REPRESENTATIONS.inverse()::get);
-		if (minimumAccessModifier != null) {
-			// old serialization
-			parserSettingsBuilder
-				.minimumFieldAccessModifier(minimumAccessModifier)
-				.minimumMethodAccessModifier(minimumAccessModifier);
-		}
 		ParserSettings parserSettings = parserSettingsBuilder.build();
 		evaluator.setParserSettings(parserSettings);
 	}
@@ -191,8 +203,15 @@ public class PreferenceUtils
 		XmlUtils.writeList(root, "ImportedPackages", "Package", importedPackages, Node::setTextContent);
 	}
 
-	private static void readImportedPackages(Element root, ExpressionEvaluator evaluator) throws ParseException {
-		Set<String> importedPackages = new LinkedHashSet<>(XmlUtils.readList(root, "ImportedPackages", "Package", Node::getTextContent));
+	private static void readImportedPackages(Element root, ExpressionEvaluator evaluator) {
+		List<String> importedPackagesList = XmlUtils.readListOrNull(root, "ImportedPackages", "Package", Node::getTextContent);
+		Set<String> importedPackages = new LinkedHashSet<>();
+		if (importedPackagesList == null) {
+			logParseExceptionAsWarning(new ParseException("Cannot read imported packages"));
+		} else {
+			importedPackages.addAll(importedPackagesList);
+		}
+
 		ParserSettings oldParserSettings = evaluator.getParserSettings();
 
 		// combine stored and old imported packages
@@ -208,17 +227,22 @@ public class PreferenceUtils
 		XmlUtils.writeList(root, "ImportedClasses", "Class", importedClassNames, Node::setTextContent);
 	}
 
-	private static void readImportedClasses(Element root, ExpressionEvaluator evaluator) throws ParseException {
-		List<String> importedClassNames = XmlUtils.readList(root, "ImportedClasses", "Class", Node::getTextContent);
-		Set<Class<?>> importedClasses = new LinkedHashSet<>(importedClassNames.size());
-		for (String importedClassName : importedClassNames) {
-			try {
-				Class<?> importedClass = Class.forName(importedClassName);
-				importedClasses.add(importedClass);
-			} catch (ClassNotFoundException e) {
-				/* skip */
+	private static void readImportedClasses(Element root, ExpressionEvaluator evaluator) {
+		List<String> importedClassNames = XmlUtils.readListOrNull(root, "ImportedClasses", "Class", Node::getTextContent);
+		Set<Class<?>> importedClasses = new LinkedHashSet<>();
+		if (importedClassNames == null) {
+			logParseExceptionAsWarning(new ParseException("Cannot read imported class names"));
+		} else {
+			for (String importedClassName : importedClassNames) {
+				try {
+					Class<?> importedClass = Class.forName(importedClassName);
+					importedClasses.add(importedClass);
+				} catch (ClassNotFoundException e) {
+					/* skip */
+				}
 			}
 		}
+
 		ParserSettings oldParserSettings = evaluator.getParserSettings();
 
 		// combine stored and old imported classes
@@ -233,9 +257,13 @@ public class PreferenceUtils
 		XmlUtils.writeList(root, "CustomActions", "Action", customActions, PreferenceUtils::writeCustomAction);
 	}
 
-	private static void readCustomActions(Element root, CustomActionSettings customActionSettings) throws ParseException {
-		List<CustomAction> customActions = XmlUtils.readList(root, "CustomActions", "Action", PreferenceUtils::readCustomAction);
-		customActionSettings.setCustomActions(customActions);
+	private static void readCustomActions(Element root, CustomActionSettings customActionSettings) {
+		List<CustomAction> customActions = XmlUtils.readListOrNull(root, "CustomActions", "Action", PreferenceUtils::readCustomAction);
+		if (customActions == null) {
+			logParseExceptionAsWarning(new ParseException("Cannot read custom actions"));
+		} else {
+			customActionSettings.setCustomActions(customActions);
+		}
 	}
 
 	private static void writeCustomAction(Element node, CustomAction customAction) {
@@ -295,11 +323,9 @@ public class PreferenceUtils
 		}
 	}
 
-	private static void readAdditionalEvaluationSettings(Element root, Collection<AdditionalEvaluationSettings> additionalEvaluationSettings) throws ParseException {
-		Element additionalEvaluationSettingsElement;
-		try {
-			additionalEvaluationSettingsElement = XmlUtils.getUniqueChild(root, "AdditionalEvaluationSettings");
-		} catch (ParseException e) {
+	private static void readAdditionalEvaluationSettings(Element root, Collection<AdditionalEvaluationSettings> additionalEvaluationSettings) {
+		Element additionalEvaluationSettingsElement = XmlUtils.getUniqueChildOrNull(root, "AdditionalEvaluationSettings");
+		if (additionalEvaluationSettingsElement == null) {
 			// no settings stored
 			return;
 		}
@@ -308,19 +334,17 @@ public class PreferenceUtils
 			if (childName == null) {
 				continue;
 			}
-			Element settingsElement;
-			try {
-				settingsElement = XmlUtils.getUniqueChild(additionalEvaluationSettingsElement, childName);
-			} catch (ParseException e) {
+			Element settingsElement = XmlUtils.getUniqueChildOrNull(additionalEvaluationSettingsElement, childName);
+			if (settingsElement == null) {
 				// no settings stored
 				continue;
 			}
 			try {
 				additionalEvalSettings.readSettings(settingsElement);
 			} catch (ParseException e) {
-				throw e;
+				logParseExceptionAsWarning(e);
 			} catch (IOException e) {
-				throw new ParseException(e.getMessage());
+				logParseExceptionAsWarning(new ParseException(e.getMessage()));
 			}
 		}
 	}

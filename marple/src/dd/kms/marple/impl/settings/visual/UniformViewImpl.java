@@ -116,7 +116,10 @@ class UniformViewImpl implements UniformView {
 			if (considerOnlyPreferredViews && !view.isPreferredView()){
 				continue;
 			}
-			return view.getView(object) != null;
+			Object objectView = view.getView(object);
+			if (objectView != null) {
+				return true;
+			}
 		}
 		return false;
 	}
