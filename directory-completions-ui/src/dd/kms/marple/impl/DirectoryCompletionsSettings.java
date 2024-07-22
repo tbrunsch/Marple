@@ -6,6 +6,7 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.settings.evaluation.AdditionalEvaluationSettings;
 import dd.kms.marple.api.settings.evaluation.EvaluationSettingsBuilder;
+import dd.kms.marple.framework.common.PreferenceUtils;
 import dd.kms.marple.framework.common.XmlUtils;
 import dd.kms.marple.framework.common.XmlUtils.ParseException;
 import dd.kms.zenodot.api.DirectoryCompletionExtension;
@@ -107,19 +108,33 @@ public class DirectoryCompletionsSettings implements AdditionalEvaluationSetting
 	}
 
 	@Override
-	public void readSettings(Element settingsElement) throws ParseException {
-		List<CompletionTarget> completionTargets = XmlUtils.readList(settingsElement, "CompletionTargets", "CompletionTarget", node -> XmlUtils.readEnumAttribute(node, CompletionTarget.class));
-		setCompletionTargets(completionTargets);
+	public void readSettings(Element settingsElement) {
+		List<CompletionTarget> completionTargets = XmlUtils.readListOrNull(settingsElement, "CompletionTargets", "CompletionTarget", node -> XmlUtils.readEnumAttribute(node, CompletionTarget.class));
+		if (completionTargets == null) {
+			PreferenceUtils.logParseExceptionAsWarning(new ParseException("Directory completions: Cannot read completion targets"));
+		} else {
+			setCompletionTargets(completionTargets);
+		}
 
-		List<String> favoritePaths = XmlUtils.readList(settingsElement, "FavoritePaths", "Path", Node::getTextContent);
-		setFavoritePaths(favoritePaths);
+		List<String> favoritePaths = XmlUtils.readListOrNull(settingsElement, "FavoritePaths", "Path", Node::getTextContent);
+		if (favoritePaths == null) {
+			PreferenceUtils.logParseExceptionAsWarning(new ParseException("Directory completions: Cannot read favorite paths"));
+		} else {
+			setFavoritePaths(favoritePaths);
+		}
 
-		List<String> favoriteUris = XmlUtils.readList(settingsElement, "FavoriteUris", "Uri", Node::getTextContent);
-		setFavoriteUris(favoriteUris);
+		List<String> favoriteUris = XmlUtils.readListOrNull(settingsElement, "FavoriteUris", "Uri", Node::getTextContent);
+		if (favoriteUris == null) {
+			PreferenceUtils.logParseExceptionAsWarning(new ParseException("Directory completions: Cannot read favorite URIs"));
+		} else {
+			setFavoriteUris(favoriteUris);
+		}
 
-		Element fileSystemAccessElement = XmlUtils.getUniqueChild(settingsElement, "FileSystemAccess");
-		boolean cacheFileSystemAccess = Boolean.parseBoolean(fileSystemAccessElement.getAttribute("cache"));
-		setCacheFileSystemAccess(cacheFileSystemAccess);
+		Element fileSystemAccessElement = XmlUtils.getUniqueChildOrNull(settingsElement, "FileSystemAccess");
+		if (fileSystemAccessElement != null) {
+			boolean cacheFileSystemAccess = Boolean.parseBoolean(fileSystemAccessElement.getAttribute("cache"));
+			setCacheFileSystemAccess(cacheFileSystemAccess);
+		}
 
 		long cacheTimeMs;
 		try {
