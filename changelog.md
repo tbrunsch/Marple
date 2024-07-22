@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.5
+## v0.5.0
 
   - switched to Zenodot 0.4 (support for parser extensions, code completions for inner classes)
   - applying code completions for non-imported classes imports these classes temporarily instead of inserting the fully qualified class name
@@ -16,7 +16,7 @@ Behavioral changes:
   - The "Inspect Object" and "Inspect Component" actions are not always the default action (the action that is performed when clicking onto a navigable element) anymore, but only in the "Inspection Dialog". In the "Evaluation Dialog", the "Evaluate Expression" action is now the default action.
   - When choosing the "Evaluate Expression" action, then the evaluation dialog is not only opened with the expression as context, but the expression is now also evaluated automatically.
 
-## v0.4
+## v0.4.0
 
   - switched to Zenodot 0.3 (lambda support, new evaluation mode "mixed typing" that is similar to dynamic typing, but without side effects, accessing the field "length" of arrays)
   - made new evaluation mode "mixed typing" the default evaluation mode
