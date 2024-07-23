@@ -53,7 +53,8 @@ public class PreferenceUtils
 		AccessModifier.PUBLIC,			"Public"
 	);
 
-	public static void writeSettings(InspectionSettings settings) {
+	public static void writeSettings(InspectionContext context) {
+		InspectionSettings settings = context.getSettings();
 		Path preferencesFile = settings.getPreferencesFile();
 		if (!checkPreferenceFile(preferencesFile, false)) {
 			return;

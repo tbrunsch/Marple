@@ -127,7 +127,7 @@ public class CustomActionsPanel extends JPanel implements Disposable
 
 	private void onTableContentChanged() {
 		customActionSettings.setCustomActions(customActions);
-		PreferenceUtils.writeSettings(context.getSettings());
+		PreferenceUtils.writeSettings(context);
 	}
 
 	private Class<?> getRequiredClass(int row) {

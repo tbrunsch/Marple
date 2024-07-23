@@ -20,7 +20,7 @@ public class ExpressionEvaluators
 		valueSetter.accept(builder, value);
 		ParserSettings parserSettings = builder.build();
 		evaluator.setParserSettings(parserSettings);
-		PreferenceUtils.writeSettings(context.getSettings());
+		PreferenceUtils.writeSettings(context);
 	}
 
 	public static <T> T getValue(Function<ParserSettings, T> valueGetter, InspectionContext context) {
