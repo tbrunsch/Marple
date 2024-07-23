@@ -15,6 +15,7 @@ Behavioral changes:
   - Marple does not inherently provide `List` views for Apache primitive lists anymore because they can now be specified by the API user if required.
   - The "Inspect Object" and "Inspect Component" actions are not always the default action (the action that is performed when clicking onto a navigable element) anymore, but only in the "Inspection Dialog". In the "Evaluation Dialog", the "Evaluate Expression" action is now the default action.
   - When choosing the "Evaluate Expression" action, then the evaluation dialog is not only opened with the expression as context, but the expression is now also evaluated automatically.
+  - Marple does not store its preferences in the specified preferences file anymore, but in a similar file. The reason is that different Marple versions that use different preferences file formats must write into different preferences files.
 
 API changes:
 

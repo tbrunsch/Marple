@@ -2,6 +2,7 @@ package dd.kms.marple.framework.common;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.settings.InspectionSettings;
@@ -40,6 +41,24 @@ import java.util.stream.Collectors;
 
 public class PreferenceUtils
 {
+	/**
+	 * Different versions of Marple that use a different preferences file syntax must use different
+	 * preferences files. Otherwise, the older Marple version could destroy the preferences of a
+	 * newer Marple version because it cannot parse everything and, thus, overwrites the preferences
+	 * file with a format that contains less information.<br>
+	 * <br>
+	 * As a consequence, we do not use the preference file specified by the user directly anymore,
+	 * but append a suffix representing the Marple version that introduced the format syntax we are
+	 * currently writing.<br>
+	 * <br>
+	 * When reading preferences and this file does not exist, then we try to find a preferences file
+	 * of an older version. New Marple versions must be able to read old preferences files.<br>
+	 * <br>
+	 * This field specifies in which order these files are considered. Whenever the preferences file
+	 * format changes, a new suffix must be <b>prepended</b> to this list.
+	 */
+	private static final List<String>	PREFERENCE_FILE_SUFFIX_HISTORY	= ImmutableList.of("_0.5.0", "");
+
 	private static final BiMap<EvaluationMode, String>	EVALUATION_MODE_STRING_REPRESENTATIONS	= ImmutableBiMap.of(
 		EvaluationMode.STATIC_TYPING, 	"Static typing",
 		EvaluationMode.DYNAMIC_TYPING,	"Dynamic typing",
@@ -56,10 +75,11 @@ public class PreferenceUtils
 	public static void writeSettings(InspectionContext context) {
 		InspectionSettings settings = context.getSettings();
 		Path preferencesFile = settings.getPreferencesFile();
-		if (!checkPreferenceFile(preferencesFile, false)) {
+		Path preferencesFileToWrite = determinePreferencesFileToWrite(preferencesFile);
+		if (preferencesFileToWrite == null) {
 			return;
 		}
-		try (OutputStream stream = Files.newOutputStream(preferencesFile)) {
+		try (OutputStream stream = Files.newOutputStream(preferencesFileToWrite)) {
 			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			Document document = builder.newDocument();
 			Element root = document.createElement("Settings");
@@ -80,10 +100,11 @@ public class PreferenceUtils
 	public static void readSettings(InspectionContext context) {
 		InspectionSettings settings = context.getSettings();
 		Path preferencesFile = settings.getPreferencesFile();
-		if (!checkPreferenceFile(preferencesFile, true)) {
+		Path preferencesFileToRead = determinePreferencesFileToRead(preferencesFile);
+		if (preferencesFileToRead == null) {
 			return;
 		}
-		try (InputStream stream = Files.newInputStream(preferencesFile)) {
+		try (InputStream stream = Files.newInputStream(preferencesFileToRead)) {
 			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			Document document = builder.parse(stream);
 			Element root = document.getDocumentElement();
@@ -102,6 +123,34 @@ public class PreferenceUtils
 
 	public static void logParseExceptionAsWarning(ParseException parseException) {
 		System.out.println("Warning while reading Marple preferences: " + parseException.getMessage());
+	}
+
+	private static Path determinePreferencesFileToWrite(Path preferencesFile) {
+		String currentSuffix = PREFERENCE_FILE_SUFFIX_HISTORY.get(0);
+		Path preferencesFileToWrite = getPreferencesFile(preferencesFile, currentSuffix);
+		return checkPreferenceFile(preferencesFileToWrite, false) ? preferencesFileToWrite : null;
+	}
+
+	private static Path determinePreferencesFileToRead(Path preferencesFile) {
+		for (String suffix : PREFERENCE_FILE_SUFFIX_HISTORY) {
+			Path preferencesFileToRead = getPreferencesFile(preferencesFile, suffix);
+			if (checkPreferenceFile(preferencesFileToRead, true)) {
+				return preferencesFileToRead;
+			}
+		}
+		return null;
+	}
+
+	private static Path getPreferencesFile(Path preferencesFile, String suffix) {
+		if (preferencesFile == null) {
+			return null;
+		}
+		String fileName = preferencesFile.getFileName().toString();
+		int extensionBegin = fileName.lastIndexOf('.');
+		String extension = fileName.substring(extensionBegin);
+		String fileNameKernel = fileName.substring(0, fileName.length() - extension.length());
+		String fileNameWithSuffix = fileNameKernel + suffix + extension;
+		return preferencesFile.resolveSibling(fileNameWithSuffix);
 	}
 
 	private static boolean checkPreferenceFile(Path preferencesFile, boolean fileMustExist) {
