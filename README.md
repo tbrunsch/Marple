@@ -179,7 +179,7 @@ The first call creates an empty builder, while the second call creates a preconf
   * an immutable part that has to be configured by the `InspectionSettingsBuilder` and
   * a mutable part that is intended to be configurable by the user.
 
-The only mutable settings are the [settings for the parser](#parser-settings) that can be configured in the [evaluation settings dialog](#evaluation-settings-1) and the [settings for custom actions](#custom-action-settings) that can be defined in the [custom actions dialog](#custom-actions). If a preferences file has been specified via `InspectionSettingsBuilder.preferencesFile()`, then these settings will also be stored and loaded when the next session is started.
+The only mutable settings are the [settings for the parser](#parser-settings) that can be configured in the [evaluation settings dialog](#evaluation-settings-1) and the [settings for custom actions](#custom-action-settings) that can be defined in the [custom actions dialog](#custom-actions). If a preferences file has been specified via `InspectionSettingsBuilder.preferencesFile()`, then these settings will also be stored and loaded when the next session is started. Note that Marple will use a file with a similar name for storing its preferences and not exactly the specified one because different Marple versions that use different preferences file formats must write into different preferences files.
     
 In the remainder of this section we discuss the different types of settings.
 

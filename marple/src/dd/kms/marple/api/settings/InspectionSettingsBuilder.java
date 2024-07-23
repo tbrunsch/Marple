@@ -20,6 +20,13 @@ public interface InspectionSettingsBuilder
 	InspectionSettingsBuilder customActionSettings(CustomActionSettings customActionSettings);
 	InspectionSettingsBuilder securitySettings(SecuritySettings securitySettings);
 	InspectionSettingsBuilder keySettings(KeySettings keySettings);
+
+	/**
+	 * Specify a file according to which Marple decides where to store its preferences.
+	 * This will be similar to the specified file, but deviate from it since different
+	 * Marple versions that use different preferences file formats must write into
+	 * different files.
+	 */
 	InspectionSettingsBuilder preferencesFile(Path preferencesFile);
 	InspectionSettings build();
 }

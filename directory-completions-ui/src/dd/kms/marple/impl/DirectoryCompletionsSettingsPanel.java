@@ -201,7 +201,7 @@ class DirectoryCompletionsSettingsPanel extends JPanel implements Disposable
 
 		updateEnabilities();
 		settings.applySettings(context);
-		PreferenceUtils.writeSettings(context.getSettings());
+		PreferenceUtils.writeSettings(context);
 	}
 
 	private void updateEnabilities() {

@@ -89,7 +89,7 @@ abstract class AbstractImportPanel<T> extends JPanel
 	void setParserSettings(ParserSettings parserSettings) {
 		InspectionSettings settings = context.getSettings();
 		settings.getEvaluator().setParserSettings(parserSettings);
-		PreferenceUtils.writeSettings(settings);
+		PreferenceUtils.writeSettings(context);
 	}
 
 	/*
