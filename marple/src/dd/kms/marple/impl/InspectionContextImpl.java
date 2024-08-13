@@ -6,15 +6,18 @@ import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.actions.CustomAction;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
+import dd.kms.marple.api.settings.evaluation.AdditionalEvaluationSettings;
+import dd.kms.marple.api.settings.evaluation.EvaluationSettings;
 import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.api.settings.visual.UniformView;
-import dd.kms.marple.impl.actions.*;
 import dd.kms.marple.framework.common.PreferenceUtils;
+import dd.kms.marple.impl.actions.*;
 import dd.kms.marple.impl.evaluator.ExpressionEvaluatorImpl;
 import dd.kms.marple.impl.gui.ComponentHierarchies;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
@@ -25,8 +28,17 @@ public class InspectionContextImpl implements InspectionContext
 	public InspectionContextImpl(InspectionSettings settings) {
 		this.settings = settings;
 		PreferenceUtils.readSettings(this);
+		applySettings();
 		settings.getInspector().setInspectionContext(this);
 		((ExpressionEvaluatorImpl) settings.getEvaluator()).setInspectionContext(this);
+	}
+
+	private void applySettings() {
+		EvaluationSettings evaluationSettings = settings.getEvaluationSettings();
+		Collection<AdditionalEvaluationSettings> additionalSettings = evaluationSettings.getAdditionalSettings().values();
+		for (AdditionalEvaluationSettings additionalEvalSettings : additionalSettings) {
+			additionalEvalSettings.applySettings(this);
+		}
 	}
 
 	@Override
