@@ -111,14 +111,7 @@ public class PreferenceUtils
 			readSettings(root, context);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			/* nothing we can do */
-		} finally {
-			EvaluationSettings evaluationSettings = settings.getEvaluationSettings();
-			Collection<AdditionalEvaluationSettings> additionalSettings = evaluationSettings.getAdditionalSettings().values();
-			for (AdditionalEvaluationSettings additionalEvalSettings : additionalSettings) {
-				additionalEvalSettings.applySettings(context);
-			}
 		}
-
 	}
 
 	public static void logParseExceptionAsWarning(ParseException parseException) {

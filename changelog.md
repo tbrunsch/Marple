@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.5.1
+
+Bug fixes:
+
+  - Additional settings had not been applied if no preference file existed.
+
 ## v0.5.0
 
   - switched to Zenodot 0.4 (support for parser extensions, code completions for inner classes)
