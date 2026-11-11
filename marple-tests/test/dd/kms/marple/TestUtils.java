@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import dd.kms.marple.api.DebugSupport;
 import dd.kms.marple.api.DirectoryCompletionExtensionUI;
 import dd.kms.marple.api.ObjectInspectionFramework;
+import dd.kms.marple.api.aiagent.AiAgentViewUI;
+import dd.kms.marple.api.aiagent.claude.ClaudeCodeAgentFactoryBuilder;
 import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.api.settings.InspectionSettings;
@@ -28,6 +30,7 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -109,7 +112,16 @@ class TestUtils
 
 		Path preferencesFile = suggestPreferencesFile();
 
-		VisualSettings visualSettings = ObjectInspectionFramework.createVisualSettingsBuilder()
+		VisualSettingsBuilder visualSettingsBuilder = ObjectInspectionFramework.createVisualSettingsBuilder();
+
+		Path repoRoot = findRepositoryRoot();
+		AiAgentViewUI.create()
+			.agentFactory(repoRoot == null ? null : ClaudeCodeAgentFactoryBuilder.create(repoRoot).build())
+			.unavailableMessage("AI agent not available: Cannot find the Marple repository root")
+			.systemPromptAddition("The inspected application is Marple's test application (module marple-tests).")
+			.register(visualSettingsBuilder);
+
+		VisualSettings visualSettings = visualSettingsBuilder
 			.listView(String.class, s -> new AbstractList<Object>() {
 				@Override
 				public int size() {
@@ -143,6 +155,26 @@ class TestUtils
 		DebugSupport.setSlotValue("variableImport",	42);
 		DebugSupport.setSlotValue("successful",		1.41);
 		DebugSupport.setSlotValue("expectedValues",	Arrays.asList("Yes!", 42, 1.41));
+	}
+
+	/**
+	 * Determines the root directory of the Marple repository by walking up from the location
+	 * this class has been loaded from (e.g., ".../marple-tests/target/test-classes"). This only
+	 * works when started from the IDE or from Maven.
+	 */
+	@Nullable
+	static Path findRepositoryRoot() {
+		try {
+			Path location = Paths.get(TestUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			for (Path directory = location; directory != null; directory = directory.getParent()) {
+				if (Files.isDirectory(directory.resolve("marple")) && Files.isDirectory(directory.resolve("marple-tests"))) {
+					return directory;
+				}
+			}
+		} catch (Exception e) {
+			/* repository root cannot be determined */
+		}
+		return null;
 	}
 
 	private static Path suggestPreferencesFile() {
