@@ -77,6 +77,11 @@ class InstanceSearchPanel extends JPanel
 	private final Map<InstancePath, SearchNode>		instanceSearchNodes			= new HashMap<>();
 	private final Set<Object>						matchingObjects				= new HashSet<>();
 
+	/**
+	 * Only accessed in the event dispatch thread
+	 */
+	private boolean									disposed;
+
 	InstanceSearchPanel(InspectionContext context) {
 		super(new GridBagLayout());
 
@@ -402,6 +407,19 @@ class InstanceSearchPanel extends JPanel
 		instancePathFinder.stop();
 	}
 
+	/**
+	 * Stops a running search and releases the references to the root, the target, and the search results.
+	 */
+	void dispose() {
+		disposed = true;
+		stopSearch();
+		root = null;
+		target = null;
+		instanceSearchNodes.clear();
+		matchingObjects.clear();
+		instanceSearchTree.setModel(null);
+	}
+
 	private void addInstancePath(InstancePath path) {
 		if (instanceSearchNodes.containsKey(path)) {
 			return;
@@ -438,6 +456,9 @@ class InstanceSearchPanel extends JPanel
 	 */
 	private void onPathDetected(InstancePath path) {
 		SwingUtilities.invokeLater(() -> {
+			if (disposed) {
+				return;
+			}
 			matchingObjects.add(path.getLastNodeObject());
 			addInstancePath(path);
 		});

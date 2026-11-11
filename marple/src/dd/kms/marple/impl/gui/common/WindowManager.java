@@ -60,9 +60,9 @@ public class WindowManager
 				window.setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
 				window.addWindowListener(new WindowAdapter() {
 					@Override
-					public void windowClosing(WindowEvent e) {
+					public void windowClosed(WindowEvent e) {
 						synchronized (LOCK) {
-							MANAGED_WINDOWS.remove(identifier);
+							MANAGED_WINDOWS.remove(identifier, window);
 						}
 					}
 				});
@@ -90,12 +90,13 @@ public class WindowManager
 
 	private static <T extends Component & Disposable> JFrame createComponentFrame(String title, Supplier<T> componentSupplier, Consumer<T> contentUpdater) {
 		JFrame frame = new JFrame(title);
+		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		T component = componentSupplier.get();
 		frame.getContentPane().add(component);
 		updateFrameOnFocusGained(frame, () -> contentUpdater.accept(component));
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
-			public void windowClosing(WindowEvent e) {
+			public void windowClosed(WindowEvent e) {
 				component.dispose();
 			}
 		});

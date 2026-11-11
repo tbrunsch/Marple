@@ -23,6 +23,7 @@ public class InstanceSearchFrame extends JFrame
 
 	private void configure() {
 		setTitle("Find Instances");
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		getContentPane().add(mainPanel);
 
@@ -35,5 +36,11 @@ public class InstanceSearchFrame extends JFrame
 
 	public void setTarget(Object target) {
 		searchPanel.setTarget(target);
+	}
+
+	@Override
+	public void dispose() {
+		searchPanel.dispose();
+		super.dispose();
 	}
 }

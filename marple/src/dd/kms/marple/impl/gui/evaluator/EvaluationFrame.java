@@ -51,6 +51,7 @@ public class EvaluationFrame extends JFrame implements Disposable
 
 	private void configure() {
 		setTitle("Evaluate");
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		getContentPane().add(mainPanel);
 
