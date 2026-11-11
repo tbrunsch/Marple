@@ -15,9 +15,12 @@ import dd.kms.marple.impl.gui.inspector.views.mapview.MapView;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static dd.kms.marple.impl.gui.common.GuiCommons.DEFAULT_INSETS;
 
@@ -68,6 +71,8 @@ public class InspectionFrame extends JFrame implements ObjectView
 
 	private void configure() {
 		setTitle(getViewName());
+		// dispose (and not only hide) the frame such that the views are disposed as well
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		getContentPane().add(mainPanel);
 
@@ -158,6 +163,7 @@ public class InspectionFrame extends JFrame implements ObjectView
 
 		InspectionViewSettings oldViewSettings = this.viewGenerator != null ? getViewSettings() : null;
 
+		disposeReplacedViews(this.views, views);
 		this.views = views;
 		currentObjectPanel.setCurrentObject(object);
 		this.viewGenerator = viewGenerator;
@@ -181,6 +187,21 @@ public class InspectionFrame extends JFrame implements ObjectView
 		GuiCommons.reevaluateButtonAction(nextButton);
 
 		setVisible(true);
+	}
+
+	/**
+	 * Views that are replaced are not needed anymore. Their settings have already been captured
+	 * and stored in the history. If the user navigates back to them, then new views will be
+	 * created and the stored settings will be applied.
+	 */
+	private static void disposeReplacedViews(List<ObjectView> oldViews, List<ObjectView> newViews) {
+		Set<ObjectView> newViewSet = Collections.newSetFromMap(new IdentityHashMap<>());
+		newViewSet.addAll(newViews);
+		for (ObjectView oldView : oldViews) {
+			if (!newViewSet.contains(oldView)) {
+				oldView.dispose();
+			}
+		}
 	}
 
 	private String getStringRepresentation(InspectionViewSettings viewSettings) {

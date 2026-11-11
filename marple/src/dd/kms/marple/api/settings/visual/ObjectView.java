@@ -5,6 +5,13 @@ import dd.kms.marple.api.gui.Disposable;
 import javax.annotation.Nullable;
 import java.awt.*;
 
+/**
+ * A view represents a tab in the inspection window. Views are created for a certain object.
+ * When the inspected object changes, new views are created and the old views are disposed
+ * (see {@link #dispose()}) after their settings have been queried via {@link #getViewSettings()}.
+ * When navigating back to an object, new views are created for that object and the stored
+ * settings are applied via {@link #applyViewSettings(Object, ViewSettingsOrigin)}.
+ */
 public interface ObjectView extends Disposable
 {
 	String getViewName();
@@ -13,7 +20,11 @@ public interface ObjectView extends Disposable
 	/**
 	 * Returns all data that is required to restore the current state of the view
 	 * at a later point in time. A view may return {@code null} if it does not have
-	 * any settings that have to be restored later.
+	 * any settings that have to be restored later.<br>
+	 * <br>
+	 * Note that this method may be called several times, also directly after creating
+	 * the view. Hence, it should be cheap and must not have side effects. The returned
+	 * settings must remain valid after the view has been disposed.
 	 */
 	@Nullable Object getViewSettings();
 
