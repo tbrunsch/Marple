@@ -1,14 +1,12 @@
 package dd.kms.marple.impl.gui.inspector.views;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.visual.ObjectView;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
-import dd.kms.marple.impl.common.ReflectionUtils;
+import dd.kms.marple.impl.gui.ComponentHierarchies;
 import dd.kms.marple.impl.gui.actionproviders.ActionProviderListeners;
 import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNode;
 import dd.kms.marple.impl.gui.actionprovidertree.ActionProviderTreeNodes;
@@ -75,18 +73,8 @@ public class ComponentHierarchyView extends JPanel implements ObjectView
 	}
 
 	private List<ActionProvider> createActionProviderHierarchy(ComponentHierarchy componentHierarchy) {
-		Multimap<Object, GeneralizedField> fieldsByObject = ArrayListMultimap.create();
-		Set<Object> objectsToFind = new HashSet<>();
-
+		Multimap<Object, GeneralizedField> fieldsByObject = ComponentHierarchies.findReferencingFields(componentHierarchy);
 		List<Object> components = new ArrayList<>(componentHierarchy.getComponents());
-
-		/*
-		 * Traverse components from child to parent because usually children are members of parents and not vice versa
-		 */
-		for (Object hierarchyNode : Lists.reverse(components)) {
-			objectsToFind.add(hierarchyNode);
-			fieldsByObject.putAll(ReflectionUtils.findFieldValues(hierarchyNode, objectsToFind));
-		}
 
 		List<ActionProvider> actionProviderHierarchy = new ArrayList<>(components.size());
 		for (int j = 0; j < components.size(); j++) {

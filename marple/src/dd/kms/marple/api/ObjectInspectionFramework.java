@@ -1,12 +1,17 @@
 package dd.kms.marple.api;
 
+import com.google.common.collect.Multimap;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.api.settings.InspectionSettingsBuilder;
+import dd.kms.marple.api.settings.components.ComponentHierarchy;
 import dd.kms.marple.api.settings.components.ComponentHierarchyModelBuilder;
 import dd.kms.marple.api.settings.components.ComponentHierarchyModels;
 import dd.kms.marple.api.settings.visual.VisualSettingsBuilder;
 import dd.kms.marple.api.settings.visual.VisualSettingsUtils;
 import dd.kms.zenodot.api.Parsers;
+import dd.kms.zenodot.api.common.GeneralizedField;
+
+import java.awt.*;
 
 public class ObjectInspectionFramework
 {
@@ -55,6 +60,26 @@ public class ObjectInspectionFramework
 		VisualSettingsUtils.addDefaultDisplayTextFunctions(builder);
 		VisualSettingsUtils.addDefaultViews(builder);
 		return builder;
+	}
+
+	/*
+	 * Component Hierarchies
+	 */
+
+	/**
+	 * Returns the hierarchy from the root component (usually a window) to the specified component.
+	 */
+	public static ComponentHierarchy getComponentHierarchy(Component component) {
+		return dd.kms.marple.impl.gui.ComponentHierarchies.getComponentHierarchy(component);
+	}
+
+	/**
+	 * Returns for each object of the specified component hierarchy the fields of objects of the
+	 * hierarchy that reference this object. This information helps finding the code that creates
+	 * or holds a certain component.
+	 */
+	public static Multimap<Object, GeneralizedField> findReferencingFields(ComponentHierarchy componentHierarchy) {
+		return dd.kms.marple.impl.gui.ComponentHierarchies.findReferencingFields(componentHierarchy);
 	}
 
 	private static dd.kms.marple.impl.ObjectInspectionFrameworkInstance getFrameworkInstance(boolean createIfRequired) {
