@@ -34,6 +34,6 @@ public class EvaluateExpressionAction implements InspectionAction
 
 	@Override
 	public void perform() {
-		expressionEvaluator.evaluate(expression, caretPosition, thisValue);
+		expressionEvaluator.showEvaluationDialog(expression, caretPosition, thisValue);
 	}
 }

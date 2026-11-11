@@ -6,9 +6,13 @@ import dd.kms.marple.api.evaluator.StringHistory;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.impl.gui.common.WindowManager;
 import dd.kms.marple.impl.gui.evaluator.EvaluationFrame;
+import dd.kms.zenodot.api.ParseException;
+import dd.kms.zenodot.api.Parsers;
+import dd.kms.zenodot.api.Variables;
 import dd.kms.zenodot.api.settings.ParserSettings;
 import dd.kms.zenodot.api.settings.ParserSettingsBuilder;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -60,7 +64,34 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 	}
 
 	@Override
-	public void evaluate(String expression, int caretPosition, Object thisValue) {
+	public void addVariable(Variable variable) {
+		DisposableVariable disposableVariable = new DisposableVariable(variable.getName(), variable.getType(), variable.getValue(), variable.isFinal(), variable.isUseHardReference());
+		for (int i = 0; i < variables.size(); i++) {
+			if (variables.get(i).getName().equals(variable.getName())) {
+				variables.set(i, disposableVariable);
+				return;
+			}
+		}
+		variables.add(disposableVariable);
+	}
+
+	@Override
+	public boolean removeVariable(String name) {
+		return variables.removeIf(variable -> variable.getName().equals(name));
+	}
+
+	@Nullable
+	@Override
+	public Object evaluate(String expression, @Nullable Object thisValue) throws ParseException {
+		Variables variableCollection = ExpressionEvaluators.toVariableCollection(getVariables(), false);
+		return Parsers.createExpressionParserBuilder(parserSettings)
+			.variables(variableCollection)
+			.createExpressionParser()
+			.evaluate(expression, thisValue);
+	}
+
+	@Override
+	public void showEvaluationDialog(String expression, int caretPosition, Object thisValue) {
 		showEvaluationFrame(expression, caretPosition, thisValue);
 	}
 
