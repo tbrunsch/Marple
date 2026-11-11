@@ -7,7 +7,9 @@ import com.google.gson.JsonParseException;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Access to members of JSON objects received from the agent or an MCP client. A missing member or
@@ -80,6 +82,30 @@ public class JsonUtils
 			throw createTypeException(key, "a boolean", element);
 		}
 		return element.getAsBoolean();
+	}
+
+	/**
+	 * Parses the name of an enum constant (see {@link Enum#name()}). Unlike the other methods, this method does
+	 * not throw a {@link JsonParseException} for an invalid value: Such a value is an invalid argument the agent
+	 * can correct, not a protocol violation.
+	 *
+	 * @return the enum constant or {@code null} if the member does not exist
+	 * @throws IllegalArgumentException if the value is not the exact name of an enum constant
+	 */
+	@Nullable
+	public static <E extends Enum<E>> E getEnum(JsonObject object, String key, Class<E> enumClass) {
+		String name = getString(object, key);
+		if (name == null) {
+			return null;
+		}
+		E[] constants = enumClass.getEnumConstants();
+		for (E constant : constants) {
+			if (constant.name().equals(name)) {
+				return constant;
+			}
+		}
+		String expectedValues = Arrays.stream(constants).map(Enum::name).collect(Collectors.joining(", "));
+		throw new IllegalArgumentException("Invalid value '" + name + "' for '" + key + "'. Expected one of: " + expectedValues);
 	}
 
 	@Nullable

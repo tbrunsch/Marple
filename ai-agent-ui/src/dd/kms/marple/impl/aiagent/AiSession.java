@@ -3,6 +3,7 @@ package dd.kms.marple.impl.aiagent;
 import com.google.common.collect.ImmutableList;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.aiagent.backend.*;
+import dd.kms.marple.impl.aiagent.mcp.EvaluatorSettingsTools;
 import dd.kms.marple.impl.aiagent.mcp.MarpleTools;
 import dd.kms.marple.impl.aiagent.mcp.McpServer;
 
@@ -27,6 +28,8 @@ class AiSession
 	private final Object				lock						= new Object();
 	@Nullable
 	private McpServer					mcpServer;
+	@Nullable
+	private EvaluatorSettingsTools		evaluatorSettingsTools;
 	@Nullable
 	private volatile AiAgent			agent;
 	@Nullable
@@ -128,19 +131,23 @@ class AiSession
 		}
 	}
 
+	/**
+	 * Closes the agent and stops the MCP server. Changes of the evaluator settings made by the agent
+	 * are reverted. The session cannot be used anymore afterwards (see {@link #reset()} for starting
+	 * a new conversation instead).
+	 * <p>
+	 * This method does not throw exceptions, is idempotent, and does not block for a long time, so it
+	 * can be called on the event dispatch thread. It may be called while a request is running: The agent
+	 * is closed before acquiring the lock, which makes the running request terminate with an exception.
+	 */
 	void close() {
 		closed = true;
 		AiAgent agent = this.agent;
 		if (agent != null) {
 			agent.close();
 		}
-		McpServer mcpServer;
 		synchronized (lock) {
-			mcpServer = this.mcpServer;
-			this.mcpServer = null;
-		}
-		if (mcpServer != null) {
-			mcpServer.stop();
+			stopMcpServer();
 		}
 	}
 
@@ -157,7 +164,11 @@ class AiSession
 			throw new IOException(settings.getUnavailableMessage());
 		}
 		if (mcpServer == null) {
-			List<AiTool> tools = new MarpleTools(context, thisValue).createTools();
+			evaluatorSettingsTools = new EvaluatorSettingsTools(context.getEvaluator());
+			List<AiTool> tools = ImmutableList.<AiTool>builder()
+				.addAll(new MarpleTools(context, thisValue).createTools())
+				.addAll(evaluatorSettingsTools.createTools())
+				.build();
 			McpServer server = new McpServer(tools);
 			server.start();
 			mcpServer = server;
@@ -178,9 +189,20 @@ class AiSession
 			this.agent = null;
 		}
 		// tools registered by the agent are not valid anymore => new MCP server for the next agent
+		stopMcpServer();
+	}
+
+	/**
+	 * Stops the MCP server and reverts the changes of the evaluator settings made by the agent.
+	 */
+	private void stopMcpServer() {
 		if (mcpServer != null) {
 			mcpServer.stop();
 			mcpServer = null;
+		}
+		if (evaluatorSettingsTools != null) {
+			evaluatorSettingsTools.revertChanges();
+			evaluatorSettingsTools = null;
 		}
 	}
 

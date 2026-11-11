@@ -128,6 +128,21 @@ public final class AiTool
 			return parameter(parameterName, propertySchema, isRequired);
 		}
 
+		/**
+		 * Adds a string parameter whose allowed values are the names of the enum constants (see {@link Enum#name()}).
+		 */
+		public <E extends Enum<E>> Builder parameter(String parameterName, Class<E> enumClass, String parameterDescription, boolean isRequired) {
+			JsonArray values = new JsonArray();
+			for (E constant : enumClass.getEnumConstants()) {
+				values.add(constant.name());
+			}
+			JsonObject propertySchema = new JsonObject();
+			propertySchema.addProperty("type", "string");
+			propertySchema.add("enum", values);
+			propertySchema.addProperty("description", parameterDescription);
+			return parameter(parameterName, propertySchema, isRequired);
+		}
+
 		public Builder parameter(String parameterName, JsonObject propertySchema, boolean isRequired) {
 			properties.add(parameterName, propertySchema);
 			if (isRequired) {

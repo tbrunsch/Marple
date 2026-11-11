@@ -307,7 +307,7 @@ public class MarpleTools
 		return AiToolResult.error(message.toString());
 	}
 
-	private static String getRequiredString(JsonObject arguments, String name) {
+	static String getRequiredString(JsonObject arguments, String name) {
 		String value = getString(arguments, name);
 		if (value == null) {
 			throw new IllegalArgumentException("Missing argument '" + name + "'");
