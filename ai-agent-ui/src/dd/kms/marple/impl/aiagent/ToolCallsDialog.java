@@ -17,18 +17,30 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
+import java.util.function.IntConsumer;
 
 /**
  * Non-modal dialog that lists the tool calls of the current conversation with their complete parameters.
- * The tools can be filtered via the context menu of the column header. For {@code evaluate_expression},
- * the parameters provide an action that opens the expression in Marple's evaluation dialog.<br>
- * <br>
- * The dialog is updated by the AI view via {@link #setToolCalls(List)}.
+ * <ul>
+ *     <li>
+ *         Column "#": the number of the tool call. Clicking a number highlights the tool call in the transcript.
+ *     </li>
+ *     <li>
+ *         Column "Request": the number of the user message the tool call belongs to.
+ *     </li>
+ *     <li>
+ *         Columns "Tool" and "Parameters". For {@code evaluate_expression}, the parameters provide an action
+ *         that opens the expression in Marple's evaluation dialog.
+ *     </li>
+ * </ul>
+ * The columns can be filtered via the context menu of the column header. The dialog is updated by the AI view
+ * via {@link #setTranscript(List)}.
  */
 class ToolCallsDialog extends JDialog
 {
@@ -37,23 +49,29 @@ class ToolCallsDialog extends JDialog
 
 	private final InspectionContext			context;
 	private final Object					thisValue;
+	private final IntConsumer				showInTranscript;
 
 	private final List<ToolCall>			toolCalls			= new ArrayList<>();
+	private final ValueFilter				requestFilter;
 	private final ValueFilter				toolFilter;
 	private final ListBasedTable<ToolCall>	table;
 
 	/**
-	 * @param thisValue	the object in whose context the agent has evaluated expressions
+	 * @param thisValue			the object in whose context the agent has evaluated expressions
+	 * @param showInTranscript	shows the tool call with the specified number in the transcript
 	 */
-	ToolCallsDialog(@Nullable Window owner, InspectionContext context, Object thisValue, List<TranscriptEntry> toolEntries) {
+	ToolCallsDialog(@Nullable Window owner, InspectionContext context, Object thisValue, List<TranscriptEntry> transcript, IntConsumer showInTranscript) {
 		super(owner, "Tool Calls", ModalityType.MODELESS);
 		this.context = context;
 		this.thisValue = thisValue;
+		this.showInTranscript = showInTranscript;
 
-		toolCalls.addAll(createToolCalls(toolEntries));
+		toolCalls.addAll(createToolCalls(transcript));
+		requestFilter = ValueFilters.createSelectionFilter(context);
 		toolFilter = ValueFilters.createSelectionFilter(context);
 		List<ColumnDescription<ToolCall>> columnDescriptions = Arrays.asList(
 			new ColumnDescriptionBuilder<ToolCall>("#",				Integer.class,	ToolCall::getNumber).build(),
+			new ColumnDescriptionBuilder<ToolCall>("Request",		Integer.class,	ToolCall::getRequest).valueFilter(requestFilter).build(),
 			new ColumnDescriptionBuilder<ToolCall>("Tool",			String.class,	ToolCall::getToolName).valueFilter(toolFilter).build(),
 			new ColumnDescriptionBuilder<ToolCall>("Parameters",	Object.class,	this::getParametersValue).valueFilter(ValueFilters.createWildcardFilter()).build()
 		);
@@ -61,15 +79,22 @@ class ToolCallsDialog extends JDialog
 
 		JTable internalTable = table.getInternalTable();
 		TableColumnModel columnModel = internalTable.getColumnModel();
-		columnModel.getColumn(0).setPreferredWidth(40);
-		columnModel.getColumn(0).setMaxWidth(60);
-		columnModel.getColumn(1).setPreferredWidth(180);
-		columnModel.getColumn(1).setMaxWidth(300);
-		columnModel.getColumn(2).setPreferredWidth(600);
-		columnModel.getColumn(2).setCellRenderer(new ParametersRenderer());
+		setColumnWidths(columnModel, 0, 40, 60);
+		setColumnWidths(columnModel, 1, 60, 80);
+		setColumnWidths(columnModel, 2, 180, 300);
+		columnModel.getColumn(3).setPreferredWidth(600);
+		columnModel.getColumn(0).setCellRenderer(new NumberRenderer());
+		columnModel.getColumn(3).setCellRenderer(new ParametersRenderer());
 		internalTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+		// a plain click handler instead of an action provider: there is only one action, so no popup menu is needed
+		internalTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				onMouseReleased(e);
+			}
+		});
 
-		JLabel hintLabel = new JLabel("Right-click a column header to filter");
+		JLabel hintLabel = new JLabel("Click a number to highlight the tool call in the transcript. Right-click a column header to filter.");
 		hintLabel.setForeground(Color.GRAY);
 
 		JPanel contentPanel = new JPanel(new BorderLayout(0, 5));
@@ -80,35 +105,88 @@ class ToolCallsDialog extends JDialog
 
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-		setSize(900, 400);
+		setSize(950, 400);
 		setLocationRelativeTo(owner);
-		scrollToLastRow();
+		scrollToRow(internalTable.getRowCount() - 1);
 	}
 
 	/**
-	 * Updates the dialog with the tool entries of the transcript (entries with a tool name).
+	 * Updates the dialog with the tool calls of the transcript. The selection is preserved.
 	 */
-	void setToolCalls(List<TranscriptEntry> toolEntries) {
-		JTable internalTable = table.getInternalTable();
-		boolean hadSelection = internalTable.getSelectedRowCount() > 0;
+	void setTranscript(List<TranscriptEntry> transcript) {
+		List<Integer> selectedNumbers = getSelectedNumbers();
 		toolCalls.clear();
-		toolCalls.addAll(createToolCalls(toolEntries));
-		// the selection filter only knows the tools that existed when the table was created
+		toolCalls.addAll(createToolCalls(transcript));
+		// the selection filters only know the values that existed when the table was created
 		for (ToolCall toolCall : toolCalls) {
+			requestFilter.addAvailableValue(toolCall.getRequest());
 			toolFilter.addAvailableValue(toolCall.getToolName());
 		}
+		JTable internalTable = table.getInternalTable();
 		((AbstractTableModel) internalTable.getModel()).fireTableDataChanged();
-		if (!hadSelection) {
-			scrollToLastRow();
+		if (selectedNumbers.isEmpty()) {
+			scrollToRow(internalTable.getRowCount() - 1);
+		} else {
+			selectNumbers(selectedNumbers);
 		}
 	}
 
-	private void scrollToLastRow() {
-		JTable internalTable = table.getInternalTable();
-		int lastRow = internalTable.getRowCount() - 1;
-		if (lastRow >= 0) {
-			internalTable.scrollRectToVisible(internalTable.getCellRect(lastRow, 0, true));
+	/**
+	 * Selects the tool calls with the numbers {@code first} to {@code last} (1-based) as far as they are
+	 * not hidden by a filter.
+	 */
+	void selectToolCalls(int first, int last) {
+		List<Integer> numbers = new ArrayList<>();
+		for (int number = first; number <= last; number++) {
+			numbers.add(number);
 		}
+		selectNumbers(numbers);
+	}
+
+	private void selectNumbers(Collection<Integer> numbers) {
+		JTable internalTable = table.getInternalTable();
+		internalTable.clearSelection();
+		int firstViewRow = -1;
+		for (int modelRow = 0; modelRow < toolCalls.size(); modelRow++) {
+			if (!numbers.contains(toolCalls.get(modelRow).getNumber())) {
+				continue;
+			}
+			int viewRow = internalTable.convertRowIndexToView(modelRow);
+			if (viewRow >= 0) {
+				internalTable.addRowSelectionInterval(viewRow, viewRow);
+				firstViewRow = firstViewRow < 0 ? viewRow : Math.min(firstViewRow, viewRow);
+			}
+		}
+		scrollToRow(firstViewRow);
+	}
+
+	private List<Integer> getSelectedNumbers() {
+		JTable internalTable = table.getInternalTable();
+		List<Integer> numbers = new ArrayList<>();
+		for (int viewRow : internalTable.getSelectedRows()) {
+			numbers.add(toolCalls.get(internalTable.convertRowIndexToModel(viewRow)).getNumber());
+		}
+		return numbers;
+	}
+
+	private void scrollToRow(int viewRow) {
+		JTable internalTable = table.getInternalTable();
+		if (viewRow >= 0 && viewRow < internalTable.getRowCount()) {
+			internalTable.scrollRectToVisible(internalTable.getCellRect(viewRow, 0, true));
+		}
+	}
+
+	private void onMouseReleased(MouseEvent e) {
+		JTable internalTable = table.getInternalTable();
+		if (!SwingUtilities.isLeftMouseButton(e)) {
+			return;
+		}
+		int viewRow = internalTable.rowAtPoint(e.getPoint());
+		int viewColumn = internalTable.columnAtPoint(e.getPoint());
+		if (viewRow < 0 || viewColumn < 0 || internalTable.convertColumnIndexToModel(viewColumn) != 0) {
+			return;
+		}
+		showInTranscript.accept(toolCalls.get(internalTable.convertRowIndexToModel(viewRow)).getNumber());
 	}
 
 	private Object getParametersValue(ToolCall toolCall) {
@@ -121,13 +199,26 @@ class ToolCallsDialog extends JDialog
 			() -> null);
 	}
 
-	private static List<ToolCall> createToolCalls(List<TranscriptEntry> toolEntries) {
-		List<ToolCall> toolCalls = new ArrayList<>(toolEntries.size());
-		for (TranscriptEntry entry : toolEntries) {
+	private static void setColumnWidths(TableColumnModel columnModel, int column, int preferredWidth, int maxWidth) {
+		columnModel.getColumn(column).setPreferredWidth(preferredWidth);
+		columnModel.getColumn(column).setMaxWidth(maxWidth);
+	}
+
+	/**
+	 * Tool calls are numbered from 1 in the order of the transcript. The request of a tool call is the number of
+	 * user messages before it.
+	 */
+	private static List<ToolCall> createToolCalls(List<TranscriptEntry> transcript) {
+		List<ToolCall> toolCalls = new ArrayList<>();
+		int request = 0;
+		for (TranscriptEntry entry : transcript) {
+			if (entry.getRole() == TranscriptEntry.Role.USER) {
+				request++;
+			}
 			String toolName = entry.getToolName();
 			JsonObject input = entry.getToolInput();
 			if (toolName != null && input != null) {
-				toolCalls.add(new ToolCall(toolCalls.size() + 1, toolName, input));
+				toolCalls.add(new ToolCall(toolCalls.size() + 1, request, toolName, input));
 			}
 		}
 		return toolCalls;
@@ -152,14 +243,16 @@ class ToolCallsDialog extends JDialog
 	private static class ToolCall
 	{
 		private final int		number;
+		private final int		request;
 		private final String	toolName;
 		private final String	parameters;
 		private final String	fullParameters;
 		@Nullable
 		private final String	expression;
 
-		ToolCall(int number, String toolName, JsonObject input) {
+		ToolCall(int number, int request, String toolName, JsonObject input) {
 			this.number = number;
+			this.request = request;
 			this.toolName = toolName;
 			this.parameters = formatParameters(input, true);
 			this.fullParameters = formatParameters(input, false);
@@ -171,6 +264,10 @@ class ToolCallsDialog extends JDialog
 
 		int getNumber() {
 			return number;
+		}
+
+		int getRequest() {
+			return request;
 		}
 
 		String getToolName() {
@@ -188,6 +285,23 @@ class ToolCallsDialog extends JDialog
 		@Nullable
 		String getExpression() {
 			return expression;
+		}
+	}
+
+	/**
+	 * Renders the number like a link (as Marple renders action providers) to indicate that it can be clicked.
+	 */
+	private static class NumberRenderer extends DefaultTableCellRenderer
+	{
+		private static final Color	DARK_BLUE	= Color.BLUE.darker();
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			component.setForeground(DARK_BLUE);
+			setHorizontalAlignment(LEADING);
+			setToolTipText("Highlights the tool call in the transcript");
+			return component;
 		}
 	}
 

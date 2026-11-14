@@ -7,6 +7,7 @@ import dd.kms.marple.api.settings.visual.ObjectView;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
@@ -18,7 +19,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -43,6 +46,8 @@ class AiAgentView extends JPanel implements ObjectView
 	}
 
 	private static final int	MAX_CONTEXT_DISPLAY_LENGTH	= 200;
+	private static final String	TOOL_CALLS_LINK_PREFIX		= "toolcalls:";
+	private static final String	TOOL_CALL_ANCHOR_PREFIX		= "toolcall-";
 
 	private final Object				thisValue;
 	private final InspectionContext		context;
@@ -73,6 +78,12 @@ class AiAgentView extends JPanel implements ObjectView
 	private AgentVariablesDialog		agentVariablesDialog;
 	@Nullable
 	private ToolCallsDialog				toolCallsDialog;
+
+	/**
+	 * The number of the tool call that is highlighted in the transcript (1-based) or -1. The highlight is
+	 * removed when the next entry is added.
+	 */
+	private int							highlightedToolCall		= -1;
 
 	private State						state					= State.IDLE;
 	/**
@@ -134,6 +145,7 @@ class AiAgentView extends JPanel implements ObjectView
 		styleSheet.addRule(".agent { padding: 2px; margin-top: 4px; }");
 		styleSheet.addRule(".progress { color: #505050; padding: 2px; margin-top: 2px; }");
 		styleSheet.addRule(".tool { color: #707070; font-size: " + Math.max(fontSize - 1, 8) + "pt; margin-top: 1px; }");
+		styleSheet.addRule(".highlightedTool { color: #707070; font-size: " + Math.max(fontSize - 1, 8) + "pt; margin-top: 1px; background-color: #fff2a8; }");
 		styleSheet.addRule(".info { color: #707070; font-style: italic; margin-top: 4px; }");
 		styleSheet.addRule(".error { color: #b00020; margin-top: 4px; }");
 		styleSheet.addRule("pre { font-family: Monospaced; background-color: #f4f4f4; padding: 4px; }");
@@ -166,6 +178,7 @@ class AiAgentView extends JPanel implements ObjectView
 		autoApproveCheckBox.addActionListener(e -> settings.setAutoApprove(autoApproveCheckBox.isSelected()));
 		agentVariablesButton.addActionListener(e -> showAgentVariables());
 		toolCallsButton.addActionListener(e -> showToolCalls());
+		transcriptPane.addHyperlinkListener(this::onHyperlinkEvent);
 
 		// Enter sends the message, Shift+Enter inserts a line break (as in common chat applications)
 		InputMap inputMap = inputArea.getInputMap(JComponent.WHEN_FOCUSED);
@@ -358,12 +371,34 @@ class AiAgentView extends JPanel implements ObjectView
 
 	private void addEntry(TranscriptEntry entry) {
 		transcript.add(entry);
+		highlightedToolCall = -1;
 		renderTranscript();
 	}
 
 	private void renderTranscript() {
+		renderTranscript(true);
+	}
+
+	/**
+	 * @param scrollToEnd	if {@code true}, then the transcript is scrolled to the last entry
+	 */
+	private void renderTranscript(boolean scrollToEnd) {
 		StringBuilder html = new StringBuilder("<html><body>");
-		for (TranscriptEntry entry : transcript) {
+		int numToolCalls = 0;
+		for (int i = 0; i < transcript.size(); i++) {
+			TranscriptEntry entry = transcript.get(i);
+			if (entry.getToolName() != null) {
+				// consecutive tool calls are rendered as one line
+				int end = i + 1;
+				while (end < transcript.size() && transcript.get(end).getToolName() != null) {
+					end++;
+				}
+				List<TranscriptEntry> toolEntries = transcript.subList(i, end);
+				appendToolCalls(html, toolEntries, numToolCalls + 1, highlightedToolCall);
+				numToolCalls += toolEntries.size();
+				i = end - 1;
+				continue;
+			}
 			String text = entry.getText();
 			switch (entry.getRole()) {
 				case USER:
@@ -388,20 +423,105 @@ class AiAgentView extends JPanel implements ObjectView
 		}
 		html.append("</body></html>");
 		transcriptPane.setText(html.toString());
-		SwingUtilities.invokeLater(() -> transcriptPane.setCaretPosition(transcriptPane.getDocument().getLength()));
+		if (scrollToEnd) {
+			SwingUtilities.invokeLater(() -> transcriptPane.setCaretPosition(transcriptPane.getDocument().getLength()));
+		}
 		// the transcript is rendered after every change
 		updateToolCalls();
+	}
+
+	/**
+	 * Renders consecutive tool calls as one line with a link to the tool call dialog. Each tool call gets an
+	 * anchor, so the dialog can scroll the transcript to it.
+	 *
+	 * @param firstNumber			the number of the first tool call (1-based)
+	 * @param highlightedNumber		the number of the highlighted tool call or -1
+	 */
+	private static void appendToolCalls(StringBuilder html, List<TranscriptEntry> toolEntries, int firstNumber, int highlightedNumber) {
+		int lastNumber = firstNumber + toolEntries.size() - 1;
+		boolean highlighted = firstNumber <= highlightedNumber && highlightedNumber <= lastNumber;
+		html.append("<div class=\"").append(highlighted ? "highlightedTool" : "tool").append("\">");
+		for (int number = firstNumber; number <= lastNumber; number++) {
+			html.append("<a name=\"").append(TOOL_CALL_ANCHOR_PREFIX).append(number).append("\"></a>");
+		}
+		html.append("&rarr; <a href=\"").append(TOOL_CALLS_LINK_PREFIX).append(firstNumber).append('-').append(lastNumber).append("\">");
+		if (toolEntries.size() == 1) {
+			html.append(MarkdownToHtml.escape(toolEntries.get(0).getText())).append("</a>");
+		} else {
+			html.append(toolEntries.size()).append(" tool calls</a>: ").append(MarkdownToHtml.escape(summarizeToolNames(toolEntries)));
+		}
+		html.append("</div>");
+	}
+
+	/**
+	 * Returns the tool names in the order of their first occurrence, e.g., "get_fields, evaluate_expression ×2".
+	 */
+	private static String summarizeToolNames(List<TranscriptEntry> toolEntries) {
+		Map<String, Integer> countsByName = new LinkedHashMap<>();
+		for (TranscriptEntry entry : toolEntries) {
+			countsByName.merge(entry.getToolName(), 1, Integer::sum);
+		}
+		StringBuilder summary = new StringBuilder();
+		for (Map.Entry<String, Integer> nameAndCount : countsByName.entrySet()) {
+			if (summary.length() > 0) {
+				summary.append(", ");
+			}
+			summary.append(nameAndCount.getKey());
+			if (nameAndCount.getValue() > 1) {
+				summary.append(" ×").append(nameAndCount.getValue());
+			}
+		}
+		return summary.toString();
+	}
+
+	private void onHyperlinkEvent(HyperlinkEvent e) {
+		String description = e.getDescription();
+		if (e.getEventType() != HyperlinkEvent.EventType.ACTIVATED || description == null || !description.startsWith(TOOL_CALLS_LINK_PREFIX)) {
+			return;
+		}
+		String[] range = description.substring(TOOL_CALLS_LINK_PREFIX.length()).split("-");
+		try {
+			showToolCalls(Integer.parseInt(range[0]), Integer.parseInt(range[range.length - 1]));
+		} catch (NumberFormatException ignored) {
+			// cannot happen for links created by this class
+		}
+	}
+
+	/**
+	 * Highlights the line of the tool call with the specified number (1-based) in the transcript and scrolls to it.
+	 */
+	private void showToolCallInTranscript(int number) {
+		highlightedToolCall = number;
+		renderTranscript(false);
+		// scroll after the new document has been laid out
+		SwingUtilities.invokeLater(() -> transcriptPane.scrollToReference(TOOL_CALL_ANCHOR_PREFIX + number));
 	}
 
 	/*
 	 * Tool calls
 	 */
 	private void showToolCalls() {
-		List<TranscriptEntry> toolEntries = getToolEntries();
-		if (toolEntries.isEmpty()) {
+		if (getToolEntries().isEmpty()) {
 			return;
 		}
-		ToolCallsDialog dialog = new ToolCallsDialog(SwingUtilities.getWindowAncestor(this), context, thisValue, toolEntries);
+		openToolCallsDialog();
+	}
+
+	/**
+	 * Opens the dialog if necessary and selects the tool calls {@code first} to {@code last} (1-based).
+	 */
+	private void showToolCalls(int first, int last) {
+		ToolCallsDialog dialog = toolCallsDialog;
+		if (dialog == null) {
+			dialog = openToolCallsDialog();
+		} else {
+			dialog.toFront();
+		}
+		dialog.selectToolCalls(first, last);
+	}
+
+	private ToolCallsDialog openToolCallsDialog() {
+		ToolCallsDialog dialog = new ToolCallsDialog(SwingUtilities.getWindowAncestor(this), context, thisValue, transcript, this::showToolCallInTranscript);
 		dialog.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosed(WindowEvent e) {
@@ -412,6 +532,7 @@ class AiAgentView extends JPanel implements ObjectView
 		toolCallsDialog = dialog;
 		updateToolCalls();
 		dialog.setVisible(true);
+		return dialog;
 	}
 
 	/**
@@ -424,7 +545,7 @@ class AiAgentView extends JPanel implements ObjectView
 			if (toolEntries.isEmpty()) {
 				dialog.dispose();
 			} else {
-				dialog.setToolCalls(toolEntries);
+				dialog.setTranscript(transcript);
 			}
 		}
 		toolCallsButton.setText("Show Tool Calls (" + toolEntries.size() + ")");
