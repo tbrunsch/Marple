@@ -302,7 +302,7 @@ class ClaudeCodeAgent implements AiAgent
 				String toolName = getString(block, "name");
 				JsonObject input = getObject(block, "input");
 				String displayName = getDisplayToolName(toolName);
-				listener.onToolUse(displayName, summarizeToolInput(input));
+				listener.onToolUse(displayName, summarizeToolInput(input), input);
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 package dd.kms.marple.impl.aiagent;
 
+import com.google.gson.JsonObject;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.aiagent.backend.AiAgentListener;
@@ -49,7 +50,7 @@ public class AiSessionManualTest
 			}
 
 			@Override
-			public void onToolUse(String toolName, String summary) {
+			public void onToolUse(String toolName, String summary, JsonObject input) {
 				System.out.println("  TOOL: " + toolName + ": " + summary);
 			}
 		};

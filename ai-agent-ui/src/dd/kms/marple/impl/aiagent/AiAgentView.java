@@ -1,5 +1,6 @@
 package dd.kms.marple.impl.aiagent;
 
+import com.google.gson.JsonObject;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.aiagent.backend.AiAgentListener;
 import dd.kms.marple.api.settings.visual.ObjectView;
@@ -56,6 +57,7 @@ class AiAgentView extends JPanel implements ObjectView
 	private final JButton				clearSessionButton		= new JButton("Clear Session");
 	private final JCheckBox				autoApproveCheckBox		= new JCheckBox("Auto approve");
 	private final JButton				agentVariablesButton	= new JButton();
+	private final JButton				toolCallsButton			= new JButton();
 	private final JEditorPane			transcriptPane			= new JEditorPane();
 	private final JTextArea				inputArea				= new JTextArea(4, 40);
 
@@ -69,6 +71,8 @@ class AiAgentView extends JPanel implements ObjectView
 	private AgentVariables				observedAgentVariables;
 	@Nullable
 	private AgentVariablesDialog		agentVariablesDialog;
+	@Nullable
+	private ToolCallsDialog				toolCallsDialog;
 
 	private State						state					= State.IDLE;
 	/**
@@ -109,6 +113,8 @@ class AiAgentView extends JPanel implements ObjectView
 		buttonBar.add(stopButton);
 		agentVariablesButton.setToolTipText("Shows the variables the agent has created in this conversation");
 		buttonBar.add(agentVariablesButton);
+		toolCallsButton.setToolTipText("Shows the tools the agent has called in this conversation with their complete parameters");
+		buttonBar.add(toolCallsButton);
 		buttonBar.add(Box.createHorizontalStrut(10));
 		buttonBar.add(statusLabel);
 		autoApproveCheckBox.setToolTipText("Approves all requests of the agent that require approval (e.g., file changes) without asking");
@@ -159,6 +165,7 @@ class AiAgentView extends JPanel implements ObjectView
 		clearSessionButton.addActionListener(e -> clearSession());
 		autoApproveCheckBox.addActionListener(e -> settings.setAutoApprove(autoApproveCheckBox.isSelected()));
 		agentVariablesButton.addActionListener(e -> showAgentVariables());
+		toolCallsButton.addActionListener(e -> showToolCalls());
 
 		// Enter sends the message, Shift+Enter inserts a line break (as in common chat applications)
 		InputMap inputMap = inputArea.getInputMap(JComponent.WHEN_FOCUSED);
@@ -337,16 +344,20 @@ class AiAgentView extends JPanel implements ObjectView
 	/*
 	 * Transcript
 	 */
-	private void addEntryLater(Request request, TranscriptEntry.Role role, String text) {
+	private void addEntryLater(Request request, TranscriptEntry entry) {
 		SwingUtilities.invokeLater(() -> {
 			if (request == currentRequest && !request.isDiscarded()) {
-				addEntry(role, text);
+				addEntry(entry);
 			}
 		});
 	}
 
 	private void addEntry(TranscriptEntry.Role role, String text) {
-		transcript.add(new TranscriptEntry(role, text));
+		addEntry(new TranscriptEntry(role, text));
+	}
+
+	private void addEntry(TranscriptEntry entry) {
+		transcript.add(entry);
 		renderTranscript();
 	}
 
@@ -378,6 +389,57 @@ class AiAgentView extends JPanel implements ObjectView
 		html.append("</body></html>");
 		transcriptPane.setText(html.toString());
 		SwingUtilities.invokeLater(() -> transcriptPane.setCaretPosition(transcriptPane.getDocument().getLength()));
+		// the transcript is rendered after every change
+		updateToolCalls();
+	}
+
+	/*
+	 * Tool calls
+	 */
+	private void showToolCalls() {
+		List<TranscriptEntry> toolEntries = getToolEntries();
+		if (toolEntries.isEmpty()) {
+			return;
+		}
+		ToolCallsDialog dialog = new ToolCallsDialog(SwingUtilities.getWindowAncestor(this), context, thisValue, toolEntries);
+		dialog.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				toolCallsDialog = null;
+				updateToolCalls();
+			}
+		});
+		toolCallsDialog = dialog;
+		updateToolCalls();
+		dialog.setVisible(true);
+	}
+
+	/**
+	 * Updates the button and the dialog. The dialog is closed when there are no tool calls anymore (new conversation).
+	 */
+	private void updateToolCalls() {
+		List<TranscriptEntry> toolEntries = getToolEntries();
+		ToolCallsDialog dialog = toolCallsDialog;
+		if (dialog != null) {
+			if (toolEntries.isEmpty()) {
+				dialog.dispose();
+			} else {
+				dialog.setToolCalls(toolEntries);
+			}
+		}
+		toolCallsButton.setText("Show Tool Calls (" + toolEntries.size() + ")");
+		// at most one dialog: it follows the changes anyway
+		toolCallsButton.setEnabled(!toolEntries.isEmpty() && toolCallsDialog == null);
+	}
+
+	private List<TranscriptEntry> getToolEntries() {
+		List<TranscriptEntry> toolEntries = new ArrayList<>();
+		for (TranscriptEntry entry : transcript) {
+			if (entry.getToolName() != null) {
+				toolEntries.add(entry);
+			}
+		}
+		return toolEntries;
 	}
 
 	/*
@@ -430,6 +492,9 @@ class AiAgentView extends JPanel implements ObjectView
 		if (agentVariablesDialog != null) {
 			agentVariablesDialog.dispose();
 		}
+		if (toolCallsDialog != null) {
+			toolCallsDialog.dispose();
+		}
 		if (session != null) {
 			session.close();
 		}
@@ -479,12 +544,14 @@ class AiAgentView extends JPanel implements ObjectView
 
 		@Override
 		public void onProgress(String text) {
-			addEntryLater(this, TranscriptEntry.Role.PROGRESS, text);
+			addEntryLater(this, new TranscriptEntry(TranscriptEntry.Role.PROGRESS, text));
 		}
 
 		@Override
-		public void onToolUse(String toolName, String summary) {
-			addEntryLater(this, TranscriptEntry.Role.TOOL, summary.isEmpty() ? toolName : toolName + ": " + summary);
+		public void onToolUse(String toolName, String summary, JsonObject input) {
+			// create the entry immediately: it copies the input
+			TranscriptEntry entry = TranscriptEntry.createToolEntry(summary.isEmpty() ? toolName : toolName + ": " + summary, toolName, input);
+			addEntryLater(this, entry);
 		}
 	}
 }
