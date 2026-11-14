@@ -7,9 +7,9 @@ import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.aiagent.backend.AiTool;
 import dd.kms.marple.api.aiagent.backend.AiToolResult;
-import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
+import dd.kms.marple.impl.aiagent.AgentVariables;
 import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.common.GeneralizedField;
@@ -25,7 +25,8 @@ import static dd.kms.marple.impl.aiagent.JsonUtils.getString;
 
 /**
  * Tools that give the agent access to the inspected object ("this"), the Swing component hierarchy,
- * expression evaluation and variables. All tools are executed on the event dispatch thread.
+ * expression evaluation and variables. All tools are executed on the event dispatch thread. The agent
+ * may only overwrite and delete the variables it has created (see {@link AgentVariables}).
  */
 public class MarpleTools
 {
@@ -37,13 +38,15 @@ public class MarpleTools
 	private final InspectionContext	context;
 	@Nullable
 	private final Object			thisValue;
+	private final AgentVariables	agentVariables;
 
 	/**
 	 * @param thisValue	the inspected object. It does not change during a conversation: A conversation belongs to one object.
 	 */
-	public MarpleTools(InspectionContext context, @Nullable Object thisValue) {
+	public MarpleTools(InspectionContext context, @Nullable Object thisValue, AgentVariables agentVariables) {
 		this.context = context;
 		this.thisValue = thisValue;
+		this.agentVariables = agentVariables;
 	}
 
 	public List<AiTool> createTools() {
@@ -72,19 +75,21 @@ public class MarpleTools
 					"Evaluates a single Zenodot expression (Java-like syntax) in the context of \"this\" (fields and methods of \"this\" can be accessed directly or via \"this.\") and returns the runtime type and display text of the result. "
 					+ "Expressions may have side effects, e.g., changing Swing components (remember to call revalidate()/repaint()). "
 					+ "Follow the Zenodot rules in the system prompt. "
-					+ "Optionally, the result is stored in a Marple variable that can be referenced by its name in later expressions.",
+					+ "Optionally, the result is stored in a Marple variable that can be referenced by its name in later expressions. "
+					+ "Variables of the user cannot be overwritten.",
 					args -> evaluateExpression(getRequiredString(args, "expression"), getString(args, "variableName")))
 				.parameter("expression", "string", "The expression to evaluate", true)
-				.parameter("variableName", "string", "Optional name of a variable the result should be stored in", false)
+				.parameter("variableName", "string", "Optional name of a variable the result should be stored in. It must not be the name of a variable of the user.", false)
 				.runInEventDispatchThread(true)
 				.build(),
 			AiTool.builder("list_variables",
-					"Lists all Marple variables that can be referenced in expressions: name, type, display text of the value and whether the variable is final.",
+					"Lists all Marple variables that can be referenced in expressions: name, type, display text of the value, whether the variable is final, "
+					+ "and whether you have created it in this conversation (createdByAgent).",
 					args -> listVariables())
 				.runInEventDispatchThread(true)
 				.build(),
 			AiTool.builder("delete_variable",
-					"Deletes the Marple variable with the specified name.",
+					"Deletes a Marple variable you have created in this conversation. Variables of the user cannot be deleted.",
 					args -> deleteVariable(getRequiredString(args, "name")))
 				.parameter("name", "string", "Name of the variable to delete", true)
 				.runInEventDispatchThread(true)
@@ -222,17 +227,19 @@ public class MarpleTools
 		if (variableName != null && !IDENTIFIER_PATTERN.matcher(variableName).matches()) {
 			return AiToolResult.error("Invalid variable name: '" + variableName + "'");
 		}
-		ExpressionEvaluator evaluator = context.getEvaluator();
+		// check before evaluating: the expression might have side effects
+		if (variableName != null && !agentVariables.canStore(variableName)) {
+			return AiToolResult.error("The variable '" + variableName + "' belongs to the user and cannot be overwritten. Choose a different name.");
+		}
 		Object value;
 		try {
-			value = evaluator.evaluate(expression, thisValue);
+			value = context.getEvaluator().evaluate(expression, thisValue);
 		} catch (ParseException e) {
 			return parseError(e);
 		}
 		JsonObject result = describeObject(value);
 		if (variableName != null) {
-			Class<?> type = value == null ? Object.class : value.getClass();
-			evaluator.addVariable(Variable.create(variableName, type, value, false, true));
+			agentVariables.store(variableName, value);
 			result.addProperty("storedInVariable", variableName);
 		}
 		return success(result);
@@ -246,6 +253,7 @@ public class MarpleTools
 			variableObject.addProperty("type", variable.getType().getName());
 			variableObject.addProperty("displayText", getDisplayText(variable.getValue()));
 			variableObject.addProperty("final", variable.isFinal());
+			variableObject.addProperty("createdByAgent", agentVariables.isAgentVariable(variable.getName()));
 			variables.add(variableObject);
 		}
 		JsonObject result = new JsonObject();
@@ -254,9 +262,12 @@ public class MarpleTools
 	}
 
 	private AiToolResult deleteVariable(String name) {
-		boolean removed = context.getEvaluator().removeVariable(name);
-		return removed
-			? AiToolResult.success("Variable '" + name + "' has been deleted")
+		if (agentVariables.delete(name)) {
+			return AiToolResult.success("Variable '" + name + "' has been deleted");
+		}
+		boolean exists = context.getEvaluator().getVariables().stream().anyMatch(variable -> variable.getName().equals(name));
+		return exists
+			? AiToolResult.error("The variable '" + name + "' belongs to the user and cannot be deleted. The user can delete it in Marple.")
 			: AiToolResult.error("There is no variable '" + name + "'");
 	}
 

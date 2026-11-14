@@ -5,6 +5,7 @@ import dd.kms.marple.api.ObjectInspectionFramework;
 import dd.kms.marple.api.aiagent.backend.McpEndpoint;
 import dd.kms.marple.api.settings.InspectionSettings;
 import dd.kms.marple.impl.InspectionContextImpl;
+import dd.kms.marple.impl.aiagent.AgentVariables;
 import dd.kms.marple.impl.aiagent.mcp.MarpleTools;
 import dd.kms.marple.impl.aiagent.mcp.McpServer;
 
@@ -40,7 +41,7 @@ public class McpServerManualTest
 
 		InspectionSettings settings = ObjectInspectionFramework.createInspectionSettingsBuilder().build();
 		InspectionContext context = new InspectionContextImpl(settings);
-		McpServer server = new McpServer(new MarpleTools(context, thisValue).createTools());
+		McpServer server = new McpServer(new MarpleTools(context, thisValue, new AgentVariables(context.getEvaluator())).createTools());
 		McpEndpoint endpoint = server.start();
 		testFrame.addWindowListener(new java.awt.event.WindowAdapter() {
 			@Override

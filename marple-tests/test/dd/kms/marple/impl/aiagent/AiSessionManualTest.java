@@ -57,6 +57,7 @@ public class AiSessionManualTest
 
 		AiSession session = new AiSession(settings, context, permissionHandler, thisValue);
 		Object resumeState;
+		AgentVariables agentVariables = session.getAgentVariables();
 		try {
 			ask(session, contextLine, listener, "Which field of which class holds \"this\"? Use the component hierarchy. Then change the text of \"this\" to \"Changed by AI\" at runtime.");
 			System.out.println("Label text is now: " + thisValue.getText());
@@ -68,7 +69,9 @@ public class AiSessionManualTest
 		}
 
 		AiSession resumedSession = new AiSession(settings, context, permissionHandler, thisValue);
-		resumedSession.restore(resumeState, Collections.emptyList());
+		// restore() must be called on the event dispatch thread; this also ensures that close() has detached the agent variables before
+		Object finalResumeState = resumeState;
+		SwingUtilities.invokeAndWait(() -> resumedSession.restore(finalResumeState, Collections.emptyList(), agentVariables));
 		try {
 			ask(resumedSession, contextLine, listener, "Which text did you set at runtime earlier in this conversation? Answer briefly without using tools.");
 		} finally {

@@ -331,7 +331,7 @@ class AiAgentView extends JPanel implements ObjectView
 		if (session == null) {
 			return null;
 		}
-		return new AiSessionSnapshot(transcript, session.getResumeState());
+		return new AiSessionSnapshot(transcript, session.getResumeState(), session.getAgentVariables());
 	}
 
 	@Override
@@ -343,7 +343,7 @@ class AiAgentView extends JPanel implements ObjectView
 		AiSessionSnapshot snapshot = (AiSessionSnapshot) settings;
 		transcript.clear();
 		transcript.addAll(snapshot.getTranscript());
-		session.restore(snapshot.getResumeState(), snapshot.getTranscript());
+		session.restore(snapshot.getResumeState(), snapshot.getTranscript(), snapshot.getAgentVariables());
 		renderTranscript();
 		updateControls();
 	}
