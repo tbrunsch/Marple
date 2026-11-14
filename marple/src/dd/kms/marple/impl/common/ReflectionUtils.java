@@ -67,16 +67,38 @@ public class ReflectionUtils
 	}
 
 	private static Set<Class<?>> getSuperClassesAndInterfaces(Object object) {
-		List<Class<?>> superClasses = new ArrayList<>();
-		Set<Class<?>> superInterfaces = new LinkedHashSet<>();
-		for (Class<?> clazz = object.getClass(); clazz != null; clazz = clazz.getSuperclass()) {
-			superClasses.add(clazz);
-			superInterfaces.addAll(Arrays.asList(clazz.getInterfaces()));
-		}
 		Set<Class<?>> result = new LinkedHashSet<>();
-		result.addAll(superClasses);
-		result.addAll(superInterfaces);
+		for (Class<?> clazz = object.getClass(); clazz != null; clazz = clazz.getSuperclass()) {
+			result.add(clazz);
+		}
+		result.addAll(getAllInterfaces(object.getClass()));
 		return result;
+	}
+
+	/**
+	 * Returns all interfaces the specified class implements, directly or indirectly: the interfaces of
+	 * the class and of its superclasses as well as the interfaces these interfaces extend. In contrast
+	 * to {@link Class#getInterfaces()}, which only returns the directly implemented interfaces, the
+	 * result contains each interface only once. The interfaces closer to the class come first.
+	 */
+	public static Set<Class<?>> getAllInterfaces(Class<?> clazz) {
+		Set<Class<?>> interfaces = new LinkedHashSet<>();
+		for (Class<?> curClass = clazz; curClass != null; curClass = curClass.getSuperclass()) {
+			for (Class<?> implementedInterface : curClass.getInterfaces()) {
+				addInterfaceWithSuperInterfaces(implementedInterface, interfaces);
+			}
+		}
+		return interfaces;
+	}
+
+	private static void addInterfaceWithSuperInterfaces(Class<?> interfaceClass, Set<Class<?>> interfaces) {
+		if (!interfaces.add(interfaceClass)) {
+			// already added together with its super interfaces
+			return;
+		}
+		for (Class<?> superInterface : interfaceClass.getInterfaces()) {
+			addInterfaceWithSuperInterfaces(superInterface, interfaces);
+		}
 	}
 
 	/**
