@@ -186,7 +186,27 @@ public class InspectionFrame extends JFrame implements ObjectView
 		GuiCommons.reevaluateButtonAction(prevButton);
 		GuiCommons.reevaluateButtonAction(nextButton);
 
+		if (!isVisible()) {
+			widenToFitViews();
+		}
+
 		setVisible(true);
+	}
+
+	/**
+	 * Widens the frame (up to the screen width) if the views do not fit horizontally, such that no horizontal
+	 * scroll bar is shown initially. The frame is not narrowed.
+	 */
+	private void widenToFitViews() {
+		validate();
+		int missingWidth = viewPane.getPreferredSize().width - viewScrollPane.getViewport().getWidth();
+		if (missingWidth <= 0) {
+			return;
+		}
+		GraphicsConfiguration graphicsConfiguration = getGraphicsConfiguration();
+		int maxWidth = graphicsConfiguration != null ? graphicsConfiguration.getBounds().width : Toolkit.getDefaultToolkit().getScreenSize().width;
+		setSize(Math.min(getWidth() + missingWidth, maxWidth), getHeight());
+		validate();
 	}
 
 	/**
