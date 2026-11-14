@@ -13,6 +13,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,12 +53,22 @@ class AiAgentView extends JPanel implements ObjectView
 
 	private final JLabel				statusLabel				= new JLabel();
 	private final JButton				stopButton				= new JButton("Stop");
-	private final JButton				newSessionButton		= new JButton("New session");
+	private final JButton				clearSessionButton		= new JButton("Clear Session");
 	private final JCheckBox				autoApproveCheckBox		= new JCheckBox("Auto approve");
+	private final JButton				agentVariablesButton	= new JButton();
 	private final JEditorPane			transcriptPane			= new JEditorPane();
 	private final JTextArea				inputArea				= new JTextArea(4, 40);
 
 	private final Runnable				autoApproveListener		= this::onAutoApproveChanged;
+	private final Runnable				agentVariablesListener	= this::updateAgentVariablesButton;
+
+	/**
+	 * The variables of the conversation that is currently shown, observed for the button text
+	 */
+	@Nullable
+	private AgentVariables				observedAgentVariables;
+	@Nullable
+	private AgentVariablesDialog		agentVariablesDialog;
 
 	private State						state					= State.IDLE;
 	/**
@@ -80,6 +92,7 @@ class AiAgentView extends JPanel implements ObjectView
 		}
 		SwingPermissionHandler permissionHandler = new SwingPermissionHandler(settings, this);
 		session = new AiSession(settings, context, permissionHandler, thisValue);
+		observeAgentVariables(session.getAgentVariables());
 
 		createLayout();
 		addListeners();
@@ -90,13 +103,18 @@ class AiAgentView extends JPanel implements ObjectView
 	}
 
 	private void createLayout() {
-		JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
-		toolBar.add(newSessionButton);
-		toolBar.add(stopButton);
+		JPanel buttonBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
+		clearSessionButton.setToolTipText("Discards the conversation and the variables the agent has created");
+		buttonBar.add(clearSessionButton);
+		buttonBar.add(stopButton);
+		agentVariablesButton.setToolTipText("Shows the variables the agent has created in this conversation");
+		buttonBar.add(agentVariablesButton);
+		buttonBar.add(Box.createHorizontalStrut(10));
+		buttonBar.add(statusLabel);
 		autoApproveCheckBox.setToolTipText("Approves all requests of the agent that require approval (e.g., file changes) without asking");
-		toolBar.add(autoApproveCheckBox);
-		toolBar.add(Box.createHorizontalStrut(10));
-		toolBar.add(statusLabel);
+		JPanel toolBar = new JPanel(new BorderLayout());
+		toolBar.add(buttonBar, BorderLayout.CENTER);
+		toolBar.add(autoApproveCheckBox, BorderLayout.EAST);
 
 		transcriptPane.setEditable(false);
 		HTMLEditorKit editorKit = new HTMLEditorKit();
@@ -138,8 +156,9 @@ class AiAgentView extends JPanel implements ObjectView
 
 	private void addListeners() {
 		stopButton.addActionListener(e -> stop());
-		newSessionButton.addActionListener(e -> startNewSession());
+		clearSessionButton.addActionListener(e -> clearSession());
 		autoApproveCheckBox.addActionListener(e -> settings.setAutoApprove(autoApproveCheckBox.isSelected()));
+		agentVariablesButton.addActionListener(e -> showAgentVariables());
 
 		// Enter sends the message, Shift+Enter inserts a line break (as in common chat applications)
 		InputMap inputMap = inputArea.getInputMap(JComponent.WHEN_FOCUSED);
@@ -151,6 +170,53 @@ class AiAgentView extends JPanel implements ObjectView
 				send();
 			}
 		});
+	}
+
+	/*
+	 * Agent variables
+	 */
+	private void showAgentVariables() {
+		if (session == null) {
+			return;
+		}
+		AgentVariables agentVariables = session.getAgentVariables();
+		// the user might have deleted variables in Marple
+		updateAgentVariablesButton();
+		if (agentVariables.getVariables().isEmpty()) {
+			return;
+		}
+		AgentVariablesDialog dialog = new AgentVariablesDialog(SwingUtilities.getWindowAncestor(this), context, agentVariables);
+		dialog.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				agentVariablesDialog = null;
+				updateAgentVariablesButton();
+			}
+		});
+		agentVariablesDialog = dialog;
+		updateAgentVariablesButton();
+		dialog.setVisible(true);
+	}
+
+	/**
+	 * Must be called whenever the session switches to another conversation.
+	 */
+	private void observeAgentVariables(@Nullable AgentVariables agentVariables) {
+		if (observedAgentVariables != null) {
+			observedAgentVariables.removeChangeListener(agentVariablesListener);
+		}
+		observedAgentVariables = agentVariables;
+		if (agentVariables != null) {
+			agentVariables.addChangeListener(agentVariablesListener);
+		}
+		updateAgentVariablesButton();
+	}
+
+	private void updateAgentVariablesButton() {
+		int count = observedAgentVariables != null ? observedAgentVariables.getVariables().size() : 0;
+		agentVariablesButton.setText("Show Agent Variables (" + count + ")");
+		// at most one dialog: it follows the changes anyway
+		agentVariablesButton.setEnabled(count > 0 && agentVariablesDialog == null);
 	}
 
 	private void onAutoApproveChanged() {
@@ -199,6 +265,7 @@ class AiAgentView extends JPanel implements ObjectView
 				}
 			}
 		}
+		updateAgentVariablesButton();
 		updateControls();
 	}
 
@@ -211,7 +278,7 @@ class AiAgentView extends JPanel implements ObjectView
 		session.cancelRequest();
 	}
 
-	private void startNewSession() {
+	private void clearSession() {
 		if (session == null || state == State.CLOSED) {
 			return;
 		}
@@ -224,6 +291,7 @@ class AiAgentView extends JPanel implements ObjectView
 			state = State.CANCELING;
 		}
 		session.reset();
+		observeAgentVariables(session.getAgentVariables());
 		transcript.clear();
 		renderTranscript();
 		updateControls();
@@ -344,6 +412,7 @@ class AiAgentView extends JPanel implements ObjectView
 		transcript.clear();
 		transcript.addAll(snapshot.getTranscript());
 		session.restore(snapshot.getResumeState(), snapshot.getTranscript(), snapshot.getAgentVariables());
+		observeAgentVariables(session.getAgentVariables());
 		renderTranscript();
 		updateControls();
 	}
@@ -356,6 +425,11 @@ class AiAgentView extends JPanel implements ObjectView
 		state = State.CLOSED;
 		currentRequest = null;
 		settings.removeAutoApproveListener(autoApproveListener);
+		// the agent variables are referenced by the history => do not let them reference this view
+		observeAgentVariables(null);
+		if (agentVariablesDialog != null) {
+			agentVariablesDialog.dispose();
+		}
 		if (session != null) {
 			session.close();
 		}
