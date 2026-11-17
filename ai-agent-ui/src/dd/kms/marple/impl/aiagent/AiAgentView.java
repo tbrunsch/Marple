@@ -124,7 +124,7 @@ class AiAgentView extends JPanel implements ObjectView
 		addListeners();
 		settings.addAutoApproveListener(autoApproveListener);
 		onAutoApproveChanged();
-		updateControls();
+		setState(State.IDLE);
 		renderTranscript();
 	}
 
@@ -176,7 +176,7 @@ class AiAgentView extends JPanel implements ObjectView
 
 		inputArea.setLineWrap(true);
 		inputArea.setWrapStyleWord(true);
-		JLabel inputLabel = new JLabel("Your message (Enter sends, Shift+Enter inserts a line break):");
+		JLabel inputLabel = new JLabel("Ask anything about \"this\" or the application (Enter sends, Shift+Enter inserts a line break):");
 		inputLabel.setLabelFor(inputArea);
 		JPanel inputPanel = new JPanel(new BorderLayout(0, 2));
 		inputPanel.add(inputLabel, BorderLayout.NORTH);
@@ -275,8 +275,7 @@ class AiAgentView extends JPanel implements ObjectView
 
 		Request request = new Request(session, message, createContextLine());
 		currentRequest = request;
-		state = State.RUNNING;
-		updateControls();
+		setState(State.RUNNING);
 		request.execute();
 	}
 
@@ -287,7 +286,7 @@ class AiAgentView extends JPanel implements ObjectView
 		}
 		boolean canceled = state == State.CANCELING;
 		currentRequest = null;
-		state = State.IDLE;
+		setState(State.IDLE);
 		if (!request.isDiscarded()) {
 			try {
 				String answer = request.get();
@@ -304,15 +303,13 @@ class AiAgentView extends JPanel implements ObjectView
 				}
 			}
 		}
-		updateControls();
 	}
 
 	private void stop() {
 		if (state != State.RUNNING || session == null) {
 			return;
 		}
-		state = State.CANCELING;
-		updateControls();
+		setState(State.CANCELING);
 		session.cancelRequest();
 	}
 
@@ -326,13 +323,12 @@ class AiAgentView extends JPanel implements ObjectView
 			 * new transcript. Resetting the session closes the agent, which makes the request terminate soon.
 			 */
 			currentRequest.discard();
-			state = State.CANCELING;
+			setState(State.CANCELING);
 		}
 		session.reset();
 		observeAgentVariables(session.getAgentVariables());
 		transcript.clear();
 		renderTranscript();
-		updateControls();
 	}
 
 	private String createContextLine() {
@@ -345,7 +341,8 @@ class AiAgentView extends JPanel implements ObjectView
 		if (displayText == null) {
 			displayText = "null";
 		}
-		displayText = displayText.replace('\n', ' ').replace('\r', ' ');
+		// one line: line breaks (\r\n, \n, or \r) and the indentation around them become a single space
+		displayText = displayText.replaceAll("\\s*\\R\\s*", " ");
 		if (displayText.length() > MAX_CONTEXT_DISPLAY_LENGTH) {
 			displayText = displayText.substring(0, MAX_CONTEXT_DISPLAY_LENGTH) + "...";
 		}
@@ -353,8 +350,13 @@ class AiAgentView extends JPanel implements ObjectView
 		return "[this: " + className + " - " + displayText + "]";
 	}
 
-	private void updateControls() {
+	/**
+	 * Changes the state and updates the controls that depend on it. These controls depend on the state only.
+	 */
+	private void setState(State state) {
+		this.state = state;
 		if (session == null) {
+			// the agent is not available => the controls have not been created
 			return;
 		}
 		stopButton.setEnabled(state == State.RUNNING);
@@ -368,7 +370,7 @@ class AiAgentView extends JPanel implements ObjectView
 			case CANCELING:
 				return "Stopping...";
 			default:
-				return transcript.isEmpty() ? "Ask anything about \"this\" or the application" : "Ready";
+				return "Ready";
 		}
 	}
 
@@ -615,7 +617,6 @@ class AiAgentView extends JPanel implements ObjectView
 		session.restore(snapshot.getResumeState(), snapshot.getTranscript(), snapshot.getAgentVariables());
 		observeAgentVariables(session.getAgentVariables());
 		renderTranscript();
-		updateControls();
 	}
 
 	@Override
@@ -623,7 +624,7 @@ class AiAgentView extends JPanel implements ObjectView
 		if (state == State.CLOSED) {
 			return;
 		}
-		state = State.CLOSED;
+		setState(State.CLOSED);
 		currentRequest = null;
 		settings.removeAutoApproveListener(autoApproveListener);
 		// the agent variables are referenced by the history => do not let them reference this view
