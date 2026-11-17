@@ -19,7 +19,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
@@ -299,7 +298,7 @@ class AiAgentView extends JPanel implements ObjectView
 				addEntry(TranscriptEntry.Role.INFO, "The request has been interrupted.");
 			} catch (ExecutionException e) {
 				Throwable cause = e.getCause() != null ? e.getCause() : e;
-				if (canceled || cause instanceof InterruptedIOException) {
+				if (canceled) {
 					addEntry(TranscriptEntry.Role.INFO, "The request has been stopped.");
 				} else {
 					String message = cause.getMessage();
