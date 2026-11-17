@@ -1,10 +1,9 @@
 package dd.kms.marple.impl.aiagent;
 
-import dd.kms.marple.api.aiagent.backend.AiAgentFactory;
+import com.google.common.base.Preconditions;
 import dd.kms.marple.api.aiagent.AiAgentViewUI;
+import dd.kms.marple.api.aiagent.backend.AiAgentFactorySupplier;
 import dd.kms.marple.api.settings.visual.VisualSettingsBuilder;
-
-import javax.annotation.Nullable;
 
 /**
  * Builder for the {@link AiAgentViewSettings}. Changes made after {@link #register(VisualSettingsBuilder)}
@@ -12,21 +11,11 @@ import javax.annotation.Nullable;
  */
 public class AiAgentViewUIImpl implements AiAgentViewUI
 {
-	@Nullable
-	private AiAgentFactory	agentFactory;
-	private String			unavailableMessage		= "AI agent not available";
-	private String			systemPromptAddition	= "";
+	private final AiAgentFactorySupplier	agentFactorySupplier;
+	private String							systemPromptAddition	= "";
 
-	@Override
-	public AiAgentViewUI agentFactory(@Nullable AiAgentFactory agentFactory) {
-		this.agentFactory = agentFactory;
-		return this;
-	}
-
-	@Override
-	public AiAgentViewUI unavailableMessage(String unavailableMessage) {
-		this.unavailableMessage = unavailableMessage;
-		return this;
+	public AiAgentViewUIImpl(AiAgentFactorySupplier agentFactorySupplier) {
+		this.agentFactorySupplier = Preconditions.checkNotNull(agentFactorySupplier, "The agent factory supplier must not be null");
 	}
 
 	@Override
@@ -37,7 +26,7 @@ public class AiAgentViewUIImpl implements AiAgentViewUI
 
 	@Override
 	public VisualSettingsBuilder register(VisualSettingsBuilder visualSettingsBuilder) {
-		AiAgentViewSettings settings = new AiAgentViewSettings(agentFactory, unavailableMessage, systemPromptAddition);
+		AiAgentViewSettings settings = new AiAgentViewSettings(agentFactorySupplier, systemPromptAddition);
 		return visualSettingsBuilder.objectView(Object.class, (object, context) -> new AiAgentView(object, context, settings));
 	}
 }

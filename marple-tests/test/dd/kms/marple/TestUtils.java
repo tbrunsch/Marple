@@ -30,6 +30,7 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -114,10 +115,7 @@ class TestUtils
 
 		VisualSettingsBuilder visualSettingsBuilder = ObjectInspectionFramework.createVisualSettingsBuilder();
 
-		Path repoRoot = findRepositoryRoot();
-		AiAgentViewUI.create()
-			.agentFactory(repoRoot == null ? null : ClaudeCodeAgentFactoryBuilder.create(repoRoot).build())
-			.unavailableMessage("AI agent not available: Cannot find the Marple repository root")
+		AiAgentViewUI.create(() -> ClaudeCodeAgentFactoryBuilder.create(findRepositoryRoot()).build())
 			.systemPromptAddition("The inspected application is Marple's test application (module marple-tests).")
 			.register(visualSettingsBuilder);
 
@@ -161,20 +159,22 @@ class TestUtils
 	 * Determines the root directory of the Marple repository by walking up from the location
 	 * this class has been loaded from (e.g., ".../marple-tests/target/test-classes"). This only
 	 * works when started from the IDE or from Maven.
+	 *
+	 * @throws IOException if the repository root cannot be found
 	 */
-	@Nullable
-	static Path findRepositoryRoot() {
+	static Path findRepositoryRoot() throws IOException {
+		Path location;
 		try {
-			Path location = Paths.get(TestUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-			for (Path directory = location; directory != null; directory = directory.getParent()) {
-				if (Files.isDirectory(directory.resolve("marple")) && Files.isDirectory(directory.resolve("marple-tests"))) {
-					return directory;
-				}
-			}
+			location = Paths.get(TestUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 		} catch (Exception e) {
-			/* repository root cannot be determined */
+			throw new IOException("Cannot find the Marple repository root: The location of the test classes cannot be determined", e);
 		}
-		return null;
+		for (Path directory = location; directory != null; directory = directory.getParent()) {
+			if (Files.isDirectory(directory.resolve("marple")) && Files.isDirectory(directory.resolve("marple-tests"))) {
+				return directory;
+			}
+		}
+		throw new IOException("Cannot find the Marple repository root (searched upwards from '" + location + "')");
 	}
 
 	private static Path suggestPreferencesFile() {

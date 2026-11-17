@@ -3,6 +3,7 @@ package dd.kms.marple.impl.aiagent;
 import com.google.gson.JsonObject;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.ObjectInspectionFramework;
+import dd.kms.marple.api.aiagent.backend.AiAgentFactory;
 import dd.kms.marple.api.aiagent.backend.AiAgentListener;
 import dd.kms.marple.api.aiagent.backend.PermissionDecision;
 import dd.kms.marple.api.aiagent.backend.PermissionHandler;
@@ -36,7 +37,8 @@ public class AiSessionManualTest
 
 		InspectionSettings inspectionSettings = ObjectInspectionFramework.createInspectionSettingsBuilder().build();
 		InspectionContext context = new InspectionContextImpl(inspectionSettings);
-		AiAgentViewSettings settings = new AiAgentViewSettings(ClaudeCodeAgentFactoryBuilder.create(repoRoot).build(), "AI agent not available", "");
+		AiAgentFactory agentFactory = ClaudeCodeAgentFactoryBuilder.create(repoRoot).build();
+		AiAgentViewSettings settings = new AiAgentViewSettings(() -> agentFactory, "");
 
 		PermissionHandler permissionHandler = request -> {
 			System.out.println("PERMISSION REQUEST: tool=" + request.getToolName() + ", file=" + request.getFilePath());
@@ -56,7 +58,7 @@ public class AiSessionManualTest
 		};
 		String contextLine = "[this: " + thisValue.getClass().getName() + " - " + context.getDisplayText(thisValue) + "]";
 
-		AiSession session = new AiSession(settings, context, permissionHandler, thisValue);
+		AiSession session = new AiSession(settings, agentFactory, context, permissionHandler, thisValue);
 		Object resumeState;
 		AgentVariables agentVariables = session.getAgentVariables();
 		try {
@@ -69,7 +71,7 @@ public class AiSessionManualTest
 			session.close();
 		}
 
-		AiSession resumedSession = new AiSession(settings, context, permissionHandler, thisValue);
+		AiSession resumedSession = new AiSession(settings, agentFactory, context, permissionHandler, thisValue);
 		// restore() must be called on the event dispatch thread; this also ensures that close() has detached the agent variables before
 		Object finalResumeState = resumeState;
 		SwingUtilities.invokeAndWait(() -> resumedSession.restore(finalResumeState, Collections.emptyList(), agentVariables));

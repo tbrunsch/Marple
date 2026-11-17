@@ -2,6 +2,7 @@ package dd.kms.marple.impl.aiagent;
 
 import com.google.gson.JsonObject;
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.aiagent.backend.AiAgentFactory;
 import dd.kms.marple.api.aiagent.backend.AiAgentListener;
 import dd.kms.marple.api.settings.visual.ObjectView;
 
@@ -17,7 +18,10 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,6 +52,10 @@ class AiAgentView extends JPanel implements ObjectView
 	private static final int	MAX_CONTEXT_DISPLAY_LENGTH	= 200;
 	private static final String	TOOL_CALLS_LINK_PREFIX		= "toolcalls:";
 	private static final String	TOOL_CALL_ANCHOR_PREFIX		= "toolcall-";
+	/**
+	 * The content of {@code AiAgentView.css} with placeholders (see {@link #loadTranscriptStyleRules(StyleSheet)})
+	 */
+	private static final String	TRANSCRIPT_STYLE_RULES		= Resources.loadText("AiAgentView.css");
 
 	private final Object				thisValue;
 	private final InspectionContext		context;
@@ -99,14 +107,18 @@ class AiAgentView extends JPanel implements ObjectView
 		this.context = context;
 		this.settings = settings;
 
-		if (settings.getAgentFactory() == null) {
+		AiAgentFactory agentFactory;
+		try {
+			agentFactory = settings.getAgentFactory();
+		} catch (IOException e) {
 			session = null;
-			JLabel unavailableLabel = new JLabel(settings.getUnavailableMessage(), SwingConstants.CENTER);
+			String reason = e.getMessage() != null ? e.getMessage() : e.toString();
+			JLabel unavailableLabel = new JLabel("AI agent not available: " + reason, SwingConstants.CENTER);
 			add(unavailableLabel, BorderLayout.CENTER);
 			return;
 		}
 		SwingPermissionHandler permissionHandler = new SwingPermissionHandler(settings, this);
-		session = new AiSession(settings, context, permissionHandler, thisValue);
+		session = new AiSession(settings, agentFactory, context, permissionHandler, thisValue);
 		observeAgentVariables(session.getAgentVariables());
 
 		createLayout();
@@ -117,18 +129,39 @@ class AiAgentView extends JPanel implements ObjectView
 		renderTranscript();
 	}
 
+	/**
+	 * Loads the rules of the resource {@code AiAgentView.css} after replacing its placeholders by
+	 * values derived from the look and feel's label font.
+	 */
+	private static void loadTranscriptStyleRules(StyleSheet styleSheet) {
+		Font font = UIManager.getFont("Label.font");
+		String fontFamily = font != null ? font.getFamily() : "SansSerif";
+		int fontSize = font != null ? font.getSize() : 12;
+		String rules = TRANSCRIPT_STYLE_RULES
+			.replace("${fontFamily}", fontFamily)
+			.replace("${fontSize}", String.valueOf(fontSize))
+			.replace("${smallFontSize}", String.valueOf(Math.max(fontSize - 1, 8)));
+		try {
+			styleSheet.loadRules(new StringReader(rules), null);
+		} catch (IOException e) {
+			throw new UncheckedIOException("Cannot load the style rules of the transcript", e);
+		}
+	}
+
 	private void createLayout() {
 		JPanel buttonBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
-		clearSessionButton.setToolTipText("Discards the conversation and the variables the agent has created");
 		buttonBar.add(clearSessionButton);
 		buttonBar.add(stopButton);
-		agentVariablesButton.setToolTipText("Shows the variables the agent has created in this conversation");
 		buttonBar.add(agentVariablesButton);
-		toolCallsButton.setToolTipText("Shows the tools the agent has called in this conversation with their complete parameters");
 		buttonBar.add(toolCallsButton);
 		buttonBar.add(Box.createHorizontalStrut(10));
 		buttonBar.add(statusLabel);
+
+		clearSessionButton.setToolTipText("Discards the conversation and the variables the agent has created");
+		agentVariablesButton.setToolTipText("Shows the variables the agent has created in this conversation");
+		toolCallsButton.setToolTipText("Shows the tools the agent has called in this conversation with their complete parameters");
 		autoApproveCheckBox.setToolTipText("Approves all requests of the agent that require approval (e.g., file changes) without asking");
+
 		JPanel toolBar = new JPanel(new BorderLayout());
 		toolBar.add(buttonBar, BorderLayout.CENTER);
 		toolBar.add(autoApproveCheckBox, BorderLayout.EAST);
@@ -137,21 +170,7 @@ class AiAgentView extends JPanel implements ObjectView
 		HTMLEditorKit editorKit = new HTMLEditorKit();
 		StyleSheet styleSheet = new StyleSheet();
 		styleSheet.addStyleSheet(editorKit.getStyleSheet());
-		Font font = UIManager.getFont("Label.font");
-		String fontFamily = font != null ? font.getFamily() : "SansSerif";
-		int fontSize = font != null ? font.getSize() : 12;
-		styleSheet.addRule("body { font-family: " + fontFamily + "; font-size: " + fontSize + "pt; margin: 4px; }");
-		styleSheet.addRule(".user { background-color: #e8f0fe; padding: 4px; margin-top: 6px; }");
-		styleSheet.addRule(".agent { padding: 2px; margin-top: 4px; }");
-		styleSheet.addRule(".progress { color: #505050; padding: 2px; margin-top: 2px; }");
-		styleSheet.addRule(".tool { color: #707070; font-size: " + Math.max(fontSize - 1, 8) + "pt; margin-top: 1px; }");
-		styleSheet.addRule(".highlightedTool { color: #707070; font-size: " + Math.max(fontSize - 1, 8) + "pt; margin-top: 1px; background-color: #fff2a8; }");
-		styleSheet.addRule(".info { color: #707070; font-style: italic; margin-top: 4px; }");
-		styleSheet.addRule(".error { color: #b00020; margin-top: 4px; }");
-		styleSheet.addRule("pre { font-family: Monospaced; background-color: #f4f4f4; padding: 4px; }");
-		styleSheet.addRule("code { font-family: Monospaced; background-color: #f4f4f4; }");
-		styleSheet.addRule("h2, h3, h4 { margin-top: 6px; margin-bottom: 2px; }");
-		styleSheet.addRule("p { margin-top: 2px; margin-bottom: 4px; }");
+		loadTranscriptStyleRules(styleSheet);
 		editorKit.setStyleSheet(styleSheet);
 		transcriptPane.setEditorKit(editorKit);
 		JScrollPane transcriptScrollPane = new JScrollPane(transcriptPane);
@@ -196,16 +215,12 @@ class AiAgentView extends JPanel implements ObjectView
 	 * Agent variables
 	 */
 	private void showAgentVariables() {
-		if (session == null) {
-			return;
-		}
-		AgentVariables agentVariables = session.getAgentVariables();
 		// the user might have deleted variables in Marple
 		updateAgentVariablesButton();
-		if (agentVariables.getVariables().isEmpty()) {
+		if (!canShowAgentVariables()) {
 			return;
 		}
-		AgentVariablesDialog dialog = new AgentVariablesDialog(SwingUtilities.getWindowAncestor(this), context, agentVariables);
+		AgentVariablesDialog dialog = new AgentVariablesDialog(SwingUtilities.getWindowAncestor(this), context, observedAgentVariables);
 		dialog.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosed(WindowEvent e) {
@@ -235,8 +250,15 @@ class AiAgentView extends JPanel implements ObjectView
 	private void updateAgentVariablesButton() {
 		int count = observedAgentVariables != null ? observedAgentVariables.getVariables().size() : 0;
 		agentVariablesButton.setText("Show Agent Variables (" + count + ")");
-		// at most one dialog: it follows the changes anyway
-		agentVariablesButton.setEnabled(count > 0 && agentVariablesDialog == null);
+		agentVariablesButton.setEnabled(canShowAgentVariables());
+	}
+
+	/**
+	 * Returns {@code true} if the conversation has variables and no dialog is open. There is at most one
+	 * dialog because it follows the changes anyway.
+	 */
+	private boolean canShowAgentVariables() {
+		return observedAgentVariables != null && !observedAgentVariables.getVariables().isEmpty() && agentVariablesDialog == null;
 	}
 
 	private void onAutoApproveChanged() {

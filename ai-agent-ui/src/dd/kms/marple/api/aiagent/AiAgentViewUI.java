@@ -1,9 +1,7 @@
 package dd.kms.marple.api.aiagent;
 
-import dd.kms.marple.api.aiagent.backend.AiAgentFactory;
+import dd.kms.marple.api.aiagent.backend.AiAgentFactorySupplier;
 import dd.kms.marple.api.settings.visual.VisualSettingsBuilder;
-
-import javax.annotation.Nullable;
 
 /**
  * Registration helper for the "AI Agent" inspection view. The view lets the user chat with an AI agent
@@ -12,25 +10,28 @@ import javax.annotation.Nullable;
  * <br>
  * Example:
  * <pre>
- * AiAgentViewUI.create()
- *     .agentFactory(agentFactory)
+ * AiAgentViewUI.create(() -&gt; {
+ *         Path sourceRootDirectory = findSourceRootDirectory();
+ *         if (sourceRootDirectory == null) {
+ *             throw new IOException("Cannot find the source code of the application");
+ *         }
+ *         return ClaudeCodeAgentFactoryBuilder.create(sourceRootDirectory).build();
+ *     })
  *     .systemPromptAddition("The inspected application is ...")
  *     .register(visualSettingsBuilder);
  * </pre>
  */
 public interface AiAgentViewUI
 {
-	static AiAgentViewUI create() {
-		return new dd.kms.marple.impl.aiagent.AiAgentViewUIImpl();
-	}
-
 	/**
-	 * Specifies how the agents are created. If {@code null} is specified, then the view displays
-	 * the "unavailable" message (see {@link #unavailableMessage(String)}).
+	 * @param agentFactorySupplier	provides the factory that creates the agents. If it throws an exception,
+	 *                              then the view displays the exception's message instead of the chat
+	 *                              (see {@link AiAgentFactorySupplier}). If the factory can always be
+	 *                              created, use {@code create(() -> agentFactory)}.
 	 */
-	AiAgentViewUI agentFactory(@Nullable AiAgentFactory agentFactory);
-
-	AiAgentViewUI unavailableMessage(String unavailableMessage);
+	static AiAgentViewUI create(AiAgentFactorySupplier agentFactorySupplier) {
+		return new dd.kms.marple.impl.aiagent.AiAgentViewUIImpl(agentFactorySupplier);
+	}
 
 	/**
 	 * Application specific information that is appended to the system prompt.

@@ -5,6 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import dd.kms.marple.api.aiagent.backend.AiAgentFactory;
 import dd.kms.marple.api.aiagent.claude.ClaudeCodeAgentFactoryBuilder;
 
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,6 +16,7 @@ import java.util.Objects;
 
 public class ClaudeCodeAgentFactoryBuilderImpl implements ClaudeCodeAgentFactoryBuilder
 {
+	@Nullable
 	private final Path					workingDirectory;
 	private String						executable				= "claude";
 	/**
@@ -21,7 +25,7 @@ public class ClaudeCodeAgentFactoryBuilderImpl implements ClaudeCodeAgentFactory
 	private final Map<String, Boolean>	tools					= new LinkedHashMap<>();
 	private List<String>				additionalArguments		= ImmutableList.of();
 
-	public ClaudeCodeAgentFactoryBuilderImpl(Path workingDirectory) {
+	public ClaudeCodeAgentFactoryBuilderImpl(@Nullable Path workingDirectory) {
 		this.workingDirectory = workingDirectory;
 		addTool("Read", false);
 		addTool("Grep", false);
@@ -56,7 +60,13 @@ public class ClaudeCodeAgentFactoryBuilderImpl implements ClaudeCodeAgentFactory
 	}
 
 	@Override
-	public AiAgentFactory build() {
+	public AiAgentFactory build() throws IOException {
+		if (workingDirectory == null) {
+			throw new IOException("No working directory specified");
+		}
+		if (!Files.isDirectory(workingDirectory)) {
+			throw new IOException("The working directory '" + workingDirectory + "' does not exist or is not a directory");
+		}
 		return new ClaudeCodeAgentFactoryImpl(executable, workingDirectory, ImmutableMap.copyOf(tools), additionalArguments);
 	}
 }

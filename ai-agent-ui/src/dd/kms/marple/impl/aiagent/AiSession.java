@@ -20,7 +20,8 @@ class AiSession
 	private static final String	MCP_SERVER_NAME				= "marple";
 	private static final int	MAX_TRANSCRIPT_SUMMARY_LENGTH	= 10000;
 
-	private final AiAgentViewSettings		settings;
+	private final AiAgentViewSettings	settings;
+	private final AiAgentFactory		agentFactory;
 	private final InspectionContext		context;
 	private final PermissionHandler		permissionHandler;
 	private final Object				thisValue;
@@ -44,8 +45,9 @@ class AiSession
 	private int							conversationId;
 	private volatile boolean			closed;
 
-	AiSession(AiAgentViewSettings settings, InspectionContext context, PermissionHandler permissionHandler, Object thisValue) {
+	AiSession(AiAgentViewSettings settings, AiAgentFactory agentFactory, InspectionContext context, PermissionHandler permissionHandler, Object thisValue) {
 		this.settings = settings;
+		this.agentFactory = agentFactory;
 		this.context = context;
 		this.permissionHandler = permissionHandler;
 		this.thisValue = thisValue;
@@ -181,10 +183,6 @@ class AiSession
 		AiAgent agent = this.agent;
 		if (agent != null) {
 			return agent;
-		}
-		AiAgentFactory agentFactory = settings.getAgentFactory();
-		if (agentFactory == null) {
-			throw new IOException(settings.getUnavailableMessage());
 		}
 		if (mcpServer == null) {
 			evaluatorSettingsTools = new EvaluatorSettingsTools(context.getEvaluator());

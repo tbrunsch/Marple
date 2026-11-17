@@ -1,0 +1,19 @@
+/*
+ * Style sheet of the transcript in the "AI Agent" view (Swing's HTML renderer: CSS 1 subset, no variables).
+ * Placeholders that are replaced before the rules are loaded:
+ *   ${fontFamily}     font family of the look and feel's label font
+ *   ${fontSize}       size of that font in pt
+ *   ${smallFontSize}  size for less important text (tool calls) in pt
+ */
+body { font-family: ${fontFamily}; font-size: ${fontSize}pt; margin: 4px; }
+.user { background-color: #e8f0fe; padding: 4px; margin-top: 6px; }
+.agent { padding: 2px; margin-top: 4px; }
+.progress { color: #505050; padding: 2px; margin-top: 2px; }
+.tool { color: #707070; font-size: ${smallFontSize}pt; margin-top: 1px; }
+.highlightedTool { color: #707070; font-size: ${smallFontSize}pt; margin-top: 1px; background-color: #fff2a8; }
+.info { color: #707070; font-style: italic; margin-top: 4px; }
+.error { color: #b00020; margin-top: 4px; }
+pre { font-family: Monospaced; background-color: #f4f4f4; padding: 4px; }
+code { font-family: Monospaced; background-color: #f4f4f4; }
+h2, h3, h4 { margin-top: 6px; margin-bottom: 2px; }
+p { margin-top: 2px; margin-bottom: 4px; }

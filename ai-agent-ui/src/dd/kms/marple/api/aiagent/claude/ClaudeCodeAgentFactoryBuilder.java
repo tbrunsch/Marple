@@ -2,6 +2,8 @@ package dd.kms.marple.api.aiagent.claude;
 
 import dd.kms.marple.api.aiagent.backend.AiAgentFactory;
 
+import javax.annotation.Nullable;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -11,8 +13,7 @@ import java.util.List;
  * <br>
  * Example:
  * <pre>
- * AiAgentViewUI.create()
- *     .agentFactory(ClaudeCodeAgentFactoryBuilder.create(sourceRootDirectory).build())
+ * AiAgentViewUI.create(() -&gt; ClaudeCodeAgentFactoryBuilder.create(sourceRootDirectory).build())
  *     .register(visualSettingsBuilder);
  * </pre>
  * The agents use the headless mode of Claude Code ({@code claude -p} with stream-json input and output).
@@ -24,9 +25,10 @@ public interface ClaudeCodeAgentFactoryBuilder
 {
 	/**
 	 * @param workingDirectory	the directory the agents are started in. It should contain the source code of the
-	 *                          inspected application.
+	 *                          inspected application. It is validated by {@link #build()}, so {@code null}
+	 *                          (e.g., if the source code cannot be found) is allowed here.
 	 */
-	static ClaudeCodeAgentFactoryBuilder create(Path workingDirectory) {
+	static ClaudeCodeAgentFactoryBuilder create(@Nullable Path workingDirectory) {
 		return new dd.kms.marple.impl.aiagent.claude.ClaudeCodeAgentFactoryBuilderImpl(workingDirectory);
 	}
 
@@ -61,6 +63,8 @@ public interface ClaudeCodeAgentFactoryBuilder
 
 	/**
 	 * Creates the factory. Changes of the builder made afterwards do not affect the factory.
+	 *
+	 * @throws IOException if no working directory has been specified or if it is not an existing directory
 	 */
-	AiAgentFactory build();
+	AiAgentFactory build() throws IOException;
 }

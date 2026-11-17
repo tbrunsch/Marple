@@ -3,7 +3,7 @@ package dd.kms.marple.api.aiagent.backend;
 import javax.annotation.Nullable;
 
 /**
- * Creates the agents for the "AI Agent" view (see {@link AiAgentViewUI#agentFactory(AiAgentFactory)}).
+ * Creates the agents for the "AI Agent" view (see {@link AiAgentFactorySupplier}).
  */
 public interface AiAgentFactory
 {
