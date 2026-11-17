@@ -404,19 +404,19 @@ class AiAgentView extends JPanel implements ObjectView
 	 */
 	private void renderTranscript(boolean scrollToEnd) {
 		StringBuilder html = new StringBuilder("<html><body>");
+		List<TranscriptEntry> toolEntries = new ArrayList<>();
 		int numToolCalls = 0;
 		for (int i = 0; i < transcript.size(); i++) {
 			TranscriptEntry entry = transcript.get(i);
 			if (entry.getToolName() != null) {
 				// consecutive tool calls are rendered as one line
-				int end = i + 1;
-				while (end < transcript.size() && transcript.get(end).getToolName() != null) {
-					end++;
+				toolEntries.add(entry);
+				boolean lastToolInRow = i + 1 == transcript.size() || transcript.get(i + 1).getToolName() == null;
+				if (lastToolInRow) {
+					appendToolCalls(html, toolEntries, numToolCalls + 1, highlightedToolCall);
+					numToolCalls += toolEntries.size();
+					toolEntries.clear();
 				}
-				List<TranscriptEntry> toolEntries = transcript.subList(i, end);
-				appendToolCalls(html, toolEntries, numToolCalls + 1, highlightedToolCall);
-				numToolCalls += toolEntries.size();
-				i = end - 1;
 				continue;
 			}
 			String text = entry.getText();
