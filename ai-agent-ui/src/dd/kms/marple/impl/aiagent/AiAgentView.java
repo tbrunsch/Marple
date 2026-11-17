@@ -214,8 +214,6 @@ class AiAgentView extends JPanel implements ObjectView
 	 * Agent variables
 	 */
 	private void showAgentVariables() {
-		// the user might have deleted variables in Marple
-		updateAgentVariablesButton();
 		if (!canShowAgentVariables()) {
 			return;
 		}
@@ -306,7 +304,6 @@ class AiAgentView extends JPanel implements ObjectView
 				}
 			}
 		}
-		updateAgentVariablesButton();
 		updateControls();
 	}
 

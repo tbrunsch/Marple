@@ -64,7 +64,7 @@ class AiSession
 			closeAgent();
 			conversationId++;
 			if (agentVariables != this.agentVariables) {
-				this.agentVariables.deleteAll();
+				discardAgentVariables();
 				this.agentVariables = agentVariables;
 				agentVariables.attach();
 			}
@@ -130,6 +130,15 @@ class AiSession
 	}
 
 	/**
+	 * Deletes the variables of the current conversation, which is replaced. Detaching the empty object
+	 * stops it from listening to the evaluator, which would otherwise keep it alive.
+	 */
+	private void discardAgentVariables() {
+		agentVariables.deleteAll();
+		agentVariables.detach();
+	}
+
+	/**
 	 * The variables the agent has created in the current conversation. Must be called on the event dispatch thread.
 	 */
 	AgentVariables getAgentVariables() {
@@ -146,7 +155,7 @@ class AiSession
 		synchronized (lock) {
 			closeAgent();
 			conversationId++;
-			agentVariables.deleteAll();
+			discardAgentVariables();
 			agentVariables = new AgentVariables(context.getEvaluator());
 			resumeState = null;
 			transcriptSummary = null;

@@ -29,19 +29,29 @@ import java.util.Map;
  * the same name and the same value. If the user deletes or replaces it, then it is not tracked anymore.
  * The agent may only overwrite and delete its own variables.<br>
  * <br>
- * All methods must be called on the event dispatch thread. Listeners are notified about all changes
- * made via this class. Changes the user makes in Marple are detected lazily: Listeners are notified when
- * one of the methods of this class detects them, not when they happen.
+ * While attached, this object listens to the evaluator's variables. Hence, the listeners of this object
+ * are notified about all changes, including changes the user makes in Marple. An object that is not
+ * used anymore must be detached. Otherwise, the evaluator keeps it alive.<br>
+ * <br>
+ * All methods must be called on the event dispatch thread. The evaluator's variables must also only be
+ * changed on the event dispatch thread.
  */
 public final class AgentVariables
 {
 	private final ExpressionEvaluator		evaluator;
 	private final Map<String, Variable>		agentVariablesByName	= new LinkedHashMap<>();
 	private final List<Runnable>			listeners				= new ArrayList<>();
+	private final Runnable					evaluatorListener		= this::onEvaluatorVariablesChanged;
 	private boolean							attached				= true;
+	/**
+	 * {@code true} while this object changes the evaluator's variables. These changes are consistent
+	 * with {@link #agentVariablesByName} and must not be handled by {@link #onEvaluatorVariablesChanged()}.
+	 */
+	private boolean							changingEvaluator		= false;
 
 	public AgentVariables(ExpressionEvaluator evaluator) {
 		this.evaluator = evaluator;
+		evaluator.addVariablesListener(evaluatorListener);
 	}
 
 	/**
@@ -60,7 +70,6 @@ public final class AgentVariables
 	 * Returns the agent's variables that still exist in the evaluator.
 	 */
 	public List<Variable> getVariables() {
-		prune();
 		return ImmutableList.copyOf(agentVariablesByName.values());
 	}
 
@@ -72,7 +81,6 @@ public final class AgentVariables
 	}
 
 	public boolean isAgentVariable(String name) {
-		prune();
 		return agentVariablesByName.containsKey(name);
 	}
 
@@ -97,8 +105,8 @@ public final class AgentVariables
 		}
 		Class<?> type = value == null ? Object.class : value.getClass();
 		Variable variable = Variable.create(name, type, value, false, true);
-		evaluator.addVariable(variable);
 		agentVariablesByName.put(name, variable);
+		changeEvaluator(() -> evaluator.addVariable(variable));
 		fireChanged();
 	}
 
@@ -112,7 +120,7 @@ public final class AgentVariables
 			return false;
 		}
 		agentVariablesByName.remove(name);
-		evaluator.removeVariable(name);
+		changeEvaluator(() -> evaluator.removeVariable(name));
 		fireChanged();
 		return true;
 	}
@@ -121,18 +129,14 @@ public final class AgentVariables
 	 * Deletes all variables of the agent.
 	 */
 	public void deleteAll() {
-		// pruning counts as a change even if no variables are left to delete afterwards
-		boolean changed = pruneSilently();
-		if (!agentVariablesByName.isEmpty()) {
-			if (attached) {
-				agentVariablesByName.keySet().forEach(evaluator::removeVariable);
-			}
-			agentVariablesByName.clear();
-			changed = true;
+		if (agentVariablesByName.isEmpty()) {
+			return;
 		}
-		if (changed) {
-			fireChanged();
+		if (attached) {
+			changeEvaluator(() -> agentVariablesByName.keySet().forEach(evaluator::removeVariable));
 		}
+		agentVariablesByName.clear();
+		fireChanged();
 	}
 
 	/**
@@ -147,14 +151,14 @@ public final class AgentVariables
 
 	/**
 	 * Removes the agent's variables from the evaluator, but keeps them for {@link #attach()}.
-	 * While detached, no variables can be stored.
+	 * While detached, no variables can be stored and this object does not listen to the evaluator.
 	 */
 	public void detach() {
 		if (!attached) {
 			return;
 		}
-		pruneSilently();
-		agentVariablesByName.keySet().forEach(evaluator::removeVariable);
+		evaluator.removeVariablesListener(evaluatorListener);
+		changeEvaluator(() -> agentVariablesByName.keySet().forEach(evaluator::removeVariable));
 		attached = false;
 		fireChanged();
 	}
@@ -174,35 +178,36 @@ public final class AgentVariables
 			if (findEvaluatorVariable(variable.getName()) != null) {
 				iter.remove();
 			} else {
-				evaluator.addVariable(variable);
+				changeEvaluator(() -> evaluator.addVariable(variable));
 			}
 		}
+		evaluator.addVariablesListener(evaluatorListener);
 		fireChanged();
+	}
+
+	private void changeEvaluator(Runnable change) {
+		changingEvaluator = true;
+		try {
+			change.run();
+		} finally {
+			changingEvaluator = false;
+		}
 	}
 
 	/**
 	 * Stops tracking variables that the user has deleted or replaced and notifies the listeners if this changed anything.
 	 */
-	private void prune() {
-		if (pruneSilently()) {
-			fireChanged();
+	private void onEvaluatorVariablesChanged() {
+		if (changingEvaluator || !attached) {
+			return;
 		}
-	}
-
-	/**
-	 * Stops tracking variables that the user has deleted or replaced without notifying the listeners.
-	 * Callers that notify the listeners anyway use this method to avoid duplicate notifications.
-	 *
-	 * @return {@code true} if variables have been removed
-	 */
-	private boolean pruneSilently() {
-		if (!attached) {
-			return false;
-		}
-		return agentVariablesByName.values().removeIf(variable -> {
+		boolean changed = agentVariablesByName.values().removeIf(variable -> {
 			Variable evaluatorVariable = findEvaluatorVariable(variable.getName());
 			return evaluatorVariable == null || evaluatorVariable.getValue() != variable.getValue();
 		});
+		if (changed) {
+			fireChanged();
+		}
 	}
 
 	private void fireChanged() {

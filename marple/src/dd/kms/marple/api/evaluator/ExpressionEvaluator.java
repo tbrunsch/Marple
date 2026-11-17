@@ -25,10 +25,13 @@ public interface ExpressionEvaluator
 	void addVariable(Variable variable);
 
 	/**
-	 * Removes the variable with the specified name. Returns {@code true} if such
-	 * a variable existed and has been removed and {@code false} otherwise.
+	 * Removes the variable with the specified name if such a variable exists.
 	 */
-	boolean removeVariable(String name);
+	void removeVariable(String name);
+
+	void addVariablesListener(Runnable listener);
+
+	void removeVariablesListener(Runnable listener);
 
 	/**
 	 * Evaluates the specified expression in the context of {@code thisValue} with the
