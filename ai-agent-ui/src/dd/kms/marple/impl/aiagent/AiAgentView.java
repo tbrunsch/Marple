@@ -605,7 +605,11 @@ class AiAgentView extends JPanel implements ObjectView
 		if (session == null) {
 			return null;
 		}
-		return new AiSessionSnapshot(transcript, session.getResumeState(), session.getAgentVariables());
+		List<TranscriptEntry> snapshotTranscript = new ArrayList<>(transcript);
+		if (state == State.RUNNING || state == State.CANCELING) {
+			snapshotTranscript.add(new TranscriptEntry(TranscriptEntry.Role.INFO, "The request has been interrupted because the inspected object has changed."));
+		}
+		return new AiSessionSnapshot(snapshotTranscript, session.getResumeState(), session.getAgentVariables());
 	}
 
 	@Override
