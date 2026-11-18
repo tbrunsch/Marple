@@ -1,6 +1,7 @@
 package dd.kms.marple.impl.aiagent;
 
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.evaluator.ExpressionEvaluator;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.impl.actions.ActionProvider;
 import dd.kms.marple.impl.actions.ActionProviderBuilder;
@@ -14,21 +15,20 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 /**
  * Non-modal dialog that shows the variables the agent has created in the current conversation. The user can
  * keep them (they become ordinary variables of the user) or delete them. The values provide the same
  * actions as in Marple's variable dialog (e.g., inspecting them).<br>
  * <br>
- * The dialog follows changes of the variables. It closes itself when the conversation becomes inactive
- * (e.g., when an action navigates to another object, which disposes the AI view) or when no variables
- * are left.
+ * The dialog follows changes of the variables. It closes itself when no variables are left. The AI view
+ * closes it when it is disposed (e.g., when an action navigates to another object).
  */
 class AgentVariablesDialog extends JDialog
 {
 	private final InspectionContext				context;
-	private final AgentVariables				agentVariables;
+	private final AgentContext					agentContext;
 	private final Runnable						changeListener	= this::onVariablesChanged;
 
 	private final List<Variable>				variables		= new ArrayList<>();
@@ -39,10 +39,10 @@ class AgentVariablesDialog extends JDialog
 	private final JButton						deleteButton	= new JButton("Delete");
 	private final JButton						deleteAllButton	= new JButton("Delete all");
 
-	AgentVariablesDialog(@Nullable Window owner, InspectionContext context, AgentVariables agentVariables) {
+	AgentVariablesDialog(@Nullable Window owner, InspectionContext context, AgentContext agentContext) {
 		super(owner, "Agent Variables", ModalityType.MODELESS);
 		this.context = context;
-		this.agentVariables = agentVariables;
+		this.agentContext = agentContext;
 
 		List<ColumnDescription<Variable>> columnDescriptions = Arrays.asList(
 			new ColumnDescriptionBuilder<>("Name",	String.class,			Variable::getName).build(),
@@ -57,7 +57,7 @@ class AgentVariablesDialog extends JDialog
 		table.setDefaultRenderer(Class.class, new ClassRenderer(context));
 		ActionProviderListeners.addMouseListeners(table);
 
-		keepButton.setToolTipText("Keeps the selected variables: they become your variables and are not removed when the conversation ends");
+		keepButton.setToolTipText("Keeps the selected variables: they are added to your variables");
 		deleteButton.setToolTipText("Deletes the selected variables");
 		deleteAllButton.setToolTipText("Deletes all variables the agent has created in this conversation");
 
@@ -72,13 +72,13 @@ class AgentVariablesDialog extends JDialog
 		contentPanel.add(buttonPanel, BorderLayout.SOUTH);
 		setContentPane(contentPanel);
 
-		keepButton.addActionListener(e -> forSelectedVariables(AgentVariables::keep));
-		deleteButton.addActionListener(e -> forSelectedVariables(AgentVariables::delete));
+		keepButton.addActionListener(e -> keepSelectedVariables());
+		deleteButton.addActionListener(e -> getSelectedNames().forEach(agentContext::delete));
 		deleteAllButton.addActionListener(e -> deleteAll());
 		table.getSelectionModel().addListSelectionListener(e -> updateButtons());
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-		agentVariables.addChangeListener(changeListener);
+		agentContext.addChangeListener(changeListener);
 		updateContent();
 
 		setSize(700, 350);
@@ -87,12 +87,12 @@ class AgentVariablesDialog extends JDialog
 
 	@Override
 	public void dispose() {
-		agentVariables.removeChangeListener(changeListener);
+		agentContext.removeChangeListener(changeListener);
 		super.dispose();
 	}
 
 	private void onVariablesChanged() {
-		if (!agentVariables.isAttached() || agentVariables.getVariables().isEmpty()) {
+		if (agentContext.getVariables().isEmpty()) {
 			dispose();
 		} else {
 			updateContent();
@@ -102,7 +102,7 @@ class AgentVariablesDialog extends JDialog
 	private void updateContent() {
 		List<String> selectedNames = getSelectedNames();
 		variables.clear();
-		variables.addAll(agentVariables.getVariables());
+		variables.addAll(agentContext.getVariables());
 		tableModel.fireTableChanged(new TableModelEvent(tableModel));
 		for (int row = 0; row < variables.size(); row++) {
 			if (selectedNames.contains(variables.get(row).getName())) {
@@ -134,10 +134,24 @@ class AgentVariablesDialog extends JDialog
 		return names;
 	}
 
-	private void forSelectedVariables(BiConsumer<AgentVariables, String> operation) {
-		for (String name : getSelectedNames()) {
-			operation.accept(agentVariables, name);
+	/**
+	 * Adds the selected variables to the user's variables. Asks before replacing variables of the user.
+	 */
+	private void keepSelectedVariables() {
+		ExpressionEvaluator userEvaluator = context.getEvaluator();
+		List<String> names = getSelectedNames();
+		List<String> existingNames = names.stream()
+			.filter(name -> AgentContext.findVariable(userEvaluator, name) != null)
+			.collect(Collectors.toList());
+		if (!existingNames.isEmpty()) {
+			int answer = JOptionPane.showConfirmDialog(this,
+				"Replace your variables " + String.join(", ", existingNames) + "?",
+				"Keep agent variables", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			if (answer != JOptionPane.YES_OPTION) {
+				return;
+			}
 		}
+		names.forEach(name -> agentContext.keep(name, userEvaluator));
 	}
 
 	private void deleteAll() {
@@ -145,7 +159,7 @@ class AgentVariablesDialog extends JDialog
 			"Delete all " + variables.size() + " variables the agent has created in this conversation?",
 			"Delete agent variables", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		if (answer == JOptionPane.YES_OPTION) {
-			agentVariables.deleteAll();
+			agentContext.deleteAll();
 		}
 	}
 }

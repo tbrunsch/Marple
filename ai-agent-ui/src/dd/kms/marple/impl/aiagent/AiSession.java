@@ -30,16 +30,14 @@ class AiSession
 	@Nullable
 	private McpServer					mcpServer;
 	@Nullable
-	private EvaluatorSettingsTools		evaluatorSettingsTools;
-	@Nullable
 	private volatile AiAgent			agent;
 	@Nullable
 	private volatile Object				resumeState;
 	@Nullable
 	private String						transcriptSummary;
-	private AgentVariables				agentVariables;
+	private AgentContext				agentContext;
 	/**
-	 * Incremented whenever another conversation starts (see {@link #reset()} and {@link #restore(Object, List, AgentVariables)}).
+	 * Incremented whenever another conversation starts (see {@link #reset()} and {@link #restore(Object, List, AgentContext)}).
 	 * It is only written on the event dispatch thread while holding the lock.
 	 */
 	private volatile int				conversationId;
@@ -51,23 +49,19 @@ class AiSession
 		this.context = context;
 		this.permissionHandler = permissionHandler;
 		this.thisValue = thisValue;
-		this.agentVariables = new AgentVariables(context.getEvaluator());
+		this.agentContext = new AgentContext(context.getEvaluator());
 	}
 
 	/**
 	 * Restores a previous conversation. If the agent cannot resume the conversation, then the
-	 * transcript is passed to the agent as context with the next request. The variables the agent
-	 * has created in that conversation are attached again. Must be called on the event dispatch thread.
+	 * transcript is passed to the agent as context with the next request. The agent's evaluator of that
+	 * conversation is used again. Must be called on the event dispatch thread.
 	 */
-	void restore(@Nullable Object resumeState, List<TranscriptEntry> transcript, AgentVariables agentVariables) {
+	void restore(@Nullable Object resumeState, List<TranscriptEntry> transcript, AgentContext agentContext) {
 		synchronized (lock) {
 			closeAgent();
 			conversationId++;
-			if (agentVariables != this.agentVariables) {
-				discardAgentVariables();
-				this.agentVariables = agentVariables;
-				agentVariables.attach();
-			}
+			this.agentContext = agentContext;
 			this.resumeState = resumeState;
 			this.transcriptSummary = resumeState == null && !transcript.isEmpty()
 				? createTranscriptSummary(transcript)
@@ -129,42 +123,30 @@ class AiSession
 	}
 
 	/**
-	 * Deletes the variables of the current conversation, which is replaced. Detaching the empty object
-	 * stops it from listening to the evaluator, which would otherwise keep it alive.
+	 * The agent's evaluator of the current conversation. Must be called on the event dispatch thread.
 	 */
-	private void discardAgentVariables() {
-		agentVariables.deleteAll();
-		agentVariables.detach();
-	}
-
-	/**
-	 * The variables the agent has created in the current conversation. Must be called on the event dispatch thread.
-	 */
-	AgentVariables getAgentVariables() {
+	AgentContext getAgentContext() {
 		synchronized (lock) {
-			return agentVariables;
+			return agentContext;
 		}
 	}
 
 	/**
-	 * Starts a new conversation. The variables the agent has created are deleted. Must be called on the event
-	 * dispatch thread.
+	 * Starts a new conversation with a new evaluator for the agent. Must be called on the event dispatch thread.
 	 */
 	void reset() {
 		synchronized (lock) {
 			closeAgent();
 			conversationId++;
-			discardAgentVariables();
-			agentVariables = new AgentVariables(context.getEvaluator());
+			agentContext = new AgentContext(context.getEvaluator());
 			resumeState = null;
 			transcriptSummary = null;
 		}
 	}
 
 	/**
-	 * Closes the agent and stops the MCP server. Changes of the evaluator settings made by the agent
-	 * are reverted. The variables the agent has created are detached: They are removed from the evaluator,
-	 * but they remain part of the conversation (see {@link AgentVariables}). The session cannot be used anymore afterwards (see {@link #reset()} for starting
+	 * Closes the agent and stops the MCP server. The agent's evaluator remains part of the conversation
+	 * (see {@link AgentContext}). The session cannot be used anymore afterwards (see {@link #reset()} for starting
 	 * a new conversation instead).
 	 * <p>
 	 * This method does not throw exceptions, is idempotent, and does not block for a long time, so it
@@ -179,8 +161,6 @@ class AiSession
 		}
 		synchronized (lock) {
 			stopMcpServer();
-			AgentVariables agentVariables = this.agentVariables;
-			EventDispatchThreadUtils.runNowOrLater(agentVariables::detach);
 		}
 	}
 
@@ -193,10 +173,9 @@ class AiSession
 			return agent;
 		}
 		if (mcpServer == null) {
-			evaluatorSettingsTools = new EvaluatorSettingsTools(context.getEvaluator());
 			List<AiTool> tools = ImmutableList.<AiTool>builder()
-				.addAll(new MarpleTools(context, thisValue, agentVariables).createTools())
-				.addAll(evaluatorSettingsTools.createTools())
+				.addAll(new MarpleTools(context, thisValue, agentContext).createTools())
+				.addAll(new EvaluatorSettingsTools(agentContext.getEvaluator()).createTools())
 				.build();
 			McpServer server = new McpServer(tools);
 			server.start();
@@ -221,17 +200,10 @@ class AiSession
 		stopMcpServer();
 	}
 
-	/**
-	 * Stops the MCP server and reverts the changes of the evaluator settings made by the agent.
-	 */
 	private void stopMcpServer() {
 		if (mcpServer != null) {
 			mcpServer.stop();
 			mcpServer = null;
-		}
-		if (evaluatorSettingsTools != null) {
-			evaluatorSettingsTools.revertChanges();
-			evaluatorSettingsTools = null;
 		}
 	}
 

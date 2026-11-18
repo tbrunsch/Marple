@@ -16,14 +16,12 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 {
 	private ParserSettings					parserSettings		= ParserSettingsBuilder.create().build();
 	private final List<DisposableVariable>	variables			= new ArrayList<>();
 	private final StringHistory				expressionHistory	= new StringHistoryImpl();
-	private final List<Runnable>			variablesListeners	= new CopyOnWriteArrayList<>();
 	private InspectionContext				context;
 
 	public void setInspectionContext(InspectionContext context) {
@@ -63,7 +61,6 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 			DisposableVariable disposableVariable = new DisposableVariable(variable.getName(), variable.getType(), variable.getValue(), variable.isFinal(), variable.isUseHardReference());
 			this.variables.add(disposableVariable);
 		}
-		fireVariablesChanged();
 	}
 
 	@Override
@@ -72,33 +69,15 @@ public class ExpressionEvaluatorImpl implements ExpressionEvaluator
 		for (int i = 0; i < variables.size(); i++) {
 			if (variables.get(i).getName().equals(variable.getName())) {
 				variables.set(i, disposableVariable);
-				fireVariablesChanged();
 				return;
 			}
 		}
 		variables.add(disposableVariable);
-		fireVariablesChanged();
 	}
 
 	@Override
-	public void removeVariable(String name) {
-		if (variables.removeIf(variable -> variable.getName().equals(name))) {
-			fireVariablesChanged();
-		}
-	}
-
-	@Override
-	public void addVariablesListener(Runnable listener) {
-		variablesListeners.add(listener);
-	}
-
-	@Override
-	public void removeVariablesListener(Runnable listener) {
-		variablesListeners.remove(listener);
-	}
-
-	private void fireVariablesChanged() {
-		variablesListeners.forEach(Runnable::run);
+	public boolean removeVariable(String name) {
+		return variables.removeIf(variable -> variable.getName().equals(name));
 	}
 
 	@Nullable

@@ -9,7 +9,7 @@ import dd.kms.marple.api.aiagent.backend.AiTool;
 import dd.kms.marple.api.aiagent.backend.AiToolResult;
 import dd.kms.marple.api.evaluator.Variable;
 import dd.kms.marple.api.settings.components.ComponentHierarchy;
-import dd.kms.marple.impl.aiagent.AgentVariables;
+import dd.kms.marple.impl.aiagent.AgentContext;
 import dd.kms.marple.impl.common.ReflectionUtils;
 import dd.kms.zenodot.api.ParseException;
 import dd.kms.zenodot.api.common.GeneralizedField;
@@ -25,8 +25,8 @@ import static dd.kms.marple.impl.aiagent.JsonUtils.getString;
 
 /**
  * Tools that give the agent access to the inspected object ("this"), the Swing component hierarchy,
- * expression evaluation and variables. All tools are executed on the event dispatch thread. The agent
- * may only overwrite and delete the variables it has created (see {@link AgentVariables}).
+ * expression evaluation and variables. All tools are executed on the event dispatch thread. Expressions are
+ * evaluated with the agent's own evaluator (see {@link AgentContext}).
  */
 public class MarpleTools
 {
@@ -38,15 +38,15 @@ public class MarpleTools
 	private final InspectionContext	context;
 	@Nullable
 	private final Object			thisValue;
-	private final AgentVariables	agentVariables;
+	private final AgentContext		agentContext;
 
 	/**
 	 * @param thisValue	the inspected object. It does not change during a conversation: A conversation belongs to one object.
 	 */
-	public MarpleTools(InspectionContext context, @Nullable Object thisValue, AgentVariables agentVariables) {
+	public MarpleTools(InspectionContext context, @Nullable Object thisValue, AgentContext agentContext) {
 		this.context = context;
 		this.thisValue = thisValue;
-		this.agentVariables = agentVariables;
+		this.agentContext = agentContext;
 	}
 
 	public List<AiTool> createTools() {
@@ -75,21 +75,20 @@ public class MarpleTools
 					"Evaluates a single Zenodot expression (Java-like syntax) in the context of \"this\" (fields and methods of \"this\" can be accessed directly or via \"this.\") and returns the runtime type and display text of the result. "
 					+ "Expressions may have side effects, e.g., changing Swing components (remember to call revalidate()/repaint()). "
 					+ "Follow the Zenodot rules in the system prompt. "
-					+ "Optionally, the result is stored in a Marple variable that can be referenced by its name in later expressions. "
-					+ "Variables of the user cannot be overwritten.",
+					+ "Optionally, the result is stored in a Marple variable that can be referenced by its name in later expressions.",
 					args -> evaluateExpression(getRequiredString(args, "expression"), getString(args, "variableName")))
 				.parameter("expression", "string", "The expression to evaluate", true)
-				.parameter("variableName", "string", "Optional name of a variable the result should be stored in. It must not be the name of a variable of the user.", false)
+				.parameter("variableName", "string", "Optional name of a variable the result should be stored in. An existing variable with that name is replaced.", false)
 				.runInEventDispatchThread(true)
 				.build(),
 			AiTool.builder("list_variables",
 					"Lists all Marple variables that can be referenced in expressions: name, type, display text of the value, whether the variable is final, "
-					+ "and whether you have created it in this conversation (createdByAgent).",
+					+ "and whether you have created it in this conversation (createdByAgent). The other variables are copies of the user's variables.",
 					args -> listVariables())
 				.runInEventDispatchThread(true)
 				.build(),
 			AiTool.builder("delete_variable",
-					"Deletes a Marple variable you have created in this conversation. Variables of the user cannot be deleted.",
+					"Deletes a Marple variable. Deleting a copy of a variable of the user does not affect the user's variable.",
 					args -> deleteVariable(getRequiredString(args, "name")))
 				.parameter("name", "string", "Name of the variable to delete", true)
 				.runInEventDispatchThread(true)
@@ -199,7 +198,7 @@ public class MarpleTools
 	 */
 	@Nullable
 	private Object getTarget(@Nullable String expression) throws ParseException {
-		return isEmpty(expression) ? thisValue : context.getEvaluator().evaluate(expression, thisValue);
+		return isEmpty(expression) ? thisValue : agentContext.getEvaluator().evaluate(expression, thisValue);
 	}
 
 	private static boolean isEmpty(@Nullable String expression) {
@@ -227,19 +226,15 @@ public class MarpleTools
 		if (variableName != null && !IDENTIFIER_PATTERN.matcher(variableName).matches()) {
 			return AiToolResult.error("Invalid variable name: '" + variableName + "'");
 		}
-		// check before evaluating: the expression might have side effects
-		if (variableName != null && !agentVariables.canStore(variableName)) {
-			return AiToolResult.error("The variable '" + variableName + "' belongs to the user and cannot be overwritten. Choose a different name.");
-		}
 		Object value;
 		try {
-			value = context.getEvaluator().evaluate(expression, thisValue);
+			value = agentContext.getEvaluator().evaluate(expression, thisValue);
 		} catch (ParseException e) {
 			return parseError(e);
 		}
 		JsonObject result = describeObject(value);
 		if (variableName != null) {
-			agentVariables.store(variableName, value);
+			agentContext.store(variableName, value);
 			result.addProperty("storedInVariable", variableName);
 		}
 		return success(result);
@@ -247,13 +242,13 @@ public class MarpleTools
 
 	private AiToolResult listVariables() {
 		JsonArray variables = new JsonArray();
-		for (Variable variable : context.getEvaluator().getVariables()) {
+		for (Variable variable : agentContext.getEvaluator().getVariables()) {
 			JsonObject variableObject = new JsonObject();
 			variableObject.addProperty("name", variable.getName());
 			variableObject.addProperty("type", variable.getType().getName());
 			variableObject.addProperty("displayText", getDisplayText(variable.getValue()));
 			variableObject.addProperty("final", variable.isFinal());
-			variableObject.addProperty("createdByAgent", agentVariables.isAgentVariable(variable.getName()));
+			variableObject.addProperty("createdByAgent", agentContext.isAgentVariable(variable.getName()));
 			variables.add(variableObject);
 		}
 		JsonObject result = new JsonObject();
@@ -262,12 +257,8 @@ public class MarpleTools
 	}
 
 	private AiToolResult deleteVariable(String name) {
-		if (agentVariables.delete(name)) {
-			return AiToolResult.success("Variable '" + name + "' has been deleted");
-		}
-		boolean exists = context.getEvaluator().getVariables().stream().anyMatch(variable -> variable.getName().equals(name));
-		return exists
-			? AiToolResult.error("The variable '" + name + "' belongs to the user and cannot be deleted. The user can delete it in Marple.")
+		return agentContext.delete(name)
+			? AiToolResult.success("Variable '" + name + "' has been deleted")
 			: AiToolResult.error("There is no variable '" + name + "'");
 	}
 
