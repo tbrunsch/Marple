@@ -653,20 +653,17 @@ class AiAgentView extends JPanel implements ObjectView
 	 */
 	private class Request extends SwingWorker<String, Void> implements AiAgentListener
 	{
-		private final AiSession	session;
-		private final int		conversationId;
-		private final String	message;
-		private final String	contextLine;
+		private final AiSession		session;
+		private final String		message;
+		private final String		contextLine;
 
 		/**
 		 * The progress and the result of a discarded request are not shown.
 		 */
-		private boolean			discarded;
+		private volatile boolean	discarded;
 
 		Request(AiSession session, String message, String contextLine) {
 			this.session = session;
-			// determined now: the session may be reset before the request is sent in the background
-			this.conversationId = session.getConversationId();
 			this.message = message;
 			this.contextLine = contextLine;
 		}
@@ -681,7 +678,9 @@ class AiAgentView extends JPanel implements ObjectView
 
 		@Override
 		protected String doInBackground() throws Exception {
-			return session.sendRequest(conversationId, message, contextLine, this);
+			// order matters: a request is discarded before the session is reset
+			int conversationId = session.getConversationId();
+			return discarded ? null : session.sendRequest(conversationId, message, contextLine, this);
 		}
 
 		@Override

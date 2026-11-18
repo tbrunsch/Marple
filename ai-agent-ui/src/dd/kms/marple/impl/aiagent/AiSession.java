@@ -42,7 +42,7 @@ class AiSession
 	 * Incremented whenever another conversation starts (see {@link #reset()} and {@link #restore(Object, List, AgentVariables)}).
 	 * It is only written on the event dispatch thread while holding the lock.
 	 */
-	private int							conversationId;
+	private volatile int				conversationId;
 	private volatile boolean			closed;
 
 	AiSession(AiAgentViewSettings settings, AiAgentFactory agentFactory, InspectionContext context, PermissionHandler permissionHandler, Object thisValue) {
@@ -77,7 +77,6 @@ class AiSession
 
 	/**
 	 * Returns the ID of the current conversation, which has to be passed to {@link #sendRequest(int, String, String, AiAgentListener)}.
-	 * Must be called on the event dispatch thread.
 	 */
 	int getConversationId() {
 		return conversationId;
