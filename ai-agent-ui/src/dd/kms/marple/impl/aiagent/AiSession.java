@@ -13,7 +13,10 @@ import java.io.InterruptedIOException;
 import java.util.List;
 
 /**
- * Owns the MCP server and the agent of one AI view. Both are started lazily on the first request.
+ * Owns the MCP server and the agent of one AI view. Both are started lazily on the first request.<br>
+ * <br>
+ * Thread safety: The mutable state is guarded by {@code this}. The lock is never held while waiting for
+ * the agent, so the request can be stopped and the session can be closed or reset while a request is running.
  */
 class AiSession
 {
@@ -26,7 +29,6 @@ class AiSession
 	private final PermissionHandler		permissionHandler;
 	private final Object				thisValue;
 
-	private final Object				lock						= new Object();
 	@Nullable
 	private McpServer					mcpServer;
 	@Nullable
@@ -38,7 +40,7 @@ class AiSession
 	private AgentContext				agentContext;
 	/**
 	 * Incremented whenever another conversation starts (see {@link #reset()} and {@link #restore(Object, List, AgentContext)}).
-	 * It is only written on the event dispatch thread while holding the lock.
+	 * It is only written on the event dispatch thread while holding the monitor of this session.
 	 */
 	private volatile int				conversationId;
 	private volatile boolean			closed;
@@ -57,16 +59,14 @@ class AiSession
 	 * transcript is passed to the agent as context with the next request. The agent's evaluator of that
 	 * conversation is used again. Must be called on the event dispatch thread.
 	 */
-	void restore(@Nullable Object resumeState, List<TranscriptEntry> transcript, AgentContext agentContext) {
-		synchronized (lock) {
-			closeAgent();
-			conversationId++;
-			this.agentContext = agentContext;
-			this.resumeState = resumeState;
-			this.transcriptSummary = resumeState == null && !transcript.isEmpty()
-				? createTranscriptSummary(transcript)
-				: null;
-		}
+	synchronized void restore(@Nullable Object resumeState, List<TranscriptEntry> transcript, AgentContext agentContext) {
+		closeAgent();
+		conversationId++;
+		this.agentContext = agentContext;
+		this.resumeState = resumeState;
+		this.transcriptSummary = resumeState == null && !transcript.isEmpty()
+			? createTranscriptSummary(transcript)
+			: null;
 	}
 
 	/**
@@ -89,7 +89,7 @@ class AiSession
 	String sendRequest(int conversationId, String message, String contextLine, AiAgentListener listener) throws IOException {
 		AiAgent agent;
 		String fullMessage;
-		synchronized (lock) {
+		synchronized (this) {
 			if (conversationId != this.conversationId) {
 				throw new InterruptedIOException("The conversation has been replaced");
 			}
@@ -125,23 +125,19 @@ class AiSession
 	/**
 	 * The agent's evaluator of the current conversation. Must be called on the event dispatch thread.
 	 */
-	AgentContext getAgentContext() {
-		synchronized (lock) {
-			return agentContext;
-		}
+	synchronized AgentContext getAgentContext() {
+		return agentContext;
 	}
 
 	/**
 	 * Starts a new conversation with a new evaluator for the agent. Must be called on the event dispatch thread.
 	 */
-	void reset() {
-		synchronized (lock) {
-			closeAgent();
-			conversationId++;
-			agentContext = new AgentContext(context.getEvaluator());
-			resumeState = null;
-			transcriptSummary = null;
-		}
+	synchronized void reset() {
+		closeAgent();
+		conversationId++;
+		agentContext = new AgentContext(context.getEvaluator());
+		resumeState = null;
+		transcriptSummary = null;
 	}
 
 	/**
@@ -151,7 +147,7 @@ class AiSession
 	 * <p>
 	 * This method does not throw exceptions, is idempotent, and does not block for a long time, so it
 	 * can be called on the event dispatch thread. It may be called while a request is running: The agent
-	 * is closed before acquiring the lock, which makes the running request terminate with an exception.
+	 * is closed before acquiring the monitor of this session, which makes the running request terminate with an exception.
 	 */
 	void close() {
 		closed = true;
@@ -159,11 +155,14 @@ class AiSession
 		if (agent != null) {
 			agent.close();
 		}
-		synchronized (lock) {
+		synchronized (this) {
 			stopMcpServer();
 		}
 	}
 
+	/**
+	 * Must be called while holding the monitor of this session.
+	 */
 	private AiAgent getOrCreateAgent() throws IOException {
 		if (closed) {
 			throw new IOException("The AI session has been closed");
