@@ -33,8 +33,11 @@ class AiSession
 	private McpServer					mcpServer;
 	@Nullable
 	private volatile AiAgent			agent;
+	/**
+	 * The resume state the next agent is created with. While an agent exists, its own resume state is authoritative.
+	 */
 	@Nullable
-	private volatile Object				resumeState;
+	private volatile Object				initialResumeState;
 	@Nullable
 	private String						transcriptSummary;
 	private AgentContext				agentContext;
@@ -63,7 +66,7 @@ class AiSession
 		closeAgent();
 		conversationId++;
 		this.agentContext = agentContext;
-		this.resumeState = resumeState;
+		this.initialResumeState = resumeState;
 		this.transcriptSummary = resumeState == null && !transcript.isEmpty()
 			? createTranscriptSummary(transcript)
 			: null;
@@ -112,14 +115,10 @@ class AiSession
 
 	@Nullable
 	Object getResumeState() {
+		// read in the opposite order of getOrCreateAgent()'s writes: if the initial state has already been cleared, then the agent is visible
+		Object initialResumeState = this.initialResumeState;
 		AiAgent agent = this.agent;
-		if (agent != null) {
-			Object agentResumeState = agent.getResumeState();
-			if (agentResumeState != null) {
-				return agentResumeState;
-			}
-		}
-		return resumeState;
+		return agent != null ? agent.getResumeState() : initialResumeState;
 	}
 
 	/**
@@ -136,7 +135,7 @@ class AiSession
 		closeAgent();
 		conversationId++;
 		agentContext = new AgentContext(context.getEvaluator());
-		resumeState = null;
+		initialResumeState = null;
 		transcriptSummary = null;
 	}
 
@@ -180,18 +179,16 @@ class AiSession
 			server.start();
 			mcpServer = server;
 		}
-		agent = agentFactory.createAgent(new Environment(mcpServer), resumeState);
+		agent = agentFactory.createAgent(new Environment(mcpServer), initialResumeState);
 		this.agent = agent;
+		// from now on, the agent's resume state is authoritative; cleared after setting the agent (see getResumeState())
+		initialResumeState = null;
 		return agent;
 	}
 
 	private void closeAgent() {
 		AiAgent agent = this.agent;
 		if (agent != null) {
-			Object agentResumeState = agent.getResumeState();
-			if (agentResumeState != null) {
-				resumeState = agentResumeState;
-			}
 			agent.close();
 			this.agent = null;
 		}
