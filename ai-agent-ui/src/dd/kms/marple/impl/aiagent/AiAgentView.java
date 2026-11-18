@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /**
  * The "AI Agent" tab: a chat with an AI agent about the inspected object. A new view (and a new session)
@@ -501,8 +502,8 @@ class AiAgentView extends JPanel implements ObjectView
 		}
 		String[] range = description.substring(TOOL_CALLS_LINK_PREFIX.length()).split("-");
 		try {
-			showToolCalls(Integer.parseInt(range[0]), Integer.parseInt(range[range.length - 1]));
-		} catch (NumberFormatException ignored) {
+			selectToolCalls(Integer.parseInt(range[0]), Integer.parseInt(range[1]));
+		} catch (NumberFormatException | ArrayIndexOutOfBoundsException ignored) {
 			// cannot happen for links created by this class
 		}
 	}
@@ -521,16 +522,25 @@ class AiAgentView extends JPanel implements ObjectView
 	 * Tool calls
 	 */
 	private void showToolCalls() {
-		if (getToolEntries().isEmpty()) {
+		if (!canShowToolCalls()) {
 			return;
 		}
 		openToolCallsDialog();
 	}
 
 	/**
-	 * Opens the dialog if necessary and selects the tool calls {@code first} to {@code last} (1-based).
+	 * Returns {@code true} if the conversation has tool calls and no dialog is open. There is at most one
+	 * dialog because it follows the changes anyway.
 	 */
-	private void showToolCalls(int first, int last) {
+	private boolean canShowToolCalls() {
+		return !getToolEntries().isEmpty() && toolCallsDialog == null;
+	}
+
+	/**
+	 * Selects the tool calls {@code first} to {@code last} (1-based) in the dialog. Unlike {@link #showToolCalls()},
+	 * this also works if the dialog is already open: It is brought to the front. Otherwise, it is opened.
+	 */
+	private void selectToolCalls(int first, int last) {
 		ToolCallsDialog dialog = toolCallsDialog;
 		if (dialog == null) {
 			dialog = openToolCallsDialog();
@@ -569,18 +579,11 @@ class AiAgentView extends JPanel implements ObjectView
 			}
 		}
 		toolCallsButton.setText("Show Tool Calls (" + toolEntries.size() + ")");
-		// at most one dialog: it follows the changes anyway
-		toolCallsButton.setEnabled(!toolEntries.isEmpty() && toolCallsDialog == null);
+		toolCallsButton.setEnabled(canShowToolCalls());
 	}
 
 	private List<TranscriptEntry> getToolEntries() {
-		List<TranscriptEntry> toolEntries = new ArrayList<>();
-		for (TranscriptEntry entry : transcript) {
-			if (entry.getToolName() != null) {
-				toolEntries.add(entry);
-			}
-		}
-		return toolEntries;
+		return transcript.stream().filter(entry -> entry.getToolName() != null).collect(Collectors.toList());
 	}
 
 	/*
