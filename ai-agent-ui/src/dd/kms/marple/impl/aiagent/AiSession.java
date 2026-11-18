@@ -145,18 +145,13 @@ class AiSession
 	 * a new conversation instead).
 	 * <p>
 	 * This method does not throw exceptions, is idempotent, and does not block for a long time, so it
-	 * can be called on the event dispatch thread. It may be called while a request is running: The agent
-	 * is closed before acquiring the monitor of this session, which makes the running request terminate with an exception.
+	 * can be called on the event dispatch thread. It may be called while a request is running, which then
+	 * terminates with an exception. Since the agent is discarded, {@link #getResumeState()} does not return its
+	 * resume state afterwards: The resume state must be queried before.
 	 */
-	void close() {
+	synchronized void close() {
 		closed = true;
-		AiAgent agent = this.agent;
-		if (agent != null) {
-			agent.close();
-		}
-		synchronized (this) {
-			stopMcpServer();
-		}
+		closeAgent();
 	}
 
 	/**
