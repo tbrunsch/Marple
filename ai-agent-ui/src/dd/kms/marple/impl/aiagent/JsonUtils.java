@@ -59,7 +59,7 @@ public class JsonUtils
 	}
 
 	/**
-	 * @return the string representation of the primitive value or {@code null} if the member does not exist
+	 * @return the string or {@code null} if the member does not exist
 	 */
 	@Nullable
 	public static String getString(JsonObject object, String key) {
@@ -67,7 +67,7 @@ public class JsonUtils
 		if (element == null) {
 			return null;
 		}
-		if (!element.isJsonPrimitive()) {
+		if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString()) {
 			throw createTypeException(key, "a string", element);
 		}
 		return element.getAsString();
