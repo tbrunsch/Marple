@@ -18,10 +18,11 @@ import static dd.kms.marple.impl.aiagent.JsonUtils.*;
  * per conversation. If the process terminates (e.g., because a request has been canceled), then
  * it is restarted with {@code --resume <session id>} on the next request.
  * <p>
- * Thread safety: All mutable state is guarded by {@code this}. Synchronized methods never block
- * for a long time. In particular, {@link #sendRequest(String, AiAgentListener)} waits for the
- * answer of Claude Code without holding the lock, so {@link #cancelRequest()}, {@link #close()},
- * and {@link #getResumeState()} can be called while a request is running.
+ * Thread safety: All mutable state is guarded by {@code this}. The lock is never held while waiting for
+ * Claude Code: {@link #sendRequest(String, AiAgentListener)} waits for the answer without holding the lock,
+ * so {@link #cancelRequest()}, {@link #close()}, and {@link #getResumeState()} can be called while a request
+ * is running. The only longer operation under the lock is starting the process (see {@link #beginRequest()}),
+ * which typically takes milliseconds. This is accepted to keep the state handling simple.
  */
 class ClaudeCodeAgent implements AiAgent
 {
