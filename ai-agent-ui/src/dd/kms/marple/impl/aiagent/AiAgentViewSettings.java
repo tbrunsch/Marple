@@ -5,14 +5,16 @@ import dd.kms.marple.api.aiagent.backend.AiAgentFactorySupplier;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Settings shared by all AI views of one registration (see {@link AiAgentViewUIImpl#register}). The object
  * lives as long as the registered inspection settings. "Auto approve" is deliberately not persisted: It is
- * off whenever the application is started.
+ * off whenever the application is started.<br>
+ * <br>
+ * All methods must be called on the event dispatch thread.
  */
 class AiAgentViewSettings
 {
@@ -24,8 +26,8 @@ class AiAgentViewSettings
 	 */
 	@Nullable
 	private AiAgentFactory					agentFactory;
-	private volatile boolean				autoApprove				= false;
-	private final List<Runnable>			autoApproveListeners	= new CopyOnWriteArrayList<>();
+	private boolean							autoApprove				= false;
+	private final List<Runnable>			autoApproveListeners	= new ArrayList<>();
 
 	AiAgentViewSettings(AiAgentFactorySupplier agentFactorySupplier, String systemPromptAddition) {
 		this.agentFactorySupplier = agentFactorySupplier;
@@ -38,7 +40,7 @@ class AiAgentViewSettings
 	 *
 	 * @throws IOException if the supplier fails to create the factory
 	 */
-	synchronized AiAgentFactory getAgentFactory() throws IOException {
+	AiAgentFactory getAgentFactory() throws IOException {
 		if (agentFactory == null) {
 			agentFactory = Objects.requireNonNull(agentFactorySupplier.get(), "The agent factory supplier returned null");
 		}
@@ -58,7 +60,8 @@ class AiAgentViewSettings
 			return;
 		}
 		this.autoApprove = autoApprove;
-		autoApproveListeners.forEach(Runnable::run);
+		// iterate over a copy so listeners may add or remove listeners without causing a ConcurrentModificationException
+		new ArrayList<>(autoApproveListeners).forEach(Runnable::run);
 	}
 
 	void addAutoApproveListener(Runnable listener) {

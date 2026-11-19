@@ -30,16 +30,4 @@ public class EventDispatchThreadUtils
 		SwingUtilities.invokeAndWait(() -> result.set(supplier.get()));
 		return result.get();
 	}
-
-	/**
-	 * Executes the runnable in the event dispatch thread without waiting for it: directly if the current
-	 * thread is the event dispatch thread, later otherwise.
-	 */
-	public static void runNowOrLater(Runnable runnable) {
-		if (SwingUtilities.isEventDispatchThread()) {
-			runnable.run();
-		} else {
-			SwingUtilities.invokeLater(runnable);
-		}
-	}
 }

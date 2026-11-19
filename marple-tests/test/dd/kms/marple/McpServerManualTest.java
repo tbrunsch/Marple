@@ -41,8 +41,8 @@ public class McpServerManualTest
 
 		InspectionSettings settings = ObjectInspectionFramework.createInspectionSettingsBuilder().build();
 		InspectionContext context = new InspectionContextImpl(settings);
-		McpServer server = new McpServer(new MarpleTools(context, thisValue, new AgentContext(context.getEvaluator())).createTools());
-		McpEndpoint endpoint = server.start();
+		McpServer server = McpServer.start(new MarpleTools(context, thisValue, new AgentContext(context.getEvaluator())).createTools());
+		McpEndpoint endpoint = server.getEndpoint();
 		testFrame.addWindowListener(new java.awt.event.WindowAdapter() {
 			@Override
 			public void windowClosed(java.awt.event.WindowEvent e) {

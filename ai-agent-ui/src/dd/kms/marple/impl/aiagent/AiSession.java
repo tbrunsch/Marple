@@ -9,14 +9,14 @@ import dd.kms.marple.impl.aiagent.mcp.McpServer;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.util.List;
 
 /**
- * Owns the MCP server and the agent of one AI view. Both are started lazily on the first request.<br>
+ * Owns the MCP server and the agent of one AI view. Both are created lazily when the first request is sent.<br>
  * <br>
- * Thread safety: The mutable state is guarded by {@code this}. The lock is never held while waiting for
- * the agent, so the request can be stopped and the session can be closed or reset while a request is running.
+ * Thread safety: All methods must be called on the event dispatch thread. Only the agent's
+ * {@link AiAgent#sendRequest(String, AiAgentListener)} runs in another thread. That request belongs to the
+ * agent it has been sent to: Starting another conversation closes that agent, which makes the request terminate.
  */
 class AiSession
 {
@@ -32,21 +32,16 @@ class AiSession
 	@Nullable
 	private McpServer					mcpServer;
 	@Nullable
-	private volatile AiAgent			agent;
+	private AiAgent						agent;
 	/**
 	 * The resume state the next agent is created with. While an agent exists, its own resume state is authoritative.
 	 */
 	@Nullable
-	private volatile Object				initialResumeState;
+	private Object						initialResumeState;
 	@Nullable
 	private String						transcriptSummary;
 	private AgentContext				agentContext;
-	/**
-	 * Incremented whenever another conversation starts (see {@link #reset()} and {@link #restore(Object, List, AgentContext)}).
-	 * It is only written on the event dispatch thread while holding the monitor of this session.
-	 */
-	private volatile int				conversationId;
-	private volatile boolean			closed;
+	private boolean						closed;
 
 	AiSession(AiAgentViewSettings settings, AiAgentFactory agentFactory, InspectionContext context, PermissionHandler permissionHandler, Object thisValue) {
 		this.settings = settings;
@@ -60,11 +55,10 @@ class AiSession
 	/**
 	 * Restores a previous conversation. If the agent cannot resume the conversation, then the
 	 * transcript is passed to the agent as context with the next request. The agent's evaluator of that
-	 * conversation is used again. Must be called on the event dispatch thread.
+	 * conversation is used again.
 	 */
-	synchronized void restore(@Nullable Object resumeState, List<TranscriptEntry> transcript, AgentContext agentContext) {
+	void restore(@Nullable Object resumeState, List<TranscriptEntry> transcript, AgentContext agentContext) {
 		closeAgent();
-		conversationId++;
 		this.agentContext = agentContext;
 		this.initialResumeState = resumeState;
 		this.transcriptSummary = resumeState == null && !transcript.isEmpty()
@@ -73,41 +67,48 @@ class AiSession
 	}
 
 	/**
-	 * Returns the ID of the current conversation, which has to be passed to {@link #sendRequest(int, String, String, AiAgentListener)}.
+	 * Returns the agent of the current conversation and creates it if necessary. This is cheap because
+	 * agents start lazily on the first request (see {@link AiAgentFactory#createAgent(AiAgentEnvironment, Object)}).
+	 * The request must be sent to the returned agent outside the event dispatch thread.
+	 *
+	 * @throws IOException if the session has been closed or the MCP server cannot be started
 	 */
-	int getConversationId() {
-		return conversationId;
+	AiAgent getOrCreateAgent() throws IOException {
+		if (closed) {
+			throw new IOException("The AI session has been closed");
+		}
+		if (agent != null) {
+			return agent;
+		}
+		if (mcpServer == null) {
+			List<AiTool> tools = ImmutableList.<AiTool>builder()
+				.addAll(new MarpleTools(context, thisValue, agentContext).createTools())
+				.addAll(new EvaluatorSettingsTools(agentContext.getEvaluator()).createTools())
+				.build();
+			mcpServer = McpServer.start(tools);
+		}
+		agent = agentFactory.createAgent(new Environment(mcpServer), initialResumeState);
+		// from now on, the agent's resume state is authoritative
+		initialResumeState = null;
+		return agent;
 	}
 
 	/**
-	 * Sends a request to the agent. Must not be called on the event dispatch thread.
+	 * Creates the message that has to be sent to the agent for the user's message. The first message after
+	 * restoring a conversation that cannot be resumed contains the previous transcript.
 	 *
-	 * @param conversationId	the ID of the conversation the request belongs to (see {@link #getConversationId()}),
-	 *							determined when the user sends the request. If another conversation has been started
-	 *							in the meantime, then the request is not sent.
-	 * @param contextLine		describes the current "this"; it is prepended to the message
-	 *
-	 * @throws InterruptedIOException if another conversation has been started in the meantime
+	 * @param contextLine	describes the current "this"; it is prepended to the message
 	 */
-	String sendRequest(int conversationId, String message, String contextLine, AiAgentListener listener) throws IOException {
-		AiAgent agent;
-		String fullMessage;
-		synchronized (this) {
-			if (conversationId != this.conversationId) {
-				throw new InterruptedIOException("The conversation has been replaced");
-			}
-			agent = getOrCreateAgent();
-			fullMessage = contextLine + "\n" + message;
-			if (transcriptSummary != null) {
-				fullMessage = transcriptSummary + "\n\n" + fullMessage;
-				transcriptSummary = null;
-			}
+	String createFullMessage(String message, String contextLine) {
+		String fullMessage = contextLine + "\n" + message;
+		if (transcriptSummary != null) {
+			fullMessage = transcriptSummary + "\n\n" + fullMessage;
+			transcriptSummary = null;
 		}
-		return agent.sendRequest(fullMessage, listener);
+		return fullMessage;
 	}
 
 	void cancelRequest() {
-		AiAgent agent = this.agent;
 		if (agent != null) {
 			agent.cancelRequest();
 		}
@@ -115,25 +116,21 @@ class AiSession
 
 	@Nullable
 	Object getResumeState() {
-		// read in the opposite order of getOrCreateAgent()'s writes: if the initial state has already been cleared, then the agent is visible
-		Object initialResumeState = this.initialResumeState;
-		AiAgent agent = this.agent;
 		return agent != null ? agent.getResumeState() : initialResumeState;
 	}
 
 	/**
-	 * The agent's evaluator of the current conversation. Must be called on the event dispatch thread.
+	 * The agent's evaluator of the current conversation
 	 */
-	synchronized AgentContext getAgentContext() {
+	AgentContext getAgentContext() {
 		return agentContext;
 	}
 
 	/**
-	 * Starts a new conversation with a new evaluator for the agent. Must be called on the event dispatch thread.
+	 * Starts a new conversation with a new evaluator for the agent
 	 */
-	synchronized void reset() {
+	void reset() {
 		closeAgent();
-		conversationId++;
 		agentContext = new AgentContext(context.getEvaluator());
 		initialResumeState = null;
 		transcriptSummary = null;
@@ -144,48 +141,19 @@ class AiSession
 	 * (see {@link AgentContext}). The session cannot be used anymore afterwards (see {@link #reset()} for starting
 	 * a new conversation instead).
 	 * <p>
-	 * This method does not throw exceptions, is idempotent, and does not block for a long time, so it
-	 * can be called on the event dispatch thread. It may be called while a request is running, which then
-	 * terminates with an exception. Since the agent is discarded, {@link #getResumeState()} does not return its
-	 * resume state afterwards: The resume state must be queried before.
+	 * This method does not throw exceptions, is idempotent, and does not block for a long time. It may be
+	 * called while a request is running, which then terminates with an exception. Since the agent is discarded,
+	 * {@link #getResumeState()} does not return its resume state afterwards: The resume state must be queried before.
 	 */
-	synchronized void close() {
+	void close() {
 		closed = true;
 		closeAgent();
 	}
 
-	/**
-	 * Must be called while holding the monitor of this session.
-	 */
-	private AiAgent getOrCreateAgent() throws IOException {
-		if (closed) {
-			throw new IOException("The AI session has been closed");
-		}
-		AiAgent agent = this.agent;
-		if (agent != null) {
-			return agent;
-		}
-		if (mcpServer == null) {
-			List<AiTool> tools = ImmutableList.<AiTool>builder()
-				.addAll(new MarpleTools(context, thisValue, agentContext).createTools())
-				.addAll(new EvaluatorSettingsTools(agentContext.getEvaluator()).createTools())
-				.build();
-			McpServer server = new McpServer(tools);
-			server.start();
-			mcpServer = server;
-		}
-		agent = agentFactory.createAgent(new Environment(mcpServer), initialResumeState);
-		this.agent = agent;
-		// from now on, the agent's resume state is authoritative; cleared after setting the agent (see getResumeState())
-		initialResumeState = null;
-		return agent;
-	}
-
 	private void closeAgent() {
-		AiAgent agent = this.agent;
 		if (agent != null) {
 			agent.close();
-			this.agent = null;
+			agent = null;
 		}
 		// tools registered by the agent are not valid anymore => new MCP server for the next agent
 		stopMcpServer();

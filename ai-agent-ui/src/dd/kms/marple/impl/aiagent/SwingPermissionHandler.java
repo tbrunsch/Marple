@@ -10,7 +10,8 @@ import java.lang.reflect.InvocationTargetException;
 
 /**
  * Asks the user via a modal dialog whether the agent may perform an action, e.g., change a file.
- * If "Auto approve" is enabled, all actions are allowed without asking.
+ * If "Auto approve" is enabled, all actions are allowed without asking. The setting is checked on the event
+ * dispatch thread, so a request that waits for an open dialog is approved if the user enables "Auto approve" there.
  */
 class SwingPermissionHandler implements PermissionHandler
 {
@@ -27,11 +28,8 @@ class SwingPermissionHandler implements PermissionHandler
 
 	@Override
 	public PermissionDecision requestPermission(PermissionRequest request) {
-		if (settings.isAutoApprove()) {
-			return PermissionDecision.allow();
-		}
 		try {
-			return EventDispatchThreadUtils.callAndWait(() -> showDialog(request));
+			return EventDispatchThreadUtils.callAndWait(() -> settings.isAutoApprove() ? PermissionDecision.allow() : showDialog(request));
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			return PermissionDecision.deny("Interrupted while waiting for the user's decision");

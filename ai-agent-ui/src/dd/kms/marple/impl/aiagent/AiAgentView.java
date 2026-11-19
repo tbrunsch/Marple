@@ -2,6 +2,7 @@ package dd.kms.marple.impl.aiagent;
 
 import com.google.gson.JsonObject;
 import dd.kms.marple.api.InspectionContext;
+import dd.kms.marple.api.aiagent.backend.AiAgent;
 import dd.kms.marple.api.aiagent.backend.AiAgentFactory;
 import dd.kms.marple.api.aiagent.backend.AiAgentListener;
 import dd.kms.marple.api.settings.visual.ObjectView;
@@ -260,7 +261,7 @@ class AiAgentView extends JPanel implements ObjectView
 	}
 
 	private void onAutoApproveChanged() {
-		EventDispatchThreadUtils.runNowOrLater(() -> autoApproveCheckBox.setSelected(settings.isAutoApprove()));
+		autoApproveCheckBox.setSelected(settings.isAutoApprove());
 	}
 
 	/*
@@ -274,7 +275,15 @@ class AiAgentView extends JPanel implements ObjectView
 		inputArea.setText("");
 		addEntry(TranscriptEntry.Role.USER, message);
 
-		Request request = new Request(session, message, createContextLine());
+		AiAgent agent;
+		try {
+			agent = session.getOrCreateAgent();
+		} catch (IOException | RuntimeException e) {
+			String errorMessage = e.getMessage();
+			addEntry(TranscriptEntry.Role.ERROR, errorMessage != null ? errorMessage : e.toString());
+			return;
+		}
+		Request request = new Request(agent, session.createFullMessage(message, createContextLine()));
 		currentRequest = request;
 		setState(State.RUNNING);
 		request.execute();
@@ -648,24 +657,25 @@ class AiAgentView extends JPanel implements ObjectView
 	}
 
 	/**
-	 * Sends a request in the background. The listener methods may be called from any thread, all
-	 * other methods must be called on the event dispatch thread.
+	 * Sends a request to the agent in the background. The listener methods may be called from any thread, all
+	 * other methods must be called on the event dispatch thread.<br>
+	 * <br>
+	 * The request belongs to the agent it is sent to: If another conversation is started, then that agent is
+	 * closed, which makes the request terminate with an exception (even if it has not been sent yet).
 	 */
 	private class Request extends SwingWorker<String, Void> implements AiAgentListener
 	{
-		private final AiSession		session;
-		private final String		message;
-		private final String		contextLine;
+		private final AiAgent	agent;
+		private final String	message;
 
 		/**
 		 * The progress and the result of a discarded request are not shown.
 		 */
-		private volatile boolean	discarded;
+		private boolean			discarded;
 
-		Request(AiSession session, String message, String contextLine) {
-			this.session = session;
+		Request(AiAgent agent, String message) {
+			this.agent = agent;
 			this.message = message;
-			this.contextLine = contextLine;
 		}
 
 		boolean isDiscarded() {
@@ -678,9 +688,7 @@ class AiAgentView extends JPanel implements ObjectView
 
 		@Override
 		protected String doInBackground() throws Exception {
-			// order matters: a request is discarded before the session is reset
-			int conversationId = session.getConversationId();
-			return discarded ? null : session.sendRequest(conversationId, message, contextLine, this);
+			return agent.sendRequest(message, this);
 		}
 
 		@Override

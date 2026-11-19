@@ -4,8 +4,11 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 
 /**
- * Agent-neutral interface of an AI agent. Except for {@link #getResumeState()}, all methods are
- * called outside the event dispatch thread.
+ * Agent-neutral interface of an AI agent.<br>
+ * <br>
+ * Threading: {@link #sendRequest(String, AiAgentListener)} is called outside the event dispatch thread. All other
+ * methods are called on the event dispatch thread, possibly while a request is running. Hence, implementations
+ * must be thread-safe, and these methods must not block for a long time.
  */
 public interface AiAgent
 {
@@ -39,6 +42,8 @@ public interface AiAgent
 	 *     <li>Must be idempotent: Calling it several times has the same effect as calling it once.</li>
 	 *     <li>May be called while a request is running. Then {@link #sendRequest(String, AiAgentListener)}
 	 *     must terminate with an exception.</li>
+	 *     <li>May be called before a request that has already been triggered in another thread reaches the agent.
+	 *     Then {@link #sendRequest(String, AiAgentListener)} must throw an exception without doing anything.</li>
 	 *     <li>Must not block for a long time. Graceful termination of external processes should be
 	 *     done asynchronously.</li>
 	 * </ul>

@@ -3,6 +3,7 @@ package dd.kms.marple.impl.aiagent;
 import com.google.gson.JsonObject;
 import dd.kms.marple.api.InspectionContext;
 import dd.kms.marple.api.ObjectInspectionFramework;
+import dd.kms.marple.api.aiagent.backend.AiAgent;
 import dd.kms.marple.api.aiagent.backend.AiAgentFactory;
 import dd.kms.marple.api.aiagent.backend.AiAgentListener;
 import dd.kms.marple.api.aiagent.backend.PermissionDecision;
@@ -21,7 +22,10 @@ import java.util.Collections;
 /**
  * Manual end-to-end test of {@link AiSession} with Claude Code (requires {@code claude} on the PATH).
  * It checks tool calls, the permission prompt tool (file edits are denied) and resuming a conversation.
- * Note that this test sends real requests to Claude.
+ * Note that this test sends real requests to Claude.<br>
+ * <br>
+ * Like in the AI view, the session is only accessed on the event dispatch thread, whereas the requests
+ * are sent to the agent in the main thread.
  */
 public class AiSessionManualTest
 {
@@ -58,27 +62,26 @@ public class AiSessionManualTest
 		};
 		String contextLine = "[this: " + thisValue.getClass().getName() + " - " + context.getDisplayText(thisValue) + "]";
 
-		AiSession session = new AiSession(settings, agentFactory, context, permissionHandler, thisValue);
+		AiSession session = onEdt(() -> new AiSession(settings, agentFactory, context, permissionHandler, thisValue));
 		Object resumeState;
-		AgentContext agentContext = session.getAgentContext();
+		AgentContext agentContext = onEdt(session::getAgentContext);
 		try {
 			ask(session, contextLine, listener, "Which field of which class holds \"this\"? Use the component hierarchy. Then change the text of \"this\" to \"Changed by AI\" at runtime.");
 			System.out.println("Label text is now: " + thisValue.getText());
 			ask(session, contextLine, listener, "Make that change permanent in the source code (one edit only; if it is rejected, do not retry).");
-			resumeState = session.getResumeState();
+			resumeState = onEdt(session::getResumeState);
 			System.out.println("Resume state: " + resumeState);
 		} finally {
-			session.close();
+			SwingUtilities.invokeAndWait(session::close);
 		}
 
-		AiSession resumedSession = new AiSession(settings, agentFactory, context, permissionHandler, thisValue);
-		// restore() must be called on the event dispatch thread
+		AiSession resumedSession = onEdt(() -> new AiSession(settings, agentFactory, context, permissionHandler, thisValue));
 		Object finalResumeState = resumeState;
 		SwingUtilities.invokeAndWait(() -> resumedSession.restore(finalResumeState, Collections.emptyList(), agentContext));
 		try {
 			ask(resumedSession, contextLine, listener, "Which text did you set at runtime earlier in this conversation? Answer briefly without using tools.");
 		} finally {
-			resumedSession.close();
+			SwingUtilities.invokeAndWait(resumedSession::close);
 		}
 		SwingUtilities.invokeLater(testFrame::dispose);
 		// give the process terminator threads time to finish
@@ -90,9 +93,38 @@ public class AiSessionManualTest
 	private static void ask(AiSession session, String contextLine, AiAgentListener listener, String message) throws Exception {
 		System.out.println("USER: " + message);
 		long startTime = System.currentTimeMillis();
-		String answer = session.sendRequest(session.getConversationId(), message, contextLine, listener);
+		AiAgent agent = onEdt(session::getOrCreateAgent);
+		String fullMessage = onEdt(() -> session.createFullMessage(message, contextLine));
+		String answer = agent.sendRequest(fullMessage, listener);
 		System.out.println("AGENT (" + (System.currentTimeMillis() - startTime) + " ms): " + answer);
 		System.out.println();
+	}
+
+	/**
+	 * Executes the supplier on the event dispatch thread and returns its result
+	 */
+	private static <T> T onEdt(EdtSupplier<T> supplier) throws Exception {
+		Object[] result = new Object[1];
+		Exception[] exception = new Exception[1];
+		SwingUtilities.invokeAndWait(() -> {
+			try {
+				result[0] = supplier.get();
+			} catch (Exception e) {
+				exception[0] = e;
+			}
+		});
+		if (exception[0] != null) {
+			throw exception[0];
+		}
+		@SuppressWarnings("unchecked")
+		T typedResult = (T) result[0];
+		return typedResult;
+	}
+
+	@FunctionalInterface
+	private interface EdtSupplier<T>
+	{
+		T get() throws Exception;
 	}
 
 	private static Path findRepositoryRoot() throws Exception {

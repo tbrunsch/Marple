@@ -30,7 +30,9 @@ import static dd.kms.marple.impl.aiagent.JsonUtils.getString;
 /**
  * Minimal MCP server with Streamable HTTP transport (JSON responses only, no SSE). It is bound to
  * the loopback interface and every request must contain a randomly generated bearer token
- * because the tools allow executing arbitrary code.
+ * because the tools allow executing arbitrary code.<br>
+ * <br>
+ * Thread safety: All methods may be called from any thread. The requests are handled by the server's own threads.
  */
 public class McpServer
 {
@@ -58,16 +60,35 @@ public class McpServer
 	private static final int			HTTP_METHOD_NOT_ALLOWED		= 405;
 	private static final int			HTTP_INTERNAL_SERVER_ERROR	= 500;
 
+	/**
+	 * Tools may be added while the server is running (see {@link #addTool(AiTool)}) and are read by the server's threads
+	 */
 	private final List<AiTool>		tools			= new CopyOnWriteArrayList<>();
 	private final String			bearerToken		= createToken();
+	private final HttpServer		server;
+	private final ExecutorService	executor;
+	private final McpEndpoint		endpoint;
 
-	@Nullable
-	private HttpServer				server;
-	@Nullable
-	private ExecutorService			executor;
+	/**
+	 * Starts an MCP server that is bound to the loopback interface on a free port. The server
+	 * must be stopped by calling {@link #stop()}.
+	 */
+	public static McpServer start(List<AiTool> tools) throws IOException {
+		return new McpServer(tools);
+	}
 
-	public McpServer(List<AiTool> tools) {
+	private McpServer(List<AiTool> tools) throws IOException {
 		this.tools.addAll(tools);
+		server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
+		executor = Executors.newCachedThreadPool(runnable -> {
+			Thread thread = new Thread(runnable, "Marple MCP server " + THREAD_COUNTER.incrementAndGet());
+			thread.setDaemon(true);
+			return thread;
+		});
+		server.setExecutor(executor);
+		server.createContext(PATH, this::handle);
+		server.start();
+		endpoint = new McpEndpoint("http://127.0.0.1:" + server.getAddress().getPort() + PATH, bearerToken);
 	}
 
 	public void addTool(AiTool tool) {
@@ -78,40 +99,16 @@ public class McpServer
 		return tools;
 	}
 
-	public synchronized McpEndpoint start() throws IOException {
-		if (server == null) {
-			HttpServer server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
-			ExecutorService executor = Executors.newCachedThreadPool(runnable -> {
-				Thread thread = new Thread(runnable, "Marple MCP server " + THREAD_COUNTER.incrementAndGet());
-				thread.setDaemon(true);
-				return thread;
-			});
-			server.setExecutor(executor);
-			server.createContext(PATH, this::handle);
-			server.start();
-			this.server = server;
-			this.executor = executor;
-		}
-		return getEndpoint();
+	public McpEndpoint getEndpoint() {
+		return endpoint;
 	}
 
-	public synchronized McpEndpoint getEndpoint() {
-		if (server == null) {
-			throw new IllegalStateException("MCP server has not been started");
-		}
-		String url = "http://127.0.0.1:" + server.getAddress().getPort() + PATH;
-		return new McpEndpoint(url, bearerToken);
-	}
-
-	public synchronized void stop() {
-		if (server != null) {
-			server.stop(0);
-			server = null;
-		}
-		if (executor != null) {
-			executor.shutdownNow();
-			executor = null;
-		}
+	/**
+	 * Stops the server. Must be called at most once.
+	 */
+	public void stop() {
+		server.stop(0);
+		executor.shutdownNow();
 	}
 
 	private void handle(HttpExchange exchange) throws IOException {
