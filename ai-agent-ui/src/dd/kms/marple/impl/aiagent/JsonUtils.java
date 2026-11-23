@@ -89,7 +89,7 @@ public class JsonUtils
 	 * not throw a {@link JsonParseException} for an invalid value: Such a value is an invalid argument the agent
 	 * can correct, not a protocol violation.
 	 *
-	 * @return the enum constant or {@code null} if the member does not exist
+	 * @return the enum constant or {@code null} if {@code object} has no member {@code key} or its value is {@code null}
 	 * @throws IllegalArgumentException if the value is not the exact name of an enum constant
 	 */
 	@Nullable
