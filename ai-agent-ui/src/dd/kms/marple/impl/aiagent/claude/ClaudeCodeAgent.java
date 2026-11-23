@@ -240,8 +240,12 @@ class ClaudeCodeAgent implements AiAgent
 	}
 
 	/**
+	 * Lines that are not JSON objects and events of other types are ignored.
+	 *
 	 * @return the final answer if the event is the result event, otherwise {@code null}
-	 * @throws JsonParseException if the event does not have the expected structure
+	 * @throws JsonParseException if a member that is evaluated (the type of any event or the content of an
+	 *                            assistant or result event) has an unexpected type
+	 * @throws IOException if the event is a result event that reports an error
 	 */
 	@Nullable
 	private String handleEvent(String line, AiAgentListener listener, List<String> pendingTexts) throws IOException {
