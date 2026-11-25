@@ -14,12 +14,12 @@ import java.util.Objects;
  * lives as long as the registered inspection settings. "Auto approve" is deliberately not persisted: It is
  * off whenever the application is started.<br>
  * <br>
- * All methods must be called on the event dispatch thread.
+ * All methods except {@link #getSystemPrompt()} must be called on the event dispatch thread.
  */
 class AiAgentViewSettings
 {
 	private final AiAgentFactorySupplier	agentFactorySupplier;
-	private final String					systemPromptAddition;
+	private final String					systemPrompt;
 	/**
 	 * The factory provided by the supplier. It is {@code null} as long as the supplier has not
 	 * succeeded yet.
@@ -31,7 +31,14 @@ class AiAgentViewSettings
 
 	AiAgentViewSettings(AiAgentFactorySupplier agentFactorySupplier, String systemPromptAddition) {
 		this.agentFactorySupplier = agentFactorySupplier;
-		this.systemPromptAddition = systemPromptAddition;
+		this.systemPrompt = createSystemPrompt(systemPromptAddition);
+	}
+
+	private static String createSystemPrompt(@Nullable String systemPromptAddition) {
+		String baseSystemPrompt = Resources.loadText("SystemPrompt.md");
+		return systemPromptAddition == null || systemPromptAddition.trim().isEmpty()
+			? baseSystemPrompt
+			: baseSystemPrompt + "\n\n" + systemPromptAddition;
 	}
 
 	/**
@@ -47,8 +54,12 @@ class AiAgentViewSettings
 		return agentFactory;
 	}
 
-	String getSystemPromptAddition() {
-		return systemPromptAddition;
+	/**
+	 * Returns the system prompt including the addition. In contrast to the other methods, this method may be
+	 * called from any thread because the system prompt is immutable.
+	 */
+	String getSystemPrompt() {
+		return systemPrompt;
 	}
 
 	boolean isAutoApprove() {

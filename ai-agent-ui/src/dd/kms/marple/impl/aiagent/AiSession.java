@@ -166,14 +166,6 @@ class AiSession
 		}
 	}
 
-	private String createSystemPrompt() {
-		String systemPrompt = SystemPrompt.TEXT;
-		String addition = settings.getSystemPromptAddition();
-		return addition == null || addition.trim().isEmpty()
-			? systemPrompt
-			: systemPrompt + "\n\n" + addition;
-	}
-
 	private static String createTranscriptSummary(List<TranscriptEntry> transcript) {
 		StringBuilder summary = new StringBuilder();
 		for (TranscriptEntry entry : transcript) {
@@ -219,7 +211,7 @@ class AiSession
 
 		@Override
 		public String getSystemPrompt() {
-			return createSystemPrompt();
+			return settings.getSystemPrompt();
 		}
 
 		@Override
