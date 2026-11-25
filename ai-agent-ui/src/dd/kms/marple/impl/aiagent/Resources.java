@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 /**
  * Loads text resources of this package.
  */
-final class Resources
+class Resources
 {
 	private Resources() {}
 

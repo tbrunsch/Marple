@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
  * An immutable entry of the transcript. Entries with role {@link Role#TOOL} additionally describe the
  * tool call (name and complete input).
  */
-final class TranscriptEntry
+class TranscriptEntry
 {
 	enum Role
 	{

@@ -21,14 +21,14 @@ public class ProcessRegistry
 	 *  process survives cancel/close (here and in ClaudeCodeAgent). Killing descendants requires
 	 *  ProcessHandle.descendants() (Java 9+) or platform-specific commands (e.g., "taskkill /T").
 	 */
-	private static final Set<Process>	PROCESSES				= Collections.newSetFromMap(new IdentityHashMap<>());
-	private static boolean				shutdownHookRegistered	= false;
+	private static final Set<Process>	PROCESSES					= Collections.newSetFromMap(new IdentityHashMap<>());
+	private static boolean				SHUTDOWN_HOOK_REGISTERED	= false;
 
 	public static synchronized void register(Process process) {
-		if (!shutdownHookRegistered) {
+		if (!SHUTDOWN_HOOK_REGISTERED) {
 			Thread shutdownHook = new Thread(ProcessRegistry::destroyAll, "Marple AI agent process cleanup");
 			Runtime.getRuntime().addShutdownHook(shutdownHook);
-			shutdownHookRegistered = true;
+			SHUTDOWN_HOOK_REGISTERED = true;
 		}
 		PROCESSES.add(process);
 	}

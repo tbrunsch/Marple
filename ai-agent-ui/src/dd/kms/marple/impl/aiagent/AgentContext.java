@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * <br>
  * All methods must be called on the event dispatch thread.
  */
-public final class AgentContext
+public class AgentContext
 {
 	private final ExpressionEvaluator	evaluator		= ExpressionEvaluator.create();
 	/**

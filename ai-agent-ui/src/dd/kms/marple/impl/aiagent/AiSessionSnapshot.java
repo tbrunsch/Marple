@@ -13,7 +13,7 @@ import java.util.List;
  * on purpose: All snapshots of a conversation refer to the same {@link AgentContext}, so they always
  * reflect its current state, and it is garbage collected with the last snapshot.
  */
-final class AiSessionSnapshot
+class AiSessionSnapshot
 {
 	private final List<TranscriptEntry>	transcript;
 	@Nullable
