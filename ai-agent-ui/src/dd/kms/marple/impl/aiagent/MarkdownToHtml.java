@@ -1,7 +1,11 @@
 package dd.kms.marple.impl.aiagent;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,7 +15,7 @@ import java.util.regex.Pattern;
  * fenced code blocks, inline code, bold, italic, links, headings, bullet and numbered lists,
  * simple tables and paragraphs. Everything else is rendered as escaped text.
  */
-final class MarkdownToHtml
+class MarkdownToHtml
 {
 	private static final Pattern	HEADING			= Pattern.compile("^(#{1,6})\\s+(.*)$");
 	private static final Pattern	BULLET_ITEM		= Pattern.compile("^\\s*[-*+]\\s+(.*)$");
@@ -25,125 +29,65 @@ final class MarkdownToHtml
 	private static final Pattern	PLACEHOLDER		= Pattern.compile("\u0000(\\d+)\u0000");
 
 	static String convert(String markdown) {
-		return new MarkdownToHtml().doConvert(markdown);
+		return new MarkdownToHtml(markdown).doConvert();
 	}
 
-	private final StringBuilder	html			= new StringBuilder();
-	private final StringBuilder	paragraph		= new StringBuilder();
-	private final List<String>	tableRows		= new ArrayList<>();
-	private String				openListTag		= null;
-	private boolean				inCodeBlock		= false;
+	/**
+	 * The lines that have not been processed yet. Each block parser consumes the lines of its block.
+	 */
+	private final Queue<String>	lines;
+	private final StringBuilder	html	= new StringBuilder();
 
-	private MarkdownToHtml() {}
-
-	private String doConvert(String markdown) {
+	private MarkdownToHtml(String markdown) {
 		String[] lines = markdown.replace("\r\n", "\n").replace('\r', '\n').split("\n", -1);
-		for (String line : lines) {
-			processLine(line);
+		this.lines = new ArrayDeque<>(Arrays.asList(lines));
+	}
+
+	private String doConvert() {
+		String line;
+		while ((line = lines.peek()) != null) {
+			if (isBlank(line)) {
+				// blank lines only separate blocks
+				lines.remove();
+			} else if (isCodeFence(line)) {
+				parseCodeBlock();
+			} else if (isTableRow(line)) {
+				parseTable();
+			} else if (isHeading(line)) {
+				parseHeading();
+			} else if (isBulletItem(line)) {
+				parseBulletItemList();
+			} else if (isNumberedItem(line)) {
+				parseNumberedItemList();
+			} else {
+				parseParagraph();
+			}
 		}
-		if (inCodeBlock) {
-			html.append("</pre>");
-		}
-		flushAll();
 		return html.toString();
 	}
 
-	private void processLine(String line) {
-		if (line.trim().startsWith("```")) {
-			if (inCodeBlock) {
-				html.append("</pre>");
-				inCodeBlock = false;
-			} else {
-				flushAll();
-				html.append("<pre>");
-				inCodeBlock = true;
-			}
-			return;
+	/**
+	 * Parses a fenced code block. A code block that is not closed ends with the last line.
+	 */
+	private void parseCodeBlock() {
+		lines.remove();
+		html.append("<pre>");
+		while (nextLineMatches(line -> !isCodeFence(line))) {
+			html.append(escape(lines.remove())).append("\n");
 		}
-		if (inCodeBlock) {
-			html.append(escape(line)).append("\n");
-			return;
-		}
-		String trimmedLine = line.trim();
-		if (trimmedLine.isEmpty()) {
-			flushAll();
-			return;
-		}
-		if (trimmedLine.startsWith("|")) {
-			flushParagraph();
-			closeList();
-			tableRows.add(trimmedLine);
-			return;
-		}
-		flushTable();
-
-		Matcher matcher = HEADING.matcher(trimmedLine);
-		if (matcher.matches()) {
-			flushAll();
-			int level = Math.min(matcher.group(1).length() + 1, 4);
-			html.append("<h").append(level).append(">").append(formatInline(matcher.group(2))).append("</h").append(level).append(">");
-			return;
-		}
-		matcher = BULLET_ITEM.matcher(line);
-		if (matcher.matches()) {
-			addListItem("ul", matcher.group(1));
-			return;
-		}
-		matcher = NUMBERED_ITEM.matcher(line);
-		if (matcher.matches()) {
-			addListItem("ol", matcher.group(1));
-			return;
-		}
-		if (openListTag != null && Character.isWhitespace(line.charAt(0))) {
-			// continuation of a list item
-			html.append(" ").append(formatInline(trimmedLine));
-			return;
-		}
-		closeList();
-		if (paragraph.length() > 0) {
-			paragraph.append("<br>");
-		}
-		paragraph.append(formatInline(trimmedLine));
+		lines.poll();
+		html.append("</pre>");
 	}
 
-	private void addListItem(String listTag, String content) {
-		flushParagraph();
-		if (!listTag.equals(openListTag)) {
-			closeList();
-			html.append("<").append(listTag).append(">");
-			openListTag = listTag;
-		}
-		html.append("<li>").append(formatInline(content));
-	}
-
-	private void flushAll() {
-		flushParagraph();
-		closeList();
-		flushTable();
-	}
-
-	private void flushParagraph() {
-		if (paragraph.length() > 0) {
-			html.append("<p>").append(paragraph).append("</p>");
-			paragraph.setLength(0);
-		}
-	}
-
-	private void closeList() {
-		if (openListTag != null) {
-			html.append("</").append(openListTag).append(">");
-			openListTag = null;
-		}
-	}
-
-	private void flushTable() {
-		if (tableRows.isEmpty()) {
-			return;
+	private void parseTable() {
+		List<String> rows = new ArrayList<>();
+		while (nextLineMatches(MarkdownToHtml::isTableRow)) {
+			rows.add(lines.remove().trim());
 		}
 		html.append("<table border=\"1\" cellspacing=\"0\" cellpadding=\"3\">");
-		boolean headerRow = tableRows.size() > 1 && TABLE_SEPARATOR.matcher(tableRows.get(1)).matches();
-		for (int i = 0; i < tableRows.size(); i++) {
-			String row = tableRows.get(i);
+		boolean headerRow = rows.size() > 1 && TABLE_SEPARATOR.matcher(rows.get(1)).matches();
+		for (int i = 0; i < rows.size(); i++) {
+			String row = rows.get(i);
 			if (TABLE_SEPARATOR.matcher(row).matches()) {
 				continue;
 			}
@@ -155,7 +99,121 @@ final class MarkdownToHtml
 			html.append("</tr>");
 		}
 		html.append("</table>");
-		tableRows.clear();
+	}
+
+	private void parseHeading() {
+		Matcher matcher = HEADING.matcher(lines.remove().trim());
+		matcher.matches();
+		int level = Math.min(matcher.group(1).length() + 1, 4);
+		html.append("<h").append(level).append(">").append(formatInline(matcher.group(2))).append("</h").append(level).append(">");
+	}
+
+	private void parseBulletItemList() {
+		parseList("ul", BULLET_ITEM);
+	}
+
+	private void parseNumberedItemList() {
+		parseList("ol", NUMBERED_ITEM);
+	}
+
+	/**
+	 * Parses a list whose items match {@code itemPattern}. Indented lines that do not start a new
+	 * block continue the previous item; if they are separated from it by blank lines, they start a
+	 * new paragraph within the item. Blank lines between items do not end the list. Nested lists
+	 * are not supported: An indented item of another list type ends the list.
+	 */
+	private void parseList(String listTag, Pattern itemPattern) {
+		Predicate<String> isItem = line -> itemPattern.matcher(line).matches();
+		html.append("<").append(listTag).append(">");
+		String nextNonBlankLine;
+		while ((nextNonBlankLine = peekFirstNonBlankLine()) != null && isItem.test(nextNonBlankLine)) {
+			removeLeadingBlankLines();
+			Matcher matcher = itemPattern.matcher(lines.remove());
+			matcher.matches();
+			html.append("<li>").append(formatInline(matcher.group(1)));
+			while ((nextNonBlankLine = peekFirstNonBlankLine()) != null && isListItemContinuation(nextNonBlankLine)) {
+				String separator = nextLineMatches(MarkdownToHtml::isBlank) ? "<br><br>" : " ";
+				removeLeadingBlankLines();
+				html.append(separator).append(formatInline(lines.remove().trim()));
+			}
+			html.append("</li>");
+		}
+		html.append("</").append(listTag).append(">");
+	}
+
+	/**
+	 * Parses a paragraph. Its lines are separated by line breaks.
+	 */
+	private void parseParagraph() {
+		html.append("<p>").append(formatInline(lines.remove().trim()));
+		while (nextLineMatches(MarkdownToHtml::isParagraphLine)) {
+			html.append("<br>").append(formatInline(lines.remove().trim()));
+		}
+		html.append("</p>");
+	}
+
+	private boolean nextLineMatches(Predicate<String> condition) {
+		String line = lines.peek();
+		return line != null && condition.test(line);
+	}
+
+	/**
+	 * Returns the first non-blank line that has not been processed yet without removing any line,
+	 * or {@code null} if there is no such line.
+	 */
+	private String peekFirstNonBlankLine() {
+		for (String line : lines) {
+			if (!isBlank(line)) {
+				return line;
+			}
+		}
+		return null;
+	}
+
+	private void removeLeadingBlankLines() {
+		while (nextLineMatches(MarkdownToHtml::isBlank)) {
+			lines.remove();
+		}
+	}
+
+	private static boolean isBlank(String line) {
+		return line.trim().isEmpty();
+	}
+
+	private static boolean isCodeFence(String line) {
+		return line.trim().startsWith("```");
+	}
+
+	private static boolean isTableRow(String line) {
+		return line.trim().startsWith("|");
+	}
+
+	private static boolean isHeading(String line) {
+		return HEADING.matcher(line.trim()).matches();
+	}
+
+	private static boolean isListItem(String line) {
+		return isBulletItem(line) || isNumberedItem(line);
+	}
+
+	private static boolean isBulletItem(String line) {
+		return BULLET_ITEM.matcher(line).matches();
+	}
+
+	private static boolean isNumberedItem(String line) {
+		return NUMBERED_ITEM.matcher(line).matches();
+	}
+
+	private static boolean startsBlock(String line) {
+		return isCodeFence(line) || isTableRow(line) || isHeading(line) || isListItem(line);
+	}
+
+	private static boolean isParagraphLine(String line) {
+		return !isBlank(line) && !startsBlock(line);
+	}
+
+	private static boolean isListItemContinuation(String line) {
+		return isParagraphLine(line) && Character.isWhitespace(line.charAt(0));
 	}
 
 	private static List<String> splitTableRow(String row) {
