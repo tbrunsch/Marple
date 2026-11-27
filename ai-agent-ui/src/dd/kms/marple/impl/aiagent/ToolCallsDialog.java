@@ -24,6 +24,7 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 import java.util.function.IntConsumer;
+import java.util.function.Predicate;
 
 /**
  * Non-modal dialog that lists the tool calls of the current conversation with their complete parameters.
@@ -70,10 +71,10 @@ class ToolCallsDialog extends JDialog
 		requestFilter = ValueFilters.createSelectionFilter(context);
 		toolFilter = ValueFilters.createSelectionFilter(context);
 		List<ColumnDescription<ToolCall>> columnDescriptions = Arrays.asList(
-			new ColumnDescriptionBuilder<ToolCall>("#",				Integer.class,	ToolCall::getNumber).build(),
-			new ColumnDescriptionBuilder<ToolCall>("Request",		Integer.class,	ToolCall::getRequest).valueFilter(requestFilter).build(),
-			new ColumnDescriptionBuilder<ToolCall>("Tool",			String.class,	ToolCall::getToolName).valueFilter(toolFilter).build(),
-			new ColumnDescriptionBuilder<ToolCall>("Parameters",	Object.class,	this::getParametersValue).valueFilter(ValueFilters.createWildcardFilter()).build()
+			new ColumnDescriptionBuilder<>("#",				Integer.class,	ToolCall::getNumber).build(),
+			new ColumnDescriptionBuilder<>("Request",		Integer.class,	ToolCall::getRequest).valueFilter(requestFilter).build(),
+			new ColumnDescriptionBuilder<>("Tool",			String.class,	ToolCall::getToolName).valueFilter(toolFilter).build(),
+			new ColumnDescriptionBuilder<>("Parameters",	Object.class,	this::getParametersValue).valueFilter(ValueFilters.createWildcardFilter()).build()
 		);
 		table = new ListBasedTable<>(toolCalls, columnDescriptions);
 
@@ -114,7 +115,7 @@ class ToolCallsDialog extends JDialog
 	 * Updates the dialog with the tool calls of the transcript. The selection is preserved.
 	 */
 	void setTranscript(List<TranscriptEntry> transcript) {
-		List<Integer> selectedNumbers = getSelectedNumbers();
+		Set<Integer> selectedToolCallNumbers = getSelectedToolCallNumbers();
 		toolCalls.clear();
 		toolCalls.addAll(createToolCalls(transcript));
 		// the selection filters only know the values that existed when the table was created
@@ -124,10 +125,10 @@ class ToolCallsDialog extends JDialog
 		}
 		JTable internalTable = table.getInternalTable();
 		((AbstractTableModel) internalTable.getModel()).fireTableDataChanged();
-		if (selectedNumbers.isEmpty()) {
+		if (selectedToolCallNumbers.isEmpty()) {
 			scrollToRow(internalTable.getRowCount() - 1);
 		} else {
-			selectNumbers(selectedNumbers);
+			selectToolCalls(toolCall -> selectedToolCallNumbers.contains(toolCall.getNumber()));
 		}
 	}
 
@@ -136,19 +137,15 @@ class ToolCallsDialog extends JDialog
 	 * not hidden by a filter.
 	 */
 	void selectToolCalls(int first, int last) {
-		List<Integer> numbers = new ArrayList<>();
-		for (int number = first; number <= last; number++) {
-			numbers.add(number);
-		}
-		selectNumbers(numbers);
+		selectToolCalls(toolCall -> first <= toolCall.getNumber() && toolCall.getNumber() <= last);
 	}
 
-	private void selectNumbers(Collection<Integer> numbers) {
+	private void selectToolCalls(Predicate<ToolCall> predicate) {
 		JTable internalTable = table.getInternalTable();
 		internalTable.clearSelection();
 		int firstViewRow = -1;
 		for (int modelRow = 0; modelRow < toolCalls.size(); modelRow++) {
-			if (!numbers.contains(toolCalls.get(modelRow).getNumber())) {
+			if (!predicate.test(toolCalls.get(modelRow))) {
 				continue;
 			}
 			int viewRow = internalTable.convertRowIndexToView(modelRow);
@@ -160,13 +157,13 @@ class ToolCallsDialog extends JDialog
 		scrollToRow(firstViewRow);
 	}
 
-	private List<Integer> getSelectedNumbers() {
+	private Set<Integer> getSelectedToolCallNumbers() {
 		JTable internalTable = table.getInternalTable();
-		List<Integer> numbers = new ArrayList<>();
+		Set<Integer> toolCallNumbers = new HashSet<>();
 		for (int viewRow : internalTable.getSelectedRows()) {
-			numbers.add(toolCalls.get(internalTable.convertRowIndexToModel(viewRow)).getNumber());
+			toolCallNumbers.add(toolCalls.get(internalTable.convertRowIndexToModel(viewRow)).getNumber());
 		}
-		return numbers;
+		return toolCallNumbers;
 	}
 
 	private void scrollToRow(int viewRow) {
