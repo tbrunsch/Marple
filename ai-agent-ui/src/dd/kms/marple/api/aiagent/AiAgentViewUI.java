@@ -20,6 +20,8 @@ import dd.kms.marple.api.settings.visual.VisualSettingsBuilder;
  *     .systemPromptAddition("The inspected application is ...")
  *     .register(visualSettingsBuilder);
  * </pre>
+ * Alternatively, {@code ClaudeCodeAgentFactoryBuilder.create(null).build()} provides an agent without access to
+ * the source code that only works on the running application.
  */
 public interface AiAgentViewUI
 {

@@ -74,6 +74,8 @@ class AiAgentView extends JPanel implements ObjectView
 	private final JButton				toolCallsButton			= new JButton();
 	private final JEditorPane			transcriptPane			= new JEditorPane();
 	private final JTextArea				inputArea				= new JTextArea(4, 40);
+	private final ScopeComboBoxModel	scopeModel;
+	private final JComboBox<Scope>		scopeComboBox;
 
 	private final Runnable				autoApproveListener		= this::onAutoApproveChanged;
 	private final Runnable				agentVariablesListener	= this::updateAgentVariablesButton;
@@ -113,12 +115,16 @@ class AiAgentView extends JPanel implements ObjectView
 			agentFactory = settings.getAgentFactory();
 		} catch (IOException e) {
 			session = null;
+			scopeModel = null;
+			scopeComboBox = null;
 			String reason = e.getMessage() != null ? e.getMessage() : e.toString();
 			JLabel unavailableLabel = new JLabel("AI agent not available: " + reason, SwingConstants.CENTER);
 			add(unavailableLabel, BorderLayout.CENTER);
 			return;
 		}
-		SwingPermissionHandler permissionHandler = new SwingPermissionHandler(settings, this);
+		scopeModel = new ScopeComboBoxModel(agentFactory.supportsFileChanges());
+		scopeComboBox = new JComboBox<>(scopeModel);
+		SwingPermissionHandler permissionHandler = new SwingPermissionHandler(settings, this, this::getCurrentScope);
 		session = new AiSession(settings, agentFactory, context, permissionHandler, thisValue);
 		observeAgentContext(session.getAgentContext());
 
@@ -180,8 +186,21 @@ class AiAgentView extends JPanel implements ObjectView
 		inputArea.setWrapStyleWord(true);
 		JLabel inputLabel = new JLabel("Ask anything about \"this\" or the application (Enter sends, Shift+Enter inserts a line break):");
 		inputLabel.setLabelFor(inputArea);
+
+		scopeComboBox.setRenderer(new ScopeRenderer(scopeModel));
+		scopeComboBox.setToolTipText(createScopeToolTip(scopeModel));
+		JLabel scopeLabel = new JLabel("Scope:");
+		scopeLabel.setLabelFor(scopeComboBox);
+		JPanel scopePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+		scopePanel.add(scopeLabel);
+		scopePanel.add(scopeComboBox);
+
+		JPanel inputHeaderPanel = new JPanel(new BorderLayout(10, 0));
+		inputHeaderPanel.add(inputLabel, BorderLayout.CENTER);
+		inputHeaderPanel.add(scopePanel, BorderLayout.EAST);
+
 		JPanel inputPanel = new JPanel(new BorderLayout(0, 2));
-		inputPanel.add(inputLabel, BorderLayout.NORTH);
+		inputPanel.add(inputHeaderPanel, BorderLayout.NORTH);
 		inputPanel.add(new JScrollPane(inputArea), BorderLayout.CENTER);
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, transcriptScrollPane, inputPanel);
@@ -265,6 +284,32 @@ class AiAgentView extends JPanel implements ObjectView
 	}
 
 	/*
+	 * Scope
+	 */
+	private static String createScopeToolTip(ScopeComboBoxModel scopeModel) {
+		StringBuilder toolTip = new StringBuilder("<html>What the agent should work on with your next message:");
+		for (Scope scope : Scope.values()) {
+			toolTip.append("<br><b>").append(MarkdownToHtml.escape(scope.toString())).append(":</b> ")
+				.append(MarkdownToHtml.escape(scope.getDescription()));
+			if (!scopeModel.isAvailable(scope)) {
+				toolTip.append(" <i>(not available: the agent has no access to the files of the application)</i>");
+			}
+		}
+		return toolTip.append("</html>").toString();
+	}
+
+	private Scope getSelectedScope() {
+		return (Scope) scopeModel.getSelectedItem();
+	}
+
+	/**
+	 * Returns the scope of the running request. If no request is running, then the selected scope is returned.
+	 */
+	private Scope getCurrentScope() {
+		return currentRequest != null ? currentRequest.scope : getSelectedScope();
+	}
+
+	/*
 	 * Requests
 	 */
 	private void send() {
@@ -273,7 +318,8 @@ class AiAgentView extends JPanel implements ObjectView
 			return;
 		}
 		inputArea.setText("");
-		addEntry(TranscriptEntry.Role.USER, message);
+		Scope scope = getSelectedScope();
+		addEntry(TranscriptEntry.createUserEntry(message, scope));
 
 		AiAgent agent;
 		try {
@@ -283,7 +329,7 @@ class AiAgentView extends JPanel implements ObjectView
 			addEntry(TranscriptEntry.Role.ERROR, errorMessage != null ? errorMessage : e.toString());
 			return;
 		}
-		Request request = new Request(agent, session.createFullMessage(message, createContextLine()));
+		Request request = new Request(agent, session.createFullMessage(message, createContextLine() + "\n" + scope.getMessageLine()), scope);
 		currentRequest = request;
 		setState(State.RUNNING);
 		request.execute();
@@ -432,7 +478,8 @@ class AiAgentView extends JPanel implements ObjectView
 			String text = entry.getText();
 			switch (entry.getRole()) {
 				case USER:
-					html.append("<div class=\"user\"><b>You:</b> ").append(MarkdownToHtml.escape(text).replace("\n", "<br>")).append("</div>");
+					html.append("<div class=\"user\"><b>You</b> <span class=\"scope\">(").append(MarkdownToHtml.escape(String.valueOf(entry.getScope()))).append(")</span><b>:</b> ")
+						.append(MarkdownToHtml.escape(text).replace("\n", "<br>")).append("</div>");
 					break;
 				case AGENT:
 					html.append("<div class=\"agent\">").append(MarkdownToHtml.convert(text)).append("</div>");
@@ -618,7 +665,7 @@ class AiAgentView extends JPanel implements ObjectView
 		if (state == State.RUNNING || state == State.CANCELING) {
 			snapshotTranscript.add(new TranscriptEntry(TranscriptEntry.Role.INFO, "The request has been interrupted because the inspected object has changed."));
 		}
-		return new AiSessionSnapshot(snapshotTranscript, session.getResumeState(), session.getAgentContext());
+		return new AiSessionSnapshot(snapshotTranscript, session.getResumeState(), session.getAgentContext(), getSelectedScope());
 	}
 
 	@Override
@@ -632,6 +679,7 @@ class AiAgentView extends JPanel implements ObjectView
 		transcript.addAll(snapshot.getTranscript());
 		session.restore(snapshot.getResumeState(), snapshot.getTranscript(), snapshot.getAgentContext());
 		observeAgentContext(session.getAgentContext());
+		scopeModel.setSelectedItem(snapshot.getScope());
 		renderTranscript();
 	}
 
@@ -667,15 +715,21 @@ class AiAgentView extends JPanel implements ObjectView
 	{
 		private final AiAgent	agent;
 		private final String	message;
+		/**
+		 * The scope the message has been sent with. It applies to the whole request, even if the user selects
+		 * another scope in the meantime.
+		 */
+		private final Scope		scope;
 
 		/**
 		 * The progress and the result of a discarded request are not shown.
 		 */
 		private boolean			discarded;
 
-		Request(AiAgent agent, String message) {
+		Request(AiAgent agent, String message, Scope scope) {
 			this.agent = agent;
 			this.message = message;
+			this.scope = scope;
 		}
 
 		boolean isDiscarded() {
@@ -706,6 +760,51 @@ class AiAgentView extends JPanel implements ObjectView
 			// create the entry immediately: it copies the input
 			TranscriptEntry entry = TranscriptEntry.createToolEntry(summary.isEmpty() ? toolName : toolName + ": " + summary, toolName, input);
 			addEntryLater(this, entry);
+		}
+	}
+
+	/**
+	 * Contains all scopes, but only available scopes can be selected
+	 */
+	private static class ScopeComboBoxModel extends DefaultComboBoxModel<Scope>
+	{
+		private final boolean	supportsFileChanges;
+
+		ScopeComboBoxModel(boolean supportsFileChanges) {
+			super(Scope.values());
+			this.supportsFileChanges = supportsFileChanges;
+			super.setSelectedItem(Scope.RUNNING_APPLICATION);
+		}
+
+		boolean isAvailable(Scope scope) {
+			return scope != Scope.FILES || supportsFileChanges;
+		}
+
+		@Override
+		public void setSelectedItem(Object item) {
+			if (item instanceof Scope && isAvailable((Scope) item)) {
+				super.setSelectedItem(item);
+			}
+		}
+	}
+
+	/**
+	 * Renders scopes that are not available as disabled
+	 */
+	private static class ScopeRenderer extends DefaultListCellRenderer
+	{
+		private final ScopeComboBoxModel	scopeModel;
+
+		ScopeRenderer(ScopeComboBoxModel scopeModel) {
+			this.scopeModel = scopeModel;
+		}
+
+		@Override
+		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+			boolean available = !(value instanceof Scope) || scopeModel.isAvailable((Scope) value);
+			super.getListCellRendererComponent(list, value, index, isSelected && available, cellHasFocus && available);
+			setEnabled(available);
+			return this;
 		}
 	}
 }

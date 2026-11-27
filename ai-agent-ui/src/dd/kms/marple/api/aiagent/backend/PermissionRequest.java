@@ -13,6 +13,10 @@ public final class PermissionRequest
 	private final String	filePath;
 	private final String	preview;
 
+	/**
+	 * @param filePath	the file the tool creates or modifies or {@code null} if the tool does not change a file
+	 *                  (see {@link #isFileChange()})
+	 */
 	public PermissionRequest(String toolName, @Nullable String filePath, String preview) {
 		this.toolName = toolName;
 		this.filePath = filePath;
@@ -26,6 +30,14 @@ public final class PermissionRequest
 	@Nullable
 	public String getFilePath() {
 		return filePath;
+	}
+
+	/**
+	 * Returns {@code true} if the tool creates or modifies a file. File changes are rejected without asking
+	 * if the user has restricted the agent to the running application.
+	 */
+	public boolean isFileChange() {
+		return filePath != null;
 	}
 
 	/**

@@ -14,12 +14,14 @@ class ClaudeCodeAgentFactoryImpl implements AiAgentFactory
 {
 	private final String						executable;
 	private final Path							workingDirectory;
+	private final boolean						supportsFileChanges;
 	private final ImmutableMap<String, Boolean>	tools;
 	private final ImmutableList<String>			additionalArguments;
 
-	ClaudeCodeAgentFactoryImpl(String executable, Path workingDirectory, ImmutableMap<String, Boolean> tools, List<String> additionalArguments) {
+	ClaudeCodeAgentFactoryImpl(String executable, Path workingDirectory, boolean supportsFileChanges, ImmutableMap<String, Boolean> tools, List<String> additionalArguments) {
 		this.executable = executable;
 		this.workingDirectory = workingDirectory;
+		this.supportsFileChanges = supportsFileChanges;
 		this.tools = tools;
 		this.additionalArguments = ImmutableList.copyOf(additionalArguments);
 	}
@@ -27,5 +29,10 @@ class ClaudeCodeAgentFactoryImpl implements AiAgentFactory
 	@Override
 	public AiAgent createAgent(AiAgentEnvironment environment, @Nullable Object resumeState) {
 		return new ClaudeCodeAgent(executable, workingDirectory, tools, additionalArguments, environment, resumeState);
+	}
+
+	@Override
+	public boolean supportsFileChanges() {
+		return supportsFileChanges;
 	}
 }

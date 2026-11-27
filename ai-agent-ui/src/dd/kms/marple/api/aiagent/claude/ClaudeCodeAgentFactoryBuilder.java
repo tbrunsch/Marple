@@ -25,8 +25,12 @@ public interface ClaudeCodeAgentFactoryBuilder
 {
 	/**
 	 * @param workingDirectory	the directory the agents are started in. It should contain the source code of the
-	 *                          inspected application. It is validated by {@link #build()}, so {@code null}
-	 *                          (e.g., if the source code cannot be found) is allowed here.
+	 *                          inspected application. If it is {@code null} (e.g., because the source code cannot be
+	 *                          found), then the agents can only analyze and change the running application: They
+	 *                          are started in an empty directory without the tools {@code Read}, {@code Grep},
+	 *                          {@code Glob}, {@code Edit}, and {@code Write}, and the view does not offer the scope
+	 *                          "Files" (see {@link AiAgentFactory#supportsFileChanges()}). A non-null directory is
+	 *                          validated by {@link #build()}.
 	 */
 	static ClaudeCodeAgentFactoryBuilder create(@Nullable Path workingDirectory) {
 		return new dd.kms.marple.impl.aiagent.claude.ClaudeCodeAgentFactoryBuilderImpl(workingDirectory);
@@ -39,8 +43,13 @@ public interface ClaudeCodeAgentFactoryBuilder
 
 	/**
 	 * Makes an additional built-in Claude Code tool available, e.g., {@code "WebSearch"} or {@code "WebFetch"}.
-	 * By default, the agents can use {@code Read}, {@code Grep}, and {@code Glob} without approval and
-	 * {@code Edit} and {@code Write} with approval.<br>
+	 * If a working directory has been specified, then the agents can use {@code Read}, {@code Grep}, and
+	 * {@code Glob} without approval and {@code Edit} and {@code Write} with approval by default. Otherwise,
+	 * no built-in tools are available by default.<br>
+	 * <br>
+	 * {@code Edit} and {@code Write} are rejected without asking if the user has selected the scope
+	 * "Running application". Other tools that require approval are not affected by the scope: The user is
+	 * always asked.<br>
 	 * <br>
 	 * The first registration of a tool wins: Registering a tool again with the same approval flag has no
 	 * effect, registering it with a different flag results in an exception.<br>
@@ -64,7 +73,8 @@ public interface ClaudeCodeAgentFactoryBuilder
 	/**
 	 * Creates the factory. Changes of the builder made afterwards do not affect the factory.
 	 *
-	 * @throws IOException if no working directory has been specified or if it is not an existing directory
+	 * @throws IOException if the specified working directory is not an existing directory or if the empty
+	 *                     directory for agents without working directory cannot be created
 	 */
 	AiAgentFactory build() throws IOException;
 }

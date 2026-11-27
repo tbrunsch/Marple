@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,13 @@ import java.util.Objects;
 
 public class ClaudeCodeAgentFactoryBuilderImpl implements ClaudeCodeAgentFactoryBuilder
 {
+	/**
+	 * Name of the empty directory (in the temp directory) agents without working directory are started in. It
+	 * is the same for all factories because Claude Code stores the sessions per directory: Resuming a session
+	 * requires the same directory.
+	 */
+	private static final String			EMPTY_DIRECTORY_NAME	= "marple-ai-agent";
+
 	@Nullable
 	private final Path					workingDirectory;
 	private String						executable				= "claude";
@@ -27,11 +35,13 @@ public class ClaudeCodeAgentFactoryBuilderImpl implements ClaudeCodeAgentFactory
 
 	public ClaudeCodeAgentFactoryBuilderImpl(@Nullable Path workingDirectory) {
 		this.workingDirectory = workingDirectory;
-		addTool("Read", false);
-		addTool("Grep", false);
-		addTool("Glob", false);
-		addTool("Edit", true);
-		addTool("Write", true);
+		if (workingDirectory != null) {
+			addTool("Read", false);
+			addTool("Grep", false);
+			addTool("Glob", false);
+			addTool("Edit", true);
+			addTool("Write", true);
+		}
 	}
 
 	@Override
@@ -61,12 +71,20 @@ public class ClaudeCodeAgentFactoryBuilderImpl implements ClaudeCodeAgentFactory
 
 	@Override
 	public AiAgentFactory build() throws IOException {
-		if (workingDirectory == null) {
-			throw new IOException("No working directory specified");
+		boolean supportsFileChanges = workingDirectory != null;
+		Path directory = supportsFileChanges ? workingDirectory : createEmptyDirectory();
+		if (!Files.isDirectory(directory)) {
+			throw new IOException("The working directory '" + directory + "' does not exist or is not a directory");
 		}
-		if (!Files.isDirectory(workingDirectory)) {
-			throw new IOException("The working directory '" + workingDirectory + "' does not exist or is not a directory");
+		return new ClaudeCodeAgentFactoryImpl(executable, directory, supportsFileChanges, ImmutableMap.copyOf(tools), additionalArguments);
+	}
+
+	private static Path createEmptyDirectory() throws IOException {
+		Path directory = Paths.get(System.getProperty("java.io.tmpdir"), EMPTY_DIRECTORY_NAME);
+		try {
+			return Files.createDirectories(directory);
+		} catch (IOException e) {
+			throw new IOException("Cannot create the directory '" + directory + "' for the AI agent: " + e.getMessage(), e);
 		}
-		return new ClaudeCodeAgentFactoryImpl(executable, workingDirectory, ImmutableMap.copyOf(tools), additionalArguments);
 	}
 }

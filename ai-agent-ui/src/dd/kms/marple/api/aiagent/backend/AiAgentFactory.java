@@ -16,4 +16,11 @@ public interface AiAgentFactory
 	 *                      or {@code null} if a new conversation should be started
 	 */
 	AiAgent createAgent(AiAgentEnvironment environment, @Nullable Object resumeState);
+
+	/**
+	 * Returns {@code true} if the agents can create and modify files, typically the source code of the inspected
+	 * application. Otherwise, the view only offers the scope "Running application", in which the agents
+	 * analyze and change the running application only.
+	 */
+	boolean supportsFileChanges();
 }

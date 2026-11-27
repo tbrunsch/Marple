@@ -6,7 +6,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * View settings of the AI view: the transcript, the agent's resume state and the agent's evaluator.
+ * View settings of the AI view: the transcript, the agent's resume state, the agent's evaluator, and the
+ * selected scope.
  * It allows restoring the conversation when the user navigates back to an object.<br>
  * <br>
  * The transcript and the resume state are immutable. The agent context is shared with the session
@@ -19,11 +20,13 @@ class AiSessionSnapshot
 	@Nullable
 	private final Object				resumeState;
 	private final AgentContext			agentContext;
+	private final Scope					scope;
 
-	AiSessionSnapshot(List<TranscriptEntry> transcript, @Nullable Object resumeState, AgentContext agentContext) {
+	AiSessionSnapshot(List<TranscriptEntry> transcript, @Nullable Object resumeState, AgentContext agentContext, Scope scope) {
 		this.transcript = ImmutableList.copyOf(transcript);
 		this.resumeState = resumeState;
 		this.agentContext = agentContext;
+		this.scope = scope;
 	}
 
 	List<TranscriptEntry> getTranscript() {
@@ -37,5 +40,9 @@ class AiSessionSnapshot
 
 	AgentContext getAgentContext() {
 		return agentContext;
+	}
+
+	Scope getScope() {
+		return scope;
 	}
 }

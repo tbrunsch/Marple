@@ -7,11 +7,13 @@ import dd.kms.marple.api.aiagent.backend.PermissionRequest;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.function.Supplier;
 
 /**
  * Asks the user via a modal dialog whether the agent may perform an action, e.g., change a file.
- * If "Auto approve" is enabled, all actions are allowed without asking. The setting is checked on the event
- * dispatch thread, so a request that waits for an open dialog is approved if the user enables "Auto approve" there.
+ * File changes are rejected without asking if the scope of the current request is {@link Scope#RUNNING_APPLICATION}.
+ * Otherwise, if "Auto approve" is enabled, all actions are allowed without asking. The settings are checked on the
+ * event dispatch thread, so a request that waits for an open dialog is approved if the user enables "Auto approve" there.
  */
 class SwingPermissionHandler implements PermissionHandler
 {
@@ -20,22 +22,36 @@ class SwingPermissionHandler implements PermissionHandler
 	 * The dialog is owned by the window that contains this component when the dialog is shown
 	 */
 	private final Component				parent;
+	/**
+	 * Provides the scope of the current request. It is called on the event dispatch thread.
+	 */
+	private final Supplier<Scope>		scopeSupplier;
 
-	SwingPermissionHandler(AiAgentViewSettings settings, Component parent) {
+	SwingPermissionHandler(AiAgentViewSettings settings, Component parent, Supplier<Scope> scopeSupplier) {
 		this.settings = settings;
 		this.parent = parent;
+		this.scopeSupplier = scopeSupplier;
 	}
 
 	@Override
 	public PermissionDecision requestPermission(PermissionRequest request) {
 		try {
-			return EventDispatchThreadUtils.callAndWait(() -> settings.isAutoApprove() ? PermissionDecision.allow() : showDialog(request));
+			return EventDispatchThreadUtils.callAndWait(() -> decide(request));
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			return PermissionDecision.deny("Interrupted while waiting for the user's decision");
 		} catch (InvocationTargetException e) {
 			return PermissionDecision.deny("Error while asking the user: " + e.getCause());
 		}
+	}
+
+	private PermissionDecision decide(PermissionRequest request) {
+		if (request.isFileChange() && scopeSupplier.get() == Scope.RUNNING_APPLICATION) {
+			return PermissionDecision.deny("The scope of the user's request is \"" + Scope.RUNNING_APPLICATION + "\": "
+				+ "Do not change files. Apply changes to the running application, or describe the required file change "
+				+ "and tell the user to select the scope \"" + Scope.FILES + "\" if the files should be changed.");
+		}
+		return settings.isAutoApprove() ? PermissionDecision.allow() : showDialog(request);
 	}
 
 	private PermissionDecision showDialog(PermissionRequest request) {

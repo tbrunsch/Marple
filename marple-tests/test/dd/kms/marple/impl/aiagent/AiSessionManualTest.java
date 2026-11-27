@@ -66,9 +66,9 @@ public class AiSessionManualTest
 		Object resumeState;
 		AgentContext agentContext = onEdt(session::getAgentContext);
 		try {
-			ask(session, contextLine, listener, "Which field of which class holds \"this\"? Use the component hierarchy. Then change the text of \"this\" to \"Changed by AI\" at runtime.");
+			ask(session, contextLine, Scope.RUNNING_APPLICATION, listener, "Which field of which class holds \"this\"? Use the component hierarchy. Then change the text of \"this\" to \"Changed by AI\" at runtime.");
 			System.out.println("Label text is now: " + thisValue.getText());
-			ask(session, contextLine, listener, "Make that change permanent in the source code (one edit only; if it is rejected, do not retry).");
+			ask(session, contextLine, Scope.FILES, listener, "Make that change permanent in the source code (one edit only; if it is rejected, do not retry).");
 			resumeState = onEdt(session::getResumeState);
 			System.out.println("Resume state: " + resumeState);
 		} finally {
@@ -79,7 +79,7 @@ public class AiSessionManualTest
 		Object finalResumeState = resumeState;
 		SwingUtilities.invokeAndWait(() -> resumedSession.restore(finalResumeState, Collections.emptyList(), agentContext));
 		try {
-			ask(resumedSession, contextLine, listener, "Which text did you set at runtime earlier in this conversation? Answer briefly without using tools.");
+			ask(resumedSession, contextLine, Scope.RUNNING_APPLICATION, listener, "Which text did you set at runtime earlier in this conversation? Answer briefly without using tools.");
 		} finally {
 			SwingUtilities.invokeAndWait(resumedSession::close);
 		}
@@ -90,11 +90,11 @@ public class AiSessionManualTest
 		System.exit(0);
 	}
 
-	private static void ask(AiSession session, String contextLine, AiAgentListener listener, String message) throws Exception {
+	private static void ask(AiSession session, String contextLine, Scope scope, AiAgentListener listener, String message) throws Exception {
 		System.out.println("USER: " + message);
 		long startTime = System.currentTimeMillis();
 		AiAgent agent = onEdt(session::getOrCreateAgent);
-		String fullMessage = onEdt(() -> session.createFullMessage(message, contextLine));
+		String fullMessage = onEdt(() -> session.createFullMessage(message, contextLine + "\n" + scope.getMessageLine()));
 		String answer = agent.sendRequest(fullMessage, listener);
 		System.out.println("AGENT (" + (System.currentTimeMillis() - startTime) + " ms): " + answer);
 		System.out.println();

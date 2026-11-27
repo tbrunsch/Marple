@@ -361,7 +361,11 @@ class ClaudeCodeAgent implements AiAgent
 					allowedTools.add(tool);
 				}
 			});
-			command.addAll(Arrays.asList("--tools", String.join(",", tools.keySet())));
+			/*
+			 * No built-in tools requires an empty value. "--tools=" avoids passing an empty argument, which
+			 * is not handled consistently by command line parsers on Windows.
+			 */
+			command.add("--tools=" + String.join(",", tools.keySet()));
 			command.addAll(Arrays.asList("--allowedTools", String.join(",", allowedTools)));
 			command.addAll(Arrays.asList("--permission-prompt-tool", "mcp__" + environment.getMcpServerName() + "__" + PERMISSION_TOOL_NAME));
 			command.addAll(Arrays.asList("--append-system-prompt-file", systemPromptFile.toString()));
