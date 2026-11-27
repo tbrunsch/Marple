@@ -64,6 +64,7 @@ class TranscriptEntry
 
 	/**
 	 * Returns a copy of the tool input for entries created via {@link #createToolEntry(String, String, JsonObject)}.
+	 * The result is {@code null} if and only if {@link #getToolName()} returns {@code null}.
 	 */
 	@Nullable
 	JsonObject getToolInput() {

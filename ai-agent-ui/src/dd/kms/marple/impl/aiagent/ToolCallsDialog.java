@@ -174,15 +174,16 @@ class ToolCallsDialog extends JDialog
 	}
 
 	private void onMouseReleased(MouseEvent e) {
-		JTable internalTable = table.getInternalTable();
 		if (!SwingUtilities.isLeftMouseButton(e)) {
 			return;
 		}
+		JTable internalTable = table.getInternalTable();
 		int viewRow = internalTable.rowAtPoint(e.getPoint());
 		int viewColumn = internalTable.columnAtPoint(e.getPoint());
 		if (viewRow < 0 || viewColumn < 0 || internalTable.convertColumnIndexToModel(viewColumn) != 0) {
 			return;
 		}
+		// clicked into a cell of the number column
 		showInTranscript.accept(toolCalls.get(internalTable.convertRowIndexToModel(viewRow)).getNumber());
 	}
 
@@ -213,8 +214,8 @@ class ToolCallsDialog extends JDialog
 				request++;
 			}
 			String toolName = entry.getToolName();
-			JsonObject input = entry.getToolInput();
-			if (toolName != null && input != null) {
+			if (toolName != null) {
+				JsonObject input = Objects.requireNonNull(entry.getToolInput());
 				toolCalls.add(new ToolCall(toolCalls.size() + 1, request, toolName, input));
 			}
 		}
