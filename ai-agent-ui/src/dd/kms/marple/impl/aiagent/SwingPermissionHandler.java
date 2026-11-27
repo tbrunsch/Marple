@@ -44,9 +44,7 @@ class SwingPermissionHandler implements PermissionHandler
 		dialog.setVisible(true);	// blocks because the dialog is modal
 
 		if (dialog.isApproved()) {
-			if (dialog.isAutoApproveSelected()) {
-				settings.setAutoApprove(true);
-			}
+			settings.setAutoApprove(dialog.isAutoApproveSelected());
 			return PermissionDecision.allow();
 		}
 		String reason = dialog.getRejectionReason();
@@ -83,7 +81,10 @@ class SwingPermissionHandler implements PermissionHandler
 				approved = true;
 				dispose();
 			});
-			rejectButton.addActionListener(e -> dispose());
+			rejectButton.addActionListener(e -> {
+				approved = false;
+				dispose();
+			});
 
 			JPanel reasonPanel = new JPanel(new BorderLayout(5, 0));
 			reasonPanel.add(new JLabel("Reason for rejection (optional):"), BorderLayout.WEST);
