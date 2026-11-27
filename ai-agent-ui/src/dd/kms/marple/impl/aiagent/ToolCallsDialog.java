@@ -71,10 +71,10 @@ class ToolCallsDialog extends JDialog
 		requestFilter = ValueFilters.createSelectionFilter(context);
 		toolFilter = ValueFilters.createSelectionFilter(context);
 		List<ColumnDescription<ToolCall>> columnDescriptions = Arrays.asList(
-			new ColumnDescriptionBuilder<>("#",				Integer.class,	ToolCall::getNumber).build(),
-			new ColumnDescriptionBuilder<>("Request",		Integer.class,	ToolCall::getRequest).valueFilter(requestFilter).build(),
-			new ColumnDescriptionBuilder<>("Tool",			String.class,	ToolCall::getToolName).valueFilter(toolFilter).build(),
-			new ColumnDescriptionBuilder<>("Parameters",	Object.class,	this::getParametersValue).valueFilter(ValueFilters.createWildcardFilter()).build()
+			new ColumnDescriptionBuilder<ToolCall>("#",				Integer.class,	toolCall -> toolCall.number).build(),
+			new ColumnDescriptionBuilder<ToolCall>("Request",		Integer.class,	toolCall -> toolCall.request).valueFilter(requestFilter).build(),
+			new ColumnDescriptionBuilder<ToolCall>("Tool",			String.class,	toolCall -> toolCall.toolName).valueFilter(toolFilter).build(),
+			new ColumnDescriptionBuilder<ToolCall>("Parameters",	Object.class,	this::getParametersValue).valueFilter(ValueFilters.createWildcardFilter()).build()
 		);
 		table = new ListBasedTable<>(toolCalls, columnDescriptions);
 
@@ -120,15 +120,15 @@ class ToolCallsDialog extends JDialog
 		toolCalls.addAll(createToolCalls(transcript));
 		// the selection filters only know the values that existed when the table was created
 		for (ToolCall toolCall : toolCalls) {
-			requestFilter.addAvailableValue(toolCall.getRequest());
-			toolFilter.addAvailableValue(toolCall.getToolName());
+			requestFilter.addAvailableValue(toolCall.request);
+			toolFilter.addAvailableValue(toolCall.toolName);
 		}
 		JTable internalTable = table.getInternalTable();
 		((AbstractTableModel) internalTable.getModel()).fireTableDataChanged();
 		if (selectedToolCallNumbers.isEmpty()) {
 			scrollToRow(internalTable.getRowCount() - 1);
 		} else {
-			selectToolCalls(toolCall -> selectedToolCallNumbers.contains(toolCall.getNumber()));
+			selectToolCalls(toolCall -> selectedToolCallNumbers.contains(toolCall.number));
 		}
 	}
 
@@ -137,7 +137,7 @@ class ToolCallsDialog extends JDialog
 	 * not hidden by a filter.
 	 */
 	void selectToolCalls(int first, int last) {
-		selectToolCalls(toolCall -> first <= toolCall.getNumber() && toolCall.getNumber() <= last);
+		selectToolCalls(toolCall -> first <= toolCall.number && toolCall.number <= last);
 	}
 
 	private void selectToolCalls(Predicate<ToolCall> predicate) {
@@ -161,7 +161,7 @@ class ToolCallsDialog extends JDialog
 		JTable internalTable = table.getInternalTable();
 		Set<Integer> toolCallNumbers = new HashSet<>();
 		for (int viewRow : internalTable.getSelectedRows()) {
-			toolCallNumbers.add(toolCalls.get(internalTable.convertRowIndexToModel(viewRow)).getNumber());
+			toolCallNumbers.add(toolCalls.get(internalTable.convertRowIndexToModel(viewRow)).number);
 		}
 		return toolCallNumbers;
 	}
@@ -184,15 +184,15 @@ class ToolCallsDialog extends JDialog
 			return;
 		}
 		// clicked into a cell of the number column
-		showInTranscript.accept(toolCalls.get(internalTable.convertRowIndexToModel(viewRow)).getNumber());
+		showInTranscript.accept(toolCalls.get(internalTable.convertRowIndexToModel(viewRow)).number);
 	}
 
 	private Object getParametersValue(ToolCall toolCall) {
-		String expression = toolCall.getExpression();
+		String expression = toolCall.expression;
 		if (expression == null) {
-			return toolCall.getParameters();
+			return toolCall.parameters;
 		}
-		return ActionProvider.of(toolCall.getParameters(),
+		return ActionProvider.of(toolCall.parameters,
 			ImmutableList.of(context.createEvaluateExpressionAction(expression, expression.length(), thisValue)),
 			() -> null);
 	}
@@ -259,31 +259,6 @@ class ToolCallsDialog extends JDialog
 				? expressionElement.getAsString()
 				: null;
 		}
-
-		int getNumber() {
-			return number;
-		}
-
-		int getRequest() {
-			return request;
-		}
-
-		String getToolName() {
-			return toolName;
-		}
-
-		String getParameters() {
-			return parameters;
-		}
-
-		String getFullParameters() {
-			return fullParameters;
-		}
-
-		@Nullable
-		String getExpression() {
-			return expression;
-		}
 	}
 
 	/**
@@ -315,7 +290,7 @@ class ToolCallsDialog extends JDialog
 			Component component = wrappedRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			if (component instanceof JComponent) {
 				int modelRow = table.convertRowIndexToModel(row);
-				String fullParameters = toolCalls.get(modelRow).getFullParameters();
+				String fullParameters = toolCalls.get(modelRow).fullParameters;
 				if (fullParameters.length() > MAX_TOOL_TIP_LENGTH) {
 					fullParameters = fullParameters.substring(0, MAX_TOOL_TIP_LENGTH) + "...";
 				}
